@@ -59,6 +59,21 @@ export function HeroOrb() {
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
+    // Сохраняем исходную структуру для волновых колебаний частиц
+    const initialDirs: { x: number; y: number; z: number; r: number }[] = [];
+    for (let i = 0; i < particleCount; i += 1) {
+      const x = positions[i * 3];
+      const y = positions[i * 3 + 1];
+      const z = positions[i * 3 + 2];
+      const r = Math.sqrt(x * x + y * y + z * z);
+      initialDirs.push({
+        x: x / r,
+        y: y / r,
+        z: z / r,
+        r: r
+      });
+    }
+
     const textureCanvas = document.createElement('canvas');
     textureCanvas.width = 32;
     textureCanvas.height = 32;
@@ -106,6 +121,26 @@ export function HeroOrb() {
 
     scene.add(orbitGroup);
 
+    // Добавляем экваториальные световые/звуковые волны
+    const wavesGroup = new THREE.Group();
+    const waveMaterial = new THREE.MeshBasicMaterial({
+      color: '#7c8cff',
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide
+    });
+    const waveGeometry = new THREE.TorusGeometry(1, 0.04, 8, 64);
+    const waveMeshes: THREE.Mesh[] = [];
+
+    for (let i = 0; i < 3; i++) {
+      const wave = new THREE.Mesh(waveGeometry, waveMaterial.clone());
+      wave.rotation.x = Math.PI / 2; // Горизонтально
+      wavesGroup.add(wave);
+      waveMeshes.push(wave);
+    }
+    scene.add(wavesGroup);
+
     const core = new THREE.Mesh(
       new THREE.SphereGeometry(4.4, 32, 32),
       new THREE.MeshBasicMaterial({ color: '#94a7ff', transparent: true, opacity: 0.12 })
@@ -148,6 +183,36 @@ export function HeroOrb() {
       currentX += (mouseX - currentX) * 0.04;
       currentY += (mouseY - currentY) * 0.04;
 
+      // Обновляем позиции частиц волновым эффектом дыхания
+      const posAttr = particleGeometry.getAttribute('position') as THREE.BufferAttribute;
+      const posArray = posAttr.array as Float32Array;
+
+      for (let i = 0; i < particleCount; i += 1) {
+        const dir = initialDirs[i];
+        const waveValue = Math.sin(dir.r * 1.8 - elapsed * 4.5) * 0.65;
+        const currentR = dir.r + waveValue;
+
+        posArray[i * 3] = dir.x * currentR;
+        posArray[i * 3 + 1] = dir.y * currentR;
+        posArray[i * 3 + 2] = dir.z * currentR;
+      }
+      posAttr.needsUpdate = true;
+
+      // Анимируем расширяющиеся экваториальные волны
+      waveMeshes.forEach((wave, i) => {
+        const progress = (elapsed * 0.35 + i / 3) % 1.0;
+        const currentScale = 1 + progress * 20;
+        wave.scale.setScalar(currentScale);
+
+        let opacity = 0;
+        if (progress < 0.15) {
+          opacity = (progress / 0.15) * 0.28;
+        } else {
+          opacity = (1 - (progress - 0.15) / 0.85) * 0.28;
+        }
+        (wave.material as THREE.MeshBasicMaterial).opacity = opacity;
+      });
+
       particles.rotation.y = elapsed * 0.08;
       particles.rotation.x = elapsed * 0.03;
       particles.position.x = currentX * 1.6;
@@ -180,6 +245,12 @@ export function HeroOrb() {
         const material = mesh.material as THREE.Material;
         material.dispose();
       });
+      wavesGroup.children.forEach((child) => {
+        const mesh = child as THREE.Mesh;
+        const material = mesh.material as THREE.Material;
+        material.dispose();
+      });
+      waveGeometry.dispose();
       core.geometry.dispose();
       (core.material as THREE.Material).dispose();
       container.removeChild(renderer.domElement);
@@ -187,7 +258,7 @@ export function HeroOrb() {
   }, []);
 
   return (
-    <div className="relative h-[360px] w-full overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_center,rgba(124,140,255,0.16),transparent_55%)] sm:h-[420px] lg:h-full lg:min-h-[520px]">
+    <div className="relative w-full h-full min-h-[380px] lg:min-h-[550px] overflow-hidden">
       <div ref={containerRef} className="absolute inset-0" />
     </div>
   );

@@ -12,7 +12,13 @@ export default function HomePage() {
     <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10 lg:py-10">
       <section className="glass-panel relative overflow-hidden rounded-[36px] px-7 py-8 lg:px-10 lg:py-10">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-        <div className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        
+        {/* Фоновый интерактивный 3D-шар с эффектами волн */}
+        <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[50%] h-full pointer-events-none z-0 opacity-85">
+          <HeroOrb />
+        </div>
+
+        <div className="relative z-10 grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="max-w-3xl space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.25em] text-accentSoft">
               <Sparkles className="h-4 w-4" />
@@ -46,7 +52,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <HeroOrb />
+          {/* Правая колонка grid зарезервирована для свободного пространства под шар на десктопах */}
+          <div className="hidden lg:block h-[550px] pointer-events-none" />
         </div>
       </section>
 
