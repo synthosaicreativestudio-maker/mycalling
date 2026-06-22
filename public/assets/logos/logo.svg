@@ -1,88 +1,136 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Градиент для звезды/стрелки -->
+    <!-- Основной неоновый градиент для звезды -->
     <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7c8cff" />
+      <stop offset="0%" stop-color="#8a99ff" />
+      <stop offset="50%" stop-color="#7c8cff" />
       <stop offset="100%" stop-color="#b5c0ff" />
     </linearGradient>
     
     <!-- Градиент для орбит -->
     <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#a8b3ff" stop-opacity="0.8" />
-      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0.3" />
+      <stop offset="0%" stop-color="#b5c0ff" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#7c8cff" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0.1" />
     </linearGradient>
+
+    <!-- Мягкий фоновый градиент для световой сферы (ambient glow) -->
+    <radialGradient id="ambientGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7c8cff" stop-opacity="0.35" />
+      <stop offset="50%" stop-color="#7c8cff" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0" />
+    </radialGradient>
     
-    <!-- Фильтр неонового свечения -->
-    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
+    <!-- Профессиональный многослойный неоновый фильтр -->
+    <!-- feColorMatrix окрашивает размытие в неоновый фиолетовый цвет -->
+    <filter id="premiumNeonGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <!-- Шаг 1: Широкое мягкое фоновое свечение (Ambient) -->
+      <feGaussianBlur stdDeviation="20" result="blurAmbient" />
+      <feColorMatrix type="matrix" values="
+        0.48 0 0 0 0
+        0    0.55 0 0 0
+        0    0    1 0 0
+        0    0    0 0.45 0" in="blurAmbient" result="glowAmbient" />
+        
+      <!-- Шаг 2: Яркое свечение вокруг контура (Core Glow) -->
+      <feGaussianBlur stdDeviation="6" result="blurCore" />
+      <feColorMatrix type="matrix" values="
+        0.48 0 0 0 0
+        0    0.55 0 0 0
+        0    0    1 0 0
+        0    0    0 0.85 0" in="blurCore" result="glowCore" />
+        
+      <!-- Шаг 3: Объединение слоев свечения с исходным векторным контуром -->
       <feMerge>
-        <feMergeNode in="blur" />
+        <feMergeNode in="glowAmbient" />
+        <feMergeNode in="glowCore" />
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
   </defs>
 
-  <!-- Сетка частиц (декоративный фон) -->
-  <g opacity="0.35">
-    <circle cx="120" cy="140" r="2" fill="#7c8cff" />
+  <!-- Сетка частиц (декоративный космический фон) -->
+  <g opacity="0.45">
+    <circle cx="120" cy="140" r="2.5" fill="#7c8cff" />
     <circle cx="380" cy="120" r="1.5" fill="#a8b3ff" />
-    <circle cx="160" cy="360" r="1.5" fill="#a8b3ff" />
-    <circle cx="360" cy="380" r="2" fill="#7c8cff" />
-    <circle cx="256" cy="70" r="1" fill="#fff" />
-    <circle cx="256" cy="442" r="1" fill="#fff" />
+    <circle cx="140" cy="380" r="1.5" fill="#a8b3ff" />
+    <circle cx="370" cy="390" r="2" fill="#7c8cff" />
+    
+    <circle cx="256" cy="60" r="1" fill="#fff" />
+    <circle cx="256" cy="452" r="1" fill="#fff" />
+    <circle cx="60" cy="256" r="1" fill="#fff" />
+    <circle cx="452" cy="256" r="1" fill="#fff" />
   </g>
 
-  <!-- Группа логотипа со свечением -->
-  <g filter="url(#neonGlow)">
-    <!-- Внешняя орбита 1 (Вращается по часовой с помощью SMIL) -->
-    <ellipse cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2.5" stroke-dasharray="8 4 2 4">
+  <!-- 1. Мягкая фоновая световая сфера (Пульсирует по яркости) -->
+  <circle cx="256" cy="256" r="160" fill="url(#ambientGlow)">
+    <animate 
+      attributeName="opacity" 
+      values="0.6; 0.95; 0.6" 
+      dur="6s" 
+      repeatCount="indefinite" />
+    <animateTransform
+      attributeName="transform"
+      type="scale"
+      values="0.9; 1.1; 0.9"
+      keyTimes="0; 0.5; 1"
+      dur="6s"
+      transform-origin="256 256"
+      repeatCount="indefinite" />
+  </circle>
+
+  <!-- 2. Основная группа логотипа со свечением -->
+  <g filter="url(#premiumNeonGlow)">
+    
+    <!-- Внешняя орбита 1 (Вращается по часовой) -->
+    <ellipse cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2" stroke-dasharray="10 6 3 6">
       <animateTransform 
         attributeName="transform" 
         type="rotate" 
         from="-30 256 256" 
         to="330 256 256" 
-        dur="25s" 
+        dur="28s" 
         repeatCount="indefinite" />
     </ellipse>
     
-    <!-- Внешняя орбита 2 (Вращается против часовой с помощью SMIL) -->
-    <ellipse cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2" opacity="0.7">
+    <!-- Внешняя орбита 2 (Вращается против часовой) -->
+    <ellipse cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="1.5" opacity="0.6">
       <animateTransform 
         attributeName="transform" 
         type="rotate" 
         from="45 256 256" 
         to="-315 256 256" 
-        dur="35s" 
+        dur="38s" 
         repeatCount="indefinite" />
     </ellipse>
     
-    <!-- Внутреннее светящееся кольцо -->
-    <circle cx="256" cy="256" r="95" fill="none" stroke="#7c8cff" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="5 15" />
-    
+    <!-- Внутреннее пунктирное кольцо -->
+    <circle cx="256" cy="256" r="95" fill="none" stroke="#7c8cff" stroke-width="1.2" stroke-opacity="0.35" stroke-dasharray="2 10" />
+
     <!-- Группа позиционирования звезды (смещение в центр 256, 256) -->
     <g transform="translate(256, 256)">
-      <!-- Вложенная группа для пульсации (масштабируется относительно своего центра 0,0) -->
+      <!-- Вложенная группа для пульсации звезды -->
       <g>
         <!-- Верхний луч -->
         <path d="M 0 0 L 0 -130 L 18 -30 Z" fill="url(#starGrad)" />
-        <path d="M 0 0 L 0 -130 L -18 -30 Z" fill="#6373e5" />
+        <path d="M 0 0 L 0 -130 L -18 -30 Z" fill="#5260cc" />
         
         <!-- Правый луч -->
         <path d="M 0 0 L 110 -20 L 25 12 Z" fill="url(#starGrad)" />
-        <path d="M 0 0 L 110 -20 L 25 -25 Z" fill="#6373e5" />
+        <path d="M 0 0 L 110 -20 L 25 -25 Z" fill="#5260cc" />
         
         <!-- Нижний луч -->
         <path d="M 0 0 L 0 85 L -12 20 Z" fill="url(#starGrad)" />
-        <path d="M 0 0 L 0 85 L 12 20 Z" fill="#5260cc" />
+        <path d="M 0 0 L 0 85 L 12 20 Z" fill="#4350b5" />
         
         <!-- Левый луч -->
         <path d="M 0 0 L -85 0 L -20 -12 Z" fill="url(#starGrad)" />
-        <path d="M 0 0 L -85 0 L -20 12 Z" fill="#5260cc" />
+        <path d="M 0 0 L -85 0 L -20 12 Z" fill="#4350b5" />
         
-        <!-- Центральное ядро свечения -->
-        <circle cx="0" cy="0" r="6" fill="#fff" filter="url(#neonGlow)" />
+        <!-- Центральное ядро -->
+        <circle cx="0" cy="0" r="5" fill="#fff" />
         
-        <!-- Пульсация масштаба через SMIL (100% стабильно во всех браузерах) -->
+        <!-- Пульсация масштаба через SMIL -->
         <animateTransform 
           attributeName="transform" 
           type="scale" 
@@ -91,10 +139,10 @@
           dur="6s" 
           repeatCount="indefinite" />
           
-        <!-- Пульсация прозрачности -->
+        <!-- Пульсация прозрачности звезды -->
         <animate 
           attributeName="opacity" 
-          values="0.95; 1; 0.95" 
+          values="0.9; 1; 0.9" 
           dur="6s" 
           repeatCount="indefinite" />
       </g>

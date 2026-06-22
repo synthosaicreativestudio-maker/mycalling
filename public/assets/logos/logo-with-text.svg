@@ -2,106 +2,169 @@
   <defs>
     <!-- Градиент для звезды/стрелки -->
     <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7c8cff" />
+      <stop offset="0%" stop-color="#8a99ff" />
       <stop offset="100%" stop-color="#b5c0ff" />
     </linearGradient>
     
     <!-- Градиент для орбит -->
     <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#a8b3ff" stop-opacity="0.8" />
-      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0.3" />
+      <stop offset="0%" stop-color="#b5c0ff" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#7c8cff" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0.05" />
+    </linearGradient>
+
+    <!-- Мягкий фоновый градиент для световой сферы (ambient glow) под знаком -->
+    <radialGradient id="ambientGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7c8cff" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Премиальный градиент для текста "Мое" (от кипенно-белого к серебристому) -->
+    <linearGradient id="textBaseGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#dbe0ff" />
+    </linearGradient>
+
+    <!-- Премиальный градиент для текста "Призвание" (яркий индиго/лавандовый перелив) -->
+    <linearGradient id="textAccentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8b3ff" />
+      <stop offset="50%" stop-color="#7c8cff" />
+      <stop offset="100%" stop-color="#ccd3ff" />
+    </linearGradient>
+
+    <!-- Мягкий градиент для подстрочника -->
+    <linearGradient id="subtextGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#9aa4c7" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#b5c0ff" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0.6" />
     </linearGradient>
     
-    <!-- Фильтр неонового свечения -->
-    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="6" result="blur" />
+    <!-- Фильтр неонового свечения для знака -->
+    <filter id="neonGlowSign" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur1" />
+      <feColorMatrix type="matrix" values="
+        0.48 0 0 0 0
+        0    0.55 0 0 0
+        0    0    1 0 0
+        0    0    0 0.5 0" in="blur1" result="glow1" />
+      <feGaussianBlur stdDeviation="2.5" result="blur2" />
+      <feColorMatrix type="matrix" values="
+        0.48 0 0 0 0
+        0    0.55 0 0 0
+        0    0    1 0 0
+        0    0    0 0.8 0" in="blur2" result="glow2" />
       <feMerge>
-        <feMergeNode in="blur" />
+        <feMergeNode in="glow1" />
+        <feMergeNode in="glow2" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Фильтр мягкого свечения текста (сохраняет читаемость, убирает плоский вид) -->
+    <filter id="textGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feColorMatrix type="matrix" values="
+        0.48 0 0 0 0
+        0    0.55 0 0 0
+        0    0    1 0 0
+        0    0    0 0.45 0" in="blur" result="glow" />
+      <feMerge>
+        <feMergeNode in="glow" />
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
   </defs>
 
-  <!-- Знак логотипа (Слева) -->
-  <g transform="translate(10, 0)">
-    <g filter="url(#neonGlow)">
-      <!-- Внешняя орбита 1 (Вращается по часовой с помощью SMIL) -->
-      <ellipse cx="50" cy="60" rx="42" ry="14" fill="none" stroke="url(#orbitGrad)" stroke-width="1.8">
+  <!-- 1. Фоновый свет под знаком (Пульсирует по яркости) -->
+  <circle cx="50" cy="60" r="45" fill="url(#ambientGlow)">
+    <animate 
+      attributeName="opacity" 
+      values="0.5; 0.85; 0.5" 
+      dur="5s" 
+      repeatCount="indefinite" />
+  </circle>
+
+  <!-- 2. Знак логотипа (Слева) со свечением -->
+  <g transform="translate(10, 0)" filter="url(#neonGlowSign)">
+    <!-- Внешняя орбита 1 -->
+    <ellipse cx="50" cy="60" rx="42" ry="14" fill="none" stroke="url(#orbitGrad)" stroke-width="1.8">
+      <animateTransform 
+        attributeName="transform" 
+        type="rotate" 
+        from="-30 50 60" 
+        to="330 50 60" 
+        dur="30s" 
+        repeatCount="indefinite" />
+    </ellipse>
+    
+    <!-- Внешняя орбита 2 -->
+    <ellipse cx="50" cy="60" rx="42" ry="14" fill="none" stroke="url(#orbitGrad)" stroke-width="1.5" opacity="0.6">
+      <animateTransform 
+        attributeName="transform" 
+        type="rotate" 
+        from="45 50 60" 
+        to="-315 50 60" 
+        dur="40s" 
+        repeatCount="indefinite" />
+    </ellipse>
+    
+    <!-- Внутреннее пунктирное кольцо -->
+    <circle cx="50" cy="60" r="22" fill="none" stroke="#7c8cff" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="2 6" />
+    
+    <!-- Группа позиционирования звезды (смещение в 50, 60) -->
+    <g transform="translate(50, 60)">
+      <!-- Вложенная анимированная группа звезды (Пульсирует) -->
+      <g>
+        <!-- Верхний луч -->
+        <path d="M 0 0 L 0 -32 L 4.5 -7 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 0 -32 L -4.5 -7 Z" fill="#5260cc" />
+        
+        <!-- Правый луч -->
+        <path d="M 0 0 L 26 -5 L 6.5 3 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 26 -5 L 6.5 -6 Z" fill="#5260cc" />
+        
+        <!-- Нижний луч -->
+        <path d="M 0 0 L 0 20 L -3 5 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 0 20 L 3 5 Z" fill="#4350b5" />
+        
+        <!-- Левый луч -->
+        <path d="M 0 0 L -20 0 L -5 -3 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L -20 0 L -5 3 Z" fill="#4350b5" />
+        
+        <!-- Центральная точка -->
+        <circle cx="0" cy="0" r="1.5" fill="#fff" />
+        
+        <!-- Пульсация масштаба через SMIL -->
         <animateTransform 
           attributeName="transform" 
-          type="rotate" 
-          from="-30 50 60" 
-          to="330 50 60" 
-          dur="30s" 
+          type="scale" 
+          values="1; 1.05; 1" 
+          keyTimes="0; 0.5; 1" 
+          dur="5s" 
           repeatCount="indefinite" />
-      </ellipse>
-      
-      <!-- Внешняя орбита 2 (Вращается против часовой с помощью SMIL) -->
-      <ellipse cx="50" cy="60" rx="42" ry="14" fill="none" stroke="url(#orbitGrad)" stroke-width="1.5" opacity="0.7">
-        <animateTransform 
-          attributeName="transform" 
-          type="rotate" 
-          from="45 50 60" 
-          to="-315 50 60" 
-          dur="40s" 
-          repeatCount="indefinite" />
-      </ellipse>
-      
-      <!-- Внутреннее светящееся кольцо -->
-      <circle cx="50" cy="60" r="22" fill="none" stroke="#7c8cff" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="2 6" />
-      
-      <!-- Группа позиционирования звезды (смещение в 50, 60) -->
-      <g transform="translate(50, 60)">
-        <!-- Вложенная анимированная группа звезды (Пульсирует относительно своего центра 0,0) -->
-        <g>
-          <!-- Верхний луч -->
-          <path d="M 0 0 L 0 -32 L 4.5 -7 Z" fill="url(#starGrad)" />
-          <path d="M 0 0 L 0 -32 L -4.5 -7 Z" fill="#6373e5" />
-          
-          <!-- Правый луч -->
-          <path d="M 0 0 L 26 -5 L 6.5 3 Z" fill="url(#starGrad)" />
-          <path d="M 0 0 L 26 -5 L 6.5 -6 Z" fill="#6373e5" />
-          
-          <!-- Нижний луч -->
-          <path d="M 0 0 L 0 20 L -3 5 Z" fill="url(#starGrad)" />
-          <path d="M 0 0 L 0 20 L 3 5 Z" fill="#5260cc" />
-          
-          <!-- Левый луч -->
-          <path d="M 0 0 L -20 0 L -5 -3 Z" fill="url(#starGrad)" />
-          <path d="M 0 0 L -20 0 L -5 3 Z" fill="#5260cc" />
-          
-          <!-- Центральная точка -->
-          <circle cx="0" cy="0" r="1.5" fill="#fff" />
-          
-          <!-- Пульсация масштаба через SMIL -->
-          <animateTransform 
-            attributeName="transform" 
-            type="scale" 
-            values="1; 1.05; 1" 
-            keyTimes="0; 0.5; 1" 
-            dur="5s" 
-            repeatCount="indefinite" />
-            
-          <!-- Пульсация прозрачности -->
-          <animate 
-            attributeName="opacity" 
-            values="0.95; 1; 0.95" 
-            dur="5s" 
-            repeatCount="indefinite" />
-        </g>
       </g>
     </g>
   </g>
 
-  <!-- Текст логотипа (Справа) -->
+  <!-- 3. Текст логотипа (Справа) с градиентами и неоновой подсветкой -->
   <g transform="translate(115, 0)">
-    <!-- Название бренда -->
-    <text x="0" y="62" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="-0.5">
-      Мое<tspan fill="#7c8cff">Призвание</tspan>
+    <!-- Название бренда со свечением -->
+    <text x="0" y="62" 
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+          font-size="38" 
+          font-weight="800" 
+          letter-spacing="-0.5"
+          filter="url(#textGlow)">
+      <tspan fill="url(#textBaseGrad)">Мое</tspan><tspan fill="url(#textAccentGrad)">Призвание</tspan>
     </text>
     
-    <!-- Подзаголовок/Таглайн -->
-    <text x="2" y="86" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="600" fill="#9aa4c7" letter-spacing="5" opacity="0.8">
+    <!-- Подстрочник/Таглайн (более тонкий шрифт, широкий трекинг, градиент) -->
+    <text x="2" y="86" 
+          font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" 
+          font-size="9.5" 
+          font-weight="700" 
+          fill="url(#subtextGrad)" 
+          letter-spacing="6">
       СЕМЕЙНЫЙ ОРИЕНТИР В БУДУЩЕЕ
     </text>
   </g>
