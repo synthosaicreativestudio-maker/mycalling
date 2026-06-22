@@ -1,0 +1,9 @@
+node_modules
+.next
+.DS_Store
+.tmp
+.env
+.env.local
+.env.*.local
+opencode-debug-20260622T121936
+tmp_unpack

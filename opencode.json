@@ -1,0 +1,29 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "docs/01-product-vision.md",
+    "docs/02-prd-v1.md",
+    "docs/06-diagnostic-framework.md",
+    "docs/07-report-spec.md",
+    "docs/11-mvp-tech-architecture.md"
+  ],
+  "default_agent": "build",
+  "skills": {
+    "paths": [
+      ".opencode/skills"
+    ]
+  },
+  "agent": {
+    "docs-architect": {
+      "description": "Maintains product documentation, PRD structure, and content consistency for МоеПризвание.",
+      "mode": "subagent",
+      "permission": {
+        "bash": "deny"
+      }
+    },
+    "mvp-architect": {
+      "description": "Plans and implements MVP architecture, web flows, and delivery breakdown for МоеПризвание.",
+      "mode": "subagent"
+    }
+  }
+}
