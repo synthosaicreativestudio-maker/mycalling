@@ -189,13 +189,6 @@ export function HeroOrb() {
   return (
     <div className="relative h-[360px] w-full overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_center,rgba(124,140,255,0.16),transparent_55%)] sm:h-[420px] lg:h-full lg:min-h-[520px]">
       <div ref={containerRef} className="absolute inset-0" />
-      <div className="absolute inset-x-6 bottom-6 rounded-[24px] border border-white/10 bg-[#0b1125]/45 p-4 backdrop-blur-md">
-        <p className="text-xs uppercase tracking-[0.22em] text-accentSoft">3D visual layer</p>
-        <p className="mt-2 text-sm leading-6 text-muted">
-          Мягкая световая сфера символизирует многослойный профиль ученика: способности, интересы, поведение,
-          личностные паттерны и мотивацию.
-        </p>
-      </div>
     </div>
   );
 }
