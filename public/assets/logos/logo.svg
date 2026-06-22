@@ -20,43 +20,6 @@
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
-
-    <style>
-      /* Анимация вращения по часовой стрелке */
-      @keyframes spin-cw {
-        0% { transform: rotate(-30deg); }
-        100% { transform: rotate(330deg); }
-      }
-      
-      /* Анимация вращения против часовой стрелки */
-      @keyframes spin-ccw {
-        0% { transform: rotate(45deg); }
-        100% { transform: rotate(-315deg); }
-      }
-      
-      /* Анимация "дыхания" центральной звезды */
-      @keyframes breath {
-        0%, 100% { transform: scale(1); opacity: 0.95; }
-        50% { transform: scale(1.04); opacity: 1; }
-      }
-
-      /* Применение стилей с центрированием точки трансформации */
-      .orbit-1 {
-        animation: spin-cw 25s linear infinite;
-        transform-origin: 256px 256px;
-      }
-      .orbit-2 {
-        animation: spin-ccw 35s linear infinite;
-        transform-origin: 256px 256px;
-      }
-      .star-group {
-        animation: breath 6s ease-in-out infinite;
-        transform-origin: 256px 256px;
-      }
-      .decor-dot {
-        transition: opacity 0.5s ease;
-      }
-    </style>
   </defs>
 
   <!-- Сетка частиц (декоративный фон) -->
@@ -71,35 +34,70 @@
 
   <!-- Группа логотипа со свечением -->
   <g filter="url(#neonGlow)">
-    <!-- Внешняя орбита 1 (Вращается по часовой) -->
-    <ellipse class="orbit-1" cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2.5" transform="rotate(-30 256 256)" stroke-dasharray="8 4 2 4" />
+    <!-- Внешняя орбита 1 (Вращается по часовой с помощью SMIL) -->
+    <ellipse cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2.5" stroke-dasharray="8 4 2 4">
+      <animateTransform 
+        attributeName="transform" 
+        type="rotate" 
+        from="-30 256 256" 
+        to="330 256 256" 
+        dur="25s" 
+        repeatCount="indefinite" />
+    </ellipse>
     
-    <!-- Внешняя орбита 2 (Вращается против часовой) -->
-    <ellipse class="orbit-2" cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2" transform="rotate(45 256 256)" opacity="0.7" />
+    <!-- Внешняя орбита 2 (Вращается против часовой с помощью SMIL) -->
+    <ellipse cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2" opacity="0.7">
+      <animateTransform 
+        attributeName="transform" 
+        type="rotate" 
+        from="45 256 256" 
+        to="-315 256 256" 
+        dur="35s" 
+        repeatCount="indefinite" />
+    </ellipse>
     
     <!-- Внутреннее светящееся кольцо -->
     <circle cx="256" cy="256" r="95" fill="none" stroke="#7c8cff" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="5 15" />
     
-    <!-- Путеводная звезда-компас (Плавно пульсирует) -->
-    <g class="star-group" transform="translate(256, 256)">
-      <!-- Верхний луч -->
-      <path d="M 0 0 L 0 -130 L 18 -30 Z" fill="url(#starGrad)" />
-      <path d="M 0 0 L 0 -130 L -18 -30 Z" fill="#6373e5" />
-      
-      <!-- Правый луч -->
-      <path d="M 0 0 L 110 -20 L 25 12 Z" fill="url(#starGrad)" />
-      <path d="M 0 0 L 110 -20 L 25 -25 Z" fill="#6373e5" />
-      
-      <!-- Нижний луч -->
-      <path d="M 0 0 L 0 85 L -12 20 Z" fill="url(#starGrad)" />
-      <path d="M 0 0 L 0 85 L 12 20 Z" fill="#5260cc" />
-      
-      <!-- Левый луч -->
-      <path d="M 0 0 L -85 0 L -20 -12 Z" fill="url(#starGrad)" />
-      <path d="M 0 0 L -85 0 L -20 12 Z" fill="#5260cc" />
-      
-      <!-- Центральное ядро свечения -->
-      <circle cx="0" cy="0" r="6" fill="#fff" filter="url(#neonGlow)" />
+    <!-- Группа позиционирования звезды (смещение в центр 256, 256) -->
+    <g transform="translate(256, 256)">
+      <!-- Вложенная группа для пульсации (масштабируется относительно своего центра 0,0) -->
+      <g>
+        <!-- Верхний луч -->
+        <path d="M 0 0 L 0 -130 L 18 -30 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 0 -130 L -18 -30 Z" fill="#6373e5" />
+        
+        <!-- Правый луч -->
+        <path d="M 0 0 L 110 -20 L 25 12 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 110 -20 L 25 -25 Z" fill="#6373e5" />
+        
+        <!-- Нижний луч -->
+        <path d="M 0 0 L 0 85 L -12 20 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 0 85 L 12 20 Z" fill="#5260cc" />
+        
+        <!-- Левый луч -->
+        <path d="M 0 0 L -85 0 L -20 -12 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L -85 0 L -20 12 Z" fill="#5260cc" />
+        
+        <!-- Центральное ядро свечения -->
+        <circle cx="0" cy="0" r="6" fill="#fff" filter="url(#neonGlow)" />
+        
+        <!-- Пульсация масштаба через SMIL (100% стабильно во всех браузерах) -->
+        <animateTransform 
+          attributeName="transform" 
+          type="scale" 
+          values="1; 1.05; 1" 
+          keyTimes="0; 0.5; 1" 
+          dur="6s" 
+          repeatCount="indefinite" />
+          
+        <!-- Пульсация прозрачности -->
+        <animate 
+          attributeName="opacity" 
+          values="0.95; 1; 0.95" 
+          dur="6s" 
+          repeatCount="indefinite" />
+      </g>
     </g>
   </g>
 </svg>
