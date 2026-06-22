@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SpaceBackground />
         
         {/* Шапка сайта с логотипом */}
-        <header className="mx-auto max-w-7xl px-6 pt-6 lg:px-10 lg:pt-8 relative z-50">
+        <header className="mx-auto max-w-7xl px-6 pt-6 lg:px-10 lg:pt-8 relative z-50 print:hidden">
           <div className="flex items-center justify-between py-3.5 rounded-2xl border border-white/10 bg-[#0b1125]/45 px-6 backdrop-blur-md">
             <Link href="/" className="flex items-center transition hover:opacity-90">
               <img

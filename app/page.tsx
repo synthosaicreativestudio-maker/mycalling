@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock, Activity, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { HeroOrb } from './components/HeroOrb';
 
 export default function HomePage() {
@@ -12,12 +15,7 @@ export default function HomePage() {
 
       <div className="relative z-10 grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="max-w-3xl space-y-8 lg:space-y-10">
-          {/* Бэдж бренда */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#7c8cff]/20 bg-[#7c8cff]/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-accentSoft font-syncopate shadow-[0_0_15px_rgba(124,140,255,0.08)]">
-            <Sparkles className="h-3.5 w-3.5 animate-pulse text-[#7c8cff]" />
-            ИИ-Профориентация
-          </div>
-
+          
           {/* Заголовки */}
           <div className="space-y-6">
             <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-7xl font-unbounded bg-gradient-to-r from-white via-[#eef2ff] to-[#7c8cff] bg-clip-text text-transparent">
@@ -47,12 +45,37 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Легкие метрики */}
-          <div className="grid gap-4 pt-6 sm:grid-cols-3 border-t border-white/5 max-w-2xl">
-            <MetricCard title="25 минут" text="Длина диагностики" />
-            <MetricCard title="3-фактора" text="RIASEC + Big Five + Гарднер" />
-            <MetricCard title="ИИ-Отчет" text="Понятный ребенку и родителям" />
-          </div>
+          {/* Легкие метрики с анимацией плавного появления */}
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.12
+                }
+              }
+            }}
+            className="grid gap-4 pt-8 sm:grid-cols-3 border-t border-white/5 max-w-2xl"
+          >
+            <MetricCard 
+              icon={<Clock className="h-5 w-5 text-[#7c8cff]" />}
+              title="25 минут" 
+              text="Длина диагностики" 
+            />
+            <MetricCard 
+              icon={<Activity className="h-5 w-5 text-[#8b5cf6]" />}
+              title="3-фактора" 
+              text="RIASEC + Big Five + Гарднер" 
+            />
+            <MetricCard 
+              icon={<FileText className="h-5 w-5 text-[#78d4ff]" />}
+              title="ИИ-Отчет" 
+              text="Понятный ребенку и родителям" 
+            />
+          </motion.div>
         </div>
 
         {/* Правая колонка grid для сохранения отступа под сферу на десктопах */}
@@ -62,11 +85,28 @@ export default function HomePage() {
   );
 }
 
-function MetricCard({ title, text }: { title: string; text: string }) {
+function MetricCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
-    <div className="rounded-2xl border border-white/[0.03] bg-white/[0.02] p-4.5 backdrop-blur-sm transition duration-300 hover:border-white/10 hover:bg-white/[0.04]">
-      <p className="text-lg font-bold text-text font-unbounded">{title}</p>
-      <p className="mt-1 text-sm text-muted font-inter leading-relaxed">{text}</p>
-    </div>
+    <motion.div 
+      variants={{
+        hidden: { opacity: 0, y: 15 },
+        visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 80 } }
+      }}
+      whileHover={{ 
+        scale: 1.03, 
+        borderColor: 'rgba(124, 140, 255, 0.25)',
+        boxShadow: '0 12px 30px -10px rgba(124, 140, 255, 0.15)',
+        y: -4
+      }}
+      className="rounded-2xl border border-white/[0.03] bg-[#0b1125]/25 p-5 backdrop-blur-md transition-all duration-300 flex flex-col gap-4 text-left"
+    >
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5">
+        {icon}
+      </div>
+      <div>
+        <p className="text-base font-extrabold text-text font-unbounded bg-gradient-to-r from-white to-[#eef2ff] bg-clip-text text-transparent leading-none">{title}</p>
+        <p className="mt-2 text-xs text-muted font-inter leading-relaxed">{text}</p>
+      </div>
+    </motion.div>
   );
 }

@@ -14,10 +14,16 @@ export function SpaceBackground() {
   }
 
   return (
-    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#050816]">
-      {/* Глубокие фоновые неоновые туманности */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,#0e1533_0%,#050816_70%)] opacity-70" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(139,92,246,0.15)_0%,transparent_60%),radial-gradient(circle_at_80%_80%,rgba(6,182,212,0.12)_0%,transparent_70%)]" />
+    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#050816] print:hidden">
+      {/* Статический слой звездного неба */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none select-none" 
+        style={{ backgroundImage: "url('/assets/backgrounds/space-bg-static.png')" }} 
+      />
+
+      {/* Глубокие фоновые неоновые туманности и аврора */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,#0e1533_0%,#050816_70%)] opacity-75" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(124,140,255,0.14)_0%,transparent_50%),radial-gradient(circle_at_78%_24%,rgba(92,214,255,0.1)_0%,transparent_40%),radial-gradient(circle_at_62%_78%,rgba(144,98,255,0.1)_0%,transparent_50%)] blur-[40px]" />
 
       <svg
         className="absolute inset-0 h-full w-full"
