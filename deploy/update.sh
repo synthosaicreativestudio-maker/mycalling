@@ -21,6 +21,10 @@ npm install
 echo "  Собираю проект..."
 npm run build
 
+echo "  Копирование статических файлов..."
+cp -r public .next/standalone/
+cp -r .next/static .next/standalone/.next/
+
 echo "  Перезапускаю приложение..."
 pm2 restart mycalling
 

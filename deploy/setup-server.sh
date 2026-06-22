@@ -43,15 +43,11 @@ else
     echo "  ✅ PM2 уже установлен"
 fi
 
-# --- 4. Установка Nginx ---
+# --- 4. Проверка зависимостей системы ---
 echo ""
-echo "📦 [4/7] Установка Nginx..."
-if ! command -v nginx &> /dev/null; then
-    sudo apt install -y nginx
-fi
-sudo systemctl enable nginx
-sudo systemctl start nginx
-echo "  ✅ Nginx запущен"
+echo "📦 [4/7] Проверка системных пакетов..."
+sudo apt update && sudo apt install -y curl git
+echo "  ✅ Системные пакеты готовы"
 
 # --- 5. Клонирование и сборка проекта ---
 echo ""
@@ -67,39 +63,19 @@ fi
 
 npm install
 npm run build
+
+# Копируем статику для корректной работы standalone режима
+echo "  📦 Копирование статических файлов..."
+cp -r public .next/standalone/
+cp -r .next/static .next/standalone/.next/
 echo "  ✅ Проект собран"
 
-# --- 6. Настройка Nginx ---
+# --- 6. Настройка Caddy (Информационное сообщение) ---
 echo ""
-echo "📦 [6/7] Настройка Nginx..."
-sudo tee /etc/nginx/sites-available/$DOMAIN > /dev/null <<NGINX_CONF
-server {
-    listen 80;
-    server_name $DOMAIN www.$DOMAIN;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_cache_bypass \$http_upgrade;
-    }
-}
-NGINX_CONF
-
-# Активируем сайт
-sudo ln -sf /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/$DOMAIN
-# Удаляем default если есть
-sudo rm -f /etc/nginx/sites-enabled/default
-
-# Проверяем конфиг
-sudo nginx -t
-sudo systemctl reload nginx
-echo "  ✅ Nginx настроен"
+echo "📦 [6/7] Настройка веб-сервера..."
+echo "  ⚠️ Caddy запущен на US-сервере (Reality Bridge)."
+echo "  ⚠️ Проксирование на порт 3000 настраивается в Caddyfile на US-сервере."
+echo "  ✅ Локальная настройка веб-сервера пропущена (используется Reality Bridge)"
 
 # --- 7. Запуск приложения через PM2 ---
 echo ""
@@ -110,7 +86,7 @@ cd "$APP_DIR"
 pm2 delete mycalling 2>/dev/null || true
 
 # Запускаем standalone сервер
-pm2 start node --name "mycalling" -- .next/standalone/server.js
+PORT=3000 pm2 start node --name "mycalling" -- .next/standalone/server.js
 pm2 save
 pm2 startup systemd -u ubuntu --hp /home/ubuntu 2>&1 | grep "sudo" | bash || true
 
@@ -119,12 +95,8 @@ echo "========================================="
 echo "✅ СЕРВЕР НАСТРОЕН!"
 echo "========================================="
 echo ""
-echo "Приложение: http://$DOMAIN (после настройки DNS)"
-echo "Прямой IP:  http://111.88.145.206"
-echo ""
-echo "⚠️  Для SSL выполните после настройки DNS:"
-echo "    sudo apt install -y certbot python3-certbot-nginx"
-echo "    sudo certbot --nginx -d $DOMAIN -d www.$DOMAIN"
+echo "Приложение запущено на порту 3000."
+echo "Прямой IP:  http://111.88.145.206:3000"
 echo ""
 echo "📋 Полезные команды:"
 echo "    pm2 status        — статус приложения"
