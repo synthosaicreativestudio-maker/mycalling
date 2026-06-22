@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Brain, BriefcaseBusiness, Compass, HeartHandshake, Sparkles, Target } from 'lucide-react';
 
+import { HeroOrb } from './components/HeroOrb';
 import { PrimaryButton } from './components/PrimaryButton';
 import { assessmentBlocks, familyBenefits, nextSteps, processSteps, professions, trustPoints } from './data';
 
@@ -11,7 +12,7 @@ export default function HomePage() {
     <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10 lg:py-10">
       <section className="glass-panel relative overflow-hidden rounded-[36px] px-7 py-8 lg:px-10 lg:py-10">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-        <div className="grid items-start gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="max-w-3xl space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.25em] text-accentSoft">
               <Sparkles className="h-4 w-4" />
@@ -45,50 +46,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid gap-4">
-            <div className="glass-panel rounded-[28px] p-5">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-accentSoft">Что получает семья</p>
-                  <h2 className="mt-2 text-2xl font-semibold">Не просто список профессий</h2>
-                </div>
-                <div className="rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-3 py-2 text-sm font-semibold text-emerald-200">
-                  explainable
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {familyBenefits.map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-muted">
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="glass-panel rounded-[28px] p-5">
-              <div className="flex items-center gap-3">
-                <BriefcaseBusiness className="h-5 w-5 text-accentSoft" />
-                <p className="font-semibold">Пример карьерного совпадения</p>
-              </div>
-              <div className="mt-5 space-y-4">
-                {professions.slice(0, 2).map((profession) => (
-                  <div key={profession.name} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-medium">{profession.name}</p>
-                      <span className="rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-sm font-semibold text-emerald-200">
-                        {profession.score}% Match
-                      </span>
-                    </div>
-                    <div className="mt-3 h-2 rounded-full bg-white/10">
-                      <div className="metric-bar h-2 rounded-full" style={{ width: `${profession.score}%` }} />
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-muted">{profession.summary}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <HeroOrb />
         </div>
       </section>
 
@@ -162,12 +120,12 @@ export default function HomePage() {
 
       <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <section className="glass-panel rounded-[32px] p-6 lg:p-7">
-          <p className="text-sm uppercase tracking-[0.2em] text-accentSoft">После результата</p>
-          <h2 className="mt-2 text-3xl font-semibold">Сервис не бросает семью после отчёта</h2>
+          <p className="text-sm uppercase tracking-[0.2em] text-accentSoft">Что получает семья</p>
+          <h2 className="mt-2 text-3xl font-semibold">Не просто список профессий</h2>
           <div className="mt-6 space-y-3">
-            {nextSteps.map((step) => (
-              <div key={step} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-muted">
-                {step}
+            {familyBenefits.map((item) => (
+              <div key={item} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm leading-6 text-muted">
+                {item}
               </div>
             ))}
           </div>
@@ -186,6 +144,9 @@ export default function HomePage() {
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-6 text-muted">{profession.summary}</p>
+                <div className="mt-4 h-2 rounded-full bg-white/10">
+                  <div className="metric-bar h-2 rounded-full" style={{ width: `${profession.score}%` }} />
+                </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {profession.subjects.map((subject) => (
                     <span key={subject} className="soft-chip rounded-full px-3 py-1 text-xs text-accentSoft">
@@ -202,6 +163,18 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+      </section>
+
+      <section className="glass-panel rounded-[32px] p-6 lg:p-7">
+        <p className="text-sm uppercase tracking-[0.2em] text-accentSoft">После результата</p>
+        <h2 className="mt-2 text-3xl font-semibold">Сервис не бросает семью после отчёта</h2>
+        <div className="mt-6 grid gap-3 lg:grid-cols-4">
+          {nextSteps.map((step) => (
+            <div key={step} className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-muted">
+              {step}
+            </div>
+          ))}
+        </div>
       </section>
     </main>
   );

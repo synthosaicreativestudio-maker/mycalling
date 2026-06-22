@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120" width="100%" height="100%">
+  <defs>
+    <!-- Градиент для звезды/стрелки -->
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c8cff" />
+      <stop offset="100%" stop-color="#b5c0ff" />
+    </linearGradient>
+    
+    <!-- Градиент для орбит -->
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8b3ff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0.3" />
+    </linearGradient>
+    
+    <!-- Фильтр неонового свечения -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      /* Анимация вращения по часовой стрелке */
+      @keyframes spin-cw {
+        0% { transform: rotate(-30deg); }
+        100% { transform: rotate(330deg); }
+      }
+      
+      /* Анимация вращения против часовой стрелки */
+      @keyframes spin-ccw {
+        0% { transform: rotate(45deg); }
+        100% { transform: rotate(-315deg); }
+      }
+      
+      /* Анимация "дыхания" центральной звезды */
+      @keyframes breath {
+        0%, 100% { transform: scale(1); opacity: 0.95; }
+        50% { transform: scale(1.05); opacity: 1; }
+      }
+
+      /* Применение стилей с точкой трансформации в центре знака (50, 60) */
+      .orbit-1 {
+        animation: spin-cw 30s linear infinite;
+        transform-origin: 50px 60px;
+      }
+      .orbit-2 {
+        animation: spin-ccw 40s linear infinite;
+        transform-origin: 50px 60px;
+      }
+      .star-group {
+        animation: breath 5s ease-in-out infinite;
+        transform-origin: 50px 60px;
+      }
+    </style>
+  </defs>
+
+  <!-- Знак логотипа (Слева) -->
+  <g transform="translate(10, 0)">
+    <g filter="url(#neonGlow)">
+      <!-- Внешняя орбита 1 (Вращается по часовой) -->
+      <ellipse class="orbit-1" cx="50" cy="60" rx="42" ry="14" fill="none" stroke="url(#orbitGrad)" stroke-width="1.8" transform="rotate(-30 50 60)" stroke-dasharray="3 2" />
+      
+      <!-- Внешняя орбита 2 (Вращается против часовой) -->
+      <ellipse class="orbit-2" cx="50" cy="60" rx="42" ry="14" fill="none" stroke="url(#orbitGrad)" stroke-width="1.5" transform="rotate(45 50 60)" opacity="0.7" />
+      
+      <!-- Внутреннее светящееся кольцо -->
+      <circle cx="50" cy="60" r="22" fill="none" stroke="#7c8cff" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="2 6" />
+      
+      <!-- Путеводная звезда-компас (Пульсирует) -->
+      <g class="star-group" transform="translate(50, 60)">
+        <!-- Верхний луч -->
+        <path d="M 0 0 L 0 -32 L 4.5 -7 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 0 -32 L -4.5 -7 Z" fill="#6373e5" />
+        
+        <!-- Правый луч -->
+        <path d="M 0 0 L 26 -5 L 6.5 3 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 26 -5 L 6.5 -6 Z" fill="#6373e5" />
+        
+        <!-- Нижний луч -->
+        <path d="M 0 0 L 0 20 L -3 5 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L 0 20 L 3 5 Z" fill="#5260cc" />
+        
+        <!-- Левый луч -->
+        <path d="M 0 0 L -20 0 L -5 -3 Z" fill="url(#starGrad)" />
+        <path d="M 0 0 L -20 0 L -5 3 Z" fill="#5260cc" />
+        
+        <!-- Центральная точка -->
+        <circle cx="0" cy="0" r="1.5" fill="#fff" />
+      </g>
+    </g>
+  </g>
+
+  <!-- Текст логотипа (Справа) -->
+  <g transform="translate(115, 0)">
+    <!-- Название бренда -->
+    <text x="0" y="62" font-family="'Plus Jakarta Sans', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif" font-size="38" font-weight="700" fill="#ffffff" letter-spacing="-0.5">
+      Мое<tspan fill="#7c8cff">Призвание</tspan>
+    </text>
+    
+    <!-- Подзаголовок/Таглайн -->
+    <text x="2" y="86" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-size="10" font-weight="600" fill="#9aa4c7" letter-spacing="5" opacity="0.8">
+      СЕМЕЙНЫЙ ОРИЕНТИР В БУДУЩЕЕ
+    </text>
+  </g>
+</svg>

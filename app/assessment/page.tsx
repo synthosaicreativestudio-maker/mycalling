@@ -1,11 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Brain, ChevronLeft, ChevronRight, CircleDashed, Compass, Flame, Sparkles, Target } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { assessmentQuestions } from '../data';
 
 const optionLabels = ['Совсем не про меня', 'Скорее нет', 'Иногда', 'Скорее да', 'Очень похоже'];
+
+const blockIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  Способности: Brain,
+  Интересы: Compass,
+  'Личностные паттерны': Sparkles,
+  Поведение: Target,
+  Мотивация: Flame
+};
 
 export default function AssessmentPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -17,6 +27,7 @@ export default function AssessmentPage() {
   const currentAnswer = answers[currentQuestion.id];
   const progress = Math.round((Object.keys(answers).length / totalQuestions) * 100);
   const isLastQuestion = currentIndex === totalQuestions - 1;
+  const Icon = blockIcons[currentQuestion.block] ?? CircleDashed;
 
   const groupedProgress = useMemo(() => {
     const groups = new Map<string, { total: number; answered: number }>();
@@ -71,68 +82,106 @@ export default function AssessmentPage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl px-6 py-10 lg:px-10">
-      <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-        <aside className="space-y-6 rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur">
+    <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 lg:px-10 lg:py-10">
+      <div className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr]">
+        <aside className="glass-panel space-y-6 rounded-[34px] p-6 lg:p-7">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-accentSoft">Диагностика</p>
-            <h1 className="mt-3 text-3xl font-semibold">Рабочая диагностика для MVP</h1>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              Ученик отвечает на вопросы по 5 сигнальным блокам. После завершения сервис считает профиль,
-              подбирает профессии, предметы и направления обучения.
+            <h1 className="gradient-title mt-3 text-3xl font-semibold leading-tight lg:text-4xl">
+              Лёгкий flow вместо тяжёлого теста.
+            </h1>
+            <p className="mt-3 text-sm leading-7 text-muted">
+              Ученик идёт по коротким шагам, видит прогресс и получает понятный итог без ощущения академической анкеты.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-surface/70 p-4">
-            <label className="text-sm font-medium text-text">Имя ученика</label>
+          <label className="input-shell block rounded-[26px] px-4 py-3">
+            <div className="mb-2 text-xs uppercase tracking-[0.18em] text-accentSoft">Имя ученика</div>
             <input
               value={studentName}
               onChange={(event) => setStudentName(event.target.value)}
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-[#0f1730] px-4 py-3 outline-none transition focus:border-accent"
+              className="w-full bg-transparent outline-none"
               placeholder="Например, Алина"
             />
-          </div>
+          </label>
 
-          <div className="rounded-3xl border border-white/10 bg-surface/70 p-4">
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="font-medium">Общий прогресс</p>
-              <p className="text-sm text-accentSoft">{progress}%</p>
+              <p className="text-sm font-semibold text-accentSoft">{progress}%</p>
             </div>
-            <div className="mt-3 h-2 rounded-full bg-white/10">
-              <div className="h-2 rounded-full bg-accent transition-all" style={{ width: `${progress}%` }} />
+            <div className="mt-4 h-2 rounded-full bg-white/10">
+              <motion.div
+                className="metric-bar h-2 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.45, ease: 'easeOut' }}
+              />
             </div>
-            <p className="mt-3 text-sm text-muted">
-              Вопрос {currentIndex + 1} из {totalQuestions}
-            </p>
+            <div className="mt-4 flex items-center justify-between text-sm text-muted">
+              <span>
+                Вопрос {currentIndex + 1} из {totalQuestions}
+              </span>
+              <span>{isLastQuestion ? 'Финальный шаг' : 'Диагностика идёт'}</span>
+            </div>
           </div>
 
-          <div className="space-y-3 rounded-3xl border border-white/10 bg-surface/70 p-4">
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-4">
             <p className="font-medium">Прогресс по блокам</p>
-            {groupedProgress.map((item) => (
-              <div key={item.block} className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span>{item.block}</span>
-                  <span className="text-accentSoft">
-                    {item.answered}/{item.total}
-                  </span>
-                </div>
-              </div>
-            ))}
+            <div className="mt-4 space-y-3">
+              {groupedProgress.map((item, index) => {
+                const BlockIcon = blockIcons[item.block] ?? CircleDashed;
+                const percent = Math.round((item.answered / item.total) * 100);
+
+                return (
+                  <motion.div
+                    key={item.block}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="rounded-2xl border border-white/10 bg-[#0e1630]/70 p-3"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-2xl border border-accent/20 bg-accent/10 p-2 text-accentSoft">
+                          <BlockIcon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{item.block}</p>
+                          <p className="text-xs text-muted">
+                            {item.answered}/{item.total} ответов
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-accentSoft">{percent}%</span>
+                    </div>
+                    <div className="mt-3 h-1.5 rounded-full bg-white/10">
+                      <div className="metric-bar h-1.5 rounded-full" style={{ width: `${percent}%` }} />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </aside>
 
-        <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur lg:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm uppercase tracking-[0.25em] text-accentSoft">{currentQuestion.block}</p>
-              <h2 className="mt-2 text-3xl font-semibold leading-tight">{currentQuestion.text}</h2>
+        <section className="glass-panel rounded-[34px] p-6 lg:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs uppercase tracking-[0.22em] text-accentSoft">
+                <Icon className="h-4 w-4" />
+                {currentQuestion.block}
+              </div>
+              <h2 className="mt-4 text-3xl font-semibold leading-tight lg:text-4xl">{currentQuestion.text}</h2>
             </div>
-            <div className="rounded-full border border-white/10 bg-surface/70 px-4 py-2 text-sm text-muted">
+            <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-muted">
               Вес блока: {currentQuestion.weight}
             </div>
           </div>
 
-          <p className="mt-4 max-w-3xl text-muted">{currentQuestion.hint}</p>
+          <div className="mt-5 rounded-[24px] border border-white/10 bg-[#0d152f]/70 p-4 text-sm leading-6 text-muted">
+            {currentQuestion.hint}
+          </div>
 
           <div className="mt-8 grid gap-3">
             {optionLabels.map((label, index) => {
@@ -140,47 +189,51 @@ export default function AssessmentPage() {
               const active = currentAnswer === value;
 
               return (
-                <button
+                <motion.button
                   key={label}
                   type="button"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
                   onClick={() => handleAnswer(value)}
-                  className={`rounded-2xl border px-4 py-4 text-left transition ${
+                  className={`group rounded-[26px] border px-5 py-5 text-left transition duration-200 ${
                     active
-                      ? 'border-accent bg-accent/15 text-white'
-                      : 'border-white/10 bg-surface/70 text-text hover:border-white/20 hover:bg-white/5'
+                      ? 'border-accent bg-accent/15 text-white shadow-[0_0_0_1px_rgba(124,140,255,0.3),0_20px_60px_rgba(124,140,255,0.12)]'
+                      : 'border-white/10 bg-white/5 text-text hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.08]'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-4">
                     <div
-                      className={`mt-1 flex h-6 w-6 items-center justify-center rounded-full border text-xs ${
-                        active ? 'border-accent bg-accent text-white' : 'border-white/20 text-muted'
+                      className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition ${
+                        active ? 'border-accent bg-accent text-white' : 'border-white/20 text-muted group-hover:border-white/30'
                       }`}
                     >
                       {value}
                     </div>
                     <div>
-                      <p className="font-medium">{label}</p>
-                      <p className="mt-1 text-sm text-muted">{currentQuestion.options[index]}</p>
+                      <p className="text-base font-semibold">{label}</p>
+                      <p className="mt-2 text-sm leading-6 text-muted">{currentQuestion.options[index]}</p>
                     </div>
                   </div>
-                </button>
+                </motion.button>
               );
             })}
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 type="button"
                 onClick={handleBack}
                 disabled={currentIndex === 0}
-                className="rounded-full border border-white/15 px-5 py-3 text-sm font-medium text-text transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-text transition hover:scale-[1.02] hover:bg-white/10 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
               >
+                <ChevronLeft className="h-4 w-4" />
                 Назад
               </button>
               <Link
                 href="/"
-                className="rounded-full border border-white/15 px-5 py-3 text-sm font-medium text-text transition hover:bg-white/5"
+                className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-text transition hover:scale-[1.02] hover:bg-white/10 active:scale-[0.99]"
               >
                 На главную
               </Link>
@@ -190,9 +243,10 @@ export default function AssessmentPage() {
               type="button"
               onClick={handleNext}
               disabled={currentAnswer === undefined}
-              className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white shadow-glow transition hover:scale-[1.02] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLastQuestion ? 'Получить отчёт' : 'Следующий вопрос'}
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         </section>

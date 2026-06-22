@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Градиент для звезды/стрелки -->
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c8cff" />
+      <stop offset="100%" stop-color="#b5c0ff" />
+    </linearGradient>
+    
+    <!-- Градиент для орбит -->
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8b3ff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#7c8cff" stop-opacity="0.3" />
+    </linearGradient>
+    
+    <!-- Фильтр неонового свечения -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      /* Анимация вращения по часовой стрелке */
+      @keyframes spin-cw {
+        0% { transform: rotate(-30deg); }
+        100% { transform: rotate(330deg); }
+      }
+      
+      /* Анимация вращения против часовой стрелки */
+      @keyframes spin-ccw {
+        0% { transform: rotate(45deg); }
+        100% { transform: rotate(-315deg); }
+      }
+      
+      /* Анимация "дыхания" центральной звезды */
+      @keyframes breath {
+        0%, 100% { transform: scale(1); opacity: 0.95; }
+        50% { transform: scale(1.04); opacity: 1; }
+      }
+
+      /* Применение стилей с центрированием точки трансформации */
+      .orbit-1 {
+        animation: spin-cw 25s linear infinite;
+        transform-origin: 256px 256px;
+      }
+      .orbit-2 {
+        animation: spin-ccw 35s linear infinite;
+        transform-origin: 256px 256px;
+      }
+      .star-group {
+        animation: breath 6s ease-in-out infinite;
+        transform-origin: 256px 256px;
+      }
+      .decor-dot {
+        transition: opacity 0.5s ease;
+      }
+    </style>
+  </defs>
+
+  <!-- Сетка частиц (декоративный фон) -->
+  <g opacity="0.35">
+    <circle cx="120" cy="140" r="2" fill="#7c8cff" />
+    <circle cx="380" cy="120" r="1.5" fill="#a8b3ff" />
+    <circle cx="160" cy="360" r="1.5" fill="#a8b3ff" />
+    <circle cx="360" cy="380" r="2" fill="#7c8cff" />
+    <circle cx="256" cy="70" r="1" fill="#fff" />
+    <circle cx="256" cy="442" r="1" fill="#fff" />
+  </g>
+
+  <!-- Группа логотипа со свечением -->
+  <g filter="url(#neonGlow)">
+    <!-- Внешняя орбита 1 (Вращается по часовой) -->
+    <ellipse class="orbit-1" cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2.5" transform="rotate(-30 256 256)" stroke-dasharray="8 4 2 4" />
+    
+    <!-- Внешняя орбита 2 (Вращается против часовой) -->
+    <ellipse class="orbit-2" cx="256" cy="256" rx="180" ry="60" fill="none" stroke="url(#orbitGrad)" stroke-width="2" transform="rotate(45 256 256)" opacity="0.7" />
+    
+    <!-- Внутреннее светящееся кольцо -->
+    <circle cx="256" cy="256" r="95" fill="none" stroke="#7c8cff" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="5 15" />
+    
+    <!-- Путеводная звезда-компас (Плавно пульсирует) -->
+    <g class="star-group" transform="translate(256, 256)">
+      <!-- Верхний луч -->
+      <path d="M 0 0 L 0 -130 L 18 -30 Z" fill="url(#starGrad)" />
+      <path d="M 0 0 L 0 -130 L -18 -30 Z" fill="#6373e5" />
+      
+      <!-- Правый луч -->
+      <path d="M 0 0 L 110 -20 L 25 12 Z" fill="url(#starGrad)" />
+      <path d="M 0 0 L 110 -20 L 25 -25 Z" fill="#6373e5" />
+      
+      <!-- Нижний луч -->
+      <path d="M 0 0 L 0 85 L -12 20 Z" fill="url(#starGrad)" />
+      <path d="M 0 0 L 0 85 L 12 20 Z" fill="#5260cc" />
+      
+      <!-- Левый луч -->
+      <path d="M 0 0 L -85 0 L -20 -12 Z" fill="url(#starGrad)" />
+      <path d="M 0 0 L -85 0 L -20 12 Z" fill="#5260cc" />
+      
+      <!-- Центральное ядро свечения -->
+      <circle cx="0" cy="0" r="6" fill="#fff" filter="url(#neonGlow)" />
+    </g>
+  </g>
+</svg>
