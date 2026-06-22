@@ -22,8 +22,8 @@ echo "  Собираю проект..."
 npm run build
 
 echo "  Копирование статических файлов..."
-cp -r public .next/standalone/
-cp -r .next/static .next/standalone/.next/
+[ -d public ] && cp -r public .next/standalone/ || mkdir -p .next/standalone/public
+[ -d .next/static ] && cp -r .next/static .next/standalone/.next/ || true
 
 echo "  Перезапускаю приложение..."
 pm2 restart mycalling

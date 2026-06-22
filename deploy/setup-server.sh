@@ -66,8 +66,8 @@ npm run build
 
 # Копируем статику для корректной работы standalone режима
 echo "  📦 Копирование статических файлов..."
-cp -r public .next/standalone/
-cp -r .next/static .next/standalone/.next/
+[ -d public ] && cp -r public .next/standalone/ || mkdir -p .next/standalone/public
+[ -d .next/static ] && cp -r .next/static .next/standalone/.next/ || true
 echo "  ✅ Проект собран"
 
 # --- 6. Настройка Caddy (Информационное сообщение) ---
