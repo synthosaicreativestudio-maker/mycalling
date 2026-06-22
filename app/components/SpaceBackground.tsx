@@ -15,7 +15,9 @@ export function SpaceBackground() {
 
   return (
     <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#050816]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,#0e1533_0%,#050816_70%)] opacity-80" />
+      {/* Глубокие фоновые неоновые туманности */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,#0e1533_0%,#050816_70%)] opacity-70" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(139,92,246,0.15)_0%,transparent_60%),radial-gradient(circle_at_80%_80%,rgba(6,182,212,0.12)_0%,transparent_70%)]" />
 
       <svg
         className="absolute inset-0 h-full w-full"

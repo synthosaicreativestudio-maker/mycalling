@@ -8,10 +8,6 @@
 
 html {
   scroll-behavior: smooth;
-}
-
-html,
-body {
   min-height: 100%;
   background-color: #050816;
   color: #eef2ff;
@@ -22,6 +18,9 @@ body {
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   position: relative;
   overflow-x: hidden;
+  min-height: 100%;
+  background-color: transparent;
+  color: #eef2ff;
 }
 
 body::before {
