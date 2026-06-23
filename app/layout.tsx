@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" className={`${inter.variable} ${manrope.variable}`}>
-      <body className="relative min-h-screen bg-[#050816] text-[#eef2ff]">
+      <body className="relative min-h-screen bg-transparent text-[#eef2ff]">
         <IntroPreloader />
         <SpaceBackground />
         
