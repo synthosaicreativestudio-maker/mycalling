@@ -27,53 +27,63 @@ export function HeroOrb() {
     renderer.setSize(width, height);
     container.appendChild(renderer.domElement);
 
+    const baseCount = 850;
+    const particleCount = baseCount * 3; // Базовые искры + 2 уровня хвостов
     const particleGeometry = new THREE.BufferGeometry();
-    const particleCount = 1400;
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
-    const colorA = new THREE.Color('#7c8cff');
-    const colorB = new THREE.Color('#78d4ff');
-    const colorMix = new THREE.Color();
+    
+    // Структура для базовых направлений движения
+    const initialDirs: { x: number; y: number; z: number; r: number }[] = [];
 
-    for (let i = 0; i < particleCount; i += 1) {
+    // Генерируем базовые частицы
+    for (let i = 0; i < baseCount; i += 1) {
       const u = Math.random();
       const v = Math.random();
       const theta = u * Math.PI * 2;
       const phi = Math.acos(2 * v - 1);
-      const radius = 12 + Math.random() * 4;
+      const radius = 11 + Math.random() * 4.5;
 
       const x = radius * Math.sin(phi) * Math.cos(theta);
       const y = radius * Math.sin(phi) * Math.sin(theta);
       const z = radius * Math.cos(phi);
 
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      initialDirs.push({
+        x: x / radius,
+        y: y / radius,
+        z: z / radius,
+        r: radius
+      });
 
-      colorMix.lerpColors(colorA, colorB, Math.random());
+      // Заполняем цвета для основы и хвостов
+      // g = 0 (основа): Ярко-золотой/желтый
+      // g = 1 (первый хвост): Насыщенный оранжево-золотой
+      // g = 2 (второй хвост): Теплый оранжево-красный (эффект остывающей искры)
+      const colorMix = new THREE.Color();
+      
+      // g = 0 (Основа)
+      colorMix.setHSL(0.12 + Math.random() * 0.04, 1.0, 0.65); // Золотисто-желтый
       colors[i * 3] = colorMix.r;
       colors[i * 3 + 1] = colorMix.g;
       colors[i * 3 + 2] = colorMix.b;
+
+      // g = 1 (Хвост 1)
+      colorMix.setHSL(0.08 + Math.random() * 0.03, 1.0, 0.52); // Оранжевый
+      colors[(i + baseCount) * 3] = colorMix.r;
+      colors[(i + baseCount) * 3 + 1] = colorMix.g;
+      colors[(i + baseCount) * 3 + 2] = colorMix.b;
+
+      // g = 2 (Хвост 2)
+      colorMix.setHSL(0.02 + Math.random() * 0.03, 1.0, 0.42); // Оранжево-красный
+      colors[(i + baseCount * 2) * 3] = colorMix.r;
+      colors[(i + baseCount * 2) * 3 + 1] = colorMix.g;
+      colors[(i + baseCount * 2) * 3 + 2] = colorMix.b;
     }
 
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    // Сохраняем исходную структуру для волновых колебаний частиц
-    const initialDirs: { x: number; y: number; z: number; r: number }[] = [];
-    for (let i = 0; i < particleCount; i += 1) {
-      const x = positions[i * 3];
-      const y = positions[i * 3 + 1];
-      const z = positions[i * 3 + 2];
-      const r = Math.sqrt(x * x + y * y + z * z);
-      initialDirs.push({
-        x: x / r,
-        y: y / r,
-        z: z / r,
-        r: r
-      });
-    }
-
+    // Создаем искристую золотую текстуру
     const textureCanvas = document.createElement('canvas');
     textureCanvas.width = 32;
     textureCanvas.height = 32;
@@ -84,9 +94,10 @@ export function HeroOrb() {
     }
 
     const gradient = textureContext.createRadialGradient(16, 16, 0, 16, 16, 16);
-    gradient.addColorStop(0, 'rgba(255,255,255,1)');
-    gradient.addColorStop(0.4, 'rgba(210,220,255,0.9)');
-    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');       // Белое ядро искры
+    gradient.addColorStop(0.25, 'rgba(255,215,0,1)');      // Чистое золото
+    gradient.addColorStop(0.6, 'rgba(255,115,0,0.5)');     // Мягкая оранжевая корона
+    gradient.addColorStop(1, 'rgba(255,115,0,0)');
     textureContext.fillStyle = gradient;
     textureContext.fillRect(0, 0, 32, 32);
     const texture = new THREE.CanvasTexture(textureCanvas);
@@ -94,7 +105,7 @@ export function HeroOrb() {
     const particles = new THREE.Points(
       particleGeometry,
       new THREE.PointsMaterial({
-        size: 0.55,
+        size: 0.68,
         map: texture,
         vertexColors: true,
         transparent: true,
@@ -104,33 +115,16 @@ export function HeroOrb() {
     );
     scene.add(particles);
 
-    const orbitGroup = new THREE.Group();
-    const orbitMaterial = new THREE.MeshBasicMaterial({
-      color: '#9bb2ff',
-      transparent: true,
-      opacity: 0.22,
-      wireframe: true
-    });
-
-    [11, 14.5, 17.5].forEach((radiusValue, index) => {
-      const orbit = new THREE.Mesh(new THREE.TorusGeometry(radiusValue, 0.08, 12, 180), orbitMaterial.clone());
-      orbit.rotation.x = index * 0.75 + 0.35;
-      orbit.rotation.y = index * 0.55 + 0.2;
-      orbitGroup.add(orbit);
-    });
-
-    scene.add(orbitGroup);
-
-    // Добавляем экваториальные световые/звуковые волны
+    // Добавляем экваториальные золотые волны
     const wavesGroup = new THREE.Group();
     const waveMaterial = new THREE.MeshBasicMaterial({
-      color: '#7c8cff',
+      color: '#ffa200',
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide
     });
-    const waveGeometry = new THREE.TorusGeometry(1, 0.04, 8, 64);
+    const waveGeometry = new THREE.TorusGeometry(1, 0.035, 8, 64);
     const waveMeshes: THREE.Mesh[] = [];
 
     for (let i = 0; i < 3; i++) {
@@ -141,17 +135,19 @@ export function HeroOrb() {
     }
     scene.add(wavesGroup);
 
+    // Золотое ядро
     const core = new THREE.Mesh(
-      new THREE.SphereGeometry(4.4, 32, 32),
-      new THREE.MeshBasicMaterial({ color: '#94a7ff', transparent: true, opacity: 0.12 })
+      new THREE.SphereGeometry(4.2, 32, 32),
+      new THREE.MeshBasicMaterial({ color: '#ffb300', transparent: true, opacity: 0.14 })
     );
     scene.add(core);
 
-    const glowLight = new THREE.PointLight('#7c8cff', 14, 120);
+    // Золотой источник света
+    const glowLight = new THREE.PointLight('#ffa200', 16, 120);
     glowLight.position.set(0, 0, 10);
     scene.add(glowLight);
 
-    const ambient = new THREE.AmbientLight('#93a6ff', 0.6);
+    const ambient = new THREE.AmbientLight('#ffea9f', 0.45);
     scene.add(ambient);
 
     let mouseX = 0;
@@ -183,22 +179,46 @@ export function HeroOrb() {
       currentX += (mouseX - currentX) * 0.04;
       currentY += (mouseY - currentY) * 0.04;
 
-      // Обновляем позиции частиц волновым эффектом дыхания
       const posAttr = particleGeometry.getAttribute('position') as THREE.BufferAttribute;
       const posArray = posAttr.array as Float32Array;
 
-      for (let i = 0; i < particleCount; i += 1) {
+      // Рассчитываем позиции для основы и хвостов с отставанием во времени
+      for (let i = 0; i < baseCount; i += 1) {
         const dir = initialDirs[i];
-        const waveValue = Math.sin(dir.r * 1.8 - elapsed * 4.5) * 0.65;
-        const currentR = dir.r + waveValue;
 
-        posArray[i * 3] = dir.x * currentR;
-        posArray[i * 3 + 1] = dir.y * currentR;
-        posArray[i * 3 + 2] = dir.z * currentR;
+        for (let g = 0; g < 3; g += 1) {
+          const idx = i + g * baseCount;
+          // Время для конкретного сегмента хвоста (основа идет в реальном времени, хвосты отстают)
+          const t = elapsed - g * 0.055;
+
+          // Радиальное колебание ("дыхание" сферы)
+          const waveValue = Math.sin(dir.r * 1.8 - t * 4.5) * 0.65;
+          const currentR = dir.r + waveValue;
+
+          const rx = dir.x * currentR;
+          const ry = dir.y * currentR;
+          const rz = dir.z * currentR;
+
+          // Индивидуальное вращение для создания закручивающихся хвостов
+          const rotY = t * 0.08;
+          const rotX = t * 0.03;
+
+          // Вращение по оси Y
+          const x1 = rx * Math.cos(rotY) - rz * Math.sin(rotY);
+          const z1 = rx * Math.sin(rotY) + rz * Math.cos(rotY);
+
+          // Вращение по оси X
+          const y2 = ry * Math.cos(rotX) - z1 * Math.sin(rotX);
+          const z2 = ry * Math.sin(rotX) + z1 * Math.cos(rotX);
+
+          posArray[idx * 3] = x1;
+          posArray[idx * 3 + 1] = y2;
+          posArray[idx * 3 + 2] = z2;
+        }
       }
       posAttr.needsUpdate = true;
 
-      // Анимируем расширяющиеся экваториальные волны
+      // Анимируем золотые волны
       waveMeshes.forEach((wave, i) => {
         const progress = (elapsed * 0.35 + i / 3) % 1.0;
         const currentScale = 1 + progress * 20;
@@ -213,14 +233,10 @@ export function HeroOrb() {
         (wave.material as THREE.MeshBasicMaterial).opacity = opacity;
       });
 
-      particles.rotation.y = elapsed * 0.08;
-      particles.rotation.x = elapsed * 0.03;
+      // Перемещение сферы за мышью
       particles.position.x = currentX * 1.6;
       particles.position.y = -currentY * 1.2;
-
-      orbitGroup.rotation.y = elapsed * 0.15;
-      orbitGroup.rotation.x = elapsed * 0.04 + currentY * 0.12;
-      orbitGroup.rotation.z = currentX * 0.08;
+      core.position.copy(particles.position);
 
       core.scale.setScalar(1 + Math.sin(elapsed * 1.2) * 0.04);
       glowLight.intensity = 14 + Math.sin(elapsed * 1.4) * 1.5;
@@ -239,12 +255,6 @@ export function HeroOrb() {
       renderer.dispose();
       particleGeometry.dispose();
       texture.dispose();
-      orbitGroup.children.forEach((child) => {
-        const mesh = child as THREE.Mesh;
-        mesh.geometry.dispose();
-        const material = mesh.material as THREE.Material;
-        material.dispose();
-      });
       wavesGroup.children.forEach((child) => {
         const mesh = child as THREE.Mesh;
         const material = mesh.material as THREE.Material;

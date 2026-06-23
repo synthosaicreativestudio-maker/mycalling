@@ -93,45 +93,8 @@ export function SpaceBackground() {
 
         <g transform="translate(0, 0)">
           
-          <ellipse cx="1150" cy="680" rx="250" ry="110" fill="none" stroke="url(#bgOrbitGrad)" stroke-width="1.5" />
-          
-          <ellipse cx="1150" cy="680" rx="300" ry="160" fill="none" stroke="url(#bgOrbitGrad)" stroke-width="1.2" transform="rotate(-15 1150 680)" />
-          
-          <ellipse cx="1150" cy="680" rx="380" ry="240" fill="none" stroke="url(#bgOrbitGrad)" stroke-width="1" stroke-dasharray="4 8" transform="rotate(25 1150 680)" opacity="0.7">
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from="25 1150 680"
-              to="385 1150 680"
-              dur="120s"
-              repeatCount="indefinite" />
-          </ellipse>
-
-          <line x1="700" y1="800" x2="1350" y2="450" stroke="#7c8cff" stroke-width="1" opacity="0.3" stroke-dasharray="3 6" />
-          <line x1="600" y1="850" x2="1400" y2="400" stroke="#7c8cff" stroke-width="1.2" opacity="0.2" />
-
-          <circle r="4" fill="#a8b3ff" filter="url(#pointGlow)">
-            <animateMotion dur="22s" repeatCount="indefinite">
-              <mpath href="#pathOrbit1" />
-            </animateMotion>
-            <animate attributeName="opacity" values="0.7; 1; 0.7" dur="4s" repeatCount="indefinite" />
-          </circle>
-
-          <circle r="5" fill="#7c8cff" filter="url(#pointGlow)">
-            <animateMotion dur="32s" repeatCount="indefinite" begin="5s">
-              <mpath href="#pathOrbit2" />
-            </animateMotion>
-            <animate attributeName="opacity" values="0.6; 1; 0.6" dur="3s" repeatCount="indefinite" />
-          </circle>
-
-          <circle r="3" fill="#ffffff" filter="url(#pointGlow)" opacity="0.8">
-            <animateMotion dur="18s" repeatCount="indefinite" begin="2s">
-              <mpath href="#pathOrbit3" />
-            </animateMotion>
-          </circle>
-
           <g transform="translate(1240, 595)">
-            <circle cx="0" cy="0" r="14" fill="#7c8cff" opacity="0.4" filter="url(#starGlow)">
+            <circle cx="0" cy="0" r="14" fill="#ffd700" opacity="0.25" filter="url(#starGlow)">
               <animate attributeName="r" values="10; 16; 10" dur="4s" repeatCount="indefinite" />
             </circle>
             <circle cx="0" cy="0" r="3.5" fill="#ffffff" filter="url(#starGlow)" />
