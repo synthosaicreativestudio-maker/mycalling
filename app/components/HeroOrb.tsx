@@ -27,7 +27,7 @@ export function HeroOrb() {
     renderer.setSize(width, height);
     container.appendChild(renderer.domElement);
 
-    const baseCount = 1200;
+    const baseCount = 2500;
     const particleCount = baseCount * 3;
     const particleGeometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
@@ -98,11 +98,11 @@ export function HeroOrb() {
     const particles = new THREE.Points(
       particleGeometry,
       new THREE.PointsMaterial({
-        size: 0.55,
+        size: 0.28,
         map: texture,
         vertexColors: true,
         transparent: true,
-        opacity: 0.7,
+        opacity: 0.5,
         depthWrite: false,
         blending: THREE.AdditiveBlending
       })

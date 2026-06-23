@@ -216,3 +216,16 @@ h1, h2, h3, .font-title {
     transform: translateY(0);
   }
 }
+
+/* ─── 3D Volume Text Shadow ─── */
+.text-3d-shadow {
+  text-shadow: 
+    0 1px 0 #121218,
+    0 2px 0 #181822,
+    0 3px 0 #20202a,
+    0 4px 0 #282834,
+    0 5px 0 #30303e,
+    0 6px 1px rgba(0, 0, 0, 0.6),
+    0 8px 16px rgba(0, 0, 0, 0.8);
+  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.05);
+}
