@@ -61,10 +61,6 @@ export function SpaceBackground() {
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          
-          <path id="pathOrbit1" d="M 900,680 A 250,110 0 1,0 1400,680 A 250,110 0 1,0 900,680" fill="none" />
-          <path id="pathOrbit2" d="M 850,680 A 300,160 -15 1,0 1450,680 A 300,160 -15 1,0 850,680" fill="none" />
-          <path id="pathOrbit3" d="M 770,680 A 380,240 25 1,0 1530,680 A 380,240 25 1,0 770,680" fill="none" />
         </defs>
 
         <circle cx="150" cy="150" r="450" fill="url(#auroraGlow)">
