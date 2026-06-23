@@ -52,4 +52,29 @@ Use active voice as default. A control should say exactly what happens when it's
 
 Treat failure and emptiness as moments for direction, not mood. Explain what went wrong and how to fix it, in the interface's voice rather than a person's. Errors don't apologize, and they are never vague about what happened. An empty screen is an invitation to act.
 
-Keep the register conversational and tuned: plain verbs, sentence case, no filler, with tone matched to the brand and the audience. Let each element do exactly one job. A label labels, an example demonstrates, and nothing quietly does double duty.
+Use the register conversational and tuned: plain verbs, sentence case, no filler, with tone matched to the brand and the audience. Let each element do exactly one job. A label labels, an example demonstrates, and nothing quietly does double duty.
+
+## Premium Typography & Fonts (Luxury, High-End, Fashion)
+
+When designing a product that needs to feel premium, exclusive, and expensive (comparable to brands like Rolex, Bentley, Aman, or Four Seasons), typography choices carry the weight of the brand's identity.
+
+### Top 10 Elite Fonts for Luxury Brands
+Use these fonts for display headings and logotypes to convey high-end elegance:
+1. **Canela** — Modern, graceful, fashion-forward with subtle flares.
+2. **Didot** — The classic French Didone (Vogue, Harper's Bazaar style). Extreme contrast.
+3. **Noe Display** — Bold serif with sharp, high-contrast terminals and strong character.
+4. **Editorial New** — Narrow, elegant, retro-editorial aesthetic with high contrast.
+5. **Saol Display** — Slender, delicate, and sophisticated serif.
+6. **Bodoni Moda** — Digital-first high-contrast Didone serif, perfect for high fashion.
+7. **Cormorant Garamond** (or Cormorant) — Extremely elegant, thin, and graceful book-style serif (available on Google Fonts, excellent Cyrillic support).
+8. **Austin** — Traditional British luxury serif, refined and timeless.
+9. **Tiempos Headline** — Clean, modern serif optimized for large, high-impact headings.
+10. **Neue Haas Grotesk** — The ultimate clean, structural, Swiss sans-serif (predecessor of Helvetica).
+
+### Free Premium Google Fonts with Cyrillic Support
+If the project requires Russian language support and must load standard web fonts:
+* **Cormorant Garamond** — The ultimate choice for grace, elegance, and luxury.
+* **Prata** — Elegant, delicate serif with teardrop terminals and high contrast.
+* **Bodoni Moda** — High fashion, high contrast Didone style.
+* **Cinzel / Cinzel Decorative** — Bold, monumental, Roman-inspired all-caps luxury (similar to Bvlgari).
+* **Playfair Display** — Classic, rich, high-contrast serif.

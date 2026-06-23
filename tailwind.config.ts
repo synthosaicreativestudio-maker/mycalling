@@ -15,7 +15,7 @@ const config: Config = {
         muted: '#8a8694'
       },
       fontFamily: {
-        title: ['var(--font-space-grotesk)', 'sans-serif'],
+        title: ['var(--font-cormorant-garamond)', 'serif'],
         body: ['var(--font-inter)', 'sans-serif']
       },
       boxShadow: {

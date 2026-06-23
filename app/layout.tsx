@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Inter, Space_Grotesk } from 'next/font/google';
+import { Inter, Cormorant_Garamond } from 'next/font/google';
 import { SpaceBackground } from './components/SpaceBackground';
 import { HeroOrb } from './components/HeroOrb';
 import { IntroPreloader } from './components/IntroPreloader';
@@ -12,10 +12,11 @@ const inter = Inter({
   display: 'swap',
 });
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ['latin', 'cyrillic'],
   weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-space-grotesk',
+  style: ['normal', 'italic'],
+  variable: '--font-cormorant-garamond',
   display: 'swap',
 });
 
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="ru" className={`${inter.variable} ${cormorantGaramond.variable}`}>
       <body className="relative min-h-screen bg-transparent text-[#f0ece4]">
         <IntroPreloader />
         

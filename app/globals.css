@@ -102,13 +102,13 @@ button {
 
 /* ─── Typography ─── */
 h1, h2, h3, .font-title {
-  font-family: var(--font-space-grotesk), sans-serif;
-  letter-spacing: -0.03em;
+  font-family: var(--font-cormorant-garamond), serif;
+  letter-spacing: -0.01em;
 }
 
 .font-sync {
-  font-family: var(--font-space-grotesk), sans-serif;
-  letter-spacing: 0.12em;
+  font-family: var(--font-inter), sans-serif;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
