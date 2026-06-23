@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Compass, Sparkles, Award, RefreshCw, User, AlertCircle, ArrowLeft, FileText, Download } from 'lucide-react';
+import { Brain, Compass, Sparkles, Award, RefreshCw, User, AlertCircle, ArrowLeft, FileText, Download, Loader2, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { HeroOrb } from '../components/HeroOrb';
 
 type Trait = {
@@ -108,29 +109,109 @@ const defaultReport: ReportData = {
   ]
 };
 
-export default function ReportPage() {
+function ReportPageContent() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get('session_id');
+
   const [report, setReport] = useState<ReportData>(defaultReport);
   const [isDemo, setIsDemo] = useState(true);
   const [activeTab, setActiveTab] = useState<'talents' | 'career' | 'parent'>('talents');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const raw = localStorage.getItem('moe-prizvanie-report');
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          setReport(parsed);
-          setIsDemo(false);
-        } catch (e) {
-          console.error('Ошибка парсинга отчета из localStorage:', e);
+    if (!sessionId) {
+      // Пытаемся взять демо-данные из localStorage, если нет session_id
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem('moe-prizvanie-report');
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            setReport(parsed);
+            setIsDemo(false);
+          } catch (e) {
+            console.error('Ошибка парсинга отчета из localStorage:', e);
+          }
         }
       }
+      return;
     }
-  }, []);
+
+    // Загрузка реального отчета с бэкенда
+    const loadReport = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`/api/v1/diagnostic/results?session_id=${sessionId}`);
+        if (!res.ok) {
+          throw new Error('Не удалось сгенерировать или получить отчет. Проверьте подключение.');
+        }
+        const data = await res.json();
+        setReport(data.data);
+        setIsDemo(false);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || 'Ошибка загрузки отчета');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadReport();
+  }, [sessionId]);
+
+  if (isLoading) {
+    return (
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 py-12 relative z-10">
+        <div className="rounded-[32px] border border-white/10 bg-[#0b1125]/75 p-12 text-center backdrop-blur-xl shadow-glow relative overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40 mix-blend-screen scale-75">
+            <HeroOrb />
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center space-y-8 animate-fade-in">
+            <div className="relative">
+              <Loader2 className="h-16 w-16 animate-spin text-[#7c8cff] opacity-80" />
+              <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-[#8b5cf6] animate-pulse" />
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="text-2xl font-bold font-unbounded text-white">Генерация карты призвания</h1>
+              <p className="max-w-md text-sm text-muted font-inter leading-relaxed">
+                Пожалуйста, подождите. ИИ-эксперт анализирует ваши ответы, сопоставляет интересы с базой профессий и формулирует персональные рекомендации. Это займет около 15 секунд...
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 py-12 relative z-10">
+        <div className="rounded-[32px] border border-red-500/20 bg-[#0b1125]/75 p-10 text-center backdrop-blur-xl shadow-[0_0_50px_rgba(239,68,68,0.05)]">
+          <div className="relative z-10 flex flex-col items-center space-y-6">
+            <AlertCircle className="h-16 w-16 text-red-500" />
+            <div className="space-y-3">
+              <h1 className="text-xl font-bold font-unbounded text-white">Не удалось загрузить отчет</h1>
+              <p className="max-w-md text-sm text-muted font-inter leading-relaxed">
+                {error}
+              </p>
+            </div>
+            <Link
+              href="/assessment"
+              className="inline-flex items-center justify-center rounded-xl bg-accent px-6 py-3 text-sm font-bold text-white shadow-glow transition hover:scale-[1.02]"
+            >
+              Вернуться к диагностике
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <>
-      {/* CSS Стили для печати глубокого отчета на А4 */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           html, body {
@@ -686,5 +767,20 @@ export default function ReportPage() {
 
       </div>
     </>
+  );
+}
+
+export default function ReportPage() {
+  return (
+    <Suspense fallback={
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 py-12 relative z-10">
+        <div className="rounded-[32px] border border-white/10 bg-[#0b1125]/75 p-12 text-center backdrop-blur-xl shadow-glow relative overflow-hidden animate-pulse">
+          <Loader2 className="h-16 w-16 animate-spin text-[#7c8cff] opacity-80 mx-auto" />
+          <h1 className="text-xl font-bold font-unbounded text-white mt-4">Загрузка отчета...</h1>
+        </div>
+      </main>
+    }>
+      <ReportPageContent />
+    </Suspense>
   );
 }

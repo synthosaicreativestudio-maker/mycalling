@@ -110,10 +110,10 @@ export default function AuthPage() {
 
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted font-inter">
-                Класс обучения
+                Класс обучения (8–11 классы)
               </label>
-              <div className="grid grid-cols-7 gap-2">
-                {['5', '6', '7', '8', '9', '10', '11'].map((g) => (
+              <div className="grid grid-cols-4 gap-2">
+                {['8', '9', '10', '11'].map((g) => (
                   <button
                     key={g}
                     type="button"

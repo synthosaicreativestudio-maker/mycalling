@@ -1,0 +1,89 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  userId     String              @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
+  username   String              @db.VarChar(100)
+  grade      Int
+  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  sessions   DiagnosticSession[]
+  results    DiagnosticResult[]
+
+  @@map("users")
+}
+
+model DiagnosticTest {
+  testId         String               @id @map("test_id") @db.VarChar(50) // 'riasec', 'big_five', 'career_anchors'
+  title          String               @db.VarChar(150)
+  totalQuestions Int                  @map("total_questions")
+  description    String?              @db.Text
+  questions      DiagnosticQuestion[]
+  sessions       DiagnosticSession[]
+
+  @@map("diagnostic_tests")
+}
+
+model DiagnosticQuestion {
+  questionId         String                 @id @map("question_id") @db.VarChar(50)
+  testId             String                 @map("test_id") @db.VarChar(50)
+  questionText       String                 @map("question_text") @db.Text
+  scaleCode          String                 @map("scale_code") @db.VarChar(10)
+  isReverse          Boolean                @default(false) @map("is_reverse")
+  visualAssetUrl     String                 @map("visual_asset_url") @db.VarChar(255)
+  aiGenerationPrompt String?                @map("ai_generation_prompt") @db.Text
+  test               DiagnosticTest         @relation(fields: [testId], references: [testId], onDelete: Cascade)
+  answers            UserDiagnosticAnswer[]
+
+  @@map("diagnostic_questions")
+}
+
+model DiagnosticSession {
+  sessionId String                 @id @default(dbgenerated("gen_random_uuid()")) @map("session_id") @db.Uuid
+  userId    String                 @map("user_id") @db.Uuid
+  testId    String                 @map("test_id") @db.VarChar(50)
+  status    String                 @default("in_progress") @db.VarChar(20) // 'in_progress', 'completed', 'abandoned'
+  startedAt DateTime               @default(now()) @map("started_at") @db.Timestamptz
+  updatedAt DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  user      User                   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  test      DiagnosticTest         @relation(fields: [testId], references: [testId])
+  answers   UserDiagnosticAnswer[]
+  results   DiagnosticResult[]
+
+  @@map("diagnostic_sessions")
+}
+
+model UserDiagnosticAnswer {
+  answerId         BigInt             @id @default(autoincrement()) @map("answer_id")
+  sessionId        String             @map("session_id") @db.Uuid
+  questionId       String             @map("question_id") @db.VarChar(50)
+  rawAnswerValue   Int                @map("raw_answer_value")
+  timeSpentMs      Int                @map("time_spent_ms")
+  isFraud          Boolean            @default(false) @map("is_fraud")
+  isFastClick      Boolean            @default(false) @map("is_fast_click")
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  session          DiagnosticSession  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  question         DiagnosticQuestion @relation(fields: [questionId], references: [questionId])
+
+  @@unique([sessionId, questionId])
+  @@map("user_diagnostic_answers")
+}
+
+model DiagnosticResult {
+  resultId       String            @id @default(dbgenerated("gen_random_uuid()")) @map("result_id") @db.Uuid
+  userId         String            @map("user_id") @db.Uuid
+  sessionId      String            @map("session_id") @db.Uuid
+  calculatedAt   DateTime          @default(now()) @map("calculated_at") @db.Timestamptz
+  validityIndex  Decimal           @map("validity_index") @db.Decimal(3, 2)
+  rawScores      Json              @map("raw_scores")
+  standardScores Json              @map("standard_scores")
+  user           User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  session        DiagnosticSession @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+
+  @@map("diagnostic_results")
+}
