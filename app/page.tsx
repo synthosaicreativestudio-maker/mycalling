@@ -127,10 +127,9 @@ export default function HomePage() {
             return (
               <motion.div
                 key={block.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
                 whileHover={{ y: -6, borderColor: 'rgba(124, 140, 255, 0.2)' }}
                 className="group relative rounded-3xl border border-white/[0.03] bg-[#0b1125]/20 p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between text-left"
               >
@@ -253,9 +252,8 @@ export default function HomePage() {
                 <div className="h-1.5 w-full rounded-full bg-white/[0.03] overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    whileInView={{ width: `${profession.score}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
+                    animate={{ width: `${profession.score}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
                     className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#7c8cff] rounded-full shadow-[0_0_10px_rgba(124,140,255,0.4)]"
                   />
                 </div>
@@ -292,9 +290,8 @@ export default function HomePage() {
             <motion.div
               key={step}
               initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.08 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.05 }}
               className="p-6 rounded-3xl border border-white/[0.03] bg-[#0b1125]/20 backdrop-blur-md text-left flex flex-col justify-between gap-6"
             >
               <div className="text-3xl font-extrabold text-white/5 font-unbounded">
