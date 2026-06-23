@@ -10,92 +10,159 @@ export function SpaceBackground() {
   }, []);
 
   if (!mounted) {
-    return <div className="fixed inset-0 -z-50 bg-[#06060e]" />;
+    return <div className="fixed inset-0 -z-50 bg-[#020205]" />;
   }
 
+  // Создаем параметры для 15 изящных линий
+  const linesCount = 16;
+  const lines = Array.from({ length: linesCount }, (_, i) => {
+    // Рассчитываем уникальные сдвиги для каждой линии, чтобы они создавали плотную, но воздушную ленту
+    const offset = i * 14;
+    const delay = -(i * 0.85); // Сдвиг по времени для эффекта волны
+    const duration = 12 + (i % 4) * 3.5; // Разная скорость для эффекта «живого» переплетения
+    const opacity = 0.08 + (1 - Math.abs(i - linesCount / 2) / (linesCount / 2)) * 0.45; // Максимальная яркость в центре ленты
+    const strokeWidth = 0.8 + (1 - Math.abs(i - linesCount / 2) / (linesCount / 2)) * 1.4; // Тонкие края, более выраженный центр
+
+    // Вспомогательные переменные для анимации Безье
+    const yStart = 680 + offset * 0.5;
+    const cp1_x = 420 + i * 8;
+    const cp1_y1 = 810 + offset * 0.8;
+    const cp1_y2 = 770 + offset * 0.7;
+    const cp1_y3 = 850 + offset * 0.9;
+
+    const cp2_x = 980 - i * 6;
+    const cp2_y1 = 760 - offset * 0.3;
+    const cp2_y2 = 800 - offset * 0.2;
+    const cp2_y3 = 720 - offset * 0.4;
+
+    const yEnd = 240 + offset * 0.2;
+
+    return {
+      id: i,
+      delay: `${delay}s`,
+      duration: `${duration}s`,
+      opacity,
+      strokeWidth,
+      path1: `M 0,${yStart} C ${cp1_x},${cp1_y1} ${cp2_x},${cp2_y1} 1440,${yEnd}`,
+      path2: `M 0,${yStart + 20} C ${cp1_x + 30},${cp1_y2} ${cp2_x - 30},${cp2_y2} 1440,${yEnd - 15}`,
+      path3: `M 0,${yStart - 20} C ${cp1_x - 30},${cp1_y3} ${cp2_x + 30},${cp2_y3} 1440,${yEnd + 15}`,
+    };
+  });
+
   return (
-    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#06060e] print:hidden">
-      {/* Статический слой звездного неба */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-screen pointer-events-none select-none" 
-        style={{ backgroundImage: "url('/assets/backgrounds/space-bg-static.png')" }} 
-      />
+    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#020205] print:hidden">
+      {/* 1. Глубокий базовый слой с радиальными туманностями в цветовой схеме референса */}
+      {/* Мягкое фиолетовое свечение в левом верхнем углу */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(76,29,149,0.15)_0%,transparent_60%)] blur-[40px] pointer-events-none" />
+      
+      {/* Интенсивное сине-фиолетовое неоновое свечение в правой нижней части (как на картинке) */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(59,48,255,0.22)_0%,rgba(109,40,217,0.08)_40%,transparent_75%)] blur-[60px] pointer-events-none" />
+      
+      {/* Дополнительное яркое синее ядро свечения снизу справа */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_80%,rgba(99,102,241,0.15)_0%,transparent_45%)] blur-[30px] pointer-events-none" />
 
-      {/* Мягкие фоновые туманности */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,#0c0418_0%,#06060e_70%)] opacity-85" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(76,29,149,0.12)_0%,transparent_50%),radial-gradient(circle_at_85%_25%,rgba(139,127,247,0.06)_0%,transparent_40%)] blur-[50px]" />
-      {/* Тёплое золотое свечение снизу */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgba(212,168,83,0.04)_0%,transparent_50%)]" />
-
+      {/* 2. SVG слой с анимированными неоновыми нитями */}
       <svg
-        className="absolute inset-0 h-full w-full"
+        className="absolute inset-0 h-full w-full opacity-90"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid slice"
         viewBox="0 0 1440 900"
       >
         <defs>
-          {/* Градиент для линзового блика */}
-          <radialGradient id="auroraGlow" cx="20%" cy="20%" r="70%">
-            <stop offset="0%" stopColor="#4c1d95" stopOpacity="0.35" />
-            <stop offset="40%" stopColor="#1e1b4b" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#06060e" stopOpacity="0" />
-          </radialGradient>
+          {/* Градиент для нитей: переход от фиолетового к яркому неоновому синему и бело-голубому в точке фокуса */}
+          <linearGradient id="neonLineGrad" x1="0%" y1="90%" x2="100%" y2="10%">
+            <stop offset="0%" stopColor="#25164f" stopOpacity="0.1" />
+            <stop offset="25%" stopColor="#5b21b6" stopOpacity="0.5" />
+            <stop offset="60%" stopColor="#4f46e5" stopOpacity="0.85" />
+            <stop offset="78%" stopColor="#818cf8" stopOpacity="1" /> {/* Пик свечения в правой нижней трети */}
+            <stop offset="90%" stopColor="#6366f1" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="#312e81" stopOpacity="0.1" />
+          </linearGradient>
 
-          {/* Фильтры свечения */}
-          <filter id="pointGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          {/* Фильтр мягкого неонового размытия (Glow) */}
+          <filter id="neonBlur" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="7" result="glow1" />
+            <feGaussianBlur stdDeviation="3" result="glow2" />
+            <feMerge>
+              <feMergeNode in="glow1" />
+              <feMergeNode in="glow2" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          
+          {/* Экстремальный фильтр свечения для подложки */}
+          <filter id="coreGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="24" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-
-          <filter id="starGlow" x="-150%" y="-150%" width="400%" height="400%">
-            <feGaussianBlur stdDeviation="8" result="blur1" />
-            <feGaussianBlur stdDeviation="2.5" result="blur2" />
-            <feMerge>
-              <feMergeNode in="blur1" />
-              <feMergeNode in="blur2" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
-        {/* Линзовый блик */}
-        <circle cx="150" cy="150" r="650" fill="url(#auroraGlow)">
-          <animate 
-            attributeName="opacity" 
-            values="0.4; 0.55; 0.4" 
-            dur="14s" 
-            repeatCount="indefinite" />
-        </circle>
+        {/* Слой 2.1: Широкая неоновая подложка для эффекта объемного излучения (имитация яркого блика на референсе) */}
+        <path
+          d="M -50,750 C 420,830 960,780 1490,240"
+          stroke="#4f46e5"
+          strokeWidth="38"
+          fill="none"
+          opacity="0.18"
+          filter="url(#coreGlow)"
+        >
+          <animate
+            attributeName="d"
+            values="
+              M -50,750 C 420,830 960,780 1490,240;
+              M -50,770 C 450,800 930,810 1490,225;
+              M -50,730 C 390,860 990,750 1490,255;
+              M -50,750 C 420,830 960,780 1490,240
+            "
+            dur="18s"
+            repeatCount="indefinite"
+          />
+        </path>
 
-        {/* Фоновые звезды */}
-        <g opacity="0.2">
-          <circle cx="280" cy="180" r="1" fill="#fff" />
-          <circle cx="790" cy="130" r="1.2" fill="#a89bfa" />
-          <circle cx="480" cy="380" r="1" fill="#fff" />
-          <circle cx="180" cy="580" r="1.5" fill="#8b7ff7" />
-          <circle cx="620" cy="720" r="1" fill="#fff" />
-          <circle cx="980" cy="220" r="1.2" fill="#fff" />
-          <circle cx="1100" cy="600" r="0.8" fill="#d4a853" />
-          <circle cx="350" cy="750" r="1" fill="#e8c97a" />
-          <circle cx="1300" cy="400" r="0.9" fill="#fff" />
-        </g>
+        <path
+          d="M -50,740 C 450,810 930,790 1490,250"
+          stroke="#818cf8"
+          strokeWidth="14"
+          fill="none"
+          opacity="0.22"
+          filter="url(#neonBlur)"
+        >
+          <animate
+            attributeName="d"
+            values="
+              M -50,740 C 450,810 930,790 1490,250;
+              M -50,720 C 420,840 960,760 1490,265;
+              M -50,760 C 480,780 900,820 1490,235;
+              M -50,740 C 450,810 930,790 1490,250
+            "
+            dur="14s"
+            repeatCount="indefinite"
+          />
+        </path>
 
-        {/* Пульсирующая звезда-вспышка */}
-        <g transform="translate(1220, 340)">
-          <circle cx="0" cy="0" r="30" fill="#a89bfa" opacity="0.1" filter="url(#starGlow)">
-            <animate attributeName="r" values="24; 36; 24" dur="6s" repeatCount="indefinite" />
-          </circle>
-          <circle cx="0" cy="0" r="10" fill="#8b7ff7" opacity="0.3" filter="url(#starGlow)" />
-          <circle cx="0" cy="0" r="2" fill="#ffffff" filter="url(#pointGlow)" />
-          <line x1="-10" y1="0" x2="10" y2="0" stroke="#ffffff" strokeWidth="0.6" opacity="0.6">
-            <animate attributeName="opacity" values="0.4; 0.8; 0.4" dur="4s" repeatCount="indefinite" />
-          </line>
-          <line x1="0" y1="-10" x2="0" y2="10" stroke="#ffffff" strokeWidth="0.6" opacity="0.6">
-            <animate attributeName="opacity" values="0.4; 0.8; 0.4" dur="4s" repeatCount="indefinite" />
-          </line>
+        {/* Слой 2.2: Тонкие, высокотехнологичные переплетающиеся нити (Lines) */}
+        <g filter="url(#neonBlur)">
+          {lines.map((line) => (
+            <path
+              key={line.id}
+              d={line.path1}
+              fill="none"
+              stroke="url(#neonLineGrad)"
+              strokeWidth={line.strokeWidth}
+              opacity={line.opacity}
+            >
+              <animate
+                attributeName="d"
+                values={`${line.path1}; ${line.path2}; ${line.path3}; ${line.path1}`}
+                dur={line.duration}
+                begin={line.delay}
+                repeatCount="indefinite"
+              />
+            </path>
+          ))}
         </g>
       </svg>
     </div>
