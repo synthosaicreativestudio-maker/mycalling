@@ -115,33 +115,6 @@ export function HeroOrb() {
     );
     scene.add(particles);
 
-    // Добавляем экваториальные золотые волны
-    const wavesGroup = new THREE.Group();
-    const waveMaterial = new THREE.MeshBasicMaterial({
-      color: '#ffa200',
-      transparent: true,
-      opacity: 0,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide
-    });
-    const waveGeometry = new THREE.TorusGeometry(1, 0.035, 8, 64);
-    const waveMeshes: THREE.Mesh[] = [];
-
-    for (let i = 0; i < 3; i++) {
-      const wave = new THREE.Mesh(waveGeometry, waveMaterial.clone());
-      wave.rotation.x = Math.PI / 2; // Горизонтально
-      wavesGroup.add(wave);
-      waveMeshes.push(wave);
-    }
-    scene.add(wavesGroup);
-
-    // Золотое ядро
-    const core = new THREE.Mesh(
-      new THREE.SphereGeometry(4.2, 32, 32),
-      new THREE.MeshBasicMaterial({ color: '#ffb300', transparent: true, opacity: 0.14 })
-    );
-    scene.add(core);
-
     // Золотой источник света
     const glowLight = new THREE.PointLight('#ffa200', 16, 120);
     glowLight.position.set(0, 0, 10);
@@ -218,27 +191,10 @@ export function HeroOrb() {
       }
       posAttr.needsUpdate = true;
 
-      // Анимируем золотые волны
-      waveMeshes.forEach((wave, i) => {
-        const progress = (elapsed * 0.35 + i / 3) % 1.0;
-        const currentScale = 1 + progress * 20;
-        wave.scale.setScalar(currentScale);
-
-        let opacity = 0;
-        if (progress < 0.15) {
-          opacity = (progress / 0.15) * 0.28;
-        } else {
-          opacity = (1 - (progress - 0.15) / 0.85) * 0.28;
-        }
-        (wave.material as THREE.MeshBasicMaterial).opacity = opacity;
-      });
-
       // Перемещение сферы за мышью
       particles.position.x = currentX * 1.6;
       particles.position.y = -currentY * 1.2;
-      core.position.copy(particles.position);
 
-      core.scale.setScalar(1 + Math.sin(elapsed * 1.2) * 0.04);
       glowLight.intensity = 14 + Math.sin(elapsed * 1.4) * 1.5;
 
       renderer.render(scene, camera);
@@ -255,14 +211,6 @@ export function HeroOrb() {
       renderer.dispose();
       particleGeometry.dispose();
       texture.dispose();
-      wavesGroup.children.forEach((child) => {
-        const mesh = child as THREE.Mesh;
-        const material = mesh.material as THREE.Material;
-        material.dispose();
-      });
-      waveGeometry.dispose();
-      core.geometry.dispose();
-      (core.material as THREE.Material).dispose();
       container.removeChild(renderer.domElement);
     };
   }, []);
