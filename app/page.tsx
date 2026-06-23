@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { AnimatedLogo } from './components/AnimatedLogo';
 
 /* ═══════════════════════════════════════════════════
    Премиальные геометрические SVG-иконки для УТП
@@ -266,9 +267,9 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-10 py-12">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-6">
-              <img
-                src="/assets/logos/logo-with-text.svg"
-                alt="МоёПризвание"
+              <AnimatedLogo
+                showText={true}
+                animate={false}
                 className="h-8 w-auto opacity-60"
               />
               <span className="text-xs text-[#8a8694]">

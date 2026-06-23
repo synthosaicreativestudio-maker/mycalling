@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatedLogo } from './AnimatedLogo';
 
 export function IntroPreloader() {
   const [loading, setLoading] = useState(true);
@@ -39,10 +40,10 @@ export function IntroPreloader() {
             >
               {/* Золотое пульсирующее свечение */}
               <div className="absolute inset-0 -m-8 rounded-full bg-[#d4a853]/15 blur-3xl animate-pulse" />
-              <img
-                src="/assets/logos/logo-with-text.svg"
-                alt="МоёПризвание"
-                className="h-20 md:h-24 w-auto object-contain relative z-10"
+              <AnimatedLogo
+                showText={true}
+                animate={false}
+                className="h-20 md:h-24 w-auto relative z-10"
               />
             </motion.div>
             

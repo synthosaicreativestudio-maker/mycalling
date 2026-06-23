@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Inter, Prata, Marck_Script } from 'next/font/google';
+import { AnimatedLogo } from './components/AnimatedLogo';
 import { SpaceBackground } from './components/SpaceBackground';
 import { HeroOrb } from './components/HeroOrb';
 import { IntroPreloader } from './components/IntroPreloader';
@@ -49,10 +50,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="mx-auto max-w-7xl px-6 lg:px-10">
               <div className="flex items-center justify-between py-4">
                 <Link href="/" className="flex items-center transition hover:opacity-90">
-                  <img
-                    src="/assets/logos/logo-with-text.svg"
-                    alt="МоёПризвание"
-                    className="h-12 md:h-16 w-auto object-contain"
+                  <AnimatedLogo
+                    showText={true}
+                    animate={false}
+                    className="h-12 md:h-16 w-auto"
                   />
                 </Link>
                 
