@@ -1,5 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048"><style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b8860b" />
+      <stop offset="30%" stop-color="#d4a853" />
+      <stop offset="70%" stop-color="#e8c97a" />
+      <stop offset="100%" stop-color="#d4a853" />
+    </linearGradient>
+  </defs>
+  <style>
       svg {
         background-color: transparent;
       }
@@ -7,7 +16,7 @@
       /* Все полилинии по умолчанию прозрачные ( fill: none ) */
       polyline {
         fill: none;
-        stroke: currentColor;
+        stroke: url(#goldGradient);
         stroke-linecap: round;
         stroke-linejoin: round;
       }
