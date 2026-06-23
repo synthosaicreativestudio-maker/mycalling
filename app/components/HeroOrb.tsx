@@ -102,17 +102,18 @@ export function HeroOrb() {
         map: texture,
         vertexColors: true,
         transparent: true,
+        opacity: 0.7,
         depthWrite: false,
         blending: THREE.AdditiveBlending
       })
     );
     scene.add(particles);
 
-    const glowLight = new THREE.PointLight('#ffa200', 12, 150);
+    const glowLight = new THREE.PointLight('#ffa200', 8, 150);
     glowLight.position.set(0, 0, 10);
     scene.add(glowLight);
 
-    const ambient = new THREE.AmbientLight('#ffea9f', 0.3);
+    const ambient = new THREE.AmbientLight('#ffea9f', 0.2);
     scene.add(ambient);
 
     let mouseX = 0;
@@ -179,7 +180,7 @@ export function HeroOrb() {
       particles.position.x = currentX * 2;
       particles.position.y = -currentY * 1.5;
 
-      glowLight.intensity = 10 + Math.sin(elapsed * 1.2) * 1.5;
+      glowLight.intensity = 7 + Math.sin(elapsed * 1.2) * 1.0;
 
       renderer.render(scene, camera);
     };

@@ -40,7 +40,7 @@ const defaultReport: ReportData = {
   studentGrade: '8',
   heroSummary: [
     'Выраженное сочетание творческого потенциала и системного мышления.',
-    'Профиль указывает на предрасположенность к созданию концептуальных интерфейсов и ИИ-продуктов.'
+    'Профиль указывает на предрасположенность к созданию концептуальных интерфейсов и цифровых продуктов.'
   ],
   personalityTraits: [
     { name: 'Открытость новому', score: 85, description: 'Высокая любознательность, готовность пробовать новые подходы и генерировать идеи.' },
@@ -85,15 +85,15 @@ const defaultReport: ReportData = {
       directions: ['Дизайн', 'IT']
     },
     {
-      name: 'Промт-инженер ИИ',
+      name: 'Инженер данных и алгоритмов',
       score: 90,
       summary: 'Проектирование логических запросов к нейросетям.',
-      why: 'Сочетание лингвистического таланта для формулировок и логического мышления для структурирования команд ИИ.',
+      why: 'Сочетание аналитических способностей, лингвистического таланта и логического мышления для работы со сложными алгоритмическими системами.',
       subjects: ['Английский язык', 'Информатика'],
       directions: ['IT и разработка']
     },
     {
-      name: 'Продукт-менеджер ИИ-сервисов',
+      name: 'Продукт-менеджер технологических сервисов',
       score: 88,
       summary: 'Управление созданием инновационных цифровых решений.',
       why: 'Стык предпринимательского интереса и развитого межличностного интеллекта Гарднера. Ученик сможет объединять разработчиков и дизайнеров.',
@@ -190,7 +190,7 @@ export default function ReportPage() {
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#7c8cff]/20 bg-[#7c8cff]/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accentSoft font-syncopate">
                 <Award className="h-3.5 w-3.5 text-[#7c8cff]" />
-                Итоговый отчет ИИ
+                Итоговый отчет
               </div>
               <h1 className="text-3xl font-extrabold font-unbounded text-text sm:text-4xl lg:text-5xl leading-tight">
                 Карта талантов: {report.studentName}
@@ -231,7 +231,7 @@ export default function ReportPage() {
               <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
               <p className="text-sm leading-relaxed font-inter">
                 Диагностика не пройдена или результаты устарели. Сейчас вы видите <span className="font-semibold text-white">демо-отчет</span> по умолчанию. 
-                Пройдите диагностику, чтобы сгенерировать собственный отчет с помощью ИИ.
+                Пройдите диагностику, чтобы сгенерировать собственный аналитический отчет.
               </p>
             </div>
           )}
@@ -426,9 +426,9 @@ export default function ReportPage() {
                         </div>
                         <p className="text-sm text-muted font-inter leading-relaxed mb-4">{prof.summary}</p>
                         
-                        {/* ИИ Обоснование в стиле элегантной цитаты */}
+                        {/* Обоснование в стиле элегантной цитаты */}
                         <div className="border-l-2 border-[#7c8cff]/50 bg-[#7c8cff]/5 p-4 rounded-r-2xl text-xs leading-relaxed text-muted font-inter mb-4">
-                          <span className="font-bold text-[#7c8cff] block mb-1">ИИ-разбор:</span> {prof.why}
+                          <span className="font-bold text-[#7c8cff] block mb-1">Разбор:</span> {prof.why}
                         </div>
 
                         <div className="flex flex-wrap gap-2">
@@ -521,7 +521,7 @@ export default function ReportPage() {
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ fontSize: '12pt', fontWeight: 'bold', margin: 0 }}>
-                КАРТА ТАЛАНТОВ И ИИ-ПРОФОРИЕНТАЦИЯ
+                КАРТА ТАЛАНТОВ И ПРОФОРИЕНТАЦИЯ
               </p>
               <p style={{ fontSize: '9pt', color: '#64748b', margin: '4px 0 0 0' }}>
                 Модель анализа: claude-opus-4-7
@@ -643,7 +643,7 @@ export default function ReportPage() {
                   {prof.summary}
                 </p>
                 <div style={{ background: '#f8fafc', borderLeft: '3px solid #3b82f6', padding: '8px 12px', fontSize: '9.5pt', color: '#334155', borderRadius: '0 8px 8px 0', lineHeight: '1.5' }}>
-                  <strong>ИИ-обоснование:</strong> {prof.why}
+                  <strong>Обоснование:</strong> {prof.why}
                 </div>
                 <div style={{ marginTop: '8px', fontSize: '9pt', color: '#64748b' }}>
                   <strong>Профильные предметы:</strong> {prof.subjects.join(', ')}

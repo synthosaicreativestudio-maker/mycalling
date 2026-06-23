@@ -51,7 +51,7 @@ export default function AuthPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold font-unbounded text-text">Вход в систему</h1>
-            <p className="mt-2 text-sm text-muted font-inter">Заполни данные, чтобы персонализировать ИИ-отчет</p>
+            <p className="mt-2 text-sm text-muted font-inter">Заполни данные, чтобы персонализировать отчет</p>
           </div>
         </div>
 

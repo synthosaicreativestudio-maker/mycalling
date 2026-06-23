@@ -5,94 +5,93 @@ import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 /* ═══════════════════════════════════════════════════
-   Объёмные SVG-иконки для УТП
+   Премиальные геометрические SVG-иконки для УТП
    ═══════════════════════════════════════════════════ */
 
 function IconTimer() {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_rgba(232,201,122,0.15)]">
       <defs>
         <linearGradient id="timerGrad" x1="8" y1="8" x2="40" y2="40">
           <stop offset="0%" stopColor="#e8c97a" />
           <stop offset="100%" stopColor="#d4a853" />
         </linearGradient>
-        <filter id="timerGlow">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
-      <circle cx="24" cy="26" r="16" stroke="url(#timerGrad)" strokeWidth="2.5" fill="none" filter="url(#timerGlow)" />
-      <line x1="24" y1="26" x2="24" y2="18" stroke="#e8c97a" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="24" y1="26" x2="30" y2="26" stroke="#d4a853" strokeWidth="2" strokeLinecap="round" />
-      <line x1="20" y1="8" x2="28" y2="8" stroke="#e8c97a" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="24" y1="8" x2="24" y2="12" stroke="#d4a853" strokeWidth="2" strokeLinecap="round" />
+      {/* Внешний тонкий круг */}
+      <circle cx="24" cy="24" r="18" stroke="url(#timerGrad)" strokeWidth="1" strokeDasharray="4 2" />
+      {/* Внутренний сплошной круг */}
+      <circle cx="24" cy="24" r="14" stroke="url(#timerGrad)" strokeWidth="1.5" />
+      {/* Тонкие направляющие оси */}
+      <line x1="24" y1="10" x2="24" y2="38" stroke="url(#timerGrad)" strokeWidth="0.5" strokeDasharray="2 2" />
+      <line x1="10" y1="24" x2="38" y2="24" stroke="url(#timerGrad)" strokeWidth="0.5" strokeDasharray="2 2" />
+      {/* Тонкие стрелки хронометра */}
+      <line x1="24" y1="24" x2="24" y2="15" stroke="#e8c97a" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="24" y1="24" x2="32" y2="20" stroke="#d4a853" strokeWidth="1" strokeLinecap="round" />
+      {/* Центральная точка */}
+      <circle cx="24" cy="24" r="2.5" fill="#e8c97a" stroke="#06060e" strokeWidth="1" />
     </svg>
   );
 }
 
 function IconScience() {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_rgba(139,127,247,0.15)]">
       <defs>
         <linearGradient id="sciGrad" x1="8" y1="8" x2="40" y2="40">
           <stop offset="0%" stopColor="#a89bfa" />
           <stop offset="100%" stopColor="#8b7ff7" />
         </linearGradient>
-        <filter id="sciGlow">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
-      <circle cx="24" cy="24" r="6" stroke="url(#sciGrad)" strokeWidth="2" fill="none" filter="url(#sciGlow)" />
-      <ellipse cx="24" cy="24" rx="18" ry="8" stroke="url(#sciGrad)" strokeWidth="1.5" fill="none" transform="rotate(0 24 24)" />
-      <ellipse cx="24" cy="24" rx="18" ry="8" stroke="url(#sciGrad)" strokeWidth="1.5" fill="none" transform="rotate(60 24 24)" />
-      <ellipse cx="24" cy="24" rx="18" ry="8" stroke="url(#sciGrad)" strokeWidth="1.5" fill="none" transform="rotate(120 24 24)" />
-      <circle cx="24" cy="24" r="3" fill="#a89bfa" />
+      {/* Три пересекающиеся окружности */}
+      <circle cx="24" cy="18" r="12" stroke="url(#sciGrad)" strokeWidth="1.2" />
+      <circle cx="17" cy="30" r="12" stroke="url(#sciGrad)" strokeWidth="1.2" />
+      <circle cx="31" cy="30" r="12" stroke="url(#sciGrad)" strokeWidth="1.2" />
+      {/* Внутренние линии пересечения */}
+      <circle cx="24" cy="26" r="3" fill="#a89bfa" opacity="0.3" />
+      <circle cx="24" cy="26" r="1" fill="#8b7ff7" />
     </svg>
   );
 }
 
 function IconReport() {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_rgba(212,168,83,0.15)]">
       <defs>
-        <linearGradient id="repGrad" x1="12" y1="6" x2="36" y2="42">
+        <linearGradient id="repGrad" x1="12" y1="12" x2="36" y2="36">
           <stop offset="0%" stopColor="#e8c97a" />
           <stop offset="50%" stopColor="#d4a853" />
           <stop offset="100%" stopColor="#a89bfa" />
         </linearGradient>
-        <filter id="repGlow">
-          <feGaussianBlur stdDeviation="1.5" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
       </defs>
-      <rect x="12" y="6" width="24" height="36" rx="4" stroke="url(#repGrad)" strokeWidth="2" fill="none" filter="url(#repGlow)" />
-      <line x1="18" y1="16" x2="30" y2="16" stroke="#e8c97a" strokeWidth="2" strokeLinecap="round" />
-      <line x1="18" y1="22" x2="28" y2="22" stroke="#d4a853" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="18" y1="28" x2="26" y2="28" stroke="#a89bfa" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="21" cy="35" r="2" fill="#d4a853" />
-      <circle cx="27" cy="35" r="2" fill="#8b7ff7" />
+      {/* Тонкий внешний геометрический кристалл */}
+      <path d="M24 8L38 18V32L24 42L10 32V18L24 8Z" stroke="url(#repGrad)" strokeWidth="1.2" strokeDasharray="3 2" />
+      {/* Внутренние линии связи к центру */}
+      <line x1="24" y1="8" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
+      <line x1="38" y1="18" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
+      <line x1="38" y1="32" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
+      <line x1="24" y1="42" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
+      <line x1="10" y1="32" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
+      <line x1="10" y1="18" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
+      {/* Сияющие точки в вершинах */}
+      <circle cx="24" cy="8" r="2" fill="#e8c97a" />
+      <circle cx="38" cy="18" r="2" fill="#d4a853" />
+      <circle cx="38" cy="32" r="2" fill="#a89bfa" />
+      <circle cx="24" cy="42" r="2" fill="#8b7ff7" />
+      <circle cx="10" cy="32" r="2" fill="#a89bfa" />
+      <circle cx="10" cy="18" r="2" fill="#d4a853" />
+      <circle cx="24" cy="24" r="3" fill="#ffffff" stroke="#8b7ff7" strokeWidth="1" />
     </svg>
   );
 }
 
 /* ═══════════════════════════════════════════════════
-   Данные «Как это работает»
+   Данные «Как это работает» (без упоминаний ИИ)
    ═══════════════════════════════════════════════════ */
 
 const howItWorks = [
   { step: '01', title: 'Регистрация', text: 'Быстрый старт без анкет' },
-  { step: '02', title: 'Диагностика', text: '25 минут интерактивного теста' },
-  { step: '03', title: 'ИИ-анализ', text: 'Алгоритм обрабатывает ответы' },
+  { step: '02', title: 'Диагностика', text: '25 минут интерактивной игры' },
+  { step: '03', title: 'Анализ ответов', text: 'Алгоритм сопоставляет результаты' },
   { step: '04', title: 'Отчёт', text: 'Профессии, предметы и план действий' },
 ];
 
@@ -112,14 +111,14 @@ export default function HomePage() {
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-3xl space-y-8"
         >
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal sm:whitespace-nowrap leading-[1.1] tracking-tight text-[#f0ece4]">
-            <span className="bg-gradient-to-b from-[#f0ece4] via-[#f0ece4] to-[#8a8694] bg-clip-text text-transparent">Определи свой</span>{' '}
-            <span className="font-signature text-[#e8c97a] lowercase filter drop-shadow-[0_0_15px_rgba(232,201,122,0.3)] ml-2 md:ml-4 inline-block">путь</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal tracking-tight text-[#f0ece4] flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-4">
+            <span className="shimmer-text uppercase">ОПРЕДЕЛИ</span>{' '}
+            <span className="shimmer-text uppercase italic font-serif">СВОЙ</span>{' '}
+            <span className="font-signature text-[#e8c97a] lowercase filter drop-shadow-[0_0_15px_rgba(232,201,122,0.3)] inline-block">путь</span>
           </h1>
           
-          <p className="max-w-lg mx-auto text-base sm:text-lg leading-relaxed text-[#8a8694]">
-            ИИ-диагностика талантов и интересов.<br />
-            25 минут — и семья получает понятный план.
+          <p className="max-w-2xl mx-auto text-base sm:text-lg leading-relaxed text-[#8a8694] font-inter">
+            Помогите ребенку выбрать будущую профессию без шаблонных тестов. 25 минут интерактивной игры раскроют его склонности и дадут готовый план действий для всей семьи.
           </p>
 
           <div className="pt-4">
@@ -169,7 +168,7 @@ export default function HomePage() {
             />
             <UspCard
               icon={<IconReport />}
-              title="Понятный ИИ-отчёт"
+              title="Понятный отчёт"
               text="Профессии, предметы и шаги — ясно ребёнку и родителю"
             />
           </motion.div>
@@ -195,15 +194,39 @@ export default function HomePage() {
               </h2>
             </div>
 
-            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {howItWorks.map((item, index) => (
+            {/* Карточки с staggered spring-анимацией появления */}
+            <motion.div 
+              className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.15,
+                  }
+                }
+              }}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-100px" }}
+            >
+              {howItWorks.map((item) => (
                 <motion.div
                   key={item.step}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="glass-card rounded-2xl p-6 text-center space-y-4"
+                  variants={{
+                    hidden: { opacity: 0, y: 40, scale: 0.95 },
+                    show: { 
+                      opacity: 1, 
+                      y: 0, 
+                      scale: 1,
+                      transition: {
+                        type: "spring",
+                        stiffness: 100,
+                        damping: 15
+                      }
+                    }
+                  }}
+                  className="glass-card rounded-2xl p-6 text-center space-y-4 hover:border-[#d4a853]/35 hover:shadow-[0_15px_30px_rgba(212,168,83,0.06)] transition-all duration-300"
                 >
                   <div className="text-3xl font-bold text-[#d4a853]/20 font-title">
                     {item.step}
@@ -216,7 +239,7 @@ export default function HomePage() {
                   </p>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Повторная CTA */}
             <div className="text-center pt-4">

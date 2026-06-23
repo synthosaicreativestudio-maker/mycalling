@@ -14,14 +14,14 @@ const blockIcons: Record<string, React.ComponentType<{ className?: string }>> = 
 };
 
 const loaderLogs = [
-  'Инициализация ИИ-анализатора...',
+  'Инициализация анализатора потенциала...',
   'Анализ профессионального вектора по коду Холланда (RIASEC)...',
   'Оценка сильных сторон личности по методике Big Five (OCEAN)...',
   'Картирование когнитивных способностей по Говарду Гарднеру...',
   'Анализ продуктового и творческого потенциала...',
   'Сопоставление психологического профиля с базой профессий 2026 года...',
   'Генерация персонализированных рекомендаций по предметам...',
-  'Сборка ИИ-отчета для родителей и подготовка выводов...'
+  'Сборка итогового отчета для родителей и подготовка рекомендаций...'
 ];
 
 export default function AssessmentPage() {
@@ -86,7 +86,7 @@ export default function AssessmentPage() {
     }));
   }, [questions, answers, mode]);
 
-  // Запуск смены логов на экране ожидания ИИ
+  // Запуск смены логов на экране ожидания
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isGenerating) {
@@ -105,7 +105,7 @@ export default function AssessmentPage() {
     if (currentAnswer === undefined) return;
 
     if (isLastQuestion) {
-      // Запуск ИИ-генерации отчета
+      // Запуск генерации отчета
       setIsGenerating(true);
       try {
         const response = await fetch('/api/generate-report', {
@@ -122,7 +122,7 @@ export default function AssessmentPage() {
         });
 
         if (!response.ok) {
-          throw new Error('Не удалось сгенерировать ИИ-отчет');
+          throw new Error('Не удалось сгенерировать отчет');
         }
 
         const reportData = await response.json();
@@ -143,7 +143,7 @@ export default function AssessmentPage() {
     setCurrentIndex((prev) => Math.max(0, prev - 1));
   };
 
-  // 1. Экран ожидания (ИИ лоадер)
+  // 1. Экран ожидания (лоадер)
   if (isGenerating) {
     return (
       <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 py-12 relative z-10">
@@ -160,9 +160,9 @@ export default function AssessmentPage() {
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-2xl font-bold font-unbounded text-text">ИИ анализирует профиль</h1>
+              <h1 className="text-2xl font-bold font-unbounded text-text">Анализ профиля способностей</h1>
               <p className="max-w-md text-sm text-muted font-inter leading-relaxed">
-                ИИ-модель <span className="text-[#a8b3ff] font-semibold">claude-opus-4-7</span> синтезирует ваши ответы для формирования карты призвания.
+                Математический алгоритм синтезирует ваши ответы для формирования карты призвания.
               </p>
             </div>
 
@@ -196,7 +196,7 @@ export default function AssessmentPage() {
             Выбери формат диагностики
           </h1>
           <p className="max-w-2xl mx-auto text-base text-muted font-inter leading-relaxed">
-            Привет, {studentName}! Выберите режим тестирования для запуска ИИ-анализа способностей.
+            Привет, {studentName}! Выберите формат диагностики для запуска анализа способностей.
           </p>
         </div>
 
@@ -409,7 +409,7 @@ export default function AssessmentPage() {
               disabled={currentAnswer === undefined}
               className="inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-bold text-white shadow-glow transition hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
             >
-              {isLastQuestion ? 'Получить ИИ-отчёт' : 'Следующий'}
+              {isLastQuestion ? 'Получить отчёт' : 'Следующий'}
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>

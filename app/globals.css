@@ -119,7 +119,7 @@ h1, h2, h3, .font-title {
   text-transform: uppercase;
 }
 
-/* ─── Gold CTA Button ─── */
+/* ─── Gold CTA Button (Glassmorphism) ─── */
 .cta-gold {
   position: relative;
   display: inline-flex;
@@ -128,22 +128,56 @@ h1, h2, h3, .font-title {
   padding: 1.125rem 2.5rem;
   font-weight: 600;
   font-size: 1rem;
-  color: #06060e;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
-  border: none;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08); /* Полупрозрачный белый фон */
+  backdrop-filter: blur(12px); /* Размытие фона за кнопкой */
+  -webkit-backdrop-filter: blur(12px); /* Для поддержки Safari */
+  
+  /* Рамка и углы */
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 9999px;
+  
+  /* Тень и подсветка */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 40px rgba(212, 168, 83, 0.2), 0 4px 20px rgba(212, 168, 83, 0.15);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cta-gold:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(212, 168, 83, 0.5); /* Золотое свечение на рамке */
+  box-shadow: 0 8px 40px rgba(212, 168, 83, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 0 60px rgba(212, 168, 83, 0.3), 0 8px 30px rgba(212, 168, 83, 0.25);
 }
 
 .cta-gold:active {
   transform: scale(0.98);
+}
+
+/* ─── Shimmer Text Animation ─── */
+.shimmer-text {
+  background: linear-gradient(
+    to right,
+    #f0ece4 20%,
+    #ffffff 40%,
+    #e8c97a 60%,
+    #f0ece4 80%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  text-fill-color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: textShine 6s linear infinite;
+}
+
+@keyframes textShine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
 }
 
 /* ─── Utility ─── */
