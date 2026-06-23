@@ -1,334 +1,279 @@
 'use client';
 
 import Link from 'next/link';
-import { 
-  ArrowRight, 
-  Clock, 
-  Activity, 
-  FileText, 
-  Brain, 
-  Compass, 
-  Sparkles, 
-  HeartHandshake, 
-  Target,
-  ArrowUpRight,
-  ShieldCheck,
-  CheckCircle2,
-  ChevronRight
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { HeroOrb } from './components/HeroOrb';
-import { assessmentBlocks, familyBenefits, nextSteps, processSteps, professions, trustPoints } from './data';
 
-const icons = [Brain, Compass, Sparkles, HeartHandshake, Target];
+/* ═══════════════════════════════════════════════════
+   Объёмные SVG-иконки для УТП
+   ═══════════════════════════════════════════════════ */
+
+function IconTimer() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="timerGrad" x1="8" y1="8" x2="40" y2="40">
+          <stop offset="0%" stopColor="#e8c97a" />
+          <stop offset="100%" stopColor="#d4a853" />
+        </linearGradient>
+        <filter id="timerGlow">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <circle cx="24" cy="26" r="16" stroke="url(#timerGrad)" strokeWidth="2.5" fill="none" filter="url(#timerGlow)" />
+      <line x1="24" y1="26" x2="24" y2="18" stroke="#e8c97a" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="24" y1="26" x2="30" y2="26" stroke="#d4a853" strokeWidth="2" strokeLinecap="round" />
+      <line x1="20" y1="8" x2="28" y2="8" stroke="#e8c97a" strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="24" y1="8" x2="24" y2="12" stroke="#d4a853" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconScience() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sciGrad" x1="8" y1="8" x2="40" y2="40">
+          <stop offset="0%" stopColor="#a89bfa" />
+          <stop offset="100%" stopColor="#8b7ff7" />
+        </linearGradient>
+        <filter id="sciGlow">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <circle cx="24" cy="24" r="6" stroke="url(#sciGrad)" strokeWidth="2" fill="none" filter="url(#sciGlow)" />
+      <ellipse cx="24" cy="24" rx="18" ry="8" stroke="url(#sciGrad)" strokeWidth="1.5" fill="none" transform="rotate(0 24 24)" />
+      <ellipse cx="24" cy="24" rx="18" ry="8" stroke="url(#sciGrad)" strokeWidth="1.5" fill="none" transform="rotate(60 24 24)" />
+      <ellipse cx="24" cy="24" rx="18" ry="8" stroke="url(#sciGrad)" strokeWidth="1.5" fill="none" transform="rotate(120 24 24)" />
+      <circle cx="24" cy="24" r="3" fill="#a89bfa" />
+    </svg>
+  );
+}
+
+function IconReport() {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="repGrad" x1="12" y1="6" x2="36" y2="42">
+          <stop offset="0%" stopColor="#e8c97a" />
+          <stop offset="50%" stopColor="#d4a853" />
+          <stop offset="100%" stopColor="#a89bfa" />
+        </linearGradient>
+        <filter id="repGlow">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <rect x="12" y="6" width="24" height="36" rx="4" stroke="url(#repGrad)" strokeWidth="2" fill="none" filter="url(#repGlow)" />
+      <line x1="18" y1="16" x2="30" y2="16" stroke="#e8c97a" strokeWidth="2" strokeLinecap="round" />
+      <line x1="18" y1="22" x2="28" y2="22" stroke="#d4a853" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="18" y1="28" x2="26" y2="28" stroke="#a89bfa" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="21" cy="35" r="2" fill="#d4a853" />
+      <circle cx="27" cy="35" r="2" fill="#8b7ff7" />
+    </svg>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   Данные «Как это работает»
+   ═══════════════════════════════════════════════════ */
+
+const howItWorks = [
+  { step: '01', title: 'Регистрация', text: 'Быстрый старт без анкет' },
+  { step: '02', title: 'Диагностика', text: '25 минут интерактивного теста' },
+  { step: '03', title: 'ИИ-анализ', text: 'Алгоритм обрабатывает ответы' },
+  { step: '04', title: 'Отчёт', text: 'Профессии, предметы и план действий' },
+];
+
+/* ═══════════════════════════════════════════════════
+   Компонент страницы
+   ═══════════════════════════════════════════════════ */
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex max-w-7xl flex-col justify-center px-6 py-10 lg:px-10 lg:py-16 relative overflow-hidden gap-20 lg:gap-32">
+    <main className="relative z-10">
       
-      {/* 1. HERO СЕКЦИЯ */}
-      <section className="relative min-h-[calc(100vh-180px)] flex flex-col justify-center">
-        {/* Фоновый интерактивный 3D-шар золотых частиц на фоне орбит */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-full lg:w-[55%] h-[600px] pointer-events-none z-0 opacity-90 select-none">
-          <HeroOrb />
-        </div>
+      {/* ─── HERO ─── */}
+      <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center pt-24">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-3xl space-y-8"
+        >
+          <h1 className="text-5xl sm:text-6xl lg:text-8xl font-bold leading-[1.05] tracking-tight bg-gradient-to-b from-[#f0ece4] via-[#f0ece4] to-[#8a8694] bg-clip-text text-transparent">
+            Определи свой путь
+          </h1>
+          
+          <p className="max-w-lg mx-auto text-base sm:text-lg leading-relaxed text-[#8a8694]">
+            ИИ-диагностика талантов и интересов.<br />
+            25 минут — и семья получает понятный план.
+          </p>
 
-        <div className="relative z-10 grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="max-w-3xl space-y-8 lg:space-y-10">
-            
-            {/* Заголовки */}
-            <div className="space-y-6">
-              <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-7.5xl bg-gradient-to-r from-white via-[#f3e8ff] to-[#c084fc] bg-clip-text text-transparent font-title">
-                Определи свой путь с помощью ИИ
-              </h1>
-              <p className="max-w-xl text-base leading-relaxed text-muted lg:text-lg font-inter">
-                Пройди современную 3-факторную диагностику талантов, характера и интересов. Получи детальный ИИ-отчет с рекомендациями по профессиям, предметам и траектории развития.
+          <div className="pt-4">
+            <Link href="/auth" className="cta-gold">
+              Пройти диагностику
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.4 }}
+          transition={{ delay: 2, duration: 1 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        >
+          <div className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5">
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+              className="w-1 h-1.5 rounded-full bg-[#d4a853]"
+            />
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ─── УТП (3 карточки) ─── */}
+      <section className="px-6 lg:px-10 py-24 lg:py-32">
+        <div className="mx-auto max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: '-100px' }}
+            className="grid gap-6 sm:grid-cols-3"
+          >
+            <UspCard
+              icon={<IconTimer />}
+              title="25 минут"
+              text="Вся диагностика — без длинных анкет и скучных вопросов"
+            />
+            <UspCard
+              icon={<IconScience />}
+              title="3 научных метода"
+              text="RIASEC, Big Five и Гарднер — проверенные мировые методики"
+            />
+            <UspCard
+              icon={<IconReport />}
+              title="Понятный ИИ-отчёт"
+              text="Профессии, предметы и шаги — ясно ребёнку и родителю"
+            />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── КАК ЭТО РАБОТАЕТ ─── */}
+      <section className="px-6 lg:px-10 py-24 lg:py-32">
+        <div className="mx-auto max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: '-100px' }}
+            className="space-y-16"
+          >
+            <div className="text-center space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4a853] font-title">
+                Как это работает
               </p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#f0ece4]">
+                Четыре шага к результату
+              </h2>
             </div>
 
-            {/* Кнопки действий */}
-            <div className="flex flex-wrap gap-4 pt-2">
-              <Link
-                href="/auth"
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#7c8cff] to-[#8b5cf6] px-8 py-4.5 text-base font-semibold text-white shadow-[0_0_40px_rgba(124,140,255,0.25)] transition duration-300 hover:scale-[1.03] hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] active:scale-[0.98]"
-                style={{ height: '56px' }}
-              >
-                Запустить тест
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {howItWorks.map((item, index) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="glass-card rounded-2xl p-6 text-center space-y-4"
+                >
+                  <div className="text-3xl font-bold text-[#d4a853]/20 font-title">
+                    {item.step}
+                  </div>
+                  <h3 className="text-lg font-semibold text-[#f0ece4] font-title">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-[#8a8694] leading-relaxed">
+                    {item.text}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Повторная CTA */}
+            <div className="text-center pt-4">
+              <Link href="/auth" className="cta-gold">
+                Начать бесплатно
                 <ArrowRight className="h-5 w-5" />
               </Link>
-              <Link
-                href="/report"
-                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-8 py-4.5 text-base font-semibold text-text transition duration-300 hover:scale-[1.03] hover:bg-white/10 backdrop-blur-md active:scale-[0.98]"
-                style={{ height: '56px' }}
-              >
-                Посмотреть демо-отчёт
-              </Link>
             </div>
+          </motion.div>
+        </div>
+      </section>
 
-            {/* Легкие метрики с анимацией плавного появления */}
-            <motion.div 
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.12
-                  }
-                }
-              }}
-              className="grid gap-4 pt-8 sm:grid-cols-3 border-t border-white/5 max-w-2xl"
-            >
-              <MetricCard 
-                icon={<Clock className="h-5 w-5 text-[#c084fc]" />}
-                title="25 минут" 
-                text="Длина диагностики" 
+      {/* ─── FOOTER ─── */}
+      <footer className="border-t border-white/[0.04] mt-16">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10 py-12">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-6">
+              <img
+                src="/assets/logos/logo-with-text.svg"
+                alt="МоёПризвание"
+                className="h-8 w-auto opacity-60"
               />
-              <MetricCard 
-                icon={<Activity className="h-5 w-5 text-[#8b5cf6]" />}
-                title="3 фактора" 
-                text="RIASEC + Big Five + Гарднер" 
-              />
-              <MetricCard 
-                icon={<FileText className="h-5 w-5 text-[#7c8cff]" />}
-                title="ИИ-Отчет" 
-                text="Понятен ребенку и родителям" 
-              />
-            </motion.div>
-          </div>
-
-          {/* Правая колонка grid для сохранения отступа под сферу на десктопах */}
-          <div className="hidden lg:block h-[500px] pointer-events-none" />
-        </div>
-      </section>
-
-      {/* 2. АРХИТЕКТУРА ДИАГНОСТИКИ */}
-      <section className="relative z-10 space-y-10">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#7c8cff] font-sync">Архитектура диагностики</p>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl bg-gradient-to-r from-white via-[#f3e8ff] to-[#8b5cf6] bg-clip-text text-transparent font-title">
-              Пять блоков в один профиль
-            </h2>
-          </div>
-          <Link
-            href="/auth"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#7c8cff] hover:text-white transition group"
-          >
-            Перейти к тесту
-            <ChevronRight className="h-4 w-4 transition group-hover:translate-x-1" />
-          </Link>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-          {assessmentBlocks.map((block, index) => {
-            const Icon = icons[index] ?? Sparkles;
-            return (
-              <motion.div
-                key={block.title}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="glass-card group relative rounded-3xl p-6 flex flex-col justify-between text-left cursor-pointer"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5 text-[#7c8cff] transition group-hover:scale-110">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-[0.1em] text-[#8b5cf6] bg-[#8b5cf6]/10 px-2.5 py-1 rounded-full">
-                      {block.weight}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-text font-title">{block.title}</h3>
-                  <p className="text-xs text-muted font-inter leading-relaxed">{block.description}</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-white/[0.03] flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-wider text-muted font-inter">Длительность</span>
-                  <span className="text-xs font-semibold text-[#7c8cff] font-inter">{block.duration}</span>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 3. ПУТЬ И ДОВЕРИЕ */}
-      <section className="relative z-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-        {/* Как устроен путь */}
-        <div className="glass-card rounded-[32px] p-8 space-y-8 text-left">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7c8cff] font-sync">Как устроен путь</p>
-            <h2 className="text-2xl font-bold font-title text-text">От первого контакта до отчета</h2>
-          </div>
-          <div className="grid gap-4">
-            {processSteps.map((step, index) => (
-              <div 
-                key={step.title} 
-                className="glass-card flex gap-4 p-5 rounded-2xl cursor-pointer"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#7c8cff]/10 text-xs font-bold text-[#7c8cff] font-title">
-                  0{index + 1}
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-text font-title">{step.title}</h4>
-                  <p className="text-xs text-muted font-inter leading-relaxed">{step.text}</p>
-                </div>
-              </div>
-            ))}
+              <span className="text-xs text-[#8a8694]">
+                © {new Date().getFullYear()} МоёПризвание
+              </span>
+            </div>
+            
+            <nav className="flex items-center gap-6 text-xs text-[#8a8694]">
+              <Link href="/privacy" className="hover:text-[#f0ece4] transition">
+                Политика конфиденциальности
+              </Link>
+              <Link href="/terms" className="hover:text-[#f0ece4] transition">
+                Пользовательское соглашение
+              </Link>
+              <a href="mailto:hello@synthosai.ru" className="hover:text-[#f0ece4] transition">
+                Контакты
+              </a>
+            </nav>
           </div>
         </div>
-
-        {/* Почему этому можно доверять */}
-        <div className="glass-card rounded-[32px] p-8 space-y-8 text-left flex flex-col justify-between">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b5cf6] font-sync">Доверие</p>
-            <h2 className="text-2xl font-bold font-title text-text">Продукт говорит по делу</h2>
-          </div>
-          <div className="space-y-4 my-auto">
-            {trustPoints.map((item) => (
-              <div 
-                key={item} 
-                className="flex items-start gap-3.5 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition duration-300"
-              >
-                <ShieldCheck className="h-5 w-5 text-[#c084fc] shrink-0 mt-0.5" />
-                <p className="text-xs text-muted font-inter leading-relaxed">{item}</p>
-              </div>
-            ))}
-          </div>
-          <div className="pt-4 border-t border-white/[0.03]">
-            <p className="text-xs text-[#7c8cff]/80 font-inter">Диагностика строится на проверенных психологических методиках</p>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. СЕМЬЯ И ПРОФЕССИИ */}
-      <section className="relative z-10 grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-        {/* Что получает семья */}
-        <div className="glass-card rounded-[32px] p-8 space-y-8 text-left flex flex-col justify-between">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7c8cff] font-sync">Что получает семья</p>
-            <h2 className="text-2xl font-bold font-title text-text">Больше, чем просто список</h2>
-          </div>
-          <div className="space-y-4 my-auto">
-            {familyBenefits.map((item) => (
-              <div 
-                key={item} 
-                className="flex items-start gap-3.5 p-4.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-[#8b5cf6]/5 transition duration-300"
-              >
-                <CheckCircle2 className="h-5 w-5 text-[#7c8cff] shrink-0 mt-0.5" />
-                <p className="text-xs text-muted font-inter leading-relaxed">{item}</p>
-              </div>
-            ))}
-          </div>
-          <div className="pt-4 border-t border-white/[0.03]">
-            <p className="text-xs text-[#8b5cf6]/80 font-inter">Отчет адаптирован для совместного чтения детьми и родителями</p>
-          </div>
-        </div>
-
-        {/* Топ карьерных совпадений */}
-        <div className="glass-card rounded-[32px] p-8 space-y-6 text-left">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b5cf6] font-sync">Карьерные совпадения</p>
-            <h2 className="text-2xl font-bold font-title text-text">Профессии, которые можно объяснить</h2>
-          </div>
-          <div className="space-y-4">
-            {professions.slice(0, 3).map((profession) => (
-              <div 
-                key={profession.name} 
-                className="glass-card p-5 rounded-2xl space-y-3 cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-text font-title">{profession.name}</span>
-                  <span className="text-xs font-extrabold text-[#7c8cff] bg-[#7c8cff]/10 px-2 py-0.5 rounded-md font-title">
-                    {profession.score}% Match
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted font-inter leading-relaxed">{profession.summary}</p>
-                
-                {/* Метрик-бар */}
-                <div className="h-1.5 w-full rounded-full bg-white/[0.03] overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${profession.score}%` }}
-                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-                    className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#7c8cff] rounded-full shadow-[0_0_10px_rgba(124,140,255,0.4)]"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {profession.subjects.slice(0, 2).map((sub) => (
-                    <span key={sub} className="text-[10px] text-[#7c8cff] bg-[#7c8cff]/5 px-2 py-0.5 rounded-full font-inter">
-                      {sub}
-                    </span>
-                  ))}
-                  {profession.directions.slice(0, 1).map((dir) => (
-                    <span key={dir} className="text-[10px] text-muted bg-white/[0.03] px-2 py-0.5 rounded-full font-inter">
-                      {dir}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. ПОСЛЕ РЕЗУЛЬТАТА */}
-      <section className="relative z-10 space-y-10">
-        <div className="space-y-3 text-left">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#7c8cff] font-sync">После результата</p>
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl bg-gradient-to-r from-white via-[#f3e8ff] to-[#7c8cff] bg-clip-text text-transparent font-title">
-            Поддержка на каждом шаге
-          </h2>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {nextSteps.map((step, index) => (
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-              className="glass-card p-6 rounded-3xl text-left flex flex-col justify-between gap-6 cursor-pointer"
-            >
-              <div className="text-3xl font-extrabold text-white/5 font-title">
-                0{index + 1}
-              </div>
-              <p className="text-xs text-muted font-inter leading-relaxed">
-                {step}
-              </p>
-              <div className="pt-2">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.02] border border-white/5 text-muted hover:text-white transition">
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      </footer>
 
     </main>
   );
 }
 
-function MetricCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+/* ═══════════════════════════════════════════════════
+   Компонент УТП-карточки
+   ═══════════════════════════════════════════════════ */
+
+function UspCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
-    <motion.div 
-      variants={{
-        hidden: { opacity: 0, y: 15 },
-        visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 80 } }
-      }}
-      className="glass-card rounded-2xl p-5 flex flex-col gap-4 text-left cursor-pointer"
-    >
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5">
+    <div className="glass-card rounded-2xl p-8 text-center space-y-5 group">
+      <div className="flex justify-center transition-transform duration-500 group-hover:scale-110">
         {icon}
       </div>
-      <div>
-        <p className="text-base font-extrabold text-text font-title bg-gradient-to-r from-white to-[#eef2ff] bg-clip-text text-transparent leading-none">{title}</p>
-        <p className="mt-2 text-xs text-muted font-inter leading-relaxed">{text}</p>
-      </div>
-    </motion.div>
+      <h3 className="text-xl font-bold text-[#f0ece4] font-title">{title}</h3>
+      <p className="text-sm text-[#8a8694] leading-relaxed">{text}</p>
+    </div>
   );
 }

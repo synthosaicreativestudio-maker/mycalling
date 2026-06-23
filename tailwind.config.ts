@@ -5,15 +5,22 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#0b1020',
-        surface: '#12192e',
-        accent: '#7c8cff',
-        accentSoft: '#a8b3ff',
-        text: '#eef2ff',
-        muted: '#9aa4c7'
+        background: '#06060e',
+        surface: '#0d0d18',
+        accent: '#d4a853',
+        accentSoft: '#e8c97a',
+        purple: '#8b7ff7',
+        purpleSoft: '#a89bfa',
+        text: '#f0ece4',
+        muted: '#8a8694'
+      },
+      fontFamily: {
+        title: ['var(--font-space-grotesk)', 'sans-serif'],
+        body: ['var(--font-inter)', 'sans-serif']
       },
       boxShadow: {
-        glow: '0 0 60px rgba(124,140,255,0.18)'
+        glow: '0 0 60px rgba(212,168,83,0.15)',
+        'glow-purple': '0 0 60px rgba(139,127,247,0.12)'
       }
     }
   },

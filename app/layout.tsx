@@ -1,8 +1,9 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Inter, Manrope } from 'next/font/google';
+import { Inter, Space_Grotesk } from 'next/font/google';
 import { SpaceBackground } from './components/SpaceBackground';
+import { HeroOrb } from './components/HeroOrb';
 import { IntroPreloader } from './components/IntroPreloader';
 
 const inter = Inter({
@@ -11,66 +12,60 @@ const inter = Inter({
   display: 'swap',
 });
 
-const manrope = Manrope({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['300', '400', '500', '600', '700', '800'],
-  variable: '--font-manrope',
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-space-grotesk',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'МоеПризвание',
-  description: 'Диагностика способностей, карьерный отчет, профессии, предметы и направления обучения.'
+  title: 'МоёПризвание — ИИ-диагностика талантов',
+  description: 'Определи свой путь. ИИ-диагностика талантов, характера и интересов за 25 минут. Понятный отчёт с рекомендациями по профессиям.'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${manrope.variable}`}>
-      <body className="relative min-h-screen bg-transparent text-[#eef2ff]">
+    <html lang="ru" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <body className="relative min-h-screen bg-transparent text-[#f0ece4]">
         <IntroPreloader />
+        
+        {/* Слой 1: Космический фон (самый нижний) */}
         <SpaceBackground />
         
-        {/* Шапка сайта с логотипом */}
-        <header className="mx-auto max-w-7xl px-6 pt-6 lg:px-10 lg:pt-8 relative z-50 print:hidden">
-          <div className="flex items-center justify-between py-3.5 rounded-2xl border border-white/10 bg-[#0b1125]/45 px-6 backdrop-blur-md">
-            <Link href="/" className="flex items-center transition hover:opacity-90">
-              <img
-                src="/assets/logos/logo-with-text.svg"
-                alt="МоеПризвание"
-                className="h-10 md:h-14 w-auto object-contain"
-              />
-            </Link>
-            
-            <nav className="hidden md:flex items-center gap-8">
-              <Link href="/" className="text-sm font-medium text-muted hover:text-text transition">
-                Главная
-              </Link>
-              <Link href="/assessment" className="text-sm font-medium text-muted hover:text-text transition">
-                Диагностика
-              </Link>
-              <Link href="/report" className="text-sm font-medium text-muted hover:text-text transition">
-                Пример отчёта
-              </Link>
-            </nav>
-
-            <div className="flex items-center gap-4">
-              <Link
-                href="/auth"
-                className="text-sm font-semibold text-muted hover:text-text transition"
-              >
-                Войти
-              </Link>
-              <Link
-                href="/auth"
-                className="rounded-full bg-accent px-5 py-2.5 text-xs font-semibold text-white shadow-glow transition hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Начать тест
-              </Link>
+        {/* Слой 2: Золотые частицы (фиксированный фон) */}
+        <HeroOrb />
+        
+        {/* Sticky Header */}
+        <header className="site-header print:hidden">
+          <div className="site-header-inner">
+            <div className="mx-auto max-w-7xl px-6 lg:px-10">
+              <div className="flex items-center justify-between py-4">
+                <Link href="/" className="flex items-center transition hover:opacity-90">
+                  <img
+                    src="/assets/logos/logo-with-text.svg"
+                    alt="МоёПризвание"
+                    className="h-12 md:h-16 w-auto object-contain"
+                  />
+                </Link>
+                
+                <div className="flex items-center gap-6">
+                  <Link
+                    href="/auth"
+                    className="text-sm font-medium text-[#8a8694] hover:text-[#f0ece4] transition duration-300"
+                  >
+                    Войти
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </header>
 
-        {children}
+        {/* Слой 3: Контент (скроллится поверх фона) */}
+        <div className="content-layer">
+          {children}
+        </div>
       </body>
     </html>
   );
