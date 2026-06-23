@@ -41,17 +41,17 @@ export function SpaceBackground() {
 
           {/* Премиальный градиент для тонких орбит */}
           <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#c084fc" stop-opacity="0.22" />
-            <stop offset="50%" stop-color="#818cf8" stop-opacity="0.12" />
-            <stop offset="100%" stop-color="#c084fc" stop-opacity="0.01" />
+            <stop offset="0%" stop-color="#c084fc" stop-opacity="0.55" />
+            <stop offset="50%" stop-color="#818cf8" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#c084fc" stop-opacity="0.05" />
           </linearGradient>
 
           {/* Градиент для пересекающего светового луча */}
           <linearGradient id="rayGrad" x1="0%" y1="100%" x2="100%" y2="0%">
             <stop offset="0%" stop-color="#818cf8" stop-opacity="0" />
-            <stop offset="50%" stop-color="#a78bfa" stop-opacity="0.4" />
-            <stop offset="55%" stop-color="#ffffff" stop-opacity="0.8" />
-            <stop offset="60%" stop-color="#c084fc" stop-opacity="0.4" />
+            <stop offset="50%" stop-color="#a78bfa" stop-opacity="0.5" />
+            <stop offset="55%" stop-color="#ffffff" stop-opacity="0.95" />
+            <stop offset="60%" stop-color="#c084fc" stop-opacity="0.5" />
             <stop offset="100%" stop-color="#818cf8" stop-opacity="0" />
           </linearGradient>
 
@@ -94,29 +94,29 @@ export function SpaceBackground() {
           <circle cx="980" cy="220" r="1.2" fill="#fff" />
         </g>
 
-        {/* Группа орбит в правом нижнем углу (стиль ChatGPT) */}
+        {/* Группа орбит, центрированная по Hero-блоку (стиль ChatGPT) */}
         <g stroke="url(#orbitGrad)" fill="none">
-          <ellipse cx="1200" cy="650" rx="260" ry="110" stroke-width="0.75" transform="rotate(-30 1200 650)" />
+          <ellipse cx="1120" cy="420" rx="260" ry="110" stroke-width="1.0" transform="rotate(-30 1120 420)" />
           
-          <ellipse cx="1200" cy="650" rx="390" ry="165" stroke-width="0.75" stroke-dasharray="4 8" transform="rotate(-30 1200 650)">
+          <ellipse cx="1120" cy="420" rx="390" ry="165" stroke-width="1.0" stroke-dasharray="4 8" transform="rotate(-30 1120 420)">
             <animateTransform
               attributeName="transform"
               type="rotate"
-              from="0 1200 650"
-              to="360 1200 650"
+              from="0 1120 420"
+              to="360 1120 420"
               dur="120s"
               repeatCount="indefinite"
             />
           </ellipse>
 
-          <ellipse cx="1200" cy="650" rx="520" ry="220" stroke-width="0.75" transform="rotate(-30 1200 650)" />
+          <ellipse cx="1120" cy="420" rx="520" ry="220" stroke-width="1.0" transform="rotate(-30 1120 420)" />
 
-          <ellipse cx="1200" cy="650" rx="680" ry="285" stroke-width="0.5" stroke-dasharray="3 6" transform="rotate(-30 1200 650)">
+          <ellipse cx="1120" cy="420" rx="680" ry="285" stroke-width="0.8" stroke-dasharray="3 6" transform="rotate(-30 1120 420)">
             <animateTransform
               attributeName="transform"
               type="rotate"
-              from="360 1200 650"
-              to="0 1200 650"
+              from="360 1120 420"
+              to="0 1120 420"
               dur="180s"
               repeatCount="indefinite"
             />
@@ -124,16 +124,16 @@ export function SpaceBackground() {
         </g>
 
         {/* Пересекающий световой луч */}
-        <line x1="720" y1="895" x2="1680" y2="445" stroke="url(#rayGrad)" stroke-width="0.75" opacity="0.25" />
+        <line x1="620" y1="710" x2="1620" y2="130" stroke="url(#rayGrad)" stroke-width="1.0" opacity="0.45" />
 
         {/* Пульсирующая фиолетово-белая вспышка на стыке одной из орбит */}
-        <g transform="translate(1260, 622)">
+        <g transform="translate(1220, 340)">
           {/* Внешний мягкий пульсирующий нимб */}
-          <circle cx="0" cy="0" r="30" fill="#a78bfa" opacity="0.12" filter="url(#starGlow)">
+          <circle cx="0" cy="0" r="30" fill="#a78bfa" opacity="0.15" filter="url(#starGlow)">
             <animate attributeName="r" values="24; 36; 24" dur="5s" repeatCount="indefinite" />
           </circle>
           {/* Среднее свечение */}
-          <circle cx="0" cy="0" r="10" fill="#c084fc" opacity="0.4" filter="url(#starGlow)" />
+          <circle cx="0" cy="0" r="10" fill="#c084fc" opacity="0.45" filter="url(#starGlow)" />
           {/* Яркое ядро вспышки */}
           <circle cx="0" cy="0" r="2.5" fill="#ffffff" filter="url(#pointGlow)" />
 
