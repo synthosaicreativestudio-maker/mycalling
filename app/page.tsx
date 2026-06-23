@@ -111,7 +111,7 @@ export default function HomePage() {
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-3xl space-y-8"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-[#f0ece4] flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-4 gap-y-2 max-w-4xl mx-auto">
+          <h1 className="adaptive-h1 font-normal tracking-tight text-[#f0ece4] gap-x-2 sm:gap-x-4 max-w-4xl mx-auto">
             <span className="relative inline-block select-none">
               <span className="absolute inset-0 text-3d-shadow text-[#0c0c14] select-none pointer-events-none uppercase">ОПРЕДЕЛИ</span>
               <span className="shimmer-text uppercase relative z-10">ОПРЕДЕЛИ</span>
@@ -121,8 +121,8 @@ export default function HomePage() {
               <span className="shimmer-text uppercase relative z-10">СВОЙ</span>
             </span>
             <span className="relative inline-block select-none">
-              <span className="absolute inset-0 text-3d-shadow text-[#0c0c14] select-none pointer-events-none font-signature uppercase text-[#e8c97a]">ПУТЬ</span>
-              <span className="font-signature text-[#e8c97a] uppercase filter drop-shadow-[0_0_15px_rgba(232,201,122,0.3)] relative z-10 inline-block">ПУТЬ</span>
+              <span className="absolute inset-0 text-3d-shadow text-[#0c0c14] select-none pointer-events-none font-signature lowercase text-[#e8c97a]">путь</span>
+              <span className="font-signature text-[#e8c97a] lowercase filter drop-shadow-[0_0_15px_rgba(232,201,122,0.3)] relative z-10 inline-block">путь</span>
             </span>
           </h1>
           
