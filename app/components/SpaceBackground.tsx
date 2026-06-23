@@ -10,20 +10,20 @@ export function SpaceBackground() {
   }, []);
 
   if (!mounted) {
-    return <div className="fixed inset-0 -z-50 bg-[#050816]" />;
+    return <div className="fixed inset-0 -z-50 bg-[#030208]" />;
   }
 
   return (
-    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#050816] print:hidden">
-      {/* Статический слой звездного неба */}
+    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#030208] print:hidden">
+      {/* Статический слой звездного неба для глубины */}
       <div 
-        className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none select-none" 
+        className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-screen pointer-events-none select-none" 
         style={{ backgroundImage: "url('/assets/backgrounds/space-bg-static.png')" }} 
       />
 
-      {/* Глубокие фоновые неоновые туманности и аврора */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,#0e1533_0%,#050816_70%)] opacity-75" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(124,140,255,0.14)_0%,transparent_50%),radial-gradient(circle_at_78%_24%,rgba(92,214,255,0.1)_0%,transparent_40%),radial-gradient(circle_at_62%_78%,rgba(144,98,255,0.1)_0%,transparent_50%)] blur-[40px]" />
+      {/* Мягкие фоновые неоновые туманности */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,#0c0621_0%,#030208_70%)] opacity-85" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(76,29,149,0.18)_0%,transparent_50%),radial-gradient(circle_at_85%_25%,rgba(99,102,241,0.08)_0%,transparent_40%)] blur-[50px]" />
 
       <svg
         className="absolute inset-0 h-full w-full"
@@ -32,29 +32,41 @@ export function SpaceBackground() {
         viewBox="0 0 1440 900"
       >
         <defs>
-          <radialGradient id="auroraGlow" cx="30%" cy="30%" r="60%">
-            <stop offset="0%" stop-color="#3c4eb8" stop-opacity="0.45" />
-            <stop offset="40%" stop-color="#24317a" stop-opacity="0.2" />
-            <stop offset="100%" stop-color="#050816" stop-opacity="0" />
+          {/* Градиент для левого верхнего линзового блика (Lens Flare) */}
+          <radialGradient id="auroraGlow" cx="20%" cy="20%" r="70%">
+            <stop offset="0%" stop-color="#4c1d95" stop-opacity="0.45" />
+            <stop offset="40%" stop-color="#1e1b4b" stop-opacity="0.18" />
+            <stop offset="100%" stop-color="#030208" stop-opacity="0" />
           </radialGradient>
 
-          <linearGradient id="bgOrbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#7c8cff" stop-opacity="0.25" />
-            <stop offset="50%" stop-color="#a8b3ff" stop-opacity="0.1" />
-            <stop offset="100%" stop-color="#7c8cff" stop-opacity="0.02" />
+          {/* Премиальный градиент для тонких орбит */}
+          <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#c084fc" stop-opacity="0.22" />
+            <stop offset="50%" stop-color="#818cf8" stop-opacity="0.12" />
+            <stop offset="100%" stop-color="#c084fc" stop-opacity="0.01" />
           </linearGradient>
 
+          {/* Градиент для пересекающего светового луча */}
+          <linearGradient id="rayGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#818cf8" stop-opacity="0" />
+            <stop offset="50%" stop-color="#a78bfa" stop-opacity="0.4" />
+            <stop offset="55%" stop-color="#ffffff" stop-opacity="0.8" />
+            <stop offset="60%" stop-color="#c084fc" stop-opacity="0.4" />
+            <stop offset="100%" stop-color="#818cf8" stop-opacity="0" />
+          </linearGradient>
+
+          {/* Фильтры свечения для звезд и вспышек */}
           <filter id="pointGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feGaussianBlur stdDeviation="3" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
 
-          <filter id="starGlow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="10" result="blur1" />
-            <feGaussianBlur stdDeviation="3" result="blur2" />
+          <filter id="starGlow" x="-150%" y="-150%" width="400%" height="400%">
+            <feGaussianBlur stdDeviation="8" result="blur1" />
+            <feGaussianBlur stdDeviation="2.5" result="blur2" />
             <feMerge>
               <feMergeNode in="blur1" />
               <feMergeNode in="blur2" />
@@ -63,46 +75,75 @@ export function SpaceBackground() {
           </filter>
         </defs>
 
-        <circle cx="150" cy="150" r="450" fill="url(#auroraGlow)">
+        {/* Большой линзовый блик в верхнем левом углу */}
+        <circle cx="150" cy="150" r="650" fill="url(#auroraGlow)">
           <animate 
             attributeName="opacity" 
-            values="0.6; 0.95; 0.6" 
-            dur="10s" 
-            repeatCount="indefinite" />
-          <animateTransform
-            attributeName="transform"
-            type="scale"
-            values="0.9; 1.1; 0.9"
-            transform-origin="150 150"
-            dur="12s"
+            values="0.45; 0.6; 0.45" 
+            dur="12s" 
             repeatCount="indefinite" />
         </circle>
 
-        <g opacity="0.3">
-          <circle cx="300" cy="200" r="1" fill="#fff" />
-          <circle cx="750" cy="150" r="1.2" fill="#7c8cff" />
-          <circle cx="500" cy="400" r="1" fill="#fff" />
-          <circle cx="200" cy="600" r="1.5" fill="#a8b3ff" />
-          <circle cx="650" cy="700" r="1" fill="#fff" />
-          <circle cx="950" cy="250" r="1.2" fill="#fff" />
+        {/* Фоновые случайные звезды */}
+        <g opacity="0.25">
+          <circle cx="280" cy="180" r="1" fill="#fff" />
+          <circle cx="790" cy="130" r="1.2" fill="#a78bfa" />
+          <circle cx="480" cy="380" r="1" fill="#fff" />
+          <circle cx="180" cy="580" r="1.5" fill="#818cf8" />
+          <circle cx="620" cy="720" r="1" fill="#fff" />
+          <circle cx="980" cy="220" r="1.2" fill="#fff" />
         </g>
 
-        <g transform="translate(0, 0)">
+        {/* Группа орбит в правом нижнем углу (стиль ChatGPT) */}
+        <g stroke="url(#orbitGrad)" fill="none">
+          <ellipse cx="1200" cy="650" rx="260" ry="110" stroke-width="0.75" transform="rotate(-30 1200 650)" />
           
-          <g transform="translate(1240, 595)">
-            <circle cx="0" cy="0" r="14" fill="#ffd700" opacity="0.25" filter="url(#starGlow)">
-              <animate attributeName="r" values="10; 16; 10" dur="4s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="0" cy="0" r="3.5" fill="#ffffff" filter="url(#starGlow)" />
-            
-            <line x1="-15" y1="0" x2="15" y2="0" stroke="#ffffff" stroke-width="1" opacity="0.9">
-              <animate attributeName="opacity" values="0.6; 1; 0.6" dur="2s" repeatCount="indefinite" />
-            </line>
-            <line x1="0" y1="-15" x2="0" y2="15" stroke="#ffffff" stroke-width="1" opacity="0.9">
-              <animate attributeName="opacity" values="0.6; 1; 0.6" dur="2s" repeatCount="indefinite" />
-            </line>
-          </g>
+          <ellipse cx="1200" cy="650" rx="390" ry="165" stroke-width="0.75" stroke-dasharray="4 8" transform="rotate(-30 1200 650)">
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 1200 650"
+              to="360 1200 650"
+              dur="120s"
+              repeatCount="indefinite"
+            />
+          </ellipse>
 
+          <ellipse cx="1200" cy="650" rx="520" ry="220" stroke-width="0.75" transform="rotate(-30 1200 650)" />
+
+          <ellipse cx="1200" cy="650" rx="680" ry="285" stroke-width="0.5" stroke-dasharray="3 6" transform="rotate(-30 1200 650)">
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="360 1200 650"
+              to="0 1200 650"
+              dur="180s"
+              repeatCount="indefinite"
+            />
+          </ellipse>
+        </g>
+
+        {/* Пересекающий световой луч */}
+        <line x1="720" y1="895" x2="1680" y2="445" stroke="url(#rayGrad)" stroke-width="0.75" opacity="0.25" />
+
+        {/* Пульсирующая фиолетово-белая вспышка на стыке одной из орбит */}
+        <g transform="translate(1260, 622)">
+          {/* Внешний мягкий пульсирующий нимб */}
+          <circle cx="0" cy="0" r="30" fill="#a78bfa" opacity="0.12" filter="url(#starGlow)">
+            <animate attributeName="r" values="24; 36; 24" dur="5s" repeatCount="indefinite" />
+          </circle>
+          {/* Среднее свечение */}
+          <circle cx="0" cy="0" r="10" fill="#c084fc" opacity="0.4" filter="url(#starGlow)" />
+          {/* Яркое ядро вспышки */}
+          <circle cx="0" cy="0" r="2.5" fill="#ffffff" filter="url(#pointGlow)" />
+
+          {/* Тонкие крестообразные лучи звезды */}
+          <line x1="-12" y1="0" x2="12" y2="0" stroke="#ffffff" stroke-width="0.75" opacity="0.8">
+            <animate attributeName="opacity" values="0.5; 0.9; 0.5" dur="3.5s" repeatCount="indefinite" />
+          </line>
+          <line x1="0" y1="-12" x2="0" y2="12" stroke="#ffffff" stroke-width="0.75" opacity="0.8">
+            <animate attributeName="opacity" values="0.5; 0.9; 0.5" dur="3.5s" repeatCount="indefinite" />
+          </line>
         </g>
       </svg>
     </div>

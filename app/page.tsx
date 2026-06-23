@@ -28,7 +28,7 @@ export default function HomePage() {
       
       {/* 1. HERO СЕКЦИЯ */}
       <section className="relative min-h-[calc(100vh-180px)] flex flex-col justify-center">
-        {/* Фоновый интерактивный 3D-шар */}
+        {/* Фоновый интерактивный 3D-шар золотых частиц на фоне орбит */}
         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-full lg:w-[55%] h-[600px] pointer-events-none z-0 opacity-90 select-none">
           <HeroOrb />
         </div>
@@ -38,10 +38,10 @@ export default function HomePage() {
             
             {/* Заголовки */}
             <div className="space-y-6">
-              <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-7xl font-unbounded bg-gradient-to-r from-white via-[#eef2ff] to-[#7c8cff] bg-clip-text text-transparent">
+              <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-7.5xl bg-gradient-to-r from-white via-[#f3e8ff] to-[#c084fc] bg-clip-text text-transparent font-title">
                 Определи свой путь с помощью ИИ
               </h1>
-              <p className="max-w-xl text-lg leading-relaxed text-muted lg:text-xl font-inter">
+              <p className="max-w-xl text-base leading-relaxed text-muted lg:text-lg font-inter">
                 Пройди современную 3-факторную диагностику талантов, характера и интересов. Получи детальный ИИ-отчет с рекомендациями по профессиям, предметам и траектории развития.
               </p>
             </div>
@@ -50,7 +50,7 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-4 pt-2">
               <Link
                 href="/auth"
-                className="inline-flex items-center gap-2 rounded-2xl bg-accent px-8 py-4.5 text-base font-semibold text-white shadow-glow transition duration-300 hover:scale-[1.03] hover:shadow-[0_0_80px_rgba(124,140,255,0.3)] active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#7c8cff] to-[#8b5cf6] px-8 py-4.5 text-base font-semibold text-white shadow-[0_0_40px_rgba(124,140,255,0.25)] transition duration-300 hover:scale-[1.03] hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] active:scale-[0.98]"
                 style={{ height: '56px' }}
               >
                 Запустить тест
@@ -58,7 +58,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/report"
-                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-8 py-4.5 text-base font-semibold text-text transition duration-300 hover:scale-[1.03] hover:bg-white/10 active:scale-[0.98]"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-8 py-4.5 text-base font-semibold text-text transition duration-300 hover:scale-[1.03] hover:bg-white/10 backdrop-blur-md active:scale-[0.98]"
                 style={{ height: '56px' }}
               >
                 Посмотреть демо-отчёт
@@ -81,19 +81,19 @@ export default function HomePage() {
               className="grid gap-4 pt-8 sm:grid-cols-3 border-t border-white/5 max-w-2xl"
             >
               <MetricCard 
-                icon={<Clock className="h-5 w-5 text-[#7c8cff]" />}
+                icon={<Clock className="h-5 w-5 text-[#c084fc]" />}
                 title="25 минут" 
                 text="Длина диагностики" 
               />
               <MetricCard 
                 icon={<Activity className="h-5 w-5 text-[#8b5cf6]" />}
-                title="3-фактора" 
+                title="3 фактора" 
                 text="RIASEC + Big Five + Гарднер" 
               />
               <MetricCard 
-                icon={<FileText className="h-5 w-5 text-[#78d4ff]" />}
+                icon={<FileText className="h-5 w-5 text-[#7c8cff]" />}
                 title="ИИ-Отчет" 
-                text="Понятный ребенку и родителям" 
+                text="Понятен ребенку и родителям" 
               />
             </motion.div>
           </div>
@@ -107,8 +107,8 @@ export default function HomePage() {
       <section className="relative z-10 space-y-10">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="space-y-3">
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#7c8cff] font-unbounded">Архитектура диагностики</p>
-            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl font-unbounded bg-gradient-to-r from-white via-[#eef2ff] to-[#7c8cff] bg-clip-text text-transparent">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#7c8cff] font-sync">Архитектура диагностики</p>
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl bg-gradient-to-r from-white via-[#f3e8ff] to-[#8b5cf6] bg-clip-text text-transparent font-title">
               Пять блоков в один профиль
             </h2>
           </div>
@@ -130,8 +130,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                whileHover={{ y: -6, borderColor: 'rgba(124, 140, 255, 0.2)' }}
-                className="group relative rounded-3xl border border-white/[0.03] bg-[#0b1125]/20 p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between text-left"
+                className="glass-card group relative rounded-3xl p-6 flex flex-col justify-between text-left cursor-pointer"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -142,7 +141,7 @@ export default function HomePage() {
                       {block.weight}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-text font-unbounded">{block.title}</h3>
+                  <h3 className="text-lg font-bold text-text font-title">{block.title}</h3>
                   <p className="text-xs text-muted font-inter leading-relaxed">{block.description}</p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-white/[0.03] flex items-center justify-between">
@@ -158,22 +157,22 @@ export default function HomePage() {
       {/* 3. ПУТЬ И ДОВЕРИЕ */}
       <section className="relative z-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         {/* Как устроен путь */}
-        <div className="rounded-[32px] border border-white/[0.03] bg-[#0b1125]/20 p-8 backdrop-blur-md space-y-8 text-left">
+        <div className="glass-card rounded-[32px] p-8 space-y-8 text-left">
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7c8cff] font-unbounded">Как устроен путь</p>
-            <h2 className="text-2xl font-bold font-unbounded text-text">От первого контакта до отчета</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7c8cff] font-sync">Как устроен путь</p>
+            <h2 className="text-2xl font-bold font-title text-text">От первого контакта до отчета</h2>
           </div>
           <div className="grid gap-4">
             {processSteps.map((step, index) => (
               <div 
                 key={step.title} 
-                className="flex gap-4 p-5 rounded-2xl border border-white/[0.02] bg-white/[0.01] hover:border-white/5 transition duration-300"
+                className="glass-card flex gap-4 p-5 rounded-2xl cursor-pointer"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#7c8cff]/10 text-xs font-bold text-[#7c8cff] font-unbounded">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#7c8cff]/10 text-xs font-bold text-[#7c8cff] font-title">
                   0{index + 1}
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-text font-unbounded">{step.title}</h4>
+                  <h4 className="text-sm font-bold text-text font-title">{step.title}</h4>
                   <p className="text-xs text-muted font-inter leading-relaxed">{step.text}</p>
                 </div>
               </div>
@@ -182,18 +181,18 @@ export default function HomePage() {
         </div>
 
         {/* Почему этому можно доверять */}
-        <div className="rounded-[32px] border border-white/[0.03] bg-[#0b1125]/20 p-8 backdrop-blur-md space-y-8 text-left flex flex-col justify-between">
+        <div className="glass-card rounded-[32px] p-8 space-y-8 text-left flex flex-col justify-between">
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b5cf6] font-unbounded">Доверие</p>
-            <h2 className="text-2xl font-bold font-unbounded text-text">Продукт говорит по делу</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b5cf6] font-sync">Доверие</p>
+            <h2 className="text-2xl font-bold font-title text-text">Продукт говорит по делу</h2>
           </div>
           <div className="space-y-4 my-auto">
             {trustPoints.map((item) => (
               <div 
                 key={item} 
-                className="flex items-start gap-3.5 p-4 rounded-xl border border-white/[0.02] bg-white/[0.01]"
+                className="flex items-start gap-3.5 p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition duration-300"
               >
-                <ShieldCheck className="h-5 w-5 text-[#8b5cf6] shrink-0 mt-0.5" />
+                <ShieldCheck className="h-5 w-5 text-[#c084fc] shrink-0 mt-0.5" />
                 <p className="text-xs text-muted font-inter leading-relaxed">{item}</p>
               </div>
             ))}
@@ -207,16 +206,16 @@ export default function HomePage() {
       {/* 4. СЕМЬЯ И ПРОФЕССИИ */}
       <section className="relative z-10 grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         {/* Что получает семья */}
-        <div className="rounded-[32px] border border-white/[0.03] bg-[#0b1125]/20 p-8 backdrop-blur-md space-y-8 text-left flex flex-col justify-between">
+        <div className="glass-card rounded-[32px] p-8 space-y-8 text-left flex flex-col justify-between">
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7c8cff] font-unbounded">Что получает семья</p>
-            <h2 className="text-2xl font-bold font-unbounded text-text">Больше, чем просто список</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7c8cff] font-sync">Что получает семья</p>
+            <h2 className="text-2xl font-bold font-title text-text">Больше, чем просто список</h2>
           </div>
           <div className="space-y-4 my-auto">
             {familyBenefits.map((item) => (
               <div 
                 key={item} 
-                className="flex items-start gap-3.5 p-4.5 rounded-xl border border-white/[0.02] bg-white/[0.01]"
+                className="flex items-start gap-3.5 p-4.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-[#8b5cf6]/5 transition duration-300"
               >
                 <CheckCircle2 className="h-5 w-5 text-[#7c8cff] shrink-0 mt-0.5" />
                 <p className="text-xs text-muted font-inter leading-relaxed">{item}</p>
@@ -229,20 +228,20 @@ export default function HomePage() {
         </div>
 
         {/* Топ карьерных совпадений */}
-        <div className="rounded-[32px] border border-white/[0.03] bg-[#0b1125]/20 p-8 backdrop-blur-md space-y-6 text-left">
+        <div className="glass-card rounded-[32px] p-8 space-y-6 text-left">
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b5cf6] font-unbounded">Карьерные совпадения</p>
-            <h2 className="text-2xl font-bold font-unbounded text-text">Профессии, которые можно объяснить</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b5cf6] font-sync">Карьерные совпадения</p>
+            <h2 className="text-2xl font-bold font-title text-text">Профессии, которые можно объяснить</h2>
           </div>
           <div className="space-y-4">
             {professions.slice(0, 3).map((profession) => (
               <div 
                 key={profession.name} 
-                className="p-5 rounded-2xl border border-white/[0.02] bg-white/[0.01] hover:border-white/5 transition duration-300 space-y-3"
+                className="glass-card p-5 rounded-2xl space-y-3 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-text font-unbounded">{profession.name}</span>
-                  <span className="text-xs font-extrabold text-[#7c8cff] bg-[#7c8cff]/10 px-2 py-0.5 rounded-md font-unbounded">
+                  <span className="text-sm font-bold text-text font-title">{profession.name}</span>
+                  <span className="text-xs font-extrabold text-[#7c8cff] bg-[#7c8cff]/10 px-2 py-0.5 rounded-md font-title">
                     {profession.score}% Match
                   </span>
                 </div>
@@ -279,8 +278,8 @@ export default function HomePage() {
       {/* 5. ПОСЛЕ РЕЗУЛЬТАТА */}
       <section className="relative z-10 space-y-10">
         <div className="space-y-3 text-left">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#7c8cff] font-unbounded">После результата</p>
-          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl font-unbounded bg-gradient-to-r from-white via-[#eef2ff] to-[#7c8cff] bg-clip-text text-transparent">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#7c8cff] font-sync">После результата</p>
+          <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl bg-gradient-to-r from-white via-[#f3e8ff] to-[#7c8cff] bg-clip-text text-transparent font-title">
             Поддержка на каждом шаге
           </h2>
         </div>
@@ -292,9 +291,9 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.05 }}
-              className="p-6 rounded-3xl border border-white/[0.03] bg-[#0b1125]/20 backdrop-blur-md text-left flex flex-col justify-between gap-6"
+              className="glass-card p-6 rounded-3xl text-left flex flex-col justify-between gap-6 cursor-pointer"
             >
-              <div className="text-3xl font-extrabold text-white/5 font-unbounded">
+              <div className="text-3xl font-extrabold text-white/5 font-title">
                 0{index + 1}
               </div>
               <p className="text-xs text-muted font-inter leading-relaxed">
@@ -321,19 +320,13 @@ function MetricCard({ icon, title, text }: { icon: React.ReactNode; title: strin
         hidden: { opacity: 0, y: 15 },
         visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 80 } }
       }}
-      whileHover={{ 
-        scale: 1.03, 
-        borderColor: 'rgba(124, 140, 255, 0.25)',
-        boxShadow: '0 12px 30px -10px rgba(124, 140, 255, 0.15)',
-        y: -4
-      }}
-      className="rounded-2xl border border-white/[0.03] bg-[#0b1125]/25 p-5 backdrop-blur-md transition-all duration-300 flex flex-col gap-4 text-left"
+      className="glass-card rounded-2xl p-5 flex flex-col gap-4 text-left cursor-pointer"
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.02] border border-white/5">
         {icon}
       </div>
       <div>
-        <p className="text-base font-extrabold text-text font-unbounded bg-gradient-to-r from-white to-[#eef2ff] bg-clip-text text-transparent leading-none">{title}</p>
+        <p className="text-base font-extrabold text-text font-title bg-gradient-to-r from-white to-[#eef2ff] bg-clip-text text-transparent leading-none">{title}</p>
         <p className="mt-2 text-xs text-muted font-inter leading-relaxed">{text}</p>
       </div>
     </motion.div>

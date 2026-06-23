@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Inter, Syncopate, Unbounded } from 'next/font/google';
+import { Inter, Manrope } from 'next/font/google';
 import { SpaceBackground } from './components/SpaceBackground';
 import { IntroPreloader } from './components/IntroPreloader';
 
@@ -11,17 +11,10 @@ const inter = Inter({
   display: 'swap',
 });
 
-const syncopate = Syncopate({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-syncopate',
-  display: 'swap',
-});
-
-const unbounded = Unbounded({
+const manrope = Manrope({
   subsets: ['latin', 'cyrillic'],
   weight: ['300', '400', '500', '600', '700', '800'],
-  variable: '--font-unbounded',
+  variable: '--font-manrope',
   display: 'swap',
 });
 
@@ -32,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${syncopate.variable} ${unbounded.variable}`}>
+    <html lang="ru" className={`${inter.variable} ${manrope.variable}`}>
       <body className="relative min-h-screen bg-[#050816] text-[#eef2ff]">
         <IntroPreloader />
         <SpaceBackground />

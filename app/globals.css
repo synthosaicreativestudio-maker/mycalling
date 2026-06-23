@@ -70,21 +70,38 @@ button {
   backdrop-filter: blur(18px);
 }
 
+.glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: rgba(124, 140, 255, 0.25);
+  box-shadow: 0 30px 60px rgba(124, 140, 255, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  transform: translateY(-4px);
+}
+
 .gradient-title {
-  font-family: var(--font-unbounded), sans-serif;
-  background: linear-gradient(90deg, #ffffff 0%, #e3e8ff 48%, #a8b3ff 100%);
+  font-family: var(--font-manrope), sans-serif;
+  background: linear-gradient(135deg, #ffffff 0%, #f3e8ff 50%, #c084fc 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 h1, h2, h3, .font-title {
-  font-family: var(--font-unbounded), sans-serif;
-  letter-spacing: -0.03em;
+  font-family: var(--font-manrope), sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .font-sync {
-  font-family: var(--font-syncopate), sans-serif;
+  font-family: var(--font-manrope), sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .soft-chip {
@@ -96,7 +113,7 @@ h1, h2, h3, .font-title {
 .input-shell {
   border: 1px solid rgba(255,255,255,0.1);
   background: rgba(11, 16, 32, 0.65);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
