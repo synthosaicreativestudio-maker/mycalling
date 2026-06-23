@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Inter, Cormorant_Garamond } from 'next/font/google';
+import { Inter, Prata, Marck_Script } from 'next/font/google';
 import { SpaceBackground } from './components/SpaceBackground';
 import { HeroOrb } from './components/HeroOrb';
 import { IntroPreloader } from './components/IntroPreloader';
@@ -12,11 +12,17 @@ const inter = Inter({
   display: 'swap',
 });
 
-const cormorantGaramond = Cormorant_Garamond({
+const prata = Prata({
   subsets: ['latin', 'cyrillic'],
-  weight: ['300', '400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-cormorant-garamond',
+  weight: ['400'],
+  variable: '--font-prata',
+  display: 'swap',
+});
+
+const marckScript = Marck_Script({
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400'],
+  variable: '--font-signature',
   display: 'swap',
 });
 
@@ -27,7 +33,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${cormorantGaramond.variable}`}>
+    <html lang="ru" className={`${inter.variable} ${prata.variable} ${marckScript.variable}`}>
       <body className="relative min-h-screen bg-transparent text-[#f0ece4]">
         <IntroPreloader />
         

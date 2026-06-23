@@ -102,8 +102,15 @@ button {
 
 /* ─── Typography ─── */
 h1, h2, h3, .font-title {
-  font-family: var(--font-cormorant-garamond), serif;
+  font-family: var(--font-prata), serif;
   letter-spacing: -0.01em;
+}
+
+.font-signature {
+  font-family: var(--font-signature), cursive;
+  font-size: 1.15em;
+  letter-spacing: 0.05em;
+  font-style: normal !important;
 }
 
 .font-sync {

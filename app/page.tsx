@@ -112,8 +112,9 @@ export default function HomePage() {
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-3xl space-y-8"
         >
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-medium sm:whitespace-nowrap leading-[1.05] tracking-tight bg-gradient-to-b from-[#f0ece4] via-[#f0ece4] to-[#8a8694] bg-clip-text text-transparent">
-            Определи свой путь
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal sm:whitespace-nowrap leading-[1.1] tracking-tight text-[#f0ece4]">
+            <span className="bg-gradient-to-b from-[#f0ece4] via-[#f0ece4] to-[#8a8694] bg-clip-text text-transparent">Определи свой</span>{' '}
+            <span className="font-signature text-[#e8c97a] lowercase filter drop-shadow-[0_0_15px_rgba(232,201,122,0.3)] ml-2 md:ml-4 inline-block">путь</span>
           </h1>
           
           <p className="max-w-lg mx-auto text-base sm:text-lg leading-relaxed text-[#8a8694]">
