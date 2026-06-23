@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru" className={`${inter.variable} ${prata.variable} ${marckScript.variable}`}>
-      <body className="relative min-h-screen bg-transparent text-[#f0ece4]">
+      <body className="relative min-h-screen bg-transparent text-[#1a2536]">
         <IntroPreloader />
         
         {/* Слой 1: Космический фон (самый нижний) */}
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div className="flex items-center gap-6">
                   <Link
                     href="/auth"
-                    className="text-sm font-medium text-[#8a8694] hover:text-[#f0ece4] transition duration-300"
+                    className="text-sm font-medium text-slate-500 hover:text-[#1a2536] transition duration-300"
                   >
                     Войти
                   </Link>
