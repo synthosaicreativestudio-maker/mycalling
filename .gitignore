@@ -7,3 +7,5 @@ node_modules
 .env.*.local
 opencode-debug-20260622T121936
 tmp_unpack
+scratch/
+
