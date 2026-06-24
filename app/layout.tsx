@@ -1,15 +1,14 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Inter, Prata, Marck_Script } from 'next/font/google';
+import { Manrope, Prata, Marck_Script } from 'next/font/google';
 import { AnimatedLogo } from './components/AnimatedLogo';
 import { SpaceBackground } from './components/SpaceBackground';
-import { HeroOrb } from './components/HeroOrb';
 import { IntroPreloader } from './components/IntroPreloader';
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ['latin', 'cyrillic'],
-  variable: '--font-inter',
+  variable: '--font-manrope',
   display: 'swap',
 });
 
@@ -34,15 +33,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${prata.variable} ${marckScript.variable}`}>
+    <html lang="ru" className={`${manrope.variable} ${prata.variable} ${marckScript.variable}`}>
       <body className="relative min-h-screen bg-transparent text-[#1a2536]">
         <IntroPreloader />
         
         {/* Слой 1: Космический фон (самый нижний) */}
         <SpaceBackground />
-        
-        {/* Слой 2: Золотые частицы (фиксированный фон) */}
-        <HeroOrb />
         
         {/* Sticky Header */}
         <header className="site-header print:hidden">
@@ -52,7 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/" className="flex items-center transition hover:opacity-90">
                   <AnimatedLogo
                     showText={true}
-                    animate={false}
+                    animate={true}
+                    isHeader={true}
                     className="h-12 md:h-16 w-auto"
                   />
                 </Link>

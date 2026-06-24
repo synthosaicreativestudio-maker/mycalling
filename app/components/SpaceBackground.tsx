@@ -10,18 +10,16 @@ export function SpaceBackground() {
   }, []);
 
   if (!mounted) {
-    return <div className="fixed inset-0 -z-50 bg-[#f5f7fa]" />;
+    return <div className="fixed inset-0 -z-50 bg-[#f7faf8]" />;
   }
 
-  // Создаем 8 изящных линий
-  const linesCount = 8;
+  const linesCount = 6;
   const lines = Array.from({ length: linesCount }, (_, i) => {
-    const offset = i * 20;
-    const delay = -(i * 1.5);
-    const duration = 15 + (i % 3) * 4;
-    // Очень нежные полупрозрачные линии
-    const opacity = 0.15 + (1 - Math.abs(i - linesCount / 2) / (linesCount / 2)) * 0.25;
-    const strokeWidth = 1.0 + (1 - Math.abs(i - linesCount / 2) / (linesCount / 2)) * 1.5;
+    const offset = i * 24;
+    const delay = -(i * 1.9);
+    const duration = 18 + (i % 3) * 5;
+    const opacity = 0.08 + (1 - Math.abs(i - linesCount / 2) / (linesCount / 2)) * 0.16;
+    const strokeWidth = 0.9 + (1 - Math.abs(i - linesCount / 2) / (linesCount / 2)) * 0.8;
 
     // Вспомогательные переменные для анимации Безье
     const yStart = 500 + offset * 0.4;
@@ -51,18 +49,16 @@ export function SpaceBackground() {
   });
 
   return (
-    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#f5f7fa] print:hidden">
-      {/* 1. Картинка-подложка из референса */}
+    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#f7faf8] print:hidden">
       <div 
-        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-85"
+        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-70"
         style={{ backgroundImage: 'url(/assets/backgrounds/light-bg.png)' }}
       />
       
-      {/* Мягкие дополнительные свечения */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(255,255,255,0.7)_0%,transparent_60%)] blur-[40px] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,rgba(212,168,83,0.06)_0%,transparent_50%)] blur-[50px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_72%,rgba(215,189,121,0.045)_0%,transparent_52%)] blur-[54px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_55%_48%,rgba(233,185,189,0.04)_0%,transparent_44%)] blur-[46px] pointer-events-none" />
 
-      {/* 2. SVG слой с анимированными нитями и золотыми частицами */}
       <svg
         className="absolute inset-0 h-full w-full"
         xmlns="http://www.w3.org/2000/svg"
@@ -70,25 +66,23 @@ export function SpaceBackground() {
         viewBox="0 0 1440 900"
       >
         <defs>
-          {/* Градиент для нитей: нежно-голубые переходы */}
           <linearGradient id="lightLineGrad" x1="0%" y1="50%" x2="100%" y2="50%">
-            <stop offset="0%" stopColor="#93c5fd" stopOpacity="0" />
-            <stop offset="30%" stopColor="#bfdbfe" stopOpacity="0.4" />
-            <stop offset="70%" stopColor="#60a5fa" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#93c5fd" stopOpacity="0" />
+            <stop offset="0%" stopColor="#9bbbcf" stopOpacity="0" />
+            <stop offset="35%" stopColor="#b7d2df" stopOpacity="0.32" />
+            <stop offset="70%" stopColor="#8aaec4" stopOpacity="0.42" />
+            <stop offset="100%" stopColor="#9bbbcf" stopOpacity="0" />
           </linearGradient>
 
-          {/* Золотой радиальный градиент для светящихся частиц */}
-          <radialGradient id="goldParticleGrad">
+          <radialGradient id="windParticleGrad">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="30%" stopColor="#f59e0b" />
-            <stop offset="70%" stopColor="#d97706" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#b45309" stopOpacity="0" />
+            <stop offset="38%" stopColor="#d7bd79" stopOpacity="0.72" />
+            <stop offset="62%" stopColor="#e9b9bd" stopOpacity="0.24" />
+            <stop offset="82%" stopColor="#9bbbcf" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="#9bbbcf" stopOpacity="0" />
           </radialGradient>
 
-          {/* Мягкое свечение для частиц */}
-          <filter id="goldGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+          <filter id="windGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="1.1" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -96,10 +90,8 @@ export function SpaceBackground() {
           </filter>
         </defs>
 
-        {/* Слой нитей */}
         {lines.map((line) => (
           <g key={line.id}>
-            {/* Сама линия */}
             <path
               id={line.pathId}
               d={line.path1}
@@ -117,12 +109,11 @@ export function SpaceBackground() {
               />
             </path>
 
-            {/* Золотистая частица 1, движущаяся вдоль линии */}
             <circle
-              r={3 + (line.id % 3)}
-              fill="url(#goldParticleGrad)"
-              filter="url(#goldGlow)"
-              opacity={0.8}
+              r={1.05 + (line.id % 3) * 0.22}
+              fill="url(#windParticleGrad)"
+              filter="url(#windGlow)"
+              opacity={0.56}
             >
               <animateMotion
                 dur={`${22 + (line.id % 4) * 5}s`}
@@ -133,13 +124,29 @@ export function SpaceBackground() {
               </animateMotion>
             </circle>
 
-            {/* Вторая золотистая частица со смещением по времени */}
-            {line.id % 2 === 0 && (
+            {line.id % 2 === 1 && (
               <circle
-                r={2 + (line.id % 2)}
-                fill="url(#goldParticleGrad)"
-                filter="url(#goldGlow)"
-                opacity={0.65}
+                r={0.92}
+                fill="url(#windParticleGrad)"
+                filter="url(#windGlow)"
+                opacity={0.34}
+              >
+                <animateMotion
+                  dur={`${26 + (line.id % 4) * 4}s`}
+                  repeatCount="indefinite"
+                  begin={`${line.id * 2 + 6}s`}
+                >
+                  <mpath href={`#${line.pathId}`} />
+                </animateMotion>
+              </circle>
+            )}
+
+            {line.id % 3 === 0 && (
+              <circle
+                r={0.86}
+                fill="url(#windParticleGrad)"
+                filter="url(#windGlow)"
+                opacity={0.28}
               >
                 <animateMotion
                   dur={`${18 + (line.id % 3) * 6}s`}

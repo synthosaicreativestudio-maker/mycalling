@@ -8,4 +8,11 @@ node_modules
 opencode-debug-20260622T121936
 tmp_unpack
 scratch/
-
+tsconfig.tsbuildinfo
+public/logo_grid.png
+public/view_segments.html
+public/assets/logos/logo_bboxes.png
+public/assets/logos/segments/
+public/assets/tree/view_tree.html
+public/assets/tree_test/
+тз для svg входа/
