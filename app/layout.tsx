@@ -27,8 +27,36 @@ const marckScript = Marck_Script({
 });
 
 export const metadata: Metadata = {
-  title: 'МоёПризвание — диагностика талантов',
-  description: 'Определи свой путь. Глубокая диагностика талантов, характера и интересов за 25 минут. Понятный отчёт с рекомендациями по профессиям.'
+  metadataBase: new URL('https://moeprizvanie.ru'),
+  title: 'МоёПризвание — диагностика талантов для школьников',
+  description: 'Определи свой путь. Глубокая диагностика талантов, характера и интересов за 25 минут. Понятный отчёт с рекомендациями по профессиям для школьников 8–11 классов.',
+  keywords: ['профориентация', 'диагностика талантов', 'тест на профессию', 'школьник', 'выбор профессии', 'RIASEC', 'Big Five'],
+  authors: [{ name: 'SynthosAI Creative Studio' }],
+  icons: {
+    icon: '/assets/logos/logo.png',
+    apple: '/assets/logos/logo.png',
+  },
+  openGraph: {
+    title: 'МоёПризвание — диагностика талантов для школьников',
+    description: 'Раскройте сильные стороны ребёнка через 25 минут интерактивной диагностики. Понятный отчёт с профессиями и планом действий.',
+    type: 'website',
+    locale: 'ru_RU',
+    siteName: 'МоёПризвание',
+    images: [
+      {
+        url: '/assets/logos/logo-with-text.png',
+        width: 1200,
+        height: 630,
+        alt: 'МоёПризвание — диагностика талантов',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'МоёПризвание — диагностика талантов',
+    description: 'Глубокая диагностика талантов за 25 минут. Понятный отчёт для всей семьи.',
+    images: ['/assets/logos/logo-with-text.png'],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

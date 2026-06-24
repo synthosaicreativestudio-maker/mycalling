@@ -34,7 +34,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'medicine',
     name: 'Медицина',
-    src: '/assets/tree/icon_medicine.png',
+    src: '/assets/tree/webp/icon_medicine.webp',
     layer: 'core',
     style: { left: '26.8%', top: '20.0%', width: '10.5%' },
     center: { x: 32.05, y: 25.25 },
@@ -43,7 +43,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'engineering',
     name: 'Инженерия',
-    src: '/assets/tree/icon_engineering.png',
+    src: '/assets/tree/webp/icon_engineering.webp',
     layer: 'core',
     style: { left: '40.2%', top: '10.5%', width: '10.8%' },
     center: { x: 45.6, y: 15.9 },
@@ -52,7 +52,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'business',
     name: 'Бизнес',
-    src: '/assets/tree/icon_business.png',
+    src: '/assets/tree/webp/icon_business.webp',
     layer: 'core',
     style: { left: '55.0%', top: '10.9%', width: '11.0%' },
     center: { x: 60.5, y: 16.4 },
@@ -61,7 +61,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'science',
     name: 'Наука',
-    src: '/assets/tree/icon_science.png',
+    src: '/assets/tree/webp/icon_science.webp',
     layer: 'core',
     style: { left: '68.6%', top: '20.4%', width: '10.5%' },
     center: { x: 73.85, y: 25.65 },
@@ -70,7 +70,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'technology',
     name: 'Технологии',
-    src: '/assets/tree/icon_technology.png',
+    src: '/assets/tree/webp/icon_technology.webp',
     layer: 'core',
     style: { left: '21.4%', top: '38.6%', width: '10.3%' },
     center: { x: 26.55, y: 43.75 },
@@ -79,7 +79,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'creativity',
     name: 'Творчество',
-    src: '/assets/tree/icon_creativity.png',
+    src: '/assets/tree/webp/icon_creativity.webp',
     layer: 'core',
     style: { left: '72.2%', top: '39.0%', width: '10.5%' },
     center: { x: 77.45, y: 44.25 },
@@ -88,7 +88,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'education',
     name: 'Образование',
-    src: '/assets/tree/icon_education.png',
+    src: '/assets/tree/webp/icon_education.webp',
     layer: 'outer',
     style: { left: '30.0%', top: '3.0%', width: '9.5%' },
     center: { x: 34.75, y: 7.75 },
@@ -97,7 +97,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'law',
     name: 'Право и общество',
-    src: '/assets/tree/icon_law.png',
+    src: '/assets/tree/webp/icon_law.webp',
     layer: 'outer',
     style: { left: '60.5%', top: '3.0%', width: '9.5%' },
     center: { x: 65.25, y: 7.75 },
@@ -106,7 +106,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'ecology',
     name: 'Экология',
-    src: '/assets/tree/icon_ecology.png',
+    src: '/assets/tree/webp/icon_ecology.webp',
     layer: 'outer',
     style: { left: '18.0%', top: '28.5%', width: '9.0%' },
     center: { x: 22.5, y: 33.0 },
@@ -115,7 +115,7 @@ const PROFESSION_ICONS: TreeItem[] = [
   {
     id: 'urban',
     name: 'Среда и строительство',
-    src: '/assets/tree/icon_urban.png',
+    src: '/assets/tree/webp/icon_urban.webp',
     layer: 'outer',
     style: { left: '80.0%', top: '28.5%', width: '9.0%' },
     center: { x: 84.5, y: 33.0 },
@@ -124,14 +124,14 @@ const PROFESSION_ICONS: TreeItem[] = [
 ];
 
 const LEAVES: LeafItem[] = [
-  { id: 1, src: '/assets/tree/leaf_1.png', style: { left: '32.03%', top: '48.14%', width: '7.52%' }, center: { x: 35.79, y: 50.43 }, phase: 0 },
-  { id: 2, src: '/assets/tree/leaf_2.png', style: { left: '38.09%', top: '38.09%', width: '6.35%' }, center: { x: 41.26, y: 41.11 }, phase: 1.2 },
-  { id: 3, src: '/assets/tree/leaf_3.png', style: { left: '38.48%', top: '28.71%', width: '3.91%' }, center: { x: 40.43, y: 31.54 }, phase: 2.4 },
-  { id: 4, src: '/assets/tree/leaf_4.png', style: { left: '42.00%', top: '55.37%', width: '7.32%' }, center: { x: 45.66, y: 62.79 }, phase: 3.6 },
-  { id: 5, src: '/assets/tree/leaf_5.png', style: { left: '47.85%', top: '29.20%', width: '5.18%' }, center: { x: 50.44, y: 34.81 }, phase: 4.8 },
-  { id: 6, src: '/assets/tree/leaf_6.png', style: { left: '55.47%', top: '37.89%', width: '7.62%' }, center: { x: 59.28, y: 41.02 }, phase: 0.8 },
-  { id: 7, src: '/assets/tree/leaf_7.png', style: { left: '60.35%', top: '47.85%', width: '7.91%' }, center: { x: 64.31, y: 50.29 }, phase: 2.0 },
-  { id: 8, src: '/assets/tree/leaf_8.png', style: { left: '60.94%', top: '29.39%', width: '4.30%' }, center: { x: 63.09, y: 31.64 }, phase: 3.2 },
+  { id: 1, src: '/assets/tree/webp/leaf_1.webp', style: { left: '32.03%', top: '48.14%', width: '7.52%' }, center: { x: 35.79, y: 50.43 }, phase: 0 },
+  { id: 2, src: '/assets/tree/webp/leaf_2.webp', style: { left: '38.09%', top: '38.09%', width: '6.35%' }, center: { x: 41.26, y: 41.11 }, phase: 1.2 },
+  { id: 3, src: '/assets/tree/webp/leaf_3.webp', style: { left: '38.48%', top: '28.71%', width: '3.91%' }, center: { x: 40.43, y: 31.54 }, phase: 2.4 },
+  { id: 4, src: '/assets/tree/webp/leaf_4.webp', style: { left: '42.00%', top: '55.37%', width: '7.32%' }, center: { x: 45.66, y: 62.79 }, phase: 3.6 },
+  { id: 5, src: '/assets/tree/webp/leaf_5.webp', style: { left: '47.85%', top: '29.20%', width: '5.18%' }, center: { x: 50.44, y: 34.81 }, phase: 4.8 },
+  { id: 6, src: '/assets/tree/webp/leaf_6.webp', style: { left: '55.47%', top: '37.89%', width: '7.62%' }, center: { x: 59.28, y: 41.02 }, phase: 0.8 },
+  { id: 7, src: '/assets/tree/webp/leaf_7.webp', style: { left: '60.35%', top: '47.85%', width: '7.91%' }, center: { x: 64.31, y: 50.29 }, phase: 2.0 },
+  { id: 8, src: '/assets/tree/webp/leaf_8.webp', style: { left: '60.94%', top: '29.39%', width: '4.30%' }, center: { x: 63.09, y: 31.64 }, phase: 3.2 },
 ];
 
 const crownParticles = Array.from({ length: 36 }, (_, index) => {
@@ -207,7 +207,7 @@ export function InteractiveTree() {
       <AmbientDust pointer={pointerSide} />
 
       <img
-        src="/assets/tree/tree_skeleton.png"
+        src="/assets/tree/webp/tree_skeleton.webp"
         alt="Дерево призвания"
         className="absolute inset-0 z-10 h-full w-full object-contain pointer-events-none"
       />

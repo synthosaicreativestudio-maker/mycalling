@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Users, HelpCircle, Shield, BookOpen, Clock, Brain, FileCheck } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useUIStore } from './store/uiStore';
@@ -80,17 +80,39 @@ function IconReport() {
 }
 
 const howItWorks = [
-  { step: '01', title: 'Регистрация', text: 'Быстрый старт без анкет' },
-  { step: '02', title: 'Диагностика', text: '25 минут интерактивной игры' },
-  { step: '03', title: 'Анализ ответов', text: 'Алгоритм сопоставляет результаты' },
-  { step: '04', title: 'Отчёт', text: 'Профессии, предметы и план действий' },
+  { step: '01', title: 'Регистрация', text: 'Быстрый старт без анкет', icon: Users },
+  { step: '02', title: 'Диагностика', text: '25 минут интерактивной игры', icon: Brain },
+  { step: '03', title: 'Анализ ответов', text: 'Алгоритм сопоставляет результаты', icon: BookOpen },
+  { step: '04', title: 'Отчёт', text: 'Профессии, предметы и план действий', icon: FileCheck },
+];
+
+const faqItems = [
+  {
+    q: 'Для кого подходит диагностика?',
+    a: 'Для школьников 8–11 классов (13–18 лет), которые хотят разобраться в своих сильных сторонах и выбрать направление развития.',
+  },
+  {
+    q: 'Насколько точны результаты?',
+    a: 'Диагностика основана на трёх научных методиках мирового уровня: RIASEC, Big Five и теория множественного интеллекта Гарднера. Результаты носят рекомендательный характер.',
+  },
+  {
+    q: 'Сколько времени занимает прохождение?',
+    a: 'Полная диагностика занимает около 25 минут. Это интерактивный формат — не скучные тесты, а вовлекающие вопросы.',
+  },
+  {
+    q: 'Что получит ребёнок после прохождения?',
+    a: 'Подробный отчёт с профилем личности, списком подходящих профессий, рекомендациями по предметам и конкретным планом действий.',
+  },
+  {
+    q: 'Безопасны ли данные ребёнка?',
+    a: 'Да. Мы собираем минимум информации, не передаём её третьим лицам и используем исключительно для формирования отчёта.',
+  },
 ];
 
 export default function HomePage() {
   const { introState } = useUIStore();
   const [mounted, setMounted] = useState(false);
   
-  // Отслеживание скролла для параллакс-эффекта дерева
   const { scrollY } = useScroll();
   const treeScale = useTransform(scrollY, [0, 600], [1.0, 0.85]);
   const treeOpacity = useTransform(scrollY, [0, 600], [1.0, 0.35]);
@@ -108,7 +130,6 @@ export default function HomePage() {
       {/* ─── HERO SECTION ─── */}
       <section className="relative min-h-screen flex items-center justify-center px-5 md:px-8 pt-32 pb-20">
         
-        {/* Слой дерева: между фоном и содержанием */}
         {mounted && isTransitionStarted && (
           <motion.div 
             style={{ 
@@ -127,7 +148,6 @@ export default function HomePage() {
 
         <div className="absolute inset-x-0 top-20 z-[9] mx-auto h-[54vh] max-w-6xl bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.82)_38%,rgba(255,255,255,0)_76%)] pointer-events-none" />
 
-        {/* Слой контента: чистая типографика поверх светлой области */}
         {mounted && showHeroContent && (
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -148,7 +168,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.82, delay: 0.52 }}
-              className="max-w-4xl text-4xl leading-[1.08] font-extrabold text-[#253243] font-sans sm:text-5xl lg:text-7xl"
+              className="max-w-4xl text-3xl leading-[1.12] font-extrabold text-[#253243] font-sans sm:text-4xl md:text-5xl lg:text-7xl"
             >
               Поможем школьнику найти своё призвание
             </motion.h1>
@@ -157,7 +177,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.82, delay: 0.66 }}
-              className="mt-7 max-w-2xl text-lg sm:text-2xl leading-relaxed text-[#566679] font-normal font-sans"
+              className="mt-7 max-w-2xl text-base sm:text-lg md:text-2xl leading-relaxed text-[#566679] font-normal font-sans"
             >
               Раскройте сильные стороны ребёнка через 25 минут интерактивной диагностики и получите понятный план развития для всей семьи.
             </motion.p>
@@ -177,7 +197,6 @@ export default function HomePage() {
           </motion.div>
         )}
 
-        {/* Scroll indicator */}
         {showHeroContent && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -225,8 +244,48 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── ДЛЯ КОГО ─── */}
+      <section className="px-6 lg:px-10 py-24 relative z-10 bg-[#f7faf8]/55">
+        <div className="mx-auto max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: '-100px' }}
+            className="space-y-12"
+          >
+            <div className="text-center space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8aaec4] font-sans">
+                Для кого
+              </p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#253243] font-sans">
+                Кому подходит диагностика
+              </h2>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <ForWhomCard
+                icon={<Users className="h-6 w-6 text-[#8aaec4]" />}
+                title="Школьникам 8–11 классов"
+                text="Идеальный возраст для осознанного выбора направления: от 13 до 18 лет"
+              />
+              <ForWhomCard
+                icon={<Shield className="h-6 w-6 text-[#c6a766]" />}
+                title="Родителям"
+                text="Понятный отчёт с конкретными рекомендациями — без сложной психологической терминологии"
+              />
+              <ForWhomCard
+                icon={<HelpCircle className="h-6 w-6 text-[#e9b9bd]" />}
+                title="Тем, кто сомневается"
+                text="Снимем тревогу вокруг выбора профессии и покажем реальные сильные стороны"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ─── КАК ЭТО РАБОТАЕТ ─── */}
-      <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-[#f7faf8]/55">
+      <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-white/35 backdrop-blur-md">
         <div className="mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -259,40 +318,129 @@ export default function HomePage() {
               whileInView="show"
               viewport={{ once: true, margin: "-100px" }}
             >
-              {howItWorks.map((item) => (
-                <motion.div
-                  key={item.step}
-                  variants={{
-                    hidden: { opacity: 0, y: 40, scale: 0.95 },
-                    show: { 
-                      opacity: 1, 
-                      y: 0, 
-                      scale: 1,
-                      transition: {
-                        type: "spring",
-                        stiffness: 100,
-                        damping: 15
+              {howItWorks.map((item) => {
+                const StepIcon = item.icon;
+                return (
+                  <motion.div
+                    key={item.step}
+                    variants={{
+                      hidden: { opacity: 0, y: 40, scale: 0.95 },
+                      show: { 
+                        opacity: 1, 
+                        y: 0, 
+                        scale: 1,
+                        transition: {
+                          type: "spring",
+                          stiffness: 100,
+                          damping: 15
+                        }
                       }
-                    }
-                  }}
-                  className="glass-card rounded-[22px] p-6 text-center space-y-4 hover:border-[#9bbbcf]/40 hover:shadow-[0_16px_36px_rgba(88,116,138,0.08)] transition-all duration-300"
-                >
-                  <div className="text-3xl font-extrabold text-[#c6a766]/38 font-sans">
-                    {item.step}
-                  </div>
-                  <h3 className="text-lg font-bold text-[#253243] font-sans">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-[#5e6b7e] leading-relaxed font-sans">
-                    {item.text}
-                  </p>
-                </motion.div>
-              ))}
+                    }}
+                    className="glass-card rounded-[22px] p-6 text-center space-y-4 hover:border-[#9bbbcf]/40 hover:shadow-[0_16px_36px_rgba(88,116,138,0.08)] transition-all duration-300"
+                  >
+                    <div className="mx-auto w-12 h-12 rounded-2xl bg-[#9bbbcf]/10 flex items-center justify-center">
+                      <StepIcon className="h-6 w-6 text-[#8aaec4]" />
+                    </div>
+                    <div className="text-3xl font-extrabold text-[#c6a766]/30 font-sans">
+                      {item.step}
+                    </div>
+                    <h3 className="text-lg font-bold text-[#253243] font-sans">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-[#5e6b7e] leading-relaxed font-sans">
+                      {item.text}
+                    </p>
+                  </motion.div>
+                );
+              })}
             </motion.div>
 
             <div className="text-center pt-4">
               <Link href="/auth" className="cta-glass h-[60px] min-w-[240px] px-8 text-base">
                 Начать бесплатно
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── SOCIAL PROOF ─── */}
+      <section className="px-6 lg:px-10 py-24 relative z-10 bg-[#f7faf8]/55">
+        <div className="mx-auto max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: '-100px' }}
+            className="space-y-12"
+          >
+            <div className="text-center space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8aaec4] font-sans">
+                Почему нам доверяют
+              </p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#253243] font-sans">
+                Надёжная методика и прозрачность
+              </h2>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-3">
+              <TrustCard
+                number="3"
+                label="научных метода"
+                desc="RIASEC, Big Five, теория Гарднера — проверенные десятилетиями исследований"
+              />
+              <TrustCard
+                number="25"
+                label="минут"
+                desc="Интерактивный формат, вовлекающий ребёнка вместо скучных анкет"
+              />
+              <TrustCard
+                number="10+"
+                label="направлений"
+                desc="Медицина, IT, бизнес, творчество и другие сферы для точного подбора"
+              />
+            </div>
+
+            <div className="glass-card rounded-[22px] p-8 text-center space-y-4">
+              <Shield className="h-8 w-8 text-[#8aaec4] mx-auto" />
+              <h3 className="text-lg font-bold text-[#253243]">Безопасность данных</h3>
+              <p className="text-sm text-[#5e6b7e] leading-relaxed max-w-2xl mx-auto">
+                Мы собираем минимум информации, не передаём её третьим лицам и используем исключительно для формирования персонального отчёта. Все данные защищены.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── FAQ ─── */}
+      <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-white/35 backdrop-blur-md">
+        <div className="mx-auto max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: '-100px' }}
+            className="space-y-12"
+          >
+            <div className="text-center space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8aaec4] font-sans">
+                Частые вопросы
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#253243] font-sans">
+                Ответы для родителей
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {faqItems.map((item, index) => (
+                <FaqItem key={index} question={item.q} answer={item.a} />
+              ))}
+            </div>
+
+            <div className="text-center pt-4">
+              <Link href="/auth" className="cta-glass h-[60px] min-w-[260px] px-8 text-base">
+                Начать диагностику
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
@@ -311,7 +459,7 @@ export default function HomePage() {
                 className="h-8 w-auto opacity-60"
               />
               <span className="text-xs text-[#5e6b7e] font-sans">
-                © {new Date().getFullYear()} МоёПризвание
+                © {new Date().getFullYear()} SynthosAI Creative Studio
               </span>
             </div>
             
@@ -343,5 +491,68 @@ function UspCard({ icon, title, text }: { icon: ReactNode; title: string; text: 
       <h3 className="text-xl font-bold text-[#253243] font-sans">{title}</h3>
       <p className="text-sm text-[#5e6b7e] leading-relaxed font-sans">{text}</p>
     </div>
+  );
+}
+
+function ForWhomCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0 }
+      }}
+      className="glass-card rounded-[22px] p-6 space-y-4"
+    >
+      <div className="w-12 h-12 rounded-2xl bg-white/60 border border-white/80 flex items-center justify-center shadow-sm">
+        {icon}
+      </div>
+      <h3 className="text-lg font-bold text-[#253243] font-sans">{title}</h3>
+      <p className="text-sm text-[#5e6b7e] leading-relaxed font-sans">{text}</p>
+    </motion.div>
+  );
+}
+
+function TrustCard({ number, label, desc }: { number: string; label: string; desc: string }) {
+  return (
+    <div className="glass-card rounded-[22px] p-6 text-center space-y-3">
+      <div className="text-4xl font-extrabold text-[#c6a766] font-sans">{number}</div>
+      <div className="text-sm font-bold uppercase tracking-wider text-[#8aaec4]">{label}</div>
+      <p className="text-sm text-[#5e6b7e] leading-relaxed font-sans">{desc}</p>
+    </div>
+  );
+}
+
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <motion.div
+      className="glass-card rounded-[18px] overflow-hidden"
+      initial={false}
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-5 text-left"
+      >
+        <span className="text-sm font-semibold text-[#253243] pr-4">{question}</span>
+        <motion.span
+          animate={{ rotate: isOpen ? 45 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-[#8aaec4] text-xl font-light flex-shrink-0"
+        >
+          +
+        </motion.span>
+      </button>
+      <motion.div
+        initial={false}
+        animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="overflow-hidden"
+      >
+        <p className="px-5 pb-5 text-sm text-[#5e6b7e] leading-relaxed">
+          {answer}
+        </p>
+      </motion.div>
+    </motion.div>
   );
 }
