@@ -134,33 +134,69 @@ const LEAVES: LeafItem[] = [
   { id: 8, src: '/assets/tree/webp/leaf_8.webp', style: { left: '60.94%', top: '29.39%', width: '4.30%' }, center: { x: 63.09, y: 31.64 }, phase: 3.2 },
 ];
 
-const crownParticles = Array.from({ length: 36 }, (_, index) => {
-  const angle = -160 + index * 8.8;
-  const radiusX = 30 + (index % 5) * 2.8;
-  const radiusY = 22 + (index % 7) * 1.9;
+const crownParticles = Array.from({ length: 92 }, (_, index) => {
+  const angle = -170 + index * 4.1;
+  const radiusX = 24 + (index % 8) * 2.4;
+  const radiusY = 18 + (index % 9) * 1.8;
   const rad = (angle * Math.PI) / 180;
   return {
     id: index,
     x: 50 + Math.cos(rad) * radiusX,
     y: 34 + Math.sin(rad) * radiusY,
-    size: 1.15 + (index % 4) * 0.28,
-    phase: index * 0.47,
+    size: 0.9 + (index % 5) * 0.18,
+    phase: index * 0.37,
   };
 });
 
-const ambientDust = Array.from({ length: 56 }, (_, index) => {
-  const ring = index % 7;
-  const column = index % 8;
-  const x = 35 + column * 4.3 + (ring % 2 === 0 ? 0.9 : -0.9);
-  const y = 16 + ring * 5.7 + (column % 3) * 0.55;
+const ambientDust = Array.from({ length: 84 }, (_, index) => {
+  const ring = index % 9;
+  const column = index % 10;
+  const x = 29 + column * 4.6 + (ring % 2 === 0 ? 0.9 : -0.9);
+  const y = 13 + ring * 5.15 + (column % 3) * 0.48;
   return {
     id: index,
     x,
     y,
-    size: 0.72 + (index % 4) * 0.12,
-    phase: index * 0.31,
+    size: 0.58 + (index % 4) * 0.11,
+    phase: index * 0.29,
   };
 });
+
+const flowStreams = [
+  {
+    id: 'stream-top',
+    points: [
+      { x: 10, y: 73 },
+      { x: 24, y: 69 },
+      { x: 39, y: 65 },
+      { x: 54, y: 63 },
+      { x: 71, y: 65 },
+      { x: 88, y: 71 },
+    ],
+  },
+  {
+    id: 'stream-mid',
+    points: [
+      { x: 14, y: 76 },
+      { x: 30, y: 72.5 },
+      { x: 45, y: 69.5 },
+      { x: 58, y: 69.2 },
+      { x: 75, y: 72.8 },
+      { x: 92, y: 77.4 },
+    ],
+  },
+  {
+    id: 'stream-low',
+    points: [
+      { x: 8, y: 80 },
+      { x: 24, y: 77.2 },
+      { x: 40, y: 75.4 },
+      { x: 58, y: 75.8 },
+      { x: 76, y: 79.4 },
+      { x: 94, y: 84.2 },
+    ],
+  },
+];
 
 const leafFilter = 'drop-shadow(0 10px 18px rgba(111, 151, 173, 0.12)) saturate(1.12) sepia(0.12) hue-rotate(-12deg) brightness(1.03) contrast(1.04)';
 const professionFilter = 'drop-shadow(0 8px 16px rgba(111, 151, 173, 0.10)) saturate(1.08) sepia(0.08) hue-rotate(-10deg) brightness(1.02) contrast(1.03)';
@@ -201,8 +237,9 @@ export function InteractiveTree() {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="interactive-tree relative mx-auto aspect-square w-full max-w-[840px] select-none"
+      className="interactive-tree relative mx-auto aspect-square w-full max-w-[920px] select-none"
     >
+      <FlowLines pointer={pointerSide} />
       <CrownParticleHalo pointer={pointerSide} />
       <AmbientDust pointer={pointerSide} />
 
@@ -228,22 +265,75 @@ export function InteractiveTree() {
   );
 }
 
+function FlowLines({ pointer }: { pointer: { x: number; y: number; active: boolean } }) {
+  return (
+    <div className="absolute inset-0 z-[6] pointer-events-none">
+      <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full overflow-visible">
+        {flowStreams.map((stream, index) => {
+          const path = `M ${stream.points
+            .map((point, pointIndex) => `${pointIndex === 0 ? '' : 'L '}${point.x} ${point.y}`)
+            .join(' ')}`;
+
+          return (
+            <g key={stream.id}>
+              <motion.path
+                d={path}
+                fill="none"
+                stroke="rgba(180,156,104,0.16)"
+                strokeWidth={index === 1 ? 0.42 : 0.34}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                animate={{ opacity: [0.18, 0.3, 0.18] }}
+                transition={{ duration: 6 + index * 1.2, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              {Array.from({ length: 26 }, (_, dotIndex) => {
+                const activation = pointer.active ? Math.max(0, 1 - Math.abs(pointer.y - (72 + index * 3)) / 32) : 0;
+                const scale = 0.7 + activation * 0.65 + ((dotIndex + index) % 4) * 0.04;
+                const opacity = 0.08 + activation * 0.35 + ((dotIndex + index) % 5) * 0.015;
+                return (
+                  <motion.circle
+                    key={`${stream.id}-${dotIndex}`}
+                    r={0.16 + (dotIndex % 3) * 0.05}
+                    fill="rgba(216,190,128,0.95)"
+                    style={{ filter: 'drop-shadow(0 0 4px rgba(216,190,128,0.55))' }}
+                    animate={{
+                      opacity,
+                      scale,
+                    }}
+                    transition={{
+                      duration: 7 + index * 1.5 + (dotIndex % 6) * 0.45,
+                      delay: dotIndex * 0.18,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
+                  >
+                    <animateMotion dur={`${7 + index * 1.5 + (dotIndex % 6) * 0.45}s`} repeatCount="indefinite" begin={`${dotIndex * 0.18}s`} path={path} />
+                  </motion.circle>
+                );
+              })}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
 function CrownParticleHalo({ pointer }: { pointer: { x: number; y: number; active: boolean } }) {
   return (
     <div className="absolute inset-0 z-[8] pointer-events-none">
       {crownParticles.map((particle) => {
         const distanceToPointer = Math.hypot(pointer.x - particle.x, pointer.y - particle.y);
-        const sideMatch = pointer.active && Math.sign(pointer.x - 50) === Math.sign(particle.x - 50);
-        const activation = sideMatch ? Math.max(0, 1 - distanceToPointer / 34) : 0;
-        const opacity = 0.08 + activation * 0.28;
-        const scale = 0.82 + activation * 0.65;
-        const driftX = activation * (pointer.x > 50 ? 6 : -6);
-        const driftY = activation * ((pointer.y - 35) * 0.08);
+        const activation = pointer.active ? Math.max(0, 1 - distanceToPointer / 30) : 0;
+        const opacity = 0.04 + activation * 0.54;
+        const scale = 0.6 + activation * 1.05;
+        const driftX = activation * (pointer.x > particle.x ? 4.8 : -4.8);
+        const driftY = activation * ((pointer.y - particle.y) * 0.1);
 
         return (
           <motion.span
             key={particle.id}
-            className="absolute rounded-full bg-[radial-gradient(circle,rgba(255,248,224,0.98)_0%,rgba(216,190,128,0.72)_38%,rgba(160,201,225,0.08)_100%)] shadow-[0_0_12px_rgba(216,190,128,0.2)]"
+            className="absolute rounded-full bg-[radial-gradient(circle,rgba(255,249,229,1)_0%,rgba(224,193,120,0.78)_34%,rgba(224,193,120,0.06)_100%)] shadow-[0_0_14px_rgba(216,190,128,0.28)]"
             style={{
               left: `${particle.x}%`,
               top: `${particle.y}%`,
@@ -256,7 +346,7 @@ function CrownParticleHalo({ pointer }: { pointer: { x: number; y: number; activ
               x: driftX,
               y: driftY,
             }}
-            transition={{ duration: 0.55, ease: 'easeOut' }}
+            transition={{ duration: 0.42, ease: 'easeOut' }}
           />
         );
       })}
@@ -269,17 +359,16 @@ function AmbientDust({ pointer }: { pointer: { x: number; y: number; active: boo
     <div className="absolute inset-0 z-[9] pointer-events-none">
       {ambientDust.map((particle) => {
         const distanceToPointer = Math.hypot(pointer.x - particle.x, pointer.y - particle.y);
-        const sideMatch = pointer.active && Math.sign(pointer.x - 50) === Math.sign(particle.x - 50);
-        const activation = sideMatch ? Math.max(0, 1 - distanceToPointer / 42) : 0;
-        const opacity = 0.05 + activation * 0.2;
-        const scale = 0.74 + activation * 0.42;
-        const driftX = Math.sin(particle.phase * 2.1) * 1.35;
-        const driftY = Math.cos(particle.phase * 1.7) * 1.1;
+        const activation = pointer.active ? Math.max(0, 1 - distanceToPointer / 40) : 0;
+        const opacity = 0.015 + activation * 0.24;
+        const scale = 0.55 + activation * 0.62;
+        const driftX = Math.sin(particle.phase * 2.1) * 1.7;
+        const driftY = Math.cos(particle.phase * 1.7) * 1.35;
 
         return (
           <motion.span
             key={particle.id}
-            className="absolute rounded-full bg-[radial-gradient(circle,rgba(255,250,235,0.98)_0%,rgba(221,196,132,0.74)_34%,rgba(156,194,221,0.22)_62%,rgba(156,194,221,0)_100%)] shadow-[0_0_10px_rgba(221,196,132,0.14)]"
+            className="absolute rounded-full bg-[radial-gradient(circle,rgba(255,251,238,0.98)_0%,rgba(221,196,132,0.78)_38%,rgba(221,196,132,0)_100%)] shadow-[0_0_8px_rgba(221,196,132,0.16)]"
             style={{
               left: `${particle.x}%`,
               top: `${particle.y}%`,
@@ -289,11 +378,11 @@ function AmbientDust({ pointer }: { pointer: { x: number; y: number; active: boo
             animate={{
               opacity,
               scale,
-              x: [0, driftX + activation * (pointer.x > 50 ? 2.8 : -2.8), 0],
-              y: [0, driftY + activation * ((pointer.y - 34) * 0.05), 0],
+              x: [0, driftX + activation * (pointer.x > particle.x ? 3.2 : -3.2), 0],
+              y: [0, driftY + activation * ((pointer.y - particle.y) * 0.06), 0],
             }}
             transition={{
-              duration: 7 + (particle.id % 5) * 0.8,
+              duration: 6.2 + (particle.id % 5) * 0.85,
               repeat: Infinity,
               repeatType: 'mirror',
               ease: 'easeInOut',
@@ -328,17 +417,17 @@ function LeafElement({
         const dx = pointer.x - leaf.center.x;
         const dy = pointer.y - leaf.center.y;
         const distance = Math.hypot(dx, dy);
-        const force = pointer.active ? Math.max(0, 1 - distance / 46) : 0;
-        const floatX = Math.sin(time * 0.58 + leaf.phase) * 1.25;
-        const floatY = Math.sin(time * 0.74 + leaf.phase * 1.2) * 1.9 - 1.05;
-        targetX = Math.max(-8, Math.min(8, dx * 0.11 * force + floatX));
-        targetY = Math.max(-8, Math.min(8, dy * 0.08 * force + floatY));
+        const force = pointer.active ? Math.max(0, 1 - distance / 52) : 0;
+        const floatX = Math.sin(time * 0.72 + leaf.phase) * 2.4;
+        const floatY = Math.sin(time * 0.96 + leaf.phase * 1.2) * 3.6 - 1.8;
+        targetX = Math.max(-12, Math.min(12, dx * 0.14 * force + floatX));
+        targetY = Math.max(-12, Math.min(12, dy * 0.11 * force + floatY));
       }
 
       setMotionState({
         x: targetX,
         y: targetY,
-        rotate: Math.sin(time * 0.72 + leaf.phase) * 1.25,
+        rotate: Math.sin(time * 0.84 + leaf.phase) * 2.8,
       });
 
       animationFrame = requestAnimationFrame(animateLeaf);
@@ -384,17 +473,17 @@ function ProfessionIcon({
         const dx = pointer.x - icon.center.x;
         const dy = pointer.y - icon.center.y;
         const distance = Math.hypot(dx, dy);
-        const force = pointer.active ? Math.max(0, 1 - distance / 58) : 0;
-        const floatX = Math.sin(time * 0.34 + icon.phase * 1.7) * 1.1;
-        const floatY = Math.sin(time * 0.52 + icon.phase) * 1.7 - 0.8;
-        targetX = Math.max(-15, Math.min(15, dx * 0.12 * force + floatX));
-        targetY = Math.max(-15, Math.min(15, dy * 0.1 * force + floatY));
+        const force = pointer.active ? Math.max(0, 1 - distance / 68) : 0;
+        const floatX = Math.sin(time * 0.46 + icon.phase * 1.7) * 2.4;
+        const floatY = Math.sin(time * 0.7 + icon.phase) * 3.2 - 1.3;
+        targetX = Math.max(-18, Math.min(18, dx * 0.14 * force + floatX));
+        targetY = Math.max(-18, Math.min(18, dy * 0.12 * force + floatY));
       }
 
       setMotionState({
         x: targetX,
         y: targetY,
-        rotate: Math.sin(time * 0.48 + icon.phase) * 0.55,
+        rotate: Math.sin(time * 0.68 + icon.phase) * 1.8,
       });
 
       animationFrame = requestAnimationFrame(animateIcon);
@@ -412,7 +501,7 @@ function ProfessionIcon({
       <motion.img
         src={icon.src}
         alt={icon.name}
-        className="h-full w-full cursor-pointer object-contain"
+        className="h-full w-full object-contain pointer-events-none"
         style={{ filter: professionFilter }}
         animate={{
           ...motionState,

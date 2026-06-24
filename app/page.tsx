@@ -114,8 +114,8 @@ export default function HomePage() {
   const [mounted, setMounted] = useState(false);
   
   const { scrollY } = useScroll();
-  const treeScale = useTransform(scrollY, [0, 600], [1.0, 0.85]);
-  const treeOpacity = useTransform(scrollY, [0, 600], [1.0, 0.35]);
+  const treeScale = useTransform(scrollY, [0, 600], [1.0, 1.0]);
+  const treeOpacity = useTransform(scrollY, [0, 600], [1.0, 1.0]);
 
   useEffect(() => {
     setMounted(true);
@@ -137,10 +137,10 @@ export default function HomePage() {
               opacity: treeOpacity,
               zIndex: 6 
             }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-1/2 top-[14%] -translate-x-1/2 -translate-y-1/2 w-[min(72vw,640px)] pointer-events-auto"
+            initial={{ opacity: 0, x: '-50%', y: '-50%', scale: 0.94 }}
+            animate={{ opacity: 1, x: '-8%', y: '-50%', scale: 1 }}
+            transition={{ duration: 1.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-1/2 top-[14%] w-[min(76vw,700px)] pointer-events-auto"
           >
             <InteractiveTree />
           </motion.div>
@@ -153,13 +153,14 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-            className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center pointer-events-auto"
+            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto pl-[7vw] pr-6 md:pr-10 lg:pr-0"
+            style={{ maxWidth: '46vw' }}
           >
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.72, delay: 0.42 }}
-              className="mb-5 text-xs font-bold uppercase tracking-[0.22em] text-[#8aaec4] font-sans"
+              className="mb-4 text-[11px] font-bold uppercase tracking-[0.24em] text-[#8aaec4] font-sans"
             >
               Диагностика талантов для школьников
             </motion.p>
@@ -168,7 +169,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.82, delay: 0.52 }}
-              className="max-w-4xl text-3xl leading-[1.12] font-extrabold text-[#253243] font-sans sm:text-4xl md:text-5xl lg:text-7xl"
+              className="max-w-[760px] text-[2rem] leading-[1.08] font-extrabold text-[#253243] font-sans sm:text-[2.35rem] md:text-[2.85rem] lg:text-[4.5rem]"
             >
               Поможем школьнику найти своё призвание
             </motion.h1>
@@ -177,7 +178,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.82, delay: 0.66 }}
-              className="mt-7 max-w-2xl text-base sm:text-lg md:text-2xl leading-relaxed text-[#566679] font-normal font-sans"
+              className="mt-6 max-w-[640px] text-[0.98rem] sm:text-[1.08rem] md:text-[1.28rem] leading-relaxed text-[#566679] font-normal font-sans"
             >
               Раскройте сильные стороны ребёнка через 25 минут интерактивной диагностики и получите понятный план развития для всей семьи.
             </motion.p>
@@ -186,7 +187,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.82, delay: 0.82 }}
-              className="mt-10 flex flex-col items-center gap-4 sm:flex-row"
+              className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center"
             >
               <Link href="/auth" className="cta-glass h-[62px] min-w-[250px] px-8 text-base sm:text-lg">
                 Пройти диагностику

@@ -90,9 +90,9 @@ export function IntroPreloader() {
   const isTransition = introState === 'transition';
 
   const logoTarget = {
-    x: typeof window === 'undefined' ? 0 : -Math.max(260, window.innerWidth / 2 - 210),
-    y: typeof window === 'undefined' ? 0 : -Math.max(210, window.innerHeight / 2 - 84),
-    scale: 0.34,
+    x: typeof window === 'undefined' ? 0 : -Math.max(300, window.innerWidth / 2 - 180),
+    y: typeof window === 'undefined' ? 0 : -Math.max(230, window.innerHeight / 2 - 70),
+    scale: 0.24,
   };
 
   if (!mounted || !shouldShow || introState === 'completed') return null;
