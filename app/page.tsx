@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ArrowRight, Users, HelpCircle, Shield, BookOpen, Clock, Brain, FileCheck } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useUIStore } from './store/uiStore';
 import { InteractiveTree } from './components/InteractiveTree';
@@ -109,13 +109,31 @@ const faqItems = [
   },
 ];
 
+const uspItems = [
+  {
+    icon: <IconTimer />,
+    title: '25 минут',
+    text: 'Вся диагностика — без длинных анкет и скучных вопросов',
+  },
+  {
+    icon: <IconScience />,
+    title: '3 научных метода',
+    text: 'RIASEC, Big Five и Гарднер — проверенные мировые методики',
+  },
+  {
+    icon: <IconReport />,
+    title: 'Понятный отчёт',
+    text: 'Профессии, предметы и шаги — ясно ребёнку и родителю',
+  },
+];
+
 export default function HomePage() {
   const { introState } = useUIStore();
   const [mounted, setMounted] = useState(false);
   
   const { scrollY } = useScroll();
-  const treeScale = useTransform(scrollY, [0, 600], [1.0, 1.0]);
-  const treeOpacity = useTransform(scrollY, [0, 600], [1.0, 1.0]);
+  const treeScale = useTransform(scrollY, [0, 450], [1.0, 0.92]);
+  const treeOpacity = useTransform(scrollY, [0, 400], [1.0, 0]);
 
   useEffect(() => {
     setMounted(true);
@@ -127,34 +145,100 @@ export default function HomePage() {
   return (
     <main className="relative z-10 w-full overflow-hidden">
       
+      {/* Предзагрузка скелета дерева для плавной анимации роста */}
+      {mounted && (
+        <img
+          src="/assets/tree/webp/tree_skeleton.webp"
+          alt=""
+          style={{ display: 'none' }}
+          aria-hidden="true"
+        />
+      )}
+      
       {/* ─── HERO SECTION ─── */}
       <section className="relative min-h-screen flex items-center justify-center px-5 md:px-8 pt-32 pb-20">
         
         {mounted && isTransitionStarted && (
-          <motion.div 
-            style={{ 
-              scale: treeScale, 
-              opacity: treeOpacity,
-              zIndex: 6 
-            }}
-            initial={{ opacity: 0, x: '-50%', y: '-50%', scale: 0.94 }}
-            animate={{ opacity: 1, x: '-8%', y: '-50%', scale: 1 }}
+          <motion.div
+            style={{ opacity: treeOpacity, zIndex: 4 }}
+            initial={{ opacity: 0, y: '-50%' }}
+            animate={{ opacity: 1, y: '-50%' }}
             transition={{ duration: 1.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-1/2 top-[14%] w-[min(76vw,700px)] pointer-events-auto"
+            className="pointer-events-none fixed inset-x-0 top-20 mx-auto hidden h-[54vh] max-w-6xl lg:block"
           >
-            <InteractiveTree />
+            <div className="h-full w-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.82)_38%,rgba(255,255,255,0)_76%)]" />
           </motion.div>
         )}
 
-        <div className="absolute inset-x-0 top-20 z-[9] mx-auto h-[54vh] max-w-6xl bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.82)_38%,rgba(255,255,255,0)_76%)] pointer-events-none" />
+        {mounted && (
+          <motion.div
+            layout
+            style={{
+              scale: treeScale,
+              opacity: treeOpacity,
+              zIndex: 5,
+              width: (introState === 'completed' || introState === 'transition')
+                ? undefined
+                : 'min(92vw, 92vh, 1280px)',
+              height: (introState === 'completed' || introState === 'transition')
+                ? undefined
+                : 'min(92vw, 92vh, 1280px)'
+            }}
+            initial={{ opacity: 0, scale: 0.88 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+            className={
+              (introState === 'completed' || introState === 'transition')
+                ? 'pointer-events-auto absolute left-1/2 top-[14%] w-[min(61vw,540px)] -translate-x-1/2 m-0 lg:fixed lg:left-auto lg:right-[3vw] lg:top-1/2 lg:-translate-y-1/2 lg:w-[min(44vw,540px)] lg:translate-x-0 lg:m-0 z-[5]'
+                : 'pointer-events-auto fixed inset-0 m-auto aspect-square z-[5]'
+            }
+          >
+            {/* Дуга земли, привязанная к нижнему краю контейнера дерева */}
+            <AnimatePresence>
+              {!(introState === 'completed' || introState === 'transition') && (
+                <svg
+                  viewBox="0 0 1000 260"
+                  className="absolute left-1/2 bottom-0 w-[min(72vw,72vh,640px)] -translate-x-1/2 translate-y-[38%] z-[6] pointer-events-none"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <mask id="lineMask">
+                      <motion.path
+                        d="M 82 176 Q 500 112 918 176"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="28"
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.0, ease: 'easeInOut' }}
+                      />
+                    </mask>
+                  </defs>
+                  <motion.path
+                    d="M 82 176 Q 500 112 918 176 Q 500 126 82 176 Z"
+                    fill="rgba(155, 187, 207, 0.76)"
+                    mask="url(#lineMask)"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </svg>
+              )}
+            </AnimatePresence>
+
+            {introState !== 'moon' && <InteractiveTree />}
+          </motion.div>
+        )}
 
         {mounted && showHeroContent && (
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto pl-[7vw] pr-6 md:pr-10 lg:pr-0"
-            style={{ maxWidth: '46vw' }}
+            className="relative z-10 flex w-full max-w-[90%] flex-col items-start text-left pointer-events-auto pl-[5%] pr-6 md:max-w-[55vw] md:pr-10 lg:pr-0"
           >
             <motion.p
               initial={{ opacity: 0, y: 16 }}
@@ -169,7 +253,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.82, delay: 0.52 }}
-              className="max-w-[760px] text-[2rem] leading-[1.08] font-extrabold text-[#253243] font-sans sm:text-[2.35rem] md:text-[2.85rem] lg:text-[4.5rem]"
+              className="w-full text-[2rem] leading-[1.08] font-extrabold text-[#253243] font-sans sm:text-[2.35rem] md:text-[2.85rem] lg:text-[2.25rem] lg:leading-[1.1] lg:whitespace-nowrap"
             >
               Поможем школьнику найти своё призвание
             </motion.h1>
@@ -217,36 +301,51 @@ export default function HomePage() {
       </section>
  
       {/* ─── УТП (3 карточки) ─── */}
-      <section className="px-6 lg:px-10 py-24 relative z-10 bg-white/35 backdrop-blur-md">
+      <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.18,
+                },
+              },
+            }}
+            initial="hidden"
+            whileInView="show"
             viewport={{ once: true, margin: '-100px' }}
             className="grid gap-6 sm:grid-cols-3"
           >
-            <UspCard
-              icon={<IconTimer />}
-              title="25 минут"
-              text="Вся диагностика — без длинных анкет и скучных вопросов"
-            />
-            <UspCard
-              icon={<IconScience />}
-              title="3 научных метода"
-              text="RIASEC, Big Five и Гарднер — проверенные мировые методики"
-            />
-            <UspCard
-              icon={<IconReport />}
-              title="Понятный отчёт"
-              text="Профессии, предметы и шаги — ясно ребёнку и родителю"
-            />
+            {uspItems.map((item, idx) => (
+              <motion.div
+                key={idx}
+                variants={{
+                  hidden: { opacity: 0, y: 60, scale: 0.92, rotateX: 8 },
+                  show: {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    rotateX: 0,
+                    transition: {
+                      type: 'spring',
+                      stiffness: 90,
+                      damping: 14,
+                    },
+                  },
+                }}
+                className="perspective-[1000px]"
+              >
+                <UspCard icon={item.icon} title={item.title} text={item.text} />
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
 
       {/* ─── ДЛЯ КОГО ─── */}
-      <section className="px-6 lg:px-10 py-24 relative z-10 bg-[#f7faf8]/55">
+      <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -286,7 +385,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── КАК ЭТО РАБОТАЕТ ─── */}
-      <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-white/35 backdrop-blur-md">
+      <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -367,7 +466,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── SOCIAL PROOF ─── */}
-      <section className="px-6 lg:px-10 py-24 relative z-10 bg-[#f7faf8]/55">
+      <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -414,8 +513,45 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── ОТЗЫВЫ И КЕЙСЫ ─── */}
+      <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true, margin: '-100px' }}
+            className="space-y-12"
+          >
+            <div className="text-center space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8aaec4] font-sans">
+                Реальные истории
+              </p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#253243] font-sans">
+                Отзывы родителей и школьников
+              </h2>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <ReviewCard
+                author="Мария, мама 9-классника"
+                text="Сын совершенно не понимал, куда идти после 9 класса. Диагностика показала сильный перекос в инженерию и IT. Отчет разложил всё по полочкам: какие предметы сдавать и куда поступать."
+              />
+              <ReviewCard
+                author="Егор, 10 класс"
+                text="Думал идти в юристы, потому что родители советовали. А тест показал, что у меня склонность к творческим профессиям и дизайну. Показал отчет маме, теперь она согласна со мной!"
+              />
+              <ReviewCard
+                author="Елена, мама выпускницы"
+                text="Очень удобный формат. Дочь прошла тест за 20 минут с телефона, а я получила PDF-отчет с подробным анализом. Это сняло столько напряжения в семье перед экзаменами!"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ─── FAQ ─── */}
-      <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-white/35 backdrop-blur-md">
+      <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-transparent">
         <div className="mx-auto max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -557,3 +693,20 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
     </motion.div>
   );
 }
+
+function ReviewCard({ author, text }: { author: string; text: string }) {
+  return (
+    <div className="glass-card rounded-[22px] p-6 space-y-4">
+      <div className="flex text-[#c6a766]">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+        ))}
+      </div>
+      <p className="text-[#566679] text-sm leading-relaxed italic">«{text}»</p>
+      <div className="font-bold text-[#253243] text-sm pt-2 border-t border-[#e2e8f0]/50">{author}</div>
+    </div>
+  );
+}
+

@@ -12,7 +12,6 @@ export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<Tab>('email');
   const [name, setName] = useState('');
   const [grade, setGrade] = useState('8');
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,7 +22,6 @@ export default function AuthPage() {
     setTimeout(() => {
       localStorage.setItem('studentName', name);
       localStorage.setItem('studentGrade', grade);
-      localStorage.setItem('studentEmail', email || 'demo@moeprizvanie.ru');
       localStorage.setItem('isAuth', 'true');
 
       router.push('/assessment');
@@ -133,20 +131,6 @@ export default function AuthPage() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted">
-                Электронная почта
-              </label>
-              <input
-                type="email"
-                required
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-shell w-full h-[56px] px-5 rounded-2xl text-text"
-              />
             </div>
 
             <button

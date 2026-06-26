@@ -1,13 +1,19 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
+import { checkRateLimit } from '../../../../lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    // Rate limit: 5 запросов в минуту с одного IP
+    const rlResponse = await checkRateLimit(request, 'register_session', 5, 60);
+    if (rlResponse) return rlResponse;
+
     const { username, grade, is_deep } = await request.json();
 
-    if (!username || !grade) {
-      return NextResponse.json({ error: 'Неполные данные' }, { status: 400 });
+    if (!username || typeof username !== 'string' || username.length < 2 || username.length > 50) {
+      return NextResponse.json({ error: 'Имя должно содержать от 2 до 50 символов' }, { status: 400 });
     }
 
     const gradeNum = parseInt(grade, 10);
@@ -50,6 +56,15 @@ export async function POST(request: Request) {
       'EX',
       7200
     );
+
+    // 4. Устанавливаем HttpOnly cookie для подтверждения владения сессией
+    cookies().set('diagnostic_session_id', session.sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7200, // 2 часа
+    });
 
     return NextResponse.json({
       status: 'success',

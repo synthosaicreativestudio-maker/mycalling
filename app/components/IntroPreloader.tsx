@@ -58,26 +58,26 @@ export function IntroPreloader() {
   useEffect(() => {
     setMounted(true);
 
-    // Пропускаем интро на повторном визите
-    if (typeof window !== 'undefined' && localStorage.getItem(INTRO_SEEN_KEY)) {
-      setShouldShow(false);
-      setIntroState('completed');
-      return;
-    }
+    // Пропускаем интро на повторном визите (временно отключено для тестирования)
+    // if (typeof window !== 'undefined' && localStorage.getItem(INTRO_SEEN_KEY)) {
+    //   setShouldShow(false);
+    //   setIntroState('completed');
+    //   return;
+    // }
 
     setIntroState('moon');
 
-    // Сокращённые тайминги: ~3 секунды вместо 7
     const timers = [
       setTimeout(() => setIntroState('tree'), 400),
-      setTimeout(() => setIntroState('leaves'), 1200),
-      setTimeout(() => setIntroState('professions'), 1800),
-      setTimeout(() => setIntroState('logo'), 2400),
-      setTimeout(() => setIntroState('transition'), 3000),
+      setTimeout(() => setIntroState('leaves'), 800),
+      setTimeout(() => setIntroState('logo'), 1200),
+      setTimeout(() => setIntroState('transition'), 1800),
       setTimeout(() => {
         setIntroState('completed');
-        localStorage.setItem(INTRO_SEEN_KEY, '1');
-      }, 3600),
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(INTRO_SEEN_KEY, '1');
+        }
+      }, 2400),
     ];
 
     return () => timers.forEach(clearTimeout);
@@ -103,113 +103,22 @@ export function IntroPreloader() {
         initial={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
-        className="fixed inset-0 z-[9999] overflow-hidden bg-[#f7faf8]"
+        className="fixed inset-0 pointer-events-none overflow-hidden"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_36%,rgba(255,255,255,0.96)_0%,rgba(250,252,250,0.82)_34%,rgba(232,241,246,0.38)_100%)]" />
+        <div className="absolute inset-0 z-[3] bg-[#f7faf8] bg-[radial-gradient(circle_at_50%_36%,rgba(255,255,255,0.96)_0%,rgba(250,252,250,0.82)_34%,rgba(232,241,246,0.38)_100%)] pointer-events-auto" />
 
         {/* Кнопка пропуска */}
         <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.6 }}
-          transition={{ delay: 0.8, duration: 0.4 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
           onClick={skipIntro}
-          className="absolute top-6 right-6 z-[10000] px-4 py-2 rounded-full text-xs font-medium text-[#566679] bg-white/60 border border-sky/20 backdrop-blur-sm hover:bg-white/80 hover:text-[#253243] transition-all"
+          className="absolute top-6 right-6 z-[10000] px-5 py-2.5 rounded-full text-sm font-semibold text-[#253243] bg-white border border-[#e2e8f0] shadow-sm backdrop-blur-sm hover:bg-gray-50 hover:shadow-md transition-all pointer-events-auto active:scale-95"
         >
-          Пропустить
+          Пропустить заставку
         </motion.button>
 
-        <svg
-          viewBox="0 0 1000 260"
-          className="absolute left-1/2 w-[min(74vw,760px)] -translate-x-1/2 pointer-events-none"
-          style={{ bottom: '18%' }}
-          aria-hidden="true"
-        >
-          <AnimatePresence>
-            {!isTransition && (
-              <motion.path
-                d="M 82 176 Q 500 112 918 176"
-                fill="none"
-                stroke="rgba(155, 187, 207, 0.76)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                exit={{ opacity: 0, pathLength: 0.84 }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
-              />
-            )}
-          </AnimatePresence>
-        </svg>
 
-        <motion.div
-          className="absolute left-1/2 top-[14%] aspect-square w-[min(72vw,640px)] -translate-x-1/2 -translate-y-1/2"
-          animate={isTransition ? { opacity: 0.18, scale: 0.92 } : { opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {showTree && (
-            <motion.img
-              src="/assets/tree/webp/tree_skeleton.webp"
-              alt=""
-              aria-hidden="true"
-              className="absolute inset-0 z-10 h-full w-full object-contain"
-              initial={{ clipPath: 'inset(100% 0 0 0)', opacity: 0.94 }}
-              animate={{ clipPath: 'inset(0% 0 0 0)', opacity: 0.94 }}
-              transition={{ duration: 1.0, ease: [0.65, 0, 0.35, 1] }}
-            />
-          )}
-
-          {showLeaves &&
-            introLeaves.map((leaf) => (
-              <motion.img
-                key={leaf.id}
-                src={leaf.src}
-                alt=""
-                aria-hidden="true"
-                className="absolute z-20"
-                style={leaf.style}
-                initial={{ opacity: 0, scale: 0.2, rotate: -4 }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  rotate: [0, 1.4, 0, -1.2, 0],
-                  y: [0, -2.4, 0, -1.1, 0],
-                  x: [0, 0.8, 0, -0.6, 0],
-                }}
-                transition={{
-                  opacity: { duration: 0.32, delay: leaf.delay, ease: 'easeOut' },
-                  scale: { duration: 0.32, delay: leaf.delay, ease: 'easeOut' },
-                  rotate: { duration: 7.2, repeat: Infinity, ease: 'easeInOut' },
-                  y: { duration: 8.4, repeat: Infinity, ease: 'easeInOut' },
-                  x: { duration: 9.1, repeat: Infinity, ease: 'easeInOut' },
-                }}
-              />
-            ))}
-
-          {showProfessions &&
-            introProfessions.map((icon) => (
-              <motion.img
-                key={icon.id}
-                src={icon.src}
-                alt=""
-                aria-hidden="true"
-                className="absolute z-30 object-contain"
-                style={icon.style}
-                initial={{ opacity: 0, scale: 0.58, y: 8 }}
-                animate={{
-                  opacity: icon.layer === 'outer' ? 0.82 : 0.98,
-                  scale: icon.layer === 'outer' ? 0.94 : 1,
-                  y: [0, -2.2, 0, 1.2, 0],
-                  rotate: [0, 0.85, 0, -0.7, 0],
-                }}
-                transition={{
-                  opacity: { duration: 0.36, delay: icon.delay, ease: [0.16, 1, 0.3, 1] },
-                  scale: { duration: 0.36, delay: icon.delay, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 8 + icon.delay * 2, repeat: Infinity, ease: 'easeInOut' },
-                  rotate: { duration: 9 + icon.delay * 1.4, repeat: Infinity, ease: 'easeInOut' },
-                }}
-              />
-            ))}
-        </motion.div>
 
         <AnimatePresence>
           {showLogo && (

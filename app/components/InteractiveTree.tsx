@@ -3,6 +3,7 @@
 import type { CSSProperties, MouseEvent, MutableRefObject, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useUIStore } from '../store/uiStore';
 
 type PointerState = {
   x: number;
@@ -31,96 +32,19 @@ type LeafItem = {
 };
 
 const PROFESSION_ICONS: TreeItem[] = [
-  {
-    id: 'medicine',
-    name: 'Медицина',
-    src: '/assets/tree/webp/icon_medicine.webp',
-    layer: 'core',
-    style: { left: '26.8%', top: '20.0%', width: '10.5%' },
-    center: { x: 32.05, y: 25.25 },
-    phase: 0.2,
-  },
-  {
-    id: 'engineering',
-    name: 'Инженерия',
-    src: '/assets/tree/webp/icon_engineering.webp',
-    layer: 'core',
-    style: { left: '40.2%', top: '10.5%', width: '10.8%' },
-    center: { x: 45.6, y: 15.9 },
-    phase: 1.1,
-  },
-  {
-    id: 'business',
-    name: 'Бизнес',
-    src: '/assets/tree/webp/icon_business.webp',
-    layer: 'core',
-    style: { left: '55.0%', top: '10.9%', width: '11.0%' },
-    center: { x: 60.5, y: 16.4 },
-    phase: 2.2,
-  },
-  {
-    id: 'science',
-    name: 'Наука',
-    src: '/assets/tree/webp/icon_science.webp',
-    layer: 'core',
-    style: { left: '68.6%', top: '20.4%', width: '10.5%' },
-    center: { x: 73.85, y: 25.65 },
-    phase: 3.1,
-  },
-  {
-    id: 'technology',
-    name: 'Технологии',
-    src: '/assets/tree/webp/icon_technology.webp',
-    layer: 'core',
-    style: { left: '21.4%', top: '38.6%', width: '10.3%' },
-    center: { x: 26.55, y: 43.75 },
-    phase: 4.1,
-  },
-  {
-    id: 'creativity',
-    name: 'Творчество',
-    src: '/assets/tree/webp/icon_creativity.webp',
-    layer: 'core',
-    style: { left: '72.2%', top: '39.0%', width: '10.5%' },
-    center: { x: 77.45, y: 44.25 },
-    phase: 5.0,
-  },
-  {
-    id: 'education',
-    name: 'Образование',
-    src: '/assets/tree/webp/icon_education.webp',
-    layer: 'outer',
-    style: { left: '30.0%', top: '3.0%', width: '9.5%' },
-    center: { x: 34.75, y: 7.75 },
-    phase: 0.8,
-  },
-  {
-    id: 'law',
-    name: 'Право и общество',
-    src: '/assets/tree/webp/icon_law.webp',
-    layer: 'outer',
-    style: { left: '60.5%', top: '3.0%', width: '9.5%' },
-    center: { x: 65.25, y: 7.75 },
-    phase: 1.8,
-  },
-  {
-    id: 'ecology',
-    name: 'Экология',
-    src: '/assets/tree/webp/icon_ecology.webp',
-    layer: 'outer',
-    style: { left: '18.0%', top: '28.5%', width: '9.0%' },
-    center: { x: 22.5, y: 33.0 },
-    phase: 2.8,
-  },
-  {
-    id: 'urban',
-    name: 'Среда и строительство',
-    src: '/assets/tree/webp/icon_urban.webp',
-    layer: 'outer',
-    style: { left: '80.0%', top: '28.5%', width: '9.0%' },
-    center: { x: 84.5, y: 33.0 },
-    phase: 3.8,
-  },
+  // 6 Core-профессий (Внутренний полукруг, R = 24%, Y_center = 38%)
+  { id: 'medicine', name: 'Медицина', src: '/assets/tree/webp/icon_medicine.webp', layer: 'core', style: { left: '26.8%', top: '31.8%', width: '10.5%' }, center: { x: 32.0, y: 37.0 }, phase: 0.2 },
+  { id: 'engineering', name: 'Инженерия', src: '/assets/tree/webp/icon_engineering.webp', layer: 'core', style: { left: '30.8%', top: '18.8%', width: '10.8%' }, center: { x: 36.2, y: 24.2 }, phase: 1.1 },
+  { id: 'business', name: 'Бизнес', src: '/assets/tree/webp/icon_business.webp', layer: 'core', style: { left: '41.4%', top: '13.4%', width: '11.0%' }, center: { x: 46.9, y: 18.9 }, phase: 2.2 },
+  { id: 'science', name: 'Наука', src: '/assets/tree/webp/icon_science.webp', layer: 'core', style: { left: '58.6%', top: '13.4%', width: '10.5%' }, center: { x: 63.85, y: 18.9 }, phase: 3.1 },
+  { id: 'technology', name: 'Технологии', src: '/assets/tree/webp/icon_technology.webp', layer: 'core', style: { left: '69.2%', top: '18.8%', width: '10.3%' }, center: { x: 74.35, y: 24.2 }, phase: 4.1 },
+  { id: 'creativity', name: 'Творчество', src: '/assets/tree/webp/icon_creativity.webp', layer: 'core', style: { left: '73.2%', top: '31.8%', width: '10.5%' }, center: { x: 78.45, y: 37.0 }, phase: 5.0 },
+
+  // 4 Outer-профессии (Внешний полукруг, R = 37%, Y_center = 38%)
+  { id: 'education', name: 'Образование', src: '/assets/tree/webp/icon_education.webp', layer: 'outer', style: { left: '17.9%', top: '19.5%', width: '9.5%' }, center: { x: 22.65, y: 24.25 }, phase: 0.8 },
+  { id: 'law', name: 'Право и общество', src: '/assets/tree/webp/icon_law.webp', layer: 'outer', style: { left: '26.2%', top: '9.6%', width: '9.5%' }, center: { x: 30.95, y: 14.35 }, phase: 1.8 },
+  { id: 'ecology', name: 'Экология', src: '/assets/tree/webp/icon_ecology.webp', layer: 'outer', style: { left: '73.8%', top: '9.6%', width: '9.0%' }, center: { x: 78.3, y: 14.35 }, phase: 2.8 },
+  { id: 'urban', name: 'Среда и строительство', src: '/assets/tree/webp/icon_urban.webp', layer: 'outer', style: { left: '82.1%', top: '19.5%', width: '9.0%' }, center: { x: 86.6, y: 24.25 }, phase: 3.8 },
 ];
 
 const LEAVES: LeafItem[] = [
@@ -202,11 +126,29 @@ const leafFilter = 'drop-shadow(0 10px 18px rgba(111, 151, 173, 0.12)) saturate(
 const professionFilter = 'drop-shadow(0 8px 16px rgba(111, 151, 173, 0.10)) saturate(1.08) sepia(0.08) hue-rotate(-10deg) brightness(1.02) contrast(1.03)';
 
 export function InteractiveTree() {
+  const { introState } = useUIStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const pointerRef = useRef<PointerState>({ x: 50, y: 36, targetX: 50, targetY: 36, active: false });
   const [pointerSide, setPointerSide] = useState({ x: 50, y: 36, active: false });
 
   useEffect(() => {
+    const handleGlobalMouseMove = (e: globalThis.MouseEvent) => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      pointerRef.current.targetX = ((e.clientX - rect.left) / rect.width) * 100;
+      pointerRef.current.targetY = ((e.clientY - rect.top) / rect.height) * 100;
+      pointerRef.current.active = true;
+    };
+
+    const handleGlobalMouseLeave = () => {
+      pointerRef.current.targetX = 50;
+      pointerRef.current.targetY = 38;
+      pointerRef.current.active = false;
+    };
+
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseleave', handleGlobalMouseLeave);
+
     let animationFrame = 0;
     const updatePointer = () => {
       const pointer = pointerRef.current;
@@ -216,41 +158,36 @@ export function InteractiveTree() {
       animationFrame = requestAnimationFrame(updatePointer);
     };
     updatePointer();
-    return () => cancelAnimationFrame(animationFrame);
+
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseleave', handleGlobalMouseLeave);
+      cancelAnimationFrame(animationFrame);
+    };
   }, []);
 
-  const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    pointerRef.current.targetX = ((event.clientX - rect.left) / rect.width) * 100;
-    pointerRef.current.targetY = ((event.clientY - rect.top) / rect.height) * 100;
-    pointerRef.current.active = true;
-  };
-
-  const handleMouseLeave = () => {
-    pointerRef.current.targetX = 50;
-    pointerRef.current.targetY = 36;
-    pointerRef.current.active = false;
-  };
+  const showDetails = introState === 'completed';
 
   return (
     <div
       ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       className="interactive-tree relative mx-auto aspect-square w-full max-w-[920px] select-none"
     >
       <FlowLines pointer={pointerSide} />
       <CrownParticleHalo pointer={pointerSide} />
       <AmbientDust pointer={pointerSide} />
 
-      <img
+      <motion.img
         src="/assets/tree/webp/tree_skeleton.webp"
         alt="Дерево призвания"
         className="absolute inset-0 z-10 h-full w-full object-contain pointer-events-none"
+        initial={introState === 'completed' ? { clipPath: 'inset(0% 0 0 0)', opacity: 1 } : { clipPath: 'inset(100% 0 0 0)', opacity: 0 }}
+        animate={{ clipPath: 'inset(0% 0 0 0)', opacity: 1 }}
+        transition={{ duration: introState === 'completed' ? 0 : 2.0, ease: [0.33, 1, 0.68, 1] }}
       />
 
       {LEAVES.map((leaf) => (
-        <LeafElement key={leaf.id} leaf={leaf} pointerRef={pointerRef} containerRef={containerRef} />
+        <LeafElement key={leaf.id} leaf={leaf} pointerRef={pointerRef} containerRef={containerRef} showDetails={showDetails} />
       ))}
 
       {PROFESSION_ICONS.map((icon) => (
@@ -259,6 +196,7 @@ export function InteractiveTree() {
           icon={icon}
           pointerRef={pointerRef}
           containerRef={containerRef}
+          showDetails={showDetails}
         />
       ))}
     </div>
@@ -325,7 +263,7 @@ function CrownParticleHalo({ pointer }: { pointer: { x: number; y: number; activ
       {crownParticles.map((particle) => {
         const distanceToPointer = Math.hypot(pointer.x - particle.x, pointer.y - particle.y);
         const activation = pointer.active ? Math.max(0, 1 - distanceToPointer / 30) : 0;
-        const opacity = 0.04 + activation * 0.54;
+        const opacity = pointer.active ? (0.04 + activation * 0.54) : 0;
         const scale = 0.6 + activation * 1.05;
         const driftX = activation * (pointer.x > particle.x ? 4.8 : -4.8);
         const driftY = activation * ((pointer.y - particle.y) * 0.1);
@@ -398,10 +336,12 @@ function LeafElement({
   leaf,
   pointerRef,
   containerRef,
+  showDetails,
 }: {
   leaf: LeafItem;
   pointerRef: MutableRefObject<PointerState>;
   containerRef: RefObject<HTMLDivElement>;
+  showDetails: boolean;
 }) {
   const [motionState, setMotionState] = useState({ x: 0, y: 0, rotate: 0 });
 
@@ -444,8 +384,19 @@ function LeafElement({
       aria-hidden="true"
       className="absolute z-20 select-none pointer-events-none"
       style={{ ...leaf.style, transformOrigin: 'center center', filter: leafFilter }}
-      animate={motionState}
-      transition={{ duration: 0.38, ease: 'easeOut' }}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{
+        ...motionState,
+        scale: showDetails ? 1 : 0,
+        opacity: showDetails ? 1 : 0,
+      }}
+      transition={{
+        x: { duration: 0.38, ease: 'easeOut' },
+        y: { duration: 0.38, ease: 'easeOut' },
+        rotate: { duration: 0.38, ease: 'easeOut' },
+        scale: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+        opacity: { duration: 0.5, ease: 'linear' },
+      }}
     />
   );
 }
@@ -454,10 +405,12 @@ function ProfessionIcon({
   icon,
   pointerRef,
   containerRef,
+  showDetails,
 }: {
   icon: TreeItem;
   pointerRef: MutableRefObject<PointerState>;
   containerRef: RefObject<HTMLDivElement>;
+  showDetails: boolean;
 }) {
   const [motionState, setMotionState] = useState({ x: 0, y: 0, rotate: 0 });
 
@@ -503,13 +456,20 @@ function ProfessionIcon({
         alt={icon.name}
         className="h-full w-full object-contain pointer-events-none"
         style={{ filter: professionFilter }}
+        initial={{ scale: 0, opacity: 0 }}
         animate={{
           ...motionState,
-          scale: icon.layer === 'outer' ? 0.92 : 0.985,
-          opacity: icon.layer === 'outer' ? 0.88 : 0.98,
+          scale: showDetails ? (icon.layer === 'outer' ? 0.92 : 0.985) : 0,
+          opacity: showDetails ? (icon.layer === 'outer' ? 0.88 : 0.98) : 0,
           filter: professionFilter,
         }}
-        transition={{ duration: 0.62, ease: 'easeOut' }}
+        transition={{
+          x: { duration: 0.62, ease: 'easeOut' },
+          y: { duration: 0.62, ease: 'easeOut' },
+          rotate: { duration: 0.62, ease: 'easeOut' },
+          scale: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+          opacity: { duration: 0.5, ease: 'linear' },
+        }}
       />
     </div>
   );

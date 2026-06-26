@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
+import { env } from '../../../../lib/env';
+import { checkRateLimit } from '../../../../lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +51,9 @@ function calculateSten(rawScore: number, scaleCode: string, testId: keyof typeof
 
 export async function GET(request: Request) {
   try {
+    const rlResponse = await checkRateLimit(request, 'results', 10, 60);
+    if (rlResponse) return rlResponse;
+
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('session_id');
 
@@ -197,8 +202,8 @@ export async function GET(request: Request) {
     };
 
     // 8. Генерация ИИ-отчета через ProxyAPI
-    const apiKey = 'fe_oa_8241bb58e1c68cff538eb3076ac734b4de235309d7832f5c';
-    const apiUrl = 'https://api.proxyapi.ru/openai/v1/chat/completions';
+    const apiKey = env.PROXYAPI_KEY;
+    const apiUrl = env.PROXYAPI_URL;
 
     const systemPrompt = `Вы — ведущий мировой эксперт в профориентации подростков и возрастной психологии.
 Ваша задача — проанализировать количественные результаты диагностики способностей, характера и ценностей ученика и составить глубокий, вдохновляющий и научно обоснованный отчет.

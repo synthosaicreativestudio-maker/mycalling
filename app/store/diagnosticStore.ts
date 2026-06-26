@@ -306,7 +306,6 @@ export const useDiagnosticStore = create<DiagnosticState>()(
       name: 'moe-prizvanie-diagnostic-session',
       partialize: (state) => ({
         sessionId: state.sessionId,
-        userId: state.userId,
         studentName: state.studentName,
         studentGrade: state.studentGrade,
         offlineAnswersBuffer: state.offlineAnswersBuffer,

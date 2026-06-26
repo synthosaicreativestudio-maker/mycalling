@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
+import { checkRateLimit } from '../../../../lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    // Rate limit: 60 запросов в минуту (чтобы не блочить нормальное прохождение)
+    const rlResponse = await checkRateLimit(request, 'submit_answer', 60, 60);
+    if (rlResponse) return rlResponse;
+
     const { session_id: sessionId, question_id: questionId, selected_value: rawValue, time_spent_ms: timeSpentMs } = await request.json();
 
     if (!sessionId || !questionId || rawValue === undefined || timeSpentMs === undefined) {
       return NextResponse.json({ error: 'Неполные данные' }, { status: 400 });
+    }
+
+    // Проверка владения сессией (Ownership check)
+    const cookieSessionId = cookies().get('diagnostic_session_id')?.value;
+    if (cookieSessionId !== sessionId) {
+      return NextResponse.json({ error: 'Нет доступа к данной сессии' }, { status: 403 });
     }
 
     const value = parseInt(rawValue, 10);

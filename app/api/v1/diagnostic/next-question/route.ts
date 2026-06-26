@@ -1,16 +1,27 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
+import { checkRateLimit } from '../../../../lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
+    const rlResponse = await checkRateLimit(request, 'next_question', 60, 60);
+    if (rlResponse) return rlResponse;
+
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('session_id');
 
     if (!sessionId) {
       return NextResponse.json({ error: 'Не указан session_id' }, { status: 400 });
+    }
+
+    // Проверка владения сессией (Ownership check)
+    const cookieSessionId = cookies().get('diagnostic_session_id')?.value;
+    if (cookieSessionId !== sessionId) {
+      return NextResponse.json({ error: 'Нет доступа к данной сессии' }, { status: 403 });
     }
 
     // 1. Получаем сессию (из Redis или Postgres)

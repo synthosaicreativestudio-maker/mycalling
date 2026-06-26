@@ -29,6 +29,13 @@ class MemoryCache {
     this.cache.set(key, next.toString());
     return next;
   }
+
+  async expire(key: string, seconds: number): Promise<number> {
+    setTimeout(() => {
+      this.cache.delete(key);
+    }, seconds * 1000);
+    return 1;
+  }
 }
 
 interface ICache {
@@ -36,6 +43,7 @@ interface ICache {
   set(key: string, value: string, mode?: string, duration?: number): Promise<'OK' | string>;
   del(key: string): Promise<number>;
   incr(key: string): Promise<number>;
+  expire(key: string, seconds: number): Promise<number>;
 }
 
 let redisClient: ICache;

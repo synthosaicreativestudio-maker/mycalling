@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
+import { env } from '../../lib/env';
+import { checkRateLimit } from '../../lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    // Rate limit: 3 запроса в минуту (внешний API)
+    const rlResponse = await checkRateLimit(request, 'generate_report', 3, 60);
+    if (rlResponse) return rlResponse;
+
     const { studentName, studentGrade, answers, isDeep } = await request.json();
 
     if (!studentName || !answers) {
@@ -126,8 +132,8 @@ export async function POST(request: Request) {
     );
 
     // 2. Отправляем запрос к языковой модели через ProxyAPI
-    const apiKey = 'fe_oa_8241bb58e1c68cff538eb3076ac734b4de235309d7832f5c';
-    const apiUrl = 'https://api.proxyapi.ru/openai/v1/chat/completions';
+    const apiKey = env.PROXYAPI_KEY;
+    const apiUrl = env.PROXYAPI_URL;
 
     const systemPrompt = `Вы — ведущий мировой эксперт в профориентации подростков и возрастной психологии.
 Ваша задача — проанализировать количественные результаты диагностики способностей, характера и интересов ученика и составить глубокий, вдохновляющий и научно обоснованный отчет.
