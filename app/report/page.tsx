@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Compass, Sparkles, Award, RefreshCw, User, AlertCircle, ArrowLeft, FileText, Download, Loader2, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { HeroOrb } from '../components/HeroOrb';
 
@@ -326,12 +325,6 @@ function ReportPageContent() {
               }`}
             >
               Карта талантов
-              {activeTab === 'talents' && (
-                <motion.div
-                  layoutId="activeReportTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-accent to-[#8b5cf6]"
-                />
-              )}
             </button>
             <button
               onClick={() => setActiveTab('career')}
@@ -340,12 +333,6 @@ function ReportPageContent() {
               }`}
             >
               Карьерный трек
-              {activeTab === 'career' && (
-                <motion.div
-                  layoutId="activeReportTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-accent to-[#8b5cf6]"
-                />
-              )}
             </button>
             <button
               onClick={() => setActiveTab('parent')}
@@ -354,25 +341,15 @@ function ReportPageContent() {
               }`}
             >
               Советы родителям
-              {activeTab === 'parent' && (
-                <motion.div
-                  layoutId="activeReportTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-accent to-[#8b5cf6]"
-                />
-              )}
             </button>
           </div>
 
           {/* Контент вкладок (Простой компактный вид для экрана) */}
-          <AnimatePresence mode="wait">
+          <div className="mt-8">
             {activeTab === 'talents' && (
-              <motion.div
+              <div
                 key="talents"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.22 }}
-                className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]"
+                className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr] animate-fade-in"
               >
                 
                 {/* Левая колонка талантов (Резюме + Интеллекты Гарднера компактно) */}
@@ -480,17 +457,13 @@ function ReportPageContent() {
 
                 </div>
 
-              </motion.div>
+              </div>
             )}
 
             {activeTab === 'career' && (
-              <motion.div
+              <div
                 key="career"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.22 }}
-                className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]"
+                className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr] animate-fade-in"
               >
                 
                 {/* Рекомендованные профессии */}
@@ -545,17 +518,13 @@ function ReportPageContent() {
                   </div>
                 </div>
 
-              </motion.div>
+              </div>
             )}
 
             {activeTab === 'parent' && (
-              <motion.div
+              <div
                 key="parent"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.22 }}
-                className="max-w-4xl mx-auto"
+                className="max-w-4xl mx-auto animate-fade-in"
               >
                 
                 {/* Раздел для родителей */}
@@ -579,9 +548,9 @@ function ReportPageContent() {
                   </div>
                 </div>
 
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
         </div>
 
       </main>

@@ -87,6 +87,15 @@ export const useDiagnosticStore = create<DiagnosticState>()(
               userId: data.data.user_id,
               isOffline: false,
             });
+
+            // Analytics: test_start
+            if (typeof window !== 'undefined' && (window as any).dataLayer) {
+              (window as any).dataLayer.push({
+                event: 'test_start',
+                session_id: data.data.session_id,
+                grade: grade
+              });
+            }
             
             await get().fetchNextQuestion();
           } catch (e) {
@@ -109,6 +118,14 @@ export const useDiagnosticStore = create<DiagnosticState>()(
 
             if (data.data.completed) {
               set({ isCompleted: true, currentQuestion: null, isLoading: false });
+
+              // Analytics: test_completed
+              if (typeof window !== 'undefined' && (window as any).dataLayer) {
+                (window as any).dataLayer.push({
+                  event: 'test_completed',
+                  session_id: sessionId
+                });
+              }
             } else {
               set({
                 currentQuestion: data.data,
