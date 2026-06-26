@@ -21,7 +21,5 @@ export const auth = betterAuth({
       }
     }
   },
-  advanced: {
-    generateId: false // let Prisma handle default UUIDs
-  }
+
 });
