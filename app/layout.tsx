@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Manrope, Prata, Marck_Script } from 'next/font/google';
 import { AnimatedLogo } from './components/AnimatedLogo';
 import { SpaceBackground } from './components/SpaceBackground';
-import { IntroPreloader } from './components/IntroPreloader';
+
 import { ExitIntentPopup } from './components/ExitIntentPopup';
 import { CookieBanner } from './components/CookieBanner';
 import logger from './lib/logger';
@@ -107,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }),
           }}
         />
-        <IntroPreloader />
+
         
         {/* Слой 1: Космический фон (самый нижний) */}
         <SpaceBackground />

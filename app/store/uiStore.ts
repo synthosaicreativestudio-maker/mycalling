@@ -8,6 +8,6 @@ interface UIState {
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  introState: 'moon',
+  introState: 'completed',
   setIntroState: (state) => set({ introState: state }),
 }));

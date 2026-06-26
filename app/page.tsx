@@ -3,10 +3,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ArrowRight, Users, HelpCircle, Shield, BookOpen, Clock, Brain, FileCheck } from 'lucide-react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { useUIStore } from './store/uiStore';
-import { InteractiveTree } from './components/InteractiveTree';
 import { AnimatedLogo } from './components/AnimatedLogo';
 
 /* ═══════════════════════════════════════════════════
@@ -128,149 +125,41 @@ const uspItems = [
 ];
 
 export default function HomePage() {
-  const { introState } = useUIStore();
   const [mounted, setMounted] = useState(false);
-  
-  const { scrollY } = useScroll();
-  const treeScale = useTransform(scrollY, [0, 450], [1.0, 0.92]);
-  const treeOpacity = useTransform(scrollY, [0, 400], [1.0, 0]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const isTransitionStarted = introState === 'transition' || introState === 'completed';
-  const showHeroContent = introState === 'completed';
-
   return (
     <main className="relative z-10 w-full overflow-hidden">
-      
-      {/* Предзагрузка скелета дерева для плавной анимации роста */}
-      {mounted && (
-        <img
-          src="/assets/tree/webp/tree_skeleton.webp"
-          alt=""
-          style={{ display: 'none' }}
-          aria-hidden="true"
-        />
-      )}
       
       {/* ─── HERO SECTION ─── */}
       <section className="relative min-h-screen flex items-center justify-center px-5 md:px-8 pt-32 pb-20">
         
-        {mounted && isTransitionStarted && (
-          <motion.div
-            style={{ opacity: treeOpacity, zIndex: 4 }}
-            initial={{ opacity: 0, y: '-50%' }}
-            animate={{ opacity: 1, y: '-50%' }}
-            transition={{ duration: 1.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-none fixed inset-x-0 top-20 mx-auto hidden h-[54vh] max-w-6xl lg:block"
-          >
-            <div className="h-full w-full bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.82)_38%,rgba(255,255,255,0)_76%)]" />
-          </motion.div>
-        )}
-
         {mounted && (
-          <motion.div
-            layout
-            style={{
-              scale: treeScale,
-              opacity: treeOpacity,
-              zIndex: 5,
-              width: (introState === 'completed' || introState === 'transition')
-                ? undefined
-                : 'min(92vw, 92vh, 1280px)',
-              height: (introState === 'completed' || introState === 'transition')
-                ? undefined
-                : 'min(92vw, 92vh, 1280px)'
-            }}
-            initial={{ opacity: 0, scale: 0.88 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-            className={
-              (introState === 'completed' || introState === 'transition')
-                ? 'pointer-events-auto absolute left-1/2 top-[14%] w-[min(61vw,540px)] -translate-x-1/2 m-0 lg:fixed lg:left-auto lg:right-[3vw] lg:top-1/2 lg:-translate-y-1/2 lg:w-[min(44vw,540px)] lg:translate-x-0 lg:m-0 z-[5]'
-                : 'pointer-events-auto fixed inset-0 m-auto aspect-square z-[5]'
-            }
-          >
-            {/* Дуга земли, привязанная к нижнему краю контейнера дерева */}
-            <AnimatePresence>
-              {!(introState === 'completed' || introState === 'transition') && (
-                <svg
-                  viewBox="0 0 1000 260"
-                  className="absolute left-1/2 bottom-0 w-[min(72vw,72vh,640px)] -translate-x-1/2 translate-y-[38%] z-[6] pointer-events-none"
-                  aria-hidden="true"
-                >
-                  <defs>
-                    <mask id="lineMask">
-                      <motion.path
-                        d="M 82 176 Q 500 112 918 176"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="28"
-                        strokeLinecap="round"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 1.0, ease: 'easeInOut' }}
-                      />
-                    </mask>
-                  </defs>
-                  <motion.path
-                    d="M 82 176 Q 500 112 918 176 Q 500 126 82 176 Z"
-                    fill="rgba(155, 187, 207, 0.76)"
-                    mask="url(#lineMask)"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </svg>
-              )}
-            </AnimatePresence>
-
-            {introState !== 'moon' && <InteractiveTree />}
-          </motion.div>
-        )}
-
-        {mounted && showHeroContent && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+          <div
             className="relative z-10 flex w-full max-w-[90%] flex-col items-start text-left pointer-events-auto pl-[5%] pr-6 md:max-w-[55vw] md:pr-10 lg:pr-0"
           >
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.72, delay: 0.42 }}
+            <p
               className="mb-4 text-[11px] font-bold uppercase tracking-[0.24em] text-[#8aaec4] font-sans"
             >
               Диагностика талантов для школьников
-            </motion.p>
+            </p>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.82, delay: 0.52 }}
+            <h1
               className="w-full text-[2rem] leading-[1.08] font-extrabold text-[#253243] font-sans sm:text-[2.35rem] md:text-[2.85rem] lg:text-[2.25rem] lg:leading-[1.1] lg:whitespace-nowrap"
             >
               Поможем школьнику найти своё призвание
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.82, delay: 0.66 }}
+            <p
               className="mt-6 max-w-[640px] text-[0.98rem] sm:text-[1.08rem] md:text-[1.28rem] leading-relaxed text-[#566679] font-normal font-sans"
             >
               Раскройте сильные стороны ребёнка через 25 минут интерактивной диагностики и получите понятный план развития для всей семьи.
-            </motion.p>
+            </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.82, delay: 0.82 }}
+            <div
               className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center"
             >
               <Link href="/auth" className="cta-glass h-[62px] min-w-[250px] px-8 text-base sm:text-lg">
@@ -278,80 +167,35 @@ export default function HomePage() {
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <span className="text-sm font-semibold text-[#6b7888]">Без длинных анкет и скучных тестов</span>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
 
-        {showHeroContent && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.4 }}
-            transition={{ delay: 2.2, duration: 1 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10"
-          >
-            <div className="w-5 h-8 rounded-full border border-[#1a2536]/20 flex justify-center pt-1.5">
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-                className="w-1 h-1.5 rounded-full bg-[#9bbbcf]"
-              />
-            </div>
-          </motion.div>
-        )}
+        
       </section>
  
       {/* ─── УТП (3 карточки) ─── */}
       <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
-          <motion.div
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.18,
-                },
-              },
-            }}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-100px' }}
+          <div
             className="grid gap-6 sm:grid-cols-3"
           >
             {uspItems.map((item, idx) => (
-              <motion.div
+              <div
                 key={idx}
-                variants={{
-                  hidden: { opacity: 0, y: 60, scale: 0.92, rotateX: 8 },
-                  show: {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    rotateX: 0,
-                    transition: {
-                      type: 'spring',
-                      stiffness: 90,
-                      damping: 14,
-                    },
-                  },
-                }}
                 className="perspective-[1000px]"
               >
                 <UspCard icon={item.icon} title={item.title} text={item.text} />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ─── ДЛЯ КОГО ─── */}
       <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, margin: '-100px' }}
+          <div
             className="space-y-12"
           >
             <div className="text-center space-y-4">
@@ -380,18 +224,14 @@ export default function HomePage() {
                 text="Снимем тревогу вокруг выбора профессии и покажем реальные сильные стороны"
               />
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ─── КАК ЭТО РАБОТАЕТ ─── */}
       <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, margin: '-100px' }}
+          <div
             className="space-y-16"
           >
             <div className="text-center space-y-4">
@@ -403,39 +243,12 @@ export default function HomePage() {
               </h2>
             </div>
 
-            <motion.div 
-              className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4"
-              variants={{
-                hidden: { opacity: 0 },
-                show: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.15,
-                  }
-                }
-              }}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-100px" }}
-            >
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {howItWorks.map((item) => {
                 const StepIcon = item.icon;
                 return (
-                  <motion.div
+                  <div
                     key={item.step}
-                    variants={{
-                      hidden: { opacity: 0, y: 40, scale: 0.95 },
-                      show: { 
-                        opacity: 1, 
-                        y: 0, 
-                        scale: 1,
-                        transition: {
-                          type: "spring",
-                          stiffness: 100,
-                          damping: 15
-                        }
-                      }
-                    }}
                     className="glass-card rounded-[22px] p-6 text-center space-y-4 hover:border-[#9bbbcf]/40 hover:shadow-[0_16px_36px_rgba(88,116,138,0.08)] transition-all duration-300"
                   >
                     <div className="mx-auto w-12 h-12 rounded-2xl bg-[#9bbbcf]/10 flex items-center justify-center">
@@ -450,10 +263,10 @@ export default function HomePage() {
                     <p className="text-sm text-[#5e6b7e] leading-relaxed font-sans">
                       {item.text}
                     </p>
-                  </motion.div>
+                  </div>
                 );
               })}
-            </motion.div>
+            </div>
 
             <div className="text-center pt-4">
               <Link href="/auth" className="cta-glass h-[60px] min-w-[240px] px-8 text-base">
@@ -461,18 +274,14 @@ export default function HomePage() {
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ─── SOCIAL PROOF ─── */}
       <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, margin: '-100px' }}
+          <div
             className="space-y-12"
           >
             <div className="text-center space-y-4">
@@ -509,18 +318,14 @@ export default function HomePage() {
                 Мы собираем минимум информации, не передаём её третьим лицам и используем исключительно для формирования персонального отчёта. Все данные защищены.
               </p>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ─── ОТЗЫВЫ И КЕЙСЫ ─── */}
       <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, margin: '-100px' }}
+          <div
             className="space-y-12"
           >
             <div className="text-center space-y-4">
@@ -546,18 +351,14 @@ export default function HomePage() {
                 text="Очень удобный формат. Дочь прошла тест за 20 минут с телефона, а я получила PDF-отчет с подробным анализом. Это сняло столько напряжения в семье перед экзаменами!"
               />
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
       <section className="px-6 lg:px-10 py-24 lg:py-32 relative z-10 bg-transparent">
         <div className="mx-auto max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true, margin: '-100px' }}
+          <div
             className="space-y-12"
           >
             <div className="text-center space-y-4">
@@ -581,7 +382,7 @@ export default function HomePage() {
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -592,7 +393,6 @@ export default function HomePage() {
             <div className="flex items-center gap-6">
               <AnimatedLogo
                 showText={true}
-                animate={false}
                 className="h-8 w-auto opacity-60"
               />
               <span className="text-xs text-[#5e6b7e] font-sans">
@@ -633,19 +433,13 @@ function UspCard({ icon, title, text }: { icon: ReactNode; title: string; text: 
 
 function ForWhomCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 }
-      }}
-      className="glass-card rounded-[22px] p-6 space-y-4"
-    >
+    <div className="glass-card rounded-[22px] p-6 space-y-4">
       <div className="w-12 h-12 rounded-2xl bg-white/60 border border-white/80 flex items-center justify-center shadow-sm">
         {icon}
       </div>
       <h3 className="text-lg font-bold text-[#253243] font-sans">{title}</h3>
       <p className="text-sm text-[#5e6b7e] leading-relaxed font-sans">{text}</p>
-    </motion.div>
+    </div>
   );
 }
 
@@ -663,34 +457,28 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <motion.div
+    <div
       className="glass-card rounded-[18px] overflow-hidden"
-      initial={false}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-5 text-left"
       >
         <span className="text-sm font-semibold text-[#253243] pr-4">{question}</span>
-        <motion.span
-          animate={{ rotate: isOpen ? 45 : 0 }}
-          transition={{ duration: 0.2 }}
-          className="text-[#8aaec4] text-xl font-light flex-shrink-0"
+        <span
+          className={`text-[#8aaec4] text-xl font-light flex-shrink-0 transition-transform ${isOpen ? "rotate-45" : ""}`}
         >
           +
-        </motion.span>
+        </span>
       </button>
-      <motion.div
-        initial={false}
-        animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="overflow-hidden"
+      <div
+        className={`overflow-hidden ${isOpen ? "block" : "hidden"}`}
       >
         <p className="px-5 pb-5 text-sm text-[#5e6b7e] leading-relaxed">
           {answer}
         </p>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
