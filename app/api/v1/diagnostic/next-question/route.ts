@@ -40,11 +40,12 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Сессия не найдена' }, { status: 404 });
       }
 
+      const user = session.user as any;
       sessionData = {
         sessionId: session.sessionId,
         userId: session.userId,
-        username: session.user.name,
-        grade: session.user.grade,
+        username: user.name,
+        grade: user.grade,
         testId: session.testId,
         fraudPoints: 0,
       };

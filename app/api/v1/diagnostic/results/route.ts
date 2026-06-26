@@ -91,6 +91,7 @@ export async function GET(request: Request) {
     if (!session) {
       return NextResponse.json({ error: 'Сессия не найдена' }, { status: 404 });
     }
+    const sessionUser = session.user as any;
 
     // 3. Загружаем все ответы пользователя по этой сессии
     const answers = await prisma.userDiagnosticAnswer.findMany({
@@ -224,7 +225,7 @@ ${isDeep ? `2. Big Five (Характер): Свяжите личностные 
 
 Вы должны ответить СТРОГО в формате JSON. Не пишите никаких других текстов, кроме валидного JSON-объекта со следующей структурой:
 {
-  "studentName": "${session.user.name}",
+  "studentName": "${sessionUser.name}",
   "heroSummary": ["Два емких, премиальных предложения с главным резюме потенциала ученика."],
   "personalityTraits": [
     {
@@ -257,7 +258,7 @@ ${isDeep ? `2. Big Five (Характер): Свяжите личностные 
   "parentSummary": ["Совет для родителей №1", "Совет для родителей №2", "Совет для родителей №3"]
 }`;
 
-    const userPrompt = `Имя ученика: ${session.user.name}. Класс: ${session.user.grade}.
+    const userPrompt = `Имя ученика: ${sessionUser.name}. Класс: ${sessionUser.grade}.
 Результаты стандартизации (Стены 1-10):
 - Интересы (RIASEC): ${JSON.stringify(riasecStens)}
 ${isDeep ? `- Характер (Big Five): ${JSON.stringify(bigFiveStens)}

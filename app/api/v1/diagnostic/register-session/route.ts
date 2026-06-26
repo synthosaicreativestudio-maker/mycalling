@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     if (!session || !session.user) {
       return NextResponse.json({ error: 'Требуется авторизация' }, { status: 401 });
     }
+    const user = session.user as any;
 
     const { is_deep } = await request.json().catch(() => ({ is_deep: true }));
     const isDeep = is_deep !== false;
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     // 2. Создаем сессию диагностики. Начинаем с riasec
     const diagnosticSession = await prisma.diagnosticSession.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         testId: 'riasec',
         status: 'in_progress',
       },
@@ -35,9 +36,9 @@ export async function POST(request: Request) {
     // 3. Кэшируем сессию в Redis (для быстрого доступа на 2 часа)
     const sessionData = {
       sessionId: diagnosticSession.sessionId,
-      userId: session.user.id,
-      username: session.user.name,
-      grade: session.user.grade || 8, // Если нет класса, по умолчанию 8
+      userId: user.id,
+      username: user.name,
+      grade: user.grade || 8,
       testId: 'riasec',
       isDeep,
       fraudPoints: 0,
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
       success: true,
       data: {
         session_id: diagnosticSession.sessionId,
-        user_id: session.user.id,
+        user_id: user.id,
         test_id: 'riasec',
       },
     });
