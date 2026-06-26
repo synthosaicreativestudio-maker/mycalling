@@ -1,29 +1,81 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
 model User {
-  userId     String              @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
-  username   String              @db.VarChar(100)
-  grade      Int
-  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz
-  sessions   DiagnosticSession[]
-  results    DiagnosticResult[]
+  id            String              @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
+  name          String              @map("username") @db.VarChar(100)
+  email         String              @unique
+  emailVerified Boolean             @default(false) @map("email_verified")
+  image         String?
+  grade         Int?
+  createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sessions      Session[]
+  accounts      Account[]
+  
+  diagnosticResults   DiagnosticResult[]
+  diagnosticSessions  DiagnosticSession[]
 
   @@map("users")
 }
 
+model Session {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  expiresAt DateTime @map("expires_at")
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id") @db.Uuid
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("verification")
+}
+
 model DiagnosticTest {
-  testId         String               @id @map("test_id") @db.VarChar(50) // 'riasec', 'big_five', 'career_anchors'
+  testId         String               @id @map("test_id") @db.VarChar(50)
   title          String               @db.VarChar(150)
   totalQuestions Int                  @map("total_questions")
-  description    String?              @db.Text
+  description    String?
   questions      DiagnosticQuestion[]
   sessions       DiagnosticSession[]
 
@@ -33,11 +85,11 @@ model DiagnosticTest {
 model DiagnosticQuestion {
   questionId         String                 @id @map("question_id") @db.VarChar(50)
   testId             String                 @map("test_id") @db.VarChar(50)
-  questionText       String                 @map("question_text") @db.Text
+  questionText       String                 @map("question_text")
   scaleCode          String                 @map("scale_code") @db.VarChar(10)
   isReverse          Boolean                @default(false) @map("is_reverse")
   visualAssetUrl     String                 @map("visual_asset_url") @db.VarChar(255)
-  aiGenerationPrompt String?                @map("ai_generation_prompt") @db.Text
+  aiGenerationPrompt String?                @map("ai_generation_prompt")
   test               DiagnosticTest         @relation(fields: [testId], references: [testId], onDelete: Cascade)
   answers            UserDiagnosticAnswer[]
 
@@ -48,28 +100,28 @@ model DiagnosticSession {
   sessionId String                 @id @default(dbgenerated("gen_random_uuid()")) @map("session_id") @db.Uuid
   userId    String                 @map("user_id") @db.Uuid
   testId    String                 @map("test_id") @db.VarChar(50)
-  status    String                 @default("in_progress") @db.VarChar(20) // 'in_progress', 'completed', 'abandoned'
-  startedAt DateTime               @default(now()) @map("started_at") @db.Timestamptz
-  updatedAt DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
-  user      User                   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  test      DiagnosticTest         @relation(fields: [testId], references: [testId])
-  answers   UserDiagnosticAnswer[]
+  status    String                 @default("in_progress") @db.VarChar(20)
+  startedAt DateTime               @default(now()) @map("started_at") @db.Timestamptz(6)
+  updatedAt DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   results   DiagnosticResult[]
+  test      DiagnosticTest         @relation(fields: [testId], references: [testId])
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers   UserDiagnosticAnswer[]
 
   @@map("diagnostic_sessions")
 }
 
 model UserDiagnosticAnswer {
-  answerId         BigInt             @id @default(autoincrement()) @map("answer_id")
-  sessionId        String             @map("session_id") @db.Uuid
-  questionId       String             @map("question_id") @db.VarChar(50)
-  rawAnswerValue   Int                @map("raw_answer_value")
-  timeSpentMs      Int                @map("time_spent_ms")
-  isFraud          Boolean            @default(false) @map("is_fraud")
-  isFastClick      Boolean            @default(false) @map("is_fast_click")
-  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz
-  session          DiagnosticSession  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
-  question         DiagnosticQuestion @relation(fields: [questionId], references: [questionId])
+  answerId       BigInt             @id @default(autoincrement()) @map("answer_id")
+  sessionId      String             @map("session_id") @db.Uuid
+  questionId     String             @map("question_id") @db.VarChar(50)
+  rawAnswerValue Int                @map("raw_answer_value")
+  timeSpentMs    Int                @map("time_spent_ms")
+  isFraud        Boolean            @default(false) @map("is_fraud")
+  isFastClick    Boolean            @default(false) @map("is_fast_click")
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  question       DiagnosticQuestion @relation(fields: [questionId], references: [questionId])
+  session        DiagnosticSession  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
 
   @@unique([sessionId, questionId])
   @@map("user_diagnostic_answers")
@@ -79,12 +131,12 @@ model DiagnosticResult {
   resultId       String            @id @default(dbgenerated("gen_random_uuid()")) @map("result_id") @db.Uuid
   userId         String            @map("user_id") @db.Uuid
   sessionId      String            @map("session_id") @db.Uuid
-  calculatedAt   DateTime          @default(now()) @map("calculated_at") @db.Timestamptz
+  calculatedAt   DateTime          @default(now()) @map("calculated_at") @db.Timestamptz(6)
   validityIndex  Decimal           @map("validity_index") @db.Decimal(3, 2)
   rawScores      Json              @map("raw_scores")
   standardScores Json              @map("standard_scores")
-  user           User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
   session        DiagnosticSession @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("diagnostic_results")
 }

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
 import { checkRateLimit } from '../../../../lib/rate-limit';
+import { auth } from '../../../../lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -10,31 +11,22 @@ export async function POST(request: Request) {
     const rlResponse = await checkRateLimit(request, 'register_session', 5, 60);
     if (rlResponse) return rlResponse;
 
-    const { username, grade, is_deep } = await request.json();
-
-    if (!username || typeof username !== 'string' || username.length < 2 || username.length > 50) {
-      return NextResponse.json({ error: 'Имя должно содержать от 2 до 50 символов' }, { status: 400 });
-    }
-
-    const gradeNum = parseInt(grade, 10);
-    if (isNaN(gradeNum) || gradeNum < 8 || gradeNum > 11) {
-      return NextResponse.json({ error: 'Класс должен быть от 8 до 11' }, { status: 400 });
-    }
-
-    const isDeep = is_deep !== false; // Дефолт true
-
-    // 1. Создаем или находим пользователя
-    const user = await prisma.user.create({
-      data: {
-        username,
-        grade: gradeNum,
-      },
+    // Авторизация пользователя через Better Auth
+    const session = await auth.api.getSession({
+      headers: await headers()
     });
 
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Требуется авторизация' }, { status: 401 });
+    }
+
+    const { is_deep } = await request.json().catch(() => ({ is_deep: true }));
+    const isDeep = is_deep !== false;
+
     // 2. Создаем сессию диагностики. Начинаем с riasec
-    const session = await prisma.diagnosticSession.create({
+    const diagnosticSession = await prisma.diagnosticSession.create({
       data: {
-        userId: user.userId,
+        userId: session.user.id,
         testId: 'riasec',
         status: 'in_progress',
       },
@@ -42,40 +34,48 @@ export async function POST(request: Request) {
 
     // 3. Кэшируем сессию в Redis (для быстрого доступа на 2 часа)
     const sessionData = {
-      sessionId: session.sessionId,
-      userId: user.userId,
-      username,
-      grade: gradeNum,
+      sessionId: diagnosticSession.sessionId,
+      userId: session.user.id,
+      username: session.user.name,
+      grade: session.user.grade || 8, // Если нет класса, по умолчанию 8
       testId: 'riasec',
       isDeep,
       fraudPoints: 0,
     };
+    
     await redisClient.set(
-      `session:${session.sessionId}`,
+      `session:${diagnosticSession.sessionId}`,
       JSON.stringify(sessionData),
       'EX',
       7200
     );
 
-    // 4. Устанавливаем HttpOnly cookie для подтверждения владения сессией
-    cookies().set('diagnostic_session_id', session.sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7200, // 2 часа
-    });
-
-    return NextResponse.json({
-      status: 'success',
+    // 4. Устанавливаем HttpOnly cookie для подтверждения владения сессией диагностики
+    const res = NextResponse.json({
+      success: true,
       data: {
-        session_id: session.sessionId,
-        user_id: user.userId,
-        test_type: 'riasec',
+        session_id: diagnosticSession.sessionId,
+        user_id: session.user.id,
+        test_id: 'riasec',
       },
     });
+
+    res.cookies.set({
+      name: 'diagnostic_session_id',
+      value: diagnosticSession.sessionId,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7200, // 2 часа
+      path: '/',
+    });
+
+    return res;
   } catch (error: any) {
     console.error('Ошибка регистрации сессии:', error);
-    return NextResponse.json({ error: 'Внутренняя ошибка сервера' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Внутренняя ошибка сервера' },
+      { status: 500 }
+    );
   }
 }

@@ -77,7 +77,7 @@ export const useDiagnosticStore = create<DiagnosticState>()(
             const res = await fetch('/api/v1/diagnostic/register-session', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username, grade }),
+              body: JSON.stringify({ is_deep: true }),
             });
             if (!res.ok) throw new Error('Ошибка регистрации сессии');
             const data = await res.json();
