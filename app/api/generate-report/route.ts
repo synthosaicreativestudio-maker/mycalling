@@ -190,31 +190,54 @@ export async function POST(request: Request) {
 
 Составь отчет по этим данным и верни строго JSON.`;
 
-    const aiResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-7',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.35,
-        response_format: { type: 'json_object' },
-      }),
-    });
+    const modelsToTry = [
+      'claude-opus-4-7', 
+      'gpt-4o', 
+      'claude-3-5-sonnet-20241022' // Резервные модели
+    ];
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('Ошибка ProxyAPI:', errorText);
-      throw new Error(`ProxyAPI returned status ${aiResponse.status}`);
+    let resultJson = null;
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        console.log(`Пробуем сгенерировать отчет через модель: ${modelName}`);
+        const aiResponse = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: modelName,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+            temperature: 0.35,
+            response_format: { type: 'json_object' },
+          }),
+        });
+
+        if (!aiResponse.ok) {
+          const errorText = await aiResponse.text();
+          console.error(`Ошибка ProxyAPI (${modelName}):`, errorText);
+          throw new Error(`ProxyAPI returned status ${aiResponse.status} for ${modelName}`);
+        }
+
+        const aiData = await aiResponse.json();
+        resultJson = JSON.parse(aiData.choices[0].message.content);
+        break; // Успех! Выходим из цикла
+      } catch (e: any) {
+        console.warn(`Модель ${modelName} недоступна или вернула ошибку. Переход к следующей...`);
+        lastError = e;
+      }
     }
 
-    const aiData = await aiResponse.json();
-    const resultJson = JSON.parse(aiData.choices[0].message.content);
+    if (!resultJson) {
+      // Если ни одна модель не справилась
+      throw lastError || new Error('Все резервные ИИ-модели недоступны');
+    }
 
     return NextResponse.json(resultJson);
   } catch (error: any) {
