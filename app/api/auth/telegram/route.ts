@@ -72,7 +72,7 @@ export async function GET(request: Request) {
     await prisma.session.create({
       data: {
         token: sessionToken,
-        userId: userId,
+        userId: userId as string,
         expiresAt: expiresAt,
         ipAddress: request.headers.get('x-forwarded-for') || null,
         userAgent: request.headers.get('user-agent') || null,
