@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowRight, Fingerprint, Send, Mail, Lock, User, GraduationCap } from 'lucide-react';
-import { authClient } from '../../lib/auth-client';
+import { authClient } from '../lib/auth-client';
 import { useDiagnosticStore } from '../store/diagnosticStore';
 import TelegramLoginWidget from '../components/TelegramLoginWidget';
 

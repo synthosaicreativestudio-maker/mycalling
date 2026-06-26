@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import prisma from '../../../../lib/prisma';
-import { auth } from '../../../../lib/auth';
+import prisma from '../../../lib/prisma';
+import { auth } from '../../../lib/auth';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8701463375:AAEQxV563Y7P5Anfm0tK1o1CvjmeC2TnEyg';
 
