@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       sessionData = {
         sessionId: session.sessionId,
         userId: session.userId,
-        username: session.user.username,
+        username: session.user.name,
         grade: session.user.grade,
         testId: session.testId,
         fraudPoints: 0,

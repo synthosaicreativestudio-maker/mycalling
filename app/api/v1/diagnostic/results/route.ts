@@ -224,7 +224,7 @@ ${isDeep ? `2. Big Five (Характер): Свяжите личностные 
 
 Вы должны ответить СТРОГО в формате JSON. Не пишите никаких других текстов, кроме валидного JSON-объекта со следующей структурой:
 {
-  "studentName": "${session.user.username}",
+  "studentName": "${session.user.name}",
   "heroSummary": ["Два емких, премиальных предложения с главным резюме потенциала ученика."],
   "personalityTraits": [
     {
@@ -257,7 +257,7 @@ ${isDeep ? `2. Big Five (Характер): Свяжите личностные 
   "parentSummary": ["Совет для родителей №1", "Совет для родителей №2", "Совет для родителей №3"]
 }`;
 
-    const userPrompt = `Имя ученика: ${session.user.username}. Класс: ${session.user.grade}.
+    const userPrompt = `Имя ученика: ${session.user.name}. Класс: ${session.user.grade}.
 Результаты стандартизации (Стены 1-10):
 - Интересы (RIASEC): ${JSON.stringify(riasecStens)}
 ${isDeep ? `- Характер (Big Five): ${JSON.stringify(bigFiveStens)}
