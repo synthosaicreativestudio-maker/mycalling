@@ -47,6 +47,7 @@ export default function AssessmentPage() {
         setMode(store.offlineAnswersBuffer.length > 0 || store.currentQuestion?.test_type !== 'riasec' ? 'deep' : 'deep');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, store.sessionId]);
 
   // Запуск таймера при появлении вопроса
@@ -54,6 +55,7 @@ export default function AssessmentPage() {
     if (store.currentQuestion) {
       questionStartTime.current = Date.now();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.currentQuestion?.question_id]);
 
   // Следим за переходом между блоками
@@ -98,6 +100,7 @@ export default function AssessmentPage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.currentQuestion, store.lockdownTimeLeft, store.isLoading, showTransition, mode, lastSelectedValue]);
 
   const handleChooseAnswer = async (value: number) => {

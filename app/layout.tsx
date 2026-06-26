@@ -31,7 +31,7 @@ const marckScript = Marck_Script({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://moeprizvanie.ru'),
+  metadataBase: new URL('https://synthosai.ru'),
   title: 'МоёПризвание — диагностика талантов для школьников',
   description: 'Определи свой путь. Глубокая диагностика талантов, характера и интересов за 25 минут. Понятный отчёт с рекомендациями по профессиям для школьников 8–11 классов.',
   keywords: ['профориентация', 'диагностика талантов', 'тест на профессию', 'школьник', 'выбор профессии', 'RIASEC', 'Big Five'],
@@ -68,25 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" className={`${manrope.variable} ${prata.variable} ${marckScript.variable}`}>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // GA4 Placeholder
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-XXXXXXXXXX');
 
-              // Yandex Metrika Placeholder
-              (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-              m[i].l=1*new Date();
-              for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-              k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-              (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-              ym(99999999, "init", { clickmap:true, trackLinks:true, accurateTrackBounce:true });
-            `,
-          }}
-        />
       </head>
       <body className="relative min-h-screen bg-transparent text-[#1a2536]">
         <script
@@ -96,7 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "name": "МоёПризвание",
-              "url": "https://moeprizvanie.ru",
+              "url": "https://synthosai.ru",
               "applicationCategory": "EducationalApplication",
               "operatingSystem": "All",
               "offers": {

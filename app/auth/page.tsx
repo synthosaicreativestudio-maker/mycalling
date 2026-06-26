@@ -13,10 +13,15 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [grade, setGrade] = useState('8');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      setError(true);
+      return;
+    }
+    setError(false);
 
     setLoading(true);
     setTimeout(() => {
@@ -106,9 +111,19 @@ export default function AuthPage() {
                 required
                 placeholder="Как тебя зовут?"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="input-shell w-full h-[56px] px-5 rounded-2xl text-text"
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (error) setError(false);
+                }}
+                className={`input-shell w-full h-[56px] px-5 rounded-2xl text-text transition ${
+                  error ? 'border-red-500/50 bg-red-500/5 focus:border-red-500/80' : ''
+                }`}
               />
+              {error && (
+                <p className="text-xs text-red-400 mt-1.5 animate-pulse">
+                  Пожалуйста, введи своё имя
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

@@ -6,18 +6,16 @@
 function getEnvOrThrow(key: string): string {
   const value = process.env[key];
   if (!value) {
-    // В мягком режиме не крашим процесс, а только пишем ворнинг
     if (
-      process.env.npm_lifecycle_event !== 'build' &&
-      process.env.VERCEL !== '1' &&
-      process.env.NEXT_PHASE !== 'phase-production-build'
+      process.env.npm_lifecycle_event === 'build' ||
+      process.env.NEXT_PHASE === 'phase-production-build'
     ) {
-      console.warn(
-        `⚠️ Внимание: Отсутствует переменная окружения: ${key}. ` +
-        `Убедитесь, что добавили её в .env или в настройки Vercel.`
-      );
+      // Во время сборки на Vercel (без подключения к БД) пишем ворнинг, чтобы сборка не падала
+      console.warn(`⚠️ Внимание: Отсутствует переменная окружения при сборке: ${key}`);
+      return '';
     }
-    return ''; // Возвращаем пустую строку вместо ошибки
+    // В рантайме всегда падаем
+    throw new Error(`CRITICAL: Отсутствует переменная окружения: ${key}. Убедитесь, что добавили её в .env или в настройки сервера.`);
   }
   return value;
 }
