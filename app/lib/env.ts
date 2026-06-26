@@ -6,18 +6,18 @@
 function getEnvOrThrow(key: string): string {
   const value = process.env[key];
   if (!value) {
-    // Не крашим процесс во время сборки статики (Vercel / Next.js)
+    // В мягком режиме не крашим процесс, а только пишем ворнинг
     if (
-      process.env.npm_lifecycle_event === 'build' ||
-      process.env.VERCEL === '1' ||
-      process.env.NEXT_PHASE === 'phase-production-build'
+      process.env.npm_lifecycle_event !== 'build' &&
+      process.env.VERCEL !== '1' &&
+      process.env.NEXT_PHASE !== 'phase-production-build'
     ) {
-      return '';
+      console.warn(
+        `⚠️ Внимание: Отсутствует переменная окружения: ${key}. ` +
+        `Убедитесь, что добавили её в .env или в настройки Vercel.`
+      );
     }
-    throw new Error(
-      `❌ Отсутствует обязательная переменная окружения: ${key}. ` +
-      `Добавьте её в .env файл или задайте в окружении сервера.`
-    );
+    return ''; // Возвращаем пустую строку вместо ошибки
   }
   return value;
 }
