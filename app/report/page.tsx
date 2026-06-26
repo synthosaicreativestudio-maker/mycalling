@@ -161,7 +161,7 @@ function ReportPageContent() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 py-12 relative z-10">
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] border border-white/10 bg-[#0b1125]/75 p-12 text-center backdrop-blur-xl shadow-glow relative overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40 mix-blend-screen scale-75">
             <HeroOrb />
@@ -187,7 +187,7 @@ function ReportPageContent() {
 
   if (error) {
     return (
-      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 py-12 relative z-10">
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] border border-red-500/20 bg-[#0b1125]/75 p-10 text-center backdrop-blur-xl shadow-[0_0_50px_rgba(239,68,68,0.05)]">
           <div className="relative z-10 flex flex-col items-center space-y-6">
             <AlertCircle className="h-16 w-16 text-red-500" />
@@ -742,7 +742,7 @@ function ReportPageContent() {
 export default function ReportPage() {
   return (
     <Suspense fallback={
-      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 py-12 relative z-10">
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] border border-white/10 bg-[#0b1125]/75 p-12 text-center backdrop-blur-xl shadow-glow relative overflow-hidden animate-pulse">
           <Loader2 className="h-16 w-16 animate-spin text-[#7c8cff] opacity-80 mx-auto" />
           <h1 className="text-xl font-bold font-unbounded text-white mt-4">Загрузка отчета...</h1>

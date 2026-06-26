@@ -28,8 +28,8 @@ export function AnimatedLogo({
   const { introState } = useUIStore();
 
   const containerClasses = isVertical
-    ? 'flex flex-col items-center justify-center text-center gap-6'
-    : 'flex items-center gap-3';
+    ? 'flex flex-col items-center justify-center text-center gap-6 w-fit'
+    : 'flex items-center gap-3 w-fit';
 
   // Если это шапка, логотип скрыт до начала перехода (transition)
   const isVisible = !isHeader || (introState === 'transition' || introState === 'completed');

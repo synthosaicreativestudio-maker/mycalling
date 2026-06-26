@@ -125,7 +125,7 @@ export default function AssessmentPage() {
   // 1. Оверлей фрод-локдауна (Click-Speed Lock)
   if (store.lockdownTimeLeft > 0) {
     return (
-      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-xl flex-col justify-center px-6 py-12 relative z-10">
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] border border-red-500/20 bg-[#0f0b15]/90 p-10 text-center backdrop-blur-xl shadow-[0_0_50px_rgba(239,68,68,0.15)] relative overflow-hidden animate-pulse">
           <div className="relative z-10 flex flex-col items-center space-y-6">
             <div className="relative">
@@ -149,7 +149,7 @@ export default function AssessmentPage() {
   // 2. Стартовый экран выбора режима
   if (mode === 'none') {
     return (
-      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-4xl flex-col justify-center px-6 py-12 relative z-10">
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-4xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="text-center space-y-4 mb-10">
           <h1 className="text-3xl font-extrabold font-unbounded text-text sm:text-4xl lg:text-5xl leading-tight">
             Выберите формат диагностики
@@ -170,16 +170,16 @@ export default function AssessmentPage() {
                 <Zap className="h-6 w-6" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold font-unbounded text-text group-hover:text-[#7c8cff] transition">
+                <h3 className="text-2xl font-bold font-unbounded text-white group-hover:text-[#7c8cff] transition">
                   Экспресс-тест
                 </h3>
-                <p className="text-sm text-muted font-inter leading-relaxed">
+                <p className="text-sm text-slate-300 font-inter leading-relaxed">
                   30 вопросов по методике RIASEC (коды Холланда). Быстрое определение твоих основных профессиональных интересов.
                 </p>
               </div>
             </div>
             <div className="mt-8 flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider text-muted font-syncopate">~4 минуты</span>
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-syncopate">~4 минуты</span>
               <span className="text-sm font-semibold text-[#7c8cff] inline-flex items-center gap-1.5 group-hover:translate-x-1.5 transition">
                 Запустить
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -199,16 +199,16 @@ export default function AssessmentPage() {
                 <Award className="h-6 w-6" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold font-unbounded text-text group-hover:text-[#8b5cf6] transition">
+                <h3 className="text-2xl font-bold font-unbounded text-white group-hover:text-[#8b5cf6] transition">
                   Комплексный тест
                 </h3>
-                <p className="text-sm text-muted font-inter leading-relaxed">
+                <p className="text-sm text-slate-300 font-inter leading-relaxed">
                   84 вопроса: глубокий анализ твоих интересов (RIASEC) + характера (Big Five) + ведущих карьерных ориентиров («Якоря карьеры» Э. Шейна).
                 </p>
               </div>
             </div>
             <div className="mt-8 flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider text-muted font-syncopate">~15 минут</span>
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-syncopate">~15 минут</span>
               <span className="text-sm font-semibold text-[#8b5cf6] inline-flex items-center gap-1.5 group-hover:translate-x-1.5 transition">
                 Запустить
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -225,7 +225,7 @@ export default function AssessmentPage() {
   // 3. Лоадер при загрузке вопросов
   if (store.isLoading) {
     return (
-      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 py-12 relative z-10">
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] border border-white/10 bg-[#0b1125]/75 p-8 text-center backdrop-blur-xl shadow-glow relative overflow-hidden">
           <div className="relative z-10 flex flex-col items-center space-y-8">
             <Loader2 className="h-16 w-16 animate-spin text-[#7c8cff] opacity-80" />

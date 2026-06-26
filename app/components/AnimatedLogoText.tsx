@@ -118,12 +118,12 @@ export function AnimatedLogoText({
   ];
 
   return (
-    <div className={`relative select-none ${className}`}>
+    <div className={`relative select-none w-fit ${className}`}>
       <svg
         viewBox="0 0 740 160"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="h-full w-full overflow-visible"
+        className="h-full w-auto overflow-visible"
       >
         <defs>
           {/* Базовый градиент для темно-графитовых букв: деликатный световой переход */}
