@@ -318,12 +318,12 @@ export default function CoachPage() {
                         <div className="flex flex-col items-center p-3 bg-white/90 rounded-lg border border-[#8c6e4b]/10 text-center space-y-2">
                           <span className="text-[11px] font-bold text-[#253243]">Через MAX ID</span>
                           <img 
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://t.me/maxid_bot')}&color=140-110-75`} 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://max.ru/maxid_bot')}&color=140-110-75`} 
                             alt="MAX ID QR" 
                             className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
                           />
                           <a 
-                            href={isMobile ? "tg://resolve?domain=maxid_bot" : "https://t.me/maxid_bot"} 
+                            href={isMobile ? "max://maxid_bot" : "https://max.ru/maxid_bot"} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-[10px] text-[#8c6e4b] hover:underline font-bold"

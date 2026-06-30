@@ -25,11 +25,11 @@ function AuthCard() {
   }, []);
 
   const telegramBotLink = isMobile ? "tg://resolve?domain=moyoprizvanie_bot" : "https://t.me/moyoprizvanie_bot";
-  const maxIdLink = isMobile ? "tg://resolve?domain=maxid_bot" : "https://t.me/maxid_bot";
+  const maxIdLink = isMobile ? "max://maxid_bot" : "https://max.ru/maxid_bot";
 
   // Динамические QR-коды
   const qrTelegramLink = "https://t.me/moyoprizvanie_bot";
-  const qrMaxIdLink = "https://t.me/maxid_bot";
+  const qrMaxIdLink = "https://max.ru/maxid_bot";
   const telegramQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrTelegramLink)}&color=34-158-217`;
   const maxIdQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrMaxIdLink)}&color=139-92-246`;
 
