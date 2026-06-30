@@ -10,7 +10,7 @@ export function SpaceBackground() {
   }, []);
 
   if (!mounted) {
-    return <div className="fixed inset-0 -z-50 bg-[#f7faf8]" />;
+    return <div className="fixed inset-0 -z-50 bg-[#fdfcfb]" />;
   }
 
   const linesCount = 6;
@@ -49,9 +49,9 @@ export function SpaceBackground() {
   });
 
   return (
-    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#f7faf8] print:hidden">
+    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#fdfcfb] print:hidden">
       <div 
-        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-70"
+        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-30"
         style={{ backgroundImage: 'url(/assets/backgrounds/light-bg2.webp)' }}
       />
       
