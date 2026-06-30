@@ -98,13 +98,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="site-header print:hidden">
           <div className="site-header-inner">
             <div className="mx-auto max-w-7xl px-6 lg:px-10">
-              <div className="flex items-center justify-between py-4">
+              <div className="flex items-center justify-between py-2">
                 <Link href="/" className="flex items-center transition hover:opacity-90">
                   <AnimatedLogo
                     showText={true}
                     animate={true}
                     isHeader={true}
-                    className="h-12 md:h-16 w-auto"
+                    className="w-auto"
                   />
                 </Link>
                 
