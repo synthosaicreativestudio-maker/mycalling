@@ -10,6 +10,16 @@ interface Message {
   content: string;
 }
 
+const STEP_NAMES: Record<number, string> = {
+  0: 'Подготовка к диалогу',
+  1: 'Пре-квалификация',
+  2: 'Знакомство',
+  3: 'Исследование личности',
+  4: 'Проверка гипотез',
+  5: 'Предварительный профиль',
+  6: 'Подведение итогов'
+};
+
 export default function CoachPage() {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -139,8 +149,9 @@ export default function CoachPage() {
             <Brain className="h-5 w-5 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-sm font-bold font-sans text-text">Нейрокоуч-сессия</h2>
-            <p className="text-xs text-muted">Шаг {step + 1} из 6: Исследуем ваши таланты</p>
+            <h2 className="text-sm font-bold font-sans text-text">
+              Шаг {step} из 6: {STEP_NAMES[step] || 'Знакомство'}
+            </h2>
           </div>
         </div>
         <div className="flex items-center gap-3">
