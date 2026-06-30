@@ -29,6 +29,16 @@ export default function CoachPage() {
   const [step, setStep] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = typeof window !== 'undefined' ? navigator.userAgent || navigator.vendor || (window as any).opera : '';
+      return /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+    };
+    setIsMobile(checkMobile());
+  }, []);
+  
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Инициализация первой реплики коуча
@@ -296,7 +306,7 @@ export default function CoachPage() {
                             className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
                           />
                           <a 
-                            href="https://t.me/moyoprizvanie_bot" 
+                            href={isMobile ? "tg://resolve?domain=moyoprizvanie_bot" : "https://t.me/moyoprizvanie_bot"} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-[10px] text-[#8c6e4b] hover:underline font-bold"
@@ -313,7 +323,7 @@ export default function CoachPage() {
                             className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
                           />
                           <a 
-                            href="https://t.me/maxid_bot" 
+                            href={isMobile ? "tg://resolve?domain=maxid_bot" : "https://t.me/maxid_bot"} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-[10px] text-[#8c6e4b] hover:underline font-bold"

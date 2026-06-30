@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Send, Fingerprint, QrCode, ExternalLink, AlertCircle } from 'lucide-react';
@@ -14,12 +14,24 @@ function AuthCard() {
   const errorParam = searchParams.get('error');
   const isRegisterDenied = errorParam === 'register_denied';
 
-  const telegramBotLink = "https://t.me/moyoprizvanie_bot"; // Наш бот
-  const maxIdLink = "https://t.me/maxid_bot"; // Чат-бот MAX ID
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = typeof window !== 'undefined' ? navigator.userAgent || navigator.vendor || (window as any).opera : '';
+      return /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+    };
+    setIsMobile(checkMobile());
+  }, []);
+
+  const telegramBotLink = isMobile ? "tg://resolve?domain=moyoprizvanie_bot" : "https://t.me/moyoprizvanie_bot";
+  const maxIdLink = isMobile ? "tg://resolve?domain=maxid_bot" : "https://t.me/maxid_bot";
 
   // Динамические QR-коды
-  const telegramQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(telegramBotLink)}&color=34-158-217`;
-  const maxIdQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(maxIdLink)}&color=139-92-246`;
+  const qrTelegramLink = "https://t.me/moyoprizvanie_bot";
+  const qrMaxIdLink = "https://t.me/maxid_bot";
+  const telegramQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrTelegramLink)}&color=34-158-217`;
+  const maxIdQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrMaxIdLink)}&color=139-92-246`;
 
   return (
     <motion.div

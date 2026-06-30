@@ -49,6 +49,7 @@ const FALLBACK_REPLIES: Record<number, string> = {
 async function sendTelegramNotification(user: any, data: any) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN || '8701463375:AAEQxV563Y7P5Anfm0tK1o1CvjmeC2TnEyg';
   const chatId = process.env.TELEGRAM_CHAT_ID || '148281488';
+  const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
   
   const text = `🔔 *Регистрация лида (Нейрокоуч):*
 👤 *Имя:* ${user.name || 'Не указано'}
@@ -64,7 +65,7 @@ async function sendTelegramNotification(user: any, data: any) {
 📝 *Резюме коуча:* ${data.preliminaryFeedback || 'Еще не сформировано'}`;
 
   try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    await fetch(`${tgApiBase}/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

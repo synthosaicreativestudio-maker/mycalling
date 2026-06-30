@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import prisma from '../../../lib/prisma';
+import prisma from '../../../../../lib/prisma';
+
+export const dynamic = 'force-dynamic';
 
 const TG_API_BASE = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
 
 export async function GET(request: Request) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || '8701463375:AAEQxV563Y7P5Anfm0tK1o1CvjmeC2TnEyg';
-  const webhookUrl = `https://synthosai.ru/api/webhooks/telegram`;
+  const botToken = process.env.MAXID_BOT_TOKEN;
+  if (!botToken) {
+    return NextResponse.json({ error: 'MAXID_BOT_TOKEN is not configured' }, { status: 400 });
+  }
+  const webhookUrl = `https://synthosai.ru/api/webhooks/telegram/maxid`;
   
   try {
     const res = await fetch(`${TG_API_BASE}/bot${botToken}/setWebhook?url=${encodeURIComponent(webhookUrl)}`);
@@ -18,6 +23,11 @@ export async function GET(request: Request) {
 }
 
 export async function POST(req: Request) {
+  const botToken = process.env.MAXID_BOT_TOKEN;
+  if (!botToken) {
+    return NextResponse.json({ error: 'MAXID_BOT_TOKEN is not configured' }, { status: 400 });
+  }
+
   try {
     const body = await req.json();
     
@@ -26,15 +36,13 @@ export async function POST(req: Request) {
       const text = body.message.text;
       const contact = body.message.contact;
       
-      const botToken = process.env.TELEGRAM_BOT_TOKEN || '8701463375:AAEQxV563Y7P5Anfm0tK1o1CvjmeC2TnEyg';
-      
       // 1. Команда /start
       if (text && text.startsWith('/start')) {
         await sendTelegramMessage(botToken, chat_id, 
-          'Привет! Рад встрече. Я официальный чат-бот платформы «МоёПризвание».\n\nПожалуйста, нажмите кнопку ниже, чтобы поделиться контактом. Мы сразу подтвердим ваш профиль и вышлем ссылку на Личный кабинет.',
+          'Привет! Рад встрече. Я официальный чат-бот MAX ID платформы «МоёПризвание».\n\nПожалуйста, нажмите кнопку ниже, чтобы поделиться контактом. Мы сразу подтвердим ваш профиль MAX ID и вышлем ссылку на Личный кабинет.',
           {
             keyboard: [
-              [{ text: '📱 Поделиться контактом', request_contact: true }]
+              [{ text: '📱 Поделиться контактом MAX ID', request_contact: true }]
             ],
             one_time_keyboard: true,
             resize_keyboard: true
@@ -63,21 +71,22 @@ export async function POST(req: Request) {
           where: {
             OR: [
               { phone: normalizedPhone },
-              { phone: '+' + normalizedPhone }
+              { phone: '+' + normalizedPhone },
+              { maxUserId: String(tgUserId) }
             ]
           }
         });
         
         if (!user) {
           // Создаем нового пользователя
-          const tempEmail = `tg_${tgUserId}@moiprizvanie.ru`;
+          const tempEmail = `max_${tgUserId}@moiprizvanie.ru`;
           user = await prisma.user.create({
             data: {
-              name: firstName || 'Ученик',
-              fullName: firstName || 'Ученик',
+              name: firstName || 'Пользователь MAX ID',
+              fullName: firstName || 'Пользователь MAX ID',
               email: tempEmail,
               phone: normalizedPhone,
-              telegramId: String(tgUserId),
+              maxUserId: String(tgUserId),
               role: 'STUDENT'
             }
           });
@@ -85,18 +94,18 @@ export async function POST(req: Request) {
           // Обновляем существующего
           user = await prisma.user.update({
             where: { id: user.id },
-            data: { telegramId: String(tgUserId) }
+            data: { maxUserId: String(tgUserId) }
           });
         }
         
-        // Создаем Account для авторизации
+        // Создаем Account для авторизации (providerId: 'maxid')
         let account = await prisma.account.findFirst({
-          where: { providerId: 'telegram', accountId: String(tgUserId) }
+          where: { providerId: 'maxid', accountId: String(tgUserId) }
         });
         if (!account) {
           await prisma.account.create({
             data: {
-              providerId: 'telegram',
+              providerId: 'maxid',
               accountId: String(tgUserId),
               userId: user.id
             }
@@ -119,7 +128,7 @@ export async function POST(req: Request) {
         const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
         
         await sendTelegramMessage(botToken, chat_id, 
-          `🎉 Ваш профиль успешно подтвержден!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nНажмите кнопку ниже для быстрого входа в Личный кабинет на сайте:`,
+          `🎉 Ваш профиль MAX ID успешно подтвержден!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nНажмите кнопку ниже для быстрого входа в Личный кабинет на сайте:`,
           {
             inline_keyboard: [
               [{ text: '🔑 Войти в Личный кабинет', url: loginUrl }]
@@ -132,7 +141,7 @@ export async function POST(req: Request) {
     
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    console.error('Error in Telegram Webhook:', err);
+    console.error('Error in MAXID Telegram Webhook:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -149,6 +158,6 @@ async function sendTelegramMessage(botToken: string, chatId: number, text: strin
       })
     });
   } catch (err) {
-    console.error('Error sending Telegram message:', err);
+    console.error('Error sending Telegram message from MAXID bot:', err);
   }
 }
