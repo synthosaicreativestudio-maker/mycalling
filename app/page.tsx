@@ -88,7 +88,7 @@ export default function HomePage() {
         
         {mounted && (
           <div
-            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[62vw] lg:max-w-[55vw]"
+            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[70vw] lg:max-w-[65vw]"
           >
             <p
               className="mb-5 text-[11px] font-bold uppercase tracking-[0.24em] text-[#8c6e4b] font-sans"
@@ -97,7 +97,7 @@ export default function HomePage() {
             </p>
 
             <h1
-              className="w-full text-[2.5rem] leading-[1.08] font-extrabold text-[#3d3123] font-sans sm:text-[3.25rem] md:text-[3.85rem] lg:text-[4.25rem] lg:leading-[1.1] mb-1"
+              className="w-full text-3xl leading-[1.15] font-extrabold text-[#3d3123] font-sans sm:text-4xl md:text-5xl lg:text-[3.5rem] mb-1"
             >
               Поможем школьнику <br className="hidden md:inline" />найти своё призвание
             </h1>
