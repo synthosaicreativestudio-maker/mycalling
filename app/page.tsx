@@ -97,7 +97,7 @@ export default function HomePage() {
             </p>
 
             <h1
-              className="w-full text-4xl leading-[1.25] font-normal text-[#3d3123] font-signature sm:text-5xl md:text-6xl lg:text-[4.5rem] lg:leading-[1.2] mb-1"
+              className="w-full text-3xl leading-[1.15] font-extrabold text-[#3d3123] font-sans sm:text-4xl md:text-5xl lg:text-[3.5rem] mb-1"
             >
               Поможем школьнику <br className="hidden md:inline" />найти своё призвание
             </h1>
