@@ -88,7 +88,7 @@ export default function HomePage() {
         
         {mounted && (
           <div
-            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[55vw] lg:max-w-[48vw]"
+            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[62vw] lg:max-w-[55vw]"
           >
             <p
               className="mb-5 text-[11px] font-bold uppercase tracking-[0.24em] text-[#8c6e4b] font-sans"
@@ -97,13 +97,13 @@ export default function HomePage() {
             </p>
 
             <h1
-              className="w-full text-[2.5rem] leading-[1.08] font-extrabold text-[#3d3123] font-sans sm:text-[3.25rem] md:text-[3.85rem] lg:text-[4.25rem] lg:leading-[1.1] mb-2"
+              className="w-full text-[2.5rem] leading-[1.08] font-extrabold text-[#3d3123] font-sans sm:text-[3.25rem] md:text-[3.85rem] lg:text-[4.25rem] lg:leading-[1.1] mb-1"
             >
-              Поможем школьнику найти своё призвание
+              Поможем школьнику <br className="hidden md:inline" />найти своё призвание
             </h1>
 
             <p
-              className="mt-12 w-full text-[0.98rem] sm:text-[1.08rem] md:text-[1.2rem] leading-relaxed text-[#736251] font-normal font-sans"
+              className="mt-9 w-full text-[0.98rem] sm:text-[1.08rem] md:text-[1.2rem] leading-relaxed text-[#736251] font-normal font-sans"
             >
               Раскройте сильные стороны ребёнка через 30 минут интерактивной диагностики и получите понятный план развития для всей семьи.
             </p>
@@ -116,7 +116,7 @@ export default function HomePage() {
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
-            <span className="text-xs font-semibold text-[#b39f85] mt-3 pl-2">Без длинных анкет и скучных тестов</span>
+            <span className="text-xs font-semibold text-[#b39f85] mt-3 pl-2">Бесплатно · Без длинных анкет и скучных тестов</span>
           </div>
         )}
 
