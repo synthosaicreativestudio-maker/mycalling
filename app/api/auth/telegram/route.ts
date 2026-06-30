@@ -40,29 +40,12 @@ export async function GET(request: Request) {
       where: { providerId: 'telegram', accountId: telegramId }
     });
 
-    let userId = account?.userId;
-
     if (!account) {
-      // Создаем пользователя
-      const user = await prisma.user.create({
-        data: {
-          name: data.first_name + (data.last_name ? ` ${data.last_name}` : ''),
-          email: `${telegramId}@telegram.local`, // Dummy email
-          emailVerified: true,
-          image: data.photo_url || null,
-        }
-      });
-      
-      userId = user.id;
-
-      await prisma.account.create({
-        data: {
-          providerId: 'telegram',
-          accountId: telegramId,
-          userId: user.id,
-        }
-      });
+      // Регистрация через кнопку входа запрещена. Вся регистрация идет через коуч-сессию.
+      return NextResponse.redirect(new URL('/auth?error=register_denied', request.url));
     }
+
+    let userId = account.userId;
 
     // Для Better Auth нужно создать токен сессии
     const sessionToken = crypto.randomBytes(32).toString('hex');

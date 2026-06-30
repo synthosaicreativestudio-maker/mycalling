@@ -169,9 +169,17 @@ export default function CoachPage() {
                 </div>
                 <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
                   isCoach 
-                    ? 'bg-white/80 text-text border border-[#8c6e4b]/10 rounded-tl-none shadow-sm' 
+                    ? (step === 6 && idx === messages.length - 1
+                        ? 'bg-gradient-to-br from-white/95 to-[#fcfaf6] text-text border-2 border-[#8c6e4b] rounded-tl-none shadow-[0_8px_30px_rgba(140,110,75,0.15)] ring-1 ring-[#8c6e4b]/20 relative overflow-hidden'
+                        : 'bg-white/80 text-text border border-[#8c6e4b]/10 rounded-tl-none shadow-sm'
+                      )
                     : 'bg-[#8c6e4b] text-white rounded-tr-none shadow-md'
                 }`}>
+                  {isCoach && step === 6 && idx === messages.length - 1 && (
+                    <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#8c6e4b] mb-2">
+                      <span>✨</span> Резюме наставника Романа
+                    </div>
+                  )}
                   {msg.content}
                 </div>
               </motion.div>

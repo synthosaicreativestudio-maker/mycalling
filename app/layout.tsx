@@ -113,7 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     href="/auth"
                     className="text-sm font-medium text-slate-500 hover:text-[#1a2536] transition duration-300"
                   >
-                    Войти
+                    Личный кабинет
                   </Link>
                 </div>
               </div>
