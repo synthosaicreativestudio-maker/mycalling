@@ -35,7 +35,7 @@ const SCENARIO_STEPS = [
 
 export async function POST(req: Request) {
   try {
-    const { message, sessionId } = await req.json();
+    const { message, sessionId, fromLoginError } = await req.json();
 
     if (!message) {
       return NextResponse.json({ error: 'Сообщение пользователя не передано' }, { status: 400 });
@@ -81,8 +81,12 @@ export async function POST(req: Request) {
     const extractedData = (coachSession.extractedData as Record<string, any>) || { currentStep: 0 };
     const currentStep = typeof extractedData.currentStep === 'number' ? extractedData.currentStep : 0;
 
-    // Добавляем сообщение пользователя в транскрипт
-    transcript.push({ role: 'user', content: message, timestamp: new Date().toISOString() });
+    // Добавляем сообщение пользователя в транскрипт с кастомным приветствием при редиректе из авторизации
+    let userMsgContent = message;
+    if (message === 'Начать сессию с коучем' && fromLoginError) {
+      userMsgContent = 'Пользователь пытался войти в личный кабинет, но не зарегистрирован. Пожалуйста, тепло поприветствуй его как наставник Роман, дружелюбно объясни, что перед входом нужно познакомиться и пройти сессию коучинга, и спроси, готов ли он начать.';
+    }
+    transcript.push({ role: 'user', content: userMsgContent, timestamp: new Date().toISOString() });
 
     const stepInfo = SCENARIO_STEPS[currentStep] || SCENARIO_STEPS[SCENARIO_STEPS.length - 1];
 

@@ -26,10 +26,16 @@ export default function CoachPage() {
     async function initSession() {
       setLoading(true);
       try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const isFromLogin = searchParams.get('error') === 'register_first';
+
         const res = await fetch('/api/v1/coach/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: 'Начать сессию с коучем' })
+          body: JSON.stringify({ 
+            message: 'Начать сессию с коучем',
+            fromLoginError: isFromLogin
+          })
         });
         const data = await res.json();
         if (data.reply) {

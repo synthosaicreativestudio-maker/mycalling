@@ -41,8 +41,8 @@ export async function GET(request: Request) {
     });
 
     if (!account) {
-      // Регистрация через кнопку входа запрещена. Вся регистрация идет через коуч-сессию.
-      return NextResponse.redirect(new URL('/auth?error=register_denied', request.url));
+      // Регистрация через кнопку входа запрещена. Система перенаправляет на прохождение коуч-сессии.
+      return NextResponse.redirect(new URL('/coach?error=register_first', request.url));
     }
 
     let userId = account.userId;
