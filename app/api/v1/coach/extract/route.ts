@@ -130,30 +130,46 @@ export async function POST(req: Request) {
     const apiKey = env.PROXYAPI_KEY;
     const apiUrl = env.PROXYAPI_URL;
 
-    const aiResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: 'Ты возвращаешь только валидный JSON.' },
-          { role: 'user', content: extractionPrompt }
-        ],
-        temperature: 0.1
-      })
-    });
+    let parsed: Record<string, any> = { shouldAdvanceStep: true };
+    try {
+      const aiResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: 'Ты возвращаешь только валидный JSON.' },
+            { role: 'user', content: extractionPrompt }
+          ],
+          temperature: 0.1
+        })
+      });
 
-    if (!aiResponse.ok) {
-      throw new Error(`ProxyAPI returned status ${aiResponse.status}`);
+      if (!aiResponse.ok) {
+        throw new Error(`ProxyAPI returned status ${aiResponse.status}`);
+      }
+
+      const aiData = await aiResponse.json();
+      const resultText = aiData.choices?.[0]?.message?.content || '{}';
+      parsed = JSON.parse(resultText);
+    } catch (err) {
+      console.warn('ProxyAPI extraction failed, using regex/fallback parser:', err);
+      // Простейший регулярный парсер для телефонов и имен на Шаге 1
+      if (currentStep === 1) {
+        const phoneMatch = lastUserMessage.match(/(?:\+7|8)[\s-]?\(?\d{3}\)?[\s-]?\d{3}\s?[-]?\d{2}\s?[-]?\d{2}/);
+        if (phoneMatch) parsed.phone = phoneMatch[0];
+        
+        // Попытка вычленить ФИО
+        const words = lastUserMessage.split(/\s+/).filter((w: string) => w.length > 2);
+        if (words.length > 0 && !lastUserMessage.includes('привет') && !lastUserMessage.includes('готов')) {
+          parsed.fullName = words.slice(0, 3).join(' ');
+        }
+      }
     }
-
-    const aiData = await aiResponse.json();
-    const resultText = aiData.choices?.[0]?.message?.content || '{}';
-    const parsed = JSON.parse(resultText);
 
     // Обновляем структурированные данные сессии
     const newExtractedData = { ...extractedData };

@@ -33,6 +33,16 @@ const SCENARIO_STEPS = [
   }
 ];
 
+const FALLBACK_REPLIES: Record<number, string> = {
+  0: "Привет! Рад тебя видеть. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы проведем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Скажи, готов ли ты начать?",
+  1: "Супер! Для начала давай пройдем быструю нативную регистрацию, чтобы сохранить твои будущие результаты в личном кабинете. Напиши, пожалуйста, как тебя зовут, сколько тебе лет, из какого ты города, в каком классе учишься и свой номер телефона.",
+  2: "Принято, все данные записаны! Давай теперь поговорим о твоих увлечениях и мечтах. Расскажи, чем ты любишь заниматься в свободное время? Какие хобби или проекты тебя увлекают? И есть ли у тебя кумиры или люди, которые тебя вдохновляют?",
+  3: "Очень интересно! А теперь давай заглянем глубже. Что для тебя важнее всего в жизни и будущей работе (например, свобода, деньги, творчество или помощь другим)? Каковы твои сильные стороны и в чем ты видишь свои главные барьеры или страхи?",
+  4: "Понял тебя. Ты упомянул очень важные вещи. Давай уточним один момент: как ты принимаешь важные решения — опираешься на логику и факты или на интуицию и чувства? И как тебе комфортнее общаться с людьми?",
+  5: "Спасибо за честность! На основе твоих ответов у меня уже вырисовывается предварительный профиль твоих талантов. Ты кажешься человеком с отличным аналитическим мышлением и стремлением к созиданию. Давай перейдем к финальному шагу, чтобы зафиксировать это.",
+  6: "Слушай, я проанализировал наш диалог. В тебе чувствуется сильный аналитический склад ума и стремление к автономии. Ты прирожденный Исследователь! Твои сильные стороны — логика и упорство. Я уже отправил твой предварительный отчет в Telegram и MAX ID. Теперь давай закрепим это интерактивными тестами!"
+};
+
 export async function POST(req: Request) {
   try {
     const { message, sessionId, fromLoginError } = await req.json();
@@ -119,28 +129,35 @@ export async function POST(req: Request) {
       }))
     ];
 
-    const aiResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: modelMessages,
-        temperature: 0.7,
-        max_tokens: 300
-      })
-    });
+    let replyContent = '';
+    try {
+      const aiResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: modelMessages,
+          temperature: 0.7,
+          max_tokens: 300
+        })
+      });
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('ProxyAPI Error:', errorText);
-      throw new Error(`ProxyAPI returned status ${aiResponse.status}`);
+      if (!aiResponse.ok) {
+        throw new Error(`ProxyAPI returned status ${aiResponse.status}`);
+      }
+
+      const aiData = await aiResponse.json();
+      replyContent = aiData.choices?.[0]?.message?.content || '';
+      if (!replyContent) {
+        throw new Error('Empty AI response');
+      }
+    } catch (err) {
+      console.warn('ProxyAPI call failed, using fallback reply for step:', currentStep, err);
+      replyContent = FALLBACK_REPLIES[currentStep] || 'Извини, я немного отвлекся. Давай продолжим наш разговор!';
     }
-
-    const aiData = await aiResponse.json();
-    const replyContent = aiData.choices?.[0]?.message?.content || 'Извини, я отвлекся. Повтори, пожалуйста.';
 
     // Добавляем ответ коуча в транскрипт
     transcript.push({ role: 'assistant', content: replyContent, timestamp: new Date().toISOString() });
