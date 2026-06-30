@@ -52,7 +52,7 @@ export function SpaceBackground() {
     <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#fdfcfb] print:hidden">
       <div 
         className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-30"
-        style={{ backgroundImage: 'url(/assets/backgrounds/light-bg2.webp)' }}
+        style={{ backgroundImage: 'url(/assets/backgrounds/light-bg3.webp)' }}
       />
       
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_25%,rgba(255,255,255,0.7)_0%,transparent_60%)] blur-[40px] pointer-events-none" />

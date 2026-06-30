@@ -84,39 +84,39 @@ export default function HomePage() {
     <main className="relative z-10 w-full overflow-hidden">
       
       {/* ─── HERO SECTION ─── */}
-      <section className="relative min-h-screen flex items-center justify-center px-5 md:px-8 pt-32 pb-20">
+      <section className="relative min-h-screen flex items-center justify-start px-6 md:px-12 lg:px-24 pt-44 md:pt-52 pb-20">
         
         {mounted && (
           <div
-            className="relative z-10 flex w-full max-w-[90%] flex-col items-center text-center pointer-events-auto pl-[5%] pr-6 md:max-w-[70vw]"
+            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[55vw] lg:max-w-[48vw]"
           >
             <p
-              className="mb-4 text-[11px] font-bold uppercase tracking-[0.24em] text-[#8c6e4b] font-sans"
+              className="mb-5 text-[11px] font-bold uppercase tracking-[0.24em] text-[#8c6e4b] font-sans"
             >
               Диагностика потенциала для школьников и родителей
             </p>
 
             <h1
-              className="w-full text-[2.5rem] leading-[1.08] font-extrabold text-[#3d3123] font-sans sm:text-[3.25rem] md:text-[3.85rem] lg:text-[4.25rem] lg:leading-[1.1] max-w-4xl"
+              className="w-full text-[2.5rem] leading-[1.08] font-extrabold text-[#3d3123] font-sans sm:text-[3.25rem] md:text-[3.85rem] lg:text-[4.25rem] lg:leading-[1.1] mb-2"
             >
               Поможем школьнику найти своё призвание
             </h1>
 
             <p
-              className="mt-6 max-w-[680px] text-[0.98rem] sm:text-[1.08rem] md:text-[1.28rem] leading-relaxed text-[#736251] font-normal font-sans"
+              className="mt-12 w-full text-[0.98rem] sm:text-[1.08rem] md:text-[1.2rem] leading-relaxed text-[#736251] font-normal font-sans"
             >
               Раскройте сильные стороны ребёнка через 30 минут интерактивной диагностики и получите понятный план развития для всей семьи.
             </p>
 
             <div
-              className="mt-9 flex flex-col items-center gap-4 sm:flex-row sm:items-center justify-center"
+              className="mt-12 flex flex-col items-start gap-4 sm:flex-row sm:items-center justify-start"
             >
               <Link href={mainCtaLink} className="cta-glass h-[62px] min-w-[280px] px-8 text-base sm:text-lg">
                 {mainCtaText}
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
-            <span className="text-xs font-semibold text-[#b39f85] mt-3">Без длинных анкет и скучных тестов</span>
+            <span className="text-xs font-semibold text-[#b39f85] mt-3 pl-2">Без длинных анкет и скучных тестов</span>
           </div>
         )}
 
