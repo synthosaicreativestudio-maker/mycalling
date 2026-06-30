@@ -102,6 +102,8 @@ model CoachSession {
   transcript    Json           // полная история диалога (массив сообщений)
   extractedData Json           // структурированные качественные данные
   completedAt   DateTime?      @map("completed_at") @db.Timestamptz(6)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("coach_sessions")
 }

@@ -5,7 +5,10 @@ import prisma from '../../../lib/prisma';
 const TG_API_BASE = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
 
 export async function GET(request: Request) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || '8701463375:AAEQxV563Y7P5Anfm0tK1o1CvjmeC2TnEyg';
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) {
+    return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN is not configured' }, { status: 400 });
+  }
   const webhookUrl = `https://synthosai.ru/api/webhooks/telegram`;
   
   try {
@@ -26,7 +29,10 @@ export async function POST(req: Request) {
       const text = body.message.text;
       const contact = body.message.contact;
       
-      const botToken = process.env.TELEGRAM_BOT_TOKEN || '8701463375:AAEQxV563Y7P5Anfm0tK1o1CvjmeC2TnEyg';
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+      if (!botToken) {
+        return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN is not configured' }, { status: 400 });
+      }
       
       // 1. Команда /start
       if (text && text.startsWith('/start')) {

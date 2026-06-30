@@ -1,4 +1,4 @@
-"use client"; // Wait, this is an API route, do not put "use client" in API route. API route is Server Side.
+// API Route — Server Side Only (НЕ ставить "use client" — это ломает серверные модули!)
 
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
@@ -46,8 +46,14 @@ const FALLBACK_REPLIES: Record<number, string> = {
   6: "Слушай, я проанализировал наш диалог. В тебе чувствуется сильный аналитический склад ума и стремление к автономии. Ты прирожденный Исследователь! Твои сильные стороны — логика и упорство. Ты можешь скачать предварительный отчет в формате PDF прямо сейчас. Теперь давай закрепим результаты интерактивными тестами!"
 };
 
+// ============================
+// ФУНКЦИИ ОТПРАВКИ УВЕДОМЛЕНИЙ
+// ============================
+
+/** Отправить карточку лида администратору в Telegram */
 async function sendTelegramNotification(user: any, data: any) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || '8701463375:AAEQxV563Y7P5Anfm0tK1o1CvjmeC2TnEyg';
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken) { console.warn('TELEGRAM_BOT_TOKEN not set, skipping admin notification'); return; }
   const chatId = process.env.TELEGRAM_CHAT_ID || '148281488';
   const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
   
@@ -75,12 +81,80 @@ async function sendTelegramNotification(user: any, data: any) {
       })
     });
   } catch (err) {
-    console.error('Telegram notification error:', err);
+    console.error('Telegram admin notification error:', err);
   }
 }
 
+/** Отправить резюме пользователю лично в Telegram-бот */
+async function sendTelegramReportToUser(user: any, data: any) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (!botToken || !user.telegramId) return;
+  const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
+
+  const feedback = data.preliminaryFeedback || 'Резюме ещё не сформировано';
+  const text = `📋 *Предварительное резюме от наставника Романа*\n\n${feedback}\n\n🎯 Теперь вы можете пройти интерактивные тесты для точной диагностики на сайте:\nhttps://synthosai.ru/assessment`;
+
+  try {
+    await fetch(`${tgApiBase}/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: user.telegramId,
+        text: text,
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [{ text: '🧪 Перейти к диагностике', url: 'https://synthosai.ru/assessment' }]
+          ]
+        }
+      })
+    });
+    console.log(`Telegram report sent to user ${user.telegramId}`);
+  } catch (err) {
+    console.error('Telegram user report error:', err);
+  }
+}
+
+/** Отправить резюме пользователю лично в бот МАКС */
+async function sendMaxReportToUser(user: any, data: any) {
+  const botToken = process.env.MAXID_BOT_TOKEN;
+  if (!botToken || !user.maxUserId) return;
+
+  const feedback = data.preliminaryFeedback || 'Резюме ещё не сформировано';
+  const text = `📋 Предварительное резюме от наставника Романа\n\n${feedback}\n\n🎯 Теперь вы можете пройти интерактивные тесты для точной диагностики на сайте: https://synthosai.ru/assessment`;
+
+  try {
+    await fetch(`https://platform-api2.max.ru/messages?user_id=${user.maxUserId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': botToken
+      },
+      body: JSON.stringify({
+        text: text,
+        format: 'html',
+        attachments: [
+          {
+            type: 'inline_keyboard',
+            payload: {
+              buttons: [
+                [{ type: 'link', text: '🧪 Перейти к диагностике', url: 'https://synthosai.ru/assessment' }]
+              ]
+            }
+          }
+        ]
+      })
+    });
+    console.log(`MAX report sent to user ${user.maxUserId}`);
+  } catch (err) {
+    console.error('MAX user report error:', err);
+  }
+}
+
+/** Синхронизировать профиль пользователя с MAX ID CRM */
 async function sendMaxIdSync(user: any, data: any) {
-  const maxToken = process.env.MAXID_API_TOKEN || 'f9LHodD0cOI4k7V9yJ8Dt6RZr_Npx_O4odWmhZ6u_WhvysoYzESOZ3VlmBDBNCUVS2_Mu9cKiod6BYKcx-1L';
+  const maxToken = process.env.MAXID_API_TOKEN;
+  if (!maxToken) { console.warn('MAXID_API_TOKEN not set, skipping CRM sync'); return; }
   
   try {
     const res = await fetch('https://api.maxid.ru/v1/leads', {
@@ -104,9 +178,9 @@ async function sendMaxIdSync(user: any, data: any) {
         }
       })
     });
-    console.log(`MAX ID sync status: ${res.status}`);
+    console.log(`MAX ID CRM sync status: ${res.status}`);
   } catch (err) {
-    console.error('MAX ID sync error:', err);
+    console.error('MAX ID CRM sync error:', err);
   }
 }
 
@@ -160,13 +234,29 @@ export async function POST(req: Request) {
     // Флаг того, что это первое инициализирующее сообщение
     const isInitMessage = message === 'Начать сессию с коучем';
 
-    let userMsgContent = message;
-    if (isInitMessage && fromLoginError) {
-      userMsgContent = 'Пользователь пытался войти в личный кабинет, но не зарегистрирован. Пожалуйста, тепло поприветствуй его как наставник Роман, дружелюбно объясни, что перед входом нужно познакомиться и пройти сессию коучинга, и спроси, готов ли он начать.';
+    // Если это первое сообщение — сразу возвращаем фиксированную фразу без обращения к ИИ
+    if (isInitMessage && transcript.length === 0) {
+      let greeting = FALLBACK_REPLIES[0];
+      if (fromLoginError) {
+        greeting = 'Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник. Я вижу, ты хотел зайти в Личный кабинет, но для этого нужно сначала пройти нашу короткую сессию. Не переживай — это не скучный тест, а увлекательное исследование твоих талантов. Готов начать?';
+      }
+      transcript.push({ role: 'assistant', content: greeting, timestamp: new Date().toISOString() });
+      await prisma.coachSession.update({
+        where: { id: coachSession.id },
+        data: { transcript, extractedData }
+      });
+      return NextResponse.json({
+        reply: greeting,
+        sessionId: coachSession.id,
+        currentStep: 0,
+        extracted: {}
+      });
     }
 
-    // Добавляем сообщение пользователя в транскрипт (только если это не первая инициализация без реплик)
-    if (!isInitMessage || transcript.length === 0) {
+    let userMsgContent = message;
+
+    // Добавляем сообщение пользователя в транскрипт
+    if (!isInitMessage) {
       transcript.push({ role: 'user', content: userMsgContent, timestamp: new Date().toISOString() });
     }
 
@@ -322,6 +412,8 @@ export async function POST(req: Request) {
 5. Не ставь диагнозов и не делай поспешных выводов.
 6. Длина ответа: на шагах 0-5 — до 2-3 предложений. На шаге 6 — дай развернутое эмпатичное резюме (4-5 предложений), начав его со слов: «Слушай, я проанализировал наш диалог...» или похожей личной фразы.
 7. КРИТИЧЕСКИ ВАЖНО: Никогда не используй аббревиатуру 'ИИ', слова 'искусственный интеллект', 'робот', 'бот' или 'алгоритм'. Ты — реальный человек, коуч по имени Роман.
+8. НИКОГДА не повторяй вопрос пользователя обратно ему. Если ответ недостаточно подробный — уточни одним конкретным наводящим вопросом, а не перефразируй то, что сказал пользователь.
+9. Если пользователь ответил кратко или неопределённо, прими его ответ и мягко уточни. Если ответ содержательный, признай его и двигайся к цели шага.
 `;
 
     const modelMessages = [
@@ -382,11 +474,18 @@ export async function POST(req: Request) {
       }
     });
 
-    // Фоновая отправка в Telegram и MAX ID (при регистрации телефона или на шаге 6)
+    // Фоновая отправка уведомлений
     const dbUser = await prisma.user.findUnique({ where: { id: coachSession.userId } });
     if (dbUser && (parsedData.phone || nextStep === 6)) {
+      // Уведомление администратору
       sendTelegramNotification(dbUser, extractedData).catch(err => console.error(err));
+      // Синхронизация в CRM
       sendMaxIdSync(dbUser, extractedData).catch(err => console.error(err));
+    }
+    // На шаге 6 — отправляем резюме пользователю лично в боты
+    if (dbUser && nextStep === 6) {
+      sendTelegramReportToUser(dbUser, extractedData).catch(err => console.error(err));
+      sendMaxReportToUser(dbUser, extractedData).catch(err => console.error(err));
     }
 
     return NextResponse.json({

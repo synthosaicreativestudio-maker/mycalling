@@ -20,7 +20,16 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/auth?error=expired_session', request.url));
     }
 
-    const response = NextResponse.redirect(new URL('/assessment', request.url));
+    // Проверяем статус коуч-сессии пользователя
+    let redirectPath = '/coach'; // По умолчанию — на коуч-сессию
+    const coachSession = await prisma.coachSession.findUnique({
+      where: { userId: session.userId }
+    });
+    if (coachSession && coachSession.status === 'COMPLETED') {
+      redirectPath = '/assessment'; // Если сессия завершена — на диагностику
+    }
+
+    const response = NextResponse.redirect(new URL(redirectPath, request.url));
     
     // Устанавливаем куку сессии Better Auth
     response.cookies.set({

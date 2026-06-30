@@ -28,6 +28,7 @@ export default function CoachPage() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
+  const [phoneConfirmed, setPhoneConfirmed] = useState(false);
   
   const [isMobile, setIsMobile] = useState(false);
   
@@ -121,6 +122,10 @@ export default function CoachPage() {
       }
       if (chatData.currentStep !== undefined) {
         setStep(chatData.currentStep);
+        // Если получен телефон от экстрактора — помечаем как подтвержденный
+        if (chatData.extracted?.phone) {
+          setPhoneConfirmed(true);
+        }
         if (chatData.currentStep === 6) {
           // Записываем имя ученика в localStorage для страницы тестов
           if (chatData.extracted?.fullName) {
@@ -291,7 +296,7 @@ export default function CoachPage() {
                   )}
                   {msg.content}
 
-                  {isCoach && step === 1 && idx === messages.length - 1 && (
+                  {isCoach && step >= 1 && step < 6 && !phoneConfirmed && idx === messages.length - 1 && (
                     <div className="mt-4 p-4 rounded-xl bg-[#8c6e4b]/5 border border-[#8c6e4b]/15 space-y-3">
                       <p className="text-xs font-bold text-[#8c6e4b] flex items-center gap-1.5">
                         <span>📲</span> Подтвердите регистрацию через чат-бот для мгновенного входа:
