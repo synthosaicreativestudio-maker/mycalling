@@ -108,7 +108,7 @@ curl https://synthosai.ru/api/webhooks/maxid
 
 ## 5. Траблшутинг баз данных (Prisma db push)
 
-### Проблема: Ошибка добавления обязательного поля с существующими записями
+### Проблема А: Ошибка добавления обязательного поля с существующими записями
 Если при выполнении `npx prisma db push` возникает ошибка:
 `Added the required column email to the users table without a default value. There are X rows in this table, it is not possible to execute this step.`
 
@@ -121,6 +121,17 @@ PGPASSWORD=safe_calling_pass_2026 psql -U ubuntu -d mycalling -c "DELETE FROM us
 ```bash
 npx prisma db push --accept-data-loss
 ```
+
+### Проблема Б: Ошибка "The column created_at does not exist in the current database" на Vercel
+Эта ошибка возникает, когда схема Prisma на стейджинг-сервере (использующем локальный Postgres на `localhost:5432`) синхронизирована, но база данных Supabase, используемая Vercel на продакшене `synthosai.ru`, осталась старой версии.
+
+**Решение:**
+Необходимо применить схему Prisma непосредственно к облачной базе данных Supabase. Сделать это можно с локального компьютера разработчика, в `.env` которого прописаны доступы к Supabase (`aws-1-us-east-1.pooler.supabase.com`):
+```bash
+# Выполнить синхронизацию схемы напрямую с Supabase (через DIRECT_URL / порт 5432)
+npx prisma db push --accept-data-loss
+```
+После успешного завершения команды облачная база данных получит все недостающие таблицы и колонки (включая `created_at` и `updated_at` в `coach_sessions`), и ошибки 500 на Vercel исчезнут.
 
 ---
 
