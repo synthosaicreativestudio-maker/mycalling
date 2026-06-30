@@ -14,8 +14,8 @@ function AuthCard() {
   const errorParam = searchParams.get('error');
   const isRegisterDenied = errorParam === 'register_denied';
 
-  const telegramBotLink = "https://t.me/romanomarche"; // Указанный бот
-  const maxIdLink = "https://maxid.ru/auth?client_id=mycalling";
+  const telegramBotLink = "https://t.me/moyoprizvanie_bot"; // Наш бот
+  const maxIdLink = "https://t.me/maxid_bot"; // Чат-бот MAX ID
 
   // Динамические QR-коды
   const telegramQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(telegramBotLink)}&color=34-158-217`;
@@ -98,7 +98,7 @@ function AuthCard() {
           <div className="pt-4 border-t border-white/5">
             <p className="text-xs text-muted/60 mb-3">Или войдите через браузерный виджет:</p>
             <div className="flex justify-center p-2 rounded-xl bg-black/10">
-              <TelegramLoginWidget botName="romanomarche" authUrl="https://synthosai.ru/api/auth/telegram" />
+              <TelegramLoginWidget botName="moyoprizvanie_bot" authUrl="https://synthosai.ru/api/auth/telegram" />
             </div>
           </div>
         </div>

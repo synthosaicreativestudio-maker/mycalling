@@ -98,7 +98,7 @@ export default function CoachPage() {
     setIsTyping(true);
 
     try {
-      // 1. Отправка сообщения коучу
+      // Отправка сообщения коучу (экстракция теперь встроена на бэкенде)
       const chatRes = await fetch('/api/v1/coach/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,23 +106,15 @@ export default function CoachPage() {
       });
       const chatData = await chatRes.json();
 
-      // 2. Извлечение структурированных данных и шаг вперед
-      const extractRes = await fetch('/api/v1/coach/extract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, lastUserMessage: userMessage })
-      });
-      const extractData = await extractRes.json();
-
       if (chatData.reply) {
         setMessages(prev => [...prev, { role: 'assistant', content: chatData.reply }]);
       }
-      if (extractData.currentStep !== undefined) {
-        setStep(extractData.currentStep);
-        if (extractData.currentStep === 6) {
+      if (chatData.currentStep !== undefined) {
+        setStep(chatData.currentStep);
+        if (chatData.currentStep === 6) {
           // Записываем имя ученика в localStorage для страницы тестов
-          if (extractData.extracted?.fullName) {
-            localStorage.setItem('studentName', extractData.extracted.fullName);
+          if (chatData.extracted?.fullName) {
+            localStorage.setItem('studentName', chatData.extracted.fullName);
           }
         }
       }
@@ -135,6 +127,96 @@ export default function CoachPage() {
 
   const handleNextStep = () => {
     router.push('/assessment');
+  };
+
+  const downloadPreliminaryReport = () => {
+    const lastCoachMessage = [...messages].reverse().find(m => m.role === 'assistant');
+    if (!lastCoachMessage) return;
+
+    const studentName = typeof window !== 'undefined' ? localStorage.getItem('studentName') || 'Гость' : 'Гость';
+    const reportText = lastCoachMessage.content;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>Предварительное резюме - МоёПризвание</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #faf8f5;
+            color: #253243;
+            padding: 40px;
+            line-height: 1.6;
+          }
+          .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.03);
+            border: 2px solid #8c6e4b;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px solid rgba(140, 110, 75, 0.2);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+          }
+          .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8c6e4b;
+          }
+          .title {
+            font-size: 20px;
+            margin-top: 10px;
+            font-weight: bold;
+          }
+          .meta {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+          }
+          .content {
+            font-size: 16px;
+            white-space: pre-wrap;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px dashed #ccc;
+            padding-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="logo">🌳 МоёПризвание</div>
+            <div class="title">Предварительное резюме наставника Романа</div>
+            <div class="meta">Для: ${studentName} | Дата: ${new Date().toLocaleDateString('ru-RU')}</div>
+          </div>
+          <div class="content">${reportText}</div>
+          <div class="footer">
+            © 2026 МоёПризвание. Все права защищены.
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          }
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const progressPercent = Math.round((step / 6) * 100);
@@ -198,6 +280,50 @@ export default function CoachPage() {
                     </div>
                   )}
                   {msg.content}
+
+                  {isCoach && step === 1 && idx === messages.length - 1 && (
+                    <div className="mt-4 p-4 rounded-xl bg-[#8c6e4b]/5 border border-[#8c6e4b]/15 space-y-3">
+                      <p className="text-xs font-bold text-[#8c6e4b] flex items-center gap-1.5">
+                        <span>📲</span> Подтвердите регистрацию через чат-бот для мгновенного входа:
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Telegram */}
+                        <div className="flex flex-col items-center p-3 bg-white/90 rounded-lg border border-[#8c6e4b]/10 text-center space-y-2">
+                          <span className="text-[11px] font-bold text-[#253243]">Через Telegram</span>
+                          <img 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://t.me/moyoprizvanie_bot')}&color=140-110-75`} 
+                            alt="Telegram QR" 
+                            className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
+                          />
+                          <a 
+                            href="https://t.me/moyoprizvanie_bot" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-[#8c6e4b] hover:underline font-bold"
+                          >
+                            Открыть чат-бот ↗
+                          </a>
+                        </div>
+                        {/* MAX ID */}
+                        <div className="flex flex-col items-center p-3 bg-white/90 rounded-lg border border-[#8c6e4b]/10 text-center space-y-2">
+                          <span className="text-[11px] font-bold text-[#253243]">Через MAX ID</span>
+                          <img 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://t.me/maxid_bot')}&color=140-110-75`} 
+                            alt="MAX ID QR" 
+                            className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
+                          />
+                          <a 
+                            href="https://t.me/maxid_bot" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-[#8c6e4b] hover:underline font-bold"
+                          >
+                            Открыть чат-бот ↗
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );
@@ -231,13 +357,23 @@ export default function CoachPage() {
               <p className="text-xs text-muted max-w-md mx-auto">
                 Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
               </p>
-              <button 
-                onClick={handleNextStep}
-                className="cta-glass h-12 px-8 text-sm inline-flex items-center gap-2"
-              >
-                Перейти к диагностике (тестам)
-                <ArrowRight className="h-4 w-4" />
-              </button>
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+                <button 
+                  type="button"
+                  onClick={downloadPreliminaryReport}
+                  className="bg-white hover:bg-gray-50 border border-[#8c6e4b]/40 text-[#8c6e4b] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                >
+                  📥 Скачать резюме (PDF)
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleNextStep}
+                  className="cta-glass h-12 px-8 text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto"
+                >
+                  Перейти к диагностике (тестам)
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
             </motion.div>
           ) : (
             <form onSubmit={handleSend} className="flex gap-2">
