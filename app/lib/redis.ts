@@ -1,5 +1,3 @@
-import Redis from 'ioredis';
-
 class MemoryCache {
   private cache = new Map<string, string>();
 
@@ -46,27 +44,6 @@ interface ICache {
   expire(key: string, seconds: number): Promise<number>;
 }
 
-let redisClient: ICache;
-
-if (process.env.REDIS_URL) {
-  try {
-    const redis = new Redis(process.env.REDIS_URL, {
-      maxRetriesPerRequest: 1,
-      connectTimeout: 2000,
-    });
-    
-    redis.on('error', (err) => {
-      console.warn('⚠️ Redis error, using Memory fallback:', err.message);
-    });
-
-    redisClient = redis as any;
-  } catch (e) {
-    console.warn('⚠️ Failed to initialize Redis, using Memory fallback');
-    redisClient = new MemoryCache();
-  }
-} else {
-  console.log('ℹ️ No REDIS_URL provided, using MemoryCache');
-  redisClient = new MemoryCache();
-}
+const redisClient: ICache = new MemoryCache();
 
 export default redisClient;

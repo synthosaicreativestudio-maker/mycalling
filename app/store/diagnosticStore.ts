@@ -74,10 +74,11 @@ export const useDiagnosticStore = create<DiagnosticState>()(
         startSession: async (username, grade) => {
           set({ isLoading: true, studentName: username, studentGrade: grade, isCompleted: false, answersHistory: {} });
           try {
+            const coachSessionId = typeof window !== 'undefined' ? localStorage.getItem('coachSessionId') : null;
             const res = await fetch('/api/v1/diagnostic/register-session', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ is_deep: true }),
+              body: JSON.stringify({ is_deep: true, coachSessionId }),
             });
             if (!res.ok) throw new Error('Ошибка регистрации сессии');
             const data = await res.json();

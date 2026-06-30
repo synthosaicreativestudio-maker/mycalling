@@ -18,6 +18,30 @@ export const auth = betterAuth({
       grade: {
         type: "number",
         required: false,
+      },
+      phone: {
+        type: "string",
+        required: false,
+      },
+      telegramId: {
+        type: "string",
+        required: false,
+      },
+      maxUserId: {
+        type: "string",
+        required: false,
+      },
+      role: {
+        type: "string",
+        required: false,
+      },
+      fullName: {
+        type: "string",
+        required: false,
+      },
+      childId: {
+        type: "string",
+        required: false,
       }
     }
   },

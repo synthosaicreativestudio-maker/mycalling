@@ -8,21 +8,44 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Role {
+  STUDENT
+  PARENT
+}
+
+enum SessionStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
 model User {
   id            String              @id @default(dbgenerated("gen_random_uuid()")) @map("user_id") @db.Uuid
   name          String              @map("username") @db.VarChar(100)
+  fullName      String?             @map("full_name") @db.VarChar(100)
   email         String              @unique
   emailVerified Boolean             @default(false) @map("email_verified")
   image         String?
   grade         Int?
+  phone         String?             @unique
+  telegramId    String?             @unique @map("telegram_id")
+  maxUserId     String?             @unique @map("max_user_id")
+  role          Role                @default(STUDENT)
   createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   sessions      Session[]
   accounts      Account[]
   
-  diagnosticResults   DiagnosticResult[]
-  diagnosticSessions  DiagnosticSession[]
+  // Новые отношения
+  coachSession  CoachSession?
+  diagnostics   DiagnosticResult[]
+  profile       DigitalProfile?
+  report        Report?
+
+  // Отношение Родитель-Ребенок
+  childId       String?             @map("child_id") @db.Uuid
+  child         User?               @relation("ParentChild", fields: [childId], references: [id])
+  parents       User[]              @relation("ParentChild")
 
   @@map("users")
 }
@@ -71,72 +94,48 @@ model Verification {
   @@map("verification")
 }
 
-model DiagnosticTest {
-  testId         String               @id @map("test_id") @db.VarChar(50)
-  title          String               @db.VarChar(150)
-  totalQuestions Int                  @map("total_questions")
-  description    String?
-  questions      DiagnosticQuestion[]
-  sessions       DiagnosticSession[]
+model CoachSession {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String         @unique @map("user_id") @db.Uuid
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        SessionStatus  @default(IN_PROGRESS)
+  transcript    Json           // полная история диалога (массив сообщений)
+  extractedData Json           // структурированные качественные данные
+  completedAt   DateTime?      @map("completed_at") @db.Timestamptz(6)
 
-  @@map("diagnostic_tests")
-}
-
-model DiagnosticQuestion {
-  questionId         String                 @id @map("question_id") @db.VarChar(50)
-  testId             String                 @map("test_id") @db.VarChar(50)
-  questionText       String                 @map("question_text")
-  scaleCode          String                 @map("scale_code") @db.VarChar(10)
-  isReverse          Boolean                @default(false) @map("is_reverse")
-  visualAssetUrl     String                 @map("visual_asset_url") @db.VarChar(255)
-  aiGenerationPrompt String?                @map("ai_generation_prompt")
-  test               DiagnosticTest         @relation(fields: [testId], references: [testId], onDelete: Cascade)
-  answers            UserDiagnosticAnswer[]
-
-  @@map("diagnostic_questions")
-}
-
-model DiagnosticSession {
-  sessionId String                 @id @default(dbgenerated("gen_random_uuid()")) @map("session_id") @db.Uuid
-  userId    String                 @map("user_id") @db.Uuid
-  testId    String                 @map("test_id") @db.VarChar(50)
-  status    String                 @default("in_progress") @db.VarChar(20)
-  startedAt DateTime               @default(now()) @map("started_at") @db.Timestamptz(6)
-  updatedAt DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  results   DiagnosticResult[]
-  test      DiagnosticTest         @relation(fields: [testId], references: [testId])
-  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  answers   UserDiagnosticAnswer[]
-
-  @@map("diagnostic_sessions")
-}
-
-model UserDiagnosticAnswer {
-  answerId       BigInt             @id @default(autoincrement()) @map("answer_id")
-  sessionId      String             @map("session_id") @db.Uuid
-  questionId     String             @map("question_id") @db.VarChar(50)
-  rawAnswerValue Int                @map("raw_answer_value")
-  timeSpentMs    Int                @map("time_spent_ms")
-  isFraud        Boolean            @default(false) @map("is_fraud")
-  isFastClick    Boolean            @default(false) @map("is_fast_click")
-  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  question       DiagnosticQuestion @relation(fields: [questionId], references: [questionId])
-  session        DiagnosticSession  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
-
-  @@unique([sessionId, questionId])
-  @@map("user_diagnostic_answers")
+  @@map("coach_sessions")
 }
 
 model DiagnosticResult {
-  resultId       String            @id @default(dbgenerated("gen_random_uuid()")) @map("result_id") @db.Uuid
-  userId         String            @map("user_id") @db.Uuid
-  sessionId      String            @map("session_id") @db.Uuid
-  calculatedAt   DateTime          @default(now()) @map("calculated_at") @db.Timestamptz(6)
-  validityIndex  Decimal           @map("validity_index") @db.Decimal(3, 2)
-  rawScores      Json              @map("raw_scores")
-  standardScores Json              @map("standard_scores")
-  session        DiagnosticSession @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
-  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  testCode      String   @map("test_code") // "RIASEC" | "BFI" | "ICAR" | "PROCRASTINATION"
+  rawResponses  Json     @map("raw_responses")
+  scores        Json     // { R: 12, I: 8, ... }
+  reliability   String   // "high" | "medium" | "low"
+  completedAt   DateTime @default(now()) @map("completed_at") @db.Timestamptz(6)
 
   @@map("diagnostic_results")
+}
+
+model DigitalProfile {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summary     Json     // объединённые данные коуча + тестов
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("digital_profiles")
+}
+
+model Report {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  htmlContent String   @map("html_content")
+  pdfUrl      String?  @map("pdf_url")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("reports")
 }

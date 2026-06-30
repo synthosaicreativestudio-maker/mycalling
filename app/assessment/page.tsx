@@ -2,27 +2,27 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Brain, Compass, Sparkles, Award, Zap, Loader2, ArrowLeft, WifiOff, RefreshCw } from 'lucide-react';
+import { Brain, Compass, Sparkles, Loader2, ArrowLeft, WifiOff, RefreshCw, Clock } from 'lucide-react';
 import { useDiagnosticStore } from '../store/diagnosticStore';
-import { HeroOrb } from '../components/HeroOrb';
 
 const blockIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   riasec: Compass,
-  big_five: Sparkles,
-  career_anchors: Award,
+  bfi: Sparkles,
+  icar: Brain,
+  procrastination: Clock,
 };
 
 const blockNames: Record<string, string> = {
-  riasec: 'Профессиональные интересы (RIASEC)',
-  big_five: 'Личностные черты (Big Five)',
-  career_anchors: 'Карьерные ценности (Якоря карьеры)',
+  riasec: 'Интересы (RIASEC)',
+  bfi: 'Личность (Big Five)',
+  icar: 'Когнитивные пробы (ICAR)',
+  procrastination: 'Поведенческий маркер (Лэй)',
 };
 
 export default function AssessmentPage() {
   const router = useRouter();
   const store = useDiagnosticStore();
 
-  const [mode, setMode] = useState<'none' | 'express' | 'deep'>('none');
   const [prevBlock, setPrevBlock] = useState<string | null>(null);
   const [lastSelectedValue, setLastSelectedValue] = useState<number | null>(null);
   const [isDebounced, setIsDebounced] = useState(false);
@@ -30,18 +30,22 @@ export default function AssessmentPage() {
 
   const questionStartTime = useRef<number>(0);
 
-  // Восстановление сессии или редирект на авторизацию
+  // Восстановление сессии диагностики или редирект
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const name = localStorage.getItem('studentName');
-      if (!name) {
-        router.push('/auth');
+      const coachSessionId = localStorage.getItem('coachSessionId');
+      if (!coachSessionId) {
+        router.push('/');
         return;
       }
 
-      // Если в Zustand уже есть активная сессия, восстанавливаем её режим
-      if (store.sessionId) {
-        setMode(store.offlineAnswersBuffer.length > 0 || store.currentQuestion?.test_type !== 'riasec' ? 'deep' : 'deep');
+      // Если в Zustand еще нет активной сессии, запускаем ее автоматически
+      if (!store.sessionId && !store.isLoading) {
+        const name = localStorage.getItem('studentName') || 'Гость';
+        const grade = localStorage.getItem('studentGrade') || '8';
+        store.startSession(name, grade).catch(() => {
+          alert('Ошибка соединения с базой данных. Пожалуйста, попробуйте позже.');
+        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,31 +56,23 @@ export default function AssessmentPage() {
     if (store.currentQuestion) {
       questionStartTime.current = Date.now();
       setImgError(false);
-      
-      const currentBlock = store.currentQuestion.test_type;
-      if (prevBlock && currentBlock !== prevBlock) {
-        // Мы убрали задержку в 2.5 секунды для мгновенного перехода (CYCLE 2)
-        setPrevBlock(currentBlock);
-      } else {
-        setPrevBlock(currentBlock);
-      }
+      setPrevBlock(store.currentQuestion.test_type);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.currentQuestion?.question_id]);
 
   // Перенаправление на отчет при завершении
   useEffect(() => {
     if (store.isCompleted && store.sessionId) {
+      // Сохраняем флаг завершения диагностики для шаг-карты на главной
+      localStorage.setItem('diagnosticCompleted', 'true');
       router.push(`/report?session_id=${store.sessionId}`);
     }
   }, [store.isCompleted, store.sessionId, router]);
 
-  // Горячие клавиши
+  // Горячие клавиши (1-5 для ответов, ArrowLeft для Назад)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (store.lockdownTimeLeft > 0 || store.isLoading || mode === 'none') return;
-
-      // Если мы в ожидании сети после ответа на этот вопрос
+      if (store.lockdownTimeLeft > 0 || store.isLoading) return;
       if (store.currentQuestion && store.answersHistory[store.currentQuestion.question_id]) return;
 
       if (['1', '2', '3', '4', '5'].includes(e.key)) {
@@ -84,60 +80,40 @@ export default function AssessmentPage() {
         handleChooseAnswer(val);
       } else if (e.key === 'ArrowLeft') {
         store.goBack();
-      } else if (e.key === 'ArrowRight') {
-        if (lastSelectedValue) {
-          handleChooseAnswer(lastSelectedValue);
-        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.currentQuestion, store.lockdownTimeLeft, store.isLoading, mode, lastSelectedValue, store.answersHistory]);
+  }, [store.currentQuestion, store.lockdownTimeLeft, store.isLoading, store.answersHistory]);
 
   const handleChooseAnswer = async (value: number) => {
     if (isDebounced || store.isLoading || store.lockdownTimeLeft > 0) return;
 
-    // Защита от спам-кликов
     setIsDebounced(true);
     setTimeout(() => setIsDebounced(false), 350);
 
     const timeSpent = Date.now() - questionStartTime.current;
     setLastSelectedValue(value);
     
-    // Мгновенная отправка (убрали анимации свайпа)
     await store.submitAnswer(value, timeSpent);
-  };
-
-  const handleStart = async (selectedMode: 'express' | 'deep') => {
-    setMode(selectedMode);
-    const name = localStorage.getItem('studentName') || 'Гость';
-    const grade = localStorage.getItem('studentGrade') || '8';
-    try {
-      await store.startSession(name, grade);
-    } catch (e) {
-      alert('Ошибка соединения с базой данных. Пожалуйста, попробуйте позже.');
-      setMode('none');
-    }
   };
 
   // 1. Оверлей фрод-локдауна (Click-Speed Lock)
   if (store.lockdownTimeLeft > 0) {
     return (
       <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
-        <div className="rounded-[32px] border border-red-500/20 bg-[#0f0b15]/90 p-10 text-center backdrop-blur-xl shadow-[0_0_50px_rgba(239,68,68,0.15)] relative overflow-hidden animate-pulse">
+        <div className="rounded-[32px] border border-red-500/20 bg-white p-10 text-center backdrop-blur-xl shadow-2xl relative overflow-hidden animate-pulse">
           <div className="relative z-10 flex flex-col items-center space-y-6">
-            <div className="relative">
-              <Zap className="h-16 w-16 text-red-500 animate-bounce" />
-            </div>
+            <span className="text-red-500 font-extrabold text-4xl">⚠️</span>
             <div className="space-y-3">
-              <h1 className="text-2xl font-bold font-unbounded text-white">Пожалуйста, делай выбор осознанно</h1>
-              <p className="max-w-md text-sm text-red-200/80 font-inter leading-relaxed">
+              <h1 className="text-2xl font-bold font-sans text-[#3d3123]">Пожалуйста, делай выбор осознанно</h1>
+              <p className="max-w-md text-sm text-[#736251] leading-relaxed">
                 Мы заметили, что ты спешишь. Твои результаты могут оказаться неточными. Тест временно заблокирован.
               </p>
             </div>
-            <div className="text-4xl font-extrabold font-unbounded text-red-400">
+            <div className="text-4xl font-extrabold font-sans text-red-500">
               {store.lockdownTimeLeft} сек
             </div>
           </div>
@@ -146,93 +122,17 @@ export default function AssessmentPage() {
     );
   }
 
-  // 2. Стартовый экран выбора режима
-  if (mode === 'none') {
-    return (
-      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-4xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
-        <div className="text-center space-y-4 mb-10">
-          <h1 className="text-3xl font-extrabold font-unbounded text-text sm:text-4xl lg:text-5xl leading-tight">
-            Выберите формат диагностики
-          </h1>
-          <p className="max-w-2xl mx-auto text-base text-muted font-inter leading-relaxed">
-            Привет! Выбери формат прохождения диагностики. Вся информация сохранится в твоем профиле.
-          </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Экспресс-тест */}
-          <div
-            onClick={() => handleStart('express')}
-            className="group cursor-pointer rounded-[32px] border border-white/10 bg-[#0b1125]/60 p-8 backdrop-blur-md transition duration-300 hover:-translate-y-1.5 hover:border-[#7c8cff]/30 hover:bg-[#0b1125]/80 hover:shadow-[0_20px_50px_rgba(124,140,255,0.08)] flex flex-col justify-between min-h-[300px]"
-          >
-            <div className="space-y-5">
-              <div className="inline-flex rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-emerald-300 transition group-hover:scale-105">
-                <Zap className="h-6 w-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-bold font-unbounded text-white group-hover:text-[#7c8cff] transition">
-                  Экспресс-тест
-                </h3>
-                <p className="text-sm text-slate-300 font-inter leading-relaxed">
-                  30 вопросов по методике RIASEC (коды Холланда). Быстрое определение твоих основных профессиональных интересов.
-                </p>
-              </div>
-            </div>
-            <div className="mt-8 flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider text-slate-400 font-syncopate">~4 минуты</span>
-              <span className="text-sm font-semibold text-[#7c8cff] inline-flex items-center gap-1.5 group-hover:translate-x-1.5 transition">
-                Запустить
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </div>
-
-          {/* Глубокий тест */}
-          <div
-            onClick={() => handleStart('deep')}
-            className="group cursor-pointer rounded-[32px] border border-white/10 bg-[#0b1125]/60 p-8 backdrop-blur-md transition duration-300 hover:-translate-y-1.5 hover:border-[#8b5cf6]/30 hover:bg-[#0b1125]/80 hover:shadow-[0_20px_50px_rgba(139,92,246,0.08)] flex flex-col justify-between min-h-[300px]"
-          >
-            <div className="space-y-5">
-              <div className="inline-flex rounded-2xl border border-[#8b5cf6]/20 bg-[#8b5cf6]/10 p-4 text-[#a855f7] transition group-hover:scale-105">
-                <Award className="h-6 w-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-bold font-unbounded text-white group-hover:text-[#8b5cf6] transition">
-                  Комплексный тест
-                </h3>
-                <p className="text-sm text-slate-300 font-inter leading-relaxed">
-                  84 вопроса: глубокий анализ твоих интересов (RIASEC) + характера (Big Five) + ведущих карьерных ориентиров («Якоря карьеры» Э. Шейна).
-                </p>
-              </div>
-            </div>
-            <div className="mt-8 flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wider text-slate-400 font-syncopate">~15 минут</span>
-              <span className="text-sm font-semibold text-[#8b5cf6] inline-flex items-center gap-1.5 group-hover:translate-x-1.5 transition">
-                Запустить
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  // 3. Лоадер при загрузке вопросов
-  if (store.isLoading) {
+  // 2. Лоадер при загрузке вопросов
+  if (store.isLoading || !store.currentQuestion) {
     return (
       <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
-        <div className="rounded-[32px] border border-white/10 bg-[#0b1125]/75 p-8 text-center backdrop-blur-xl shadow-glow relative overflow-hidden">
+        <div className="rounded-[32px] glass-card p-8 text-center relative overflow-hidden">
           <div className="relative z-10 flex flex-col items-center space-y-8">
-            <Loader2 className="h-16 w-16 animate-spin text-[#7c8cff] opacity-80" />
+            <Loader2 className="h-16 w-16 animate-spin text-[#8c6e4b] opacity-80" />
             <div className="space-y-2">
-              <h1 className="text-xl font-bold font-unbounded text-text">Загрузка вопросов диагностики...</h1>
-              <p className="max-w-md text-xs text-muted font-inter leading-relaxed">
-                Наш алгоритм синхронизирует сессию с базой данных PostgreSQL.
+              <h1 className="text-xl font-bold font-sans text-[#3d3123]">Загрузка вопросов диагностики...</h1>
+              <p className="max-w-md text-xs text-[#736251] leading-relaxed">
+                Пожалуйста, подождите, мы настраиваем сессию тестирования.
               </p>
             </div>
           </div>
@@ -242,25 +142,24 @@ export default function AssessmentPage() {
   }
 
   const currentQuestion = store.currentQuestion;
-  if (!currentQuestion) return null;
-
   const Icon = blockIcons[currentQuestion.test_type] || Compass;
-
-  // CYCLE 1: Fallback UI (когда мы уже ответили на этот вопрос, но оффлайн/висит запрос)
   const isWaitingForNext = store.answersHistory[currentQuestion.question_id] !== undefined;
 
+  // Рассчитываем текущий номер вопроса (всего 29 вопросов)
+  const currentQuestionNumber = Math.round((currentQuestion.progress_percent / 100) * 29) + 1;
+
   return (
-    <main className="mx-auto min-h-[calc(100vh-100px)] max-w-7xl px-6 py-10 lg:px-10 relative z-10">
+    <main className="mx-auto min-h-[calc(100vh-100px)] max-w-7xl px-6 py-10 lg:px-10 relative z-10 pt-28">
       
       {/* Плашка оффлайн-режима */}
       {store.isOffline && (
         <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-200 backdrop-blur-sm shadow-lg max-w-4xl mx-auto transition-opacity">
           <div className="flex items-center gap-3">
             <WifiOff className="h-5 w-5 text-red-400 shrink-0 animate-pulse" />
-            <p className="text-xs md:text-sm font-inter leading-relaxed">
+            <p className="text-xs md:text-sm leading-relaxed text-[#3d3123]">
               Сеть временно недоступна. 
               {store.offlineAnswersBuffer.length > 0 && (
-                <span className="font-bold text-white ml-2">Неотправленных ответов: {store.offlineAnswersBuffer.length}</span>
+                <span className="font-bold ml-2">Неотправленных ответов: {store.offlineAnswersBuffer.length}</span>
               )}
             </p>
           </div>
@@ -277,68 +176,69 @@ export default function AssessmentPage() {
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         
         {/* Боковая панель прогресса */}
-        <aside className="glass-panel space-y-6 rounded-[32px] p-6 lg:p-7 bg-[#0b1125]/60 backdrop-blur-md border-white/10">
+        <aside className="glass-panel space-y-6 rounded-[32px] p-6 lg:p-7">
           <div>
-            <span className="text-xs uppercase tracking-[0.25em] text-accentSoft font-syncopate">
-              {mode === 'express' ? 'Экспресс-диагностика' : 'Комплексный анализ'}
+            <span className="text-xs uppercase tracking-[0.25em] text-[#8c6e4b] font-bold">
+              Интерактивная диагностика
             </span>
-            <h1 className="text-2xl font-bold font-unbounded text-text mt-3 leading-tight">
+            <h1 className="text-2xl font-bold text-[#3d3123] mt-3 leading-tight font-sans">
               Диагностика потенциала
             </h1>
-            <p className="mt-2 text-sm text-muted font-inter leading-relaxed">
-              Отвечай максимально честно. В тесте нет «правильных» ответов.
+            <p className="mt-2 text-sm text-[#736251] leading-relaxed">
+              Отвечайте искренне. Здесь нет правильных или неправильных ответов.
             </p>
           </div>
 
           {/* Общий прогресс */}
-          <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
+          <div className="rounded-2xl border border-[#8c6e4b]/15 bg-white/40 p-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-text font-inter">Общий прогресс</p>
-              <p className="text-sm font-semibold text-accentSoft font-unbounded">{currentQuestion.progress_percent}%</p>
+              <p className="text-sm font-semibold text-text font-sans">Общий прогресс</p>
+              <p className="text-sm font-bold text-[#8c6e4b]">{currentQuestion.progress_percent}%</p>
             </div>
-            <div className="mt-3.5 h-1.5 rounded-full bg-white/10">
+            <div className="mt-3.5 h-1.5 rounded-full bg-black/5 overflow-hidden">
               <div
-                className="metric-bar h-1.5 rounded-full bg-gradient-to-r from-accent to-[#8b5cf6] transition-all duration-300"
+                className="h-1.5 rounded-full bg-[#8c6e4b] transition-all duration-300"
                 style={{ width: `${currentQuestion.progress_percent}%` }}
               />
             </div>
-            <div className="mt-3 flex items-center justify-between text-xs text-muted font-inter">
-              <span>Вопрос {Math.round((currentQuestion.progress_percent / 100) * (mode === 'express' ? 30 : 84)) + 1} из {mode === 'express' ? 30 : 84}</span>
+            <div className="mt-3 flex items-center justify-between text-xs text-muted">
+              <span>Вопрос {currentQuestionNumber > 29 ? 29 : currentQuestionNumber} из 29</span>
               <span>Блок: {blockNames[currentQuestion.test_type]}</span>
             </div>
           </div>
 
           {/* Список блоков теста */}
-          <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 space-y-3.5">
-            <p className="text-sm font-semibold text-text font-inter">Этапы диагностики</p>
+          <div className="rounded-2xl border border-[#8c6e4b]/15 bg-white/40 p-4 space-y-3.5">
+            <p className="text-sm font-semibold text-text">Этапы диагностики</p>
             <div className="space-y-3">
               {Object.entries(blockNames).map(([key, name]) => {
                 const BlockIcon = blockIcons[key] || Compass;
                 const isCurrent = currentQuestion.test_type === key;
-                const isPassed = 
-                  (key === 'riasec' && currentQuestion.test_type !== 'riasec') ||
-                  (key === 'big_five' && currentQuestion.test_type === 'career_anchors');
-
-                if (mode === 'express' && key !== 'riasec') return null;
+                
+                // Простая логика определения пройденных этапов
+                const keys = Object.keys(blockNames);
+                const currentIdx = keys.indexOf(currentQuestion.test_type);
+                const blockIdx = keys.indexOf(key);
+                const isPassed = blockIdx < currentIdx;
 
                 return (
                   <div 
                     key={key} 
                     className={`rounded-xl border p-3 transition duration-200 ${
                       isCurrent 
-                        ? 'border-accent bg-accent/5 text-white' 
+                        ? 'border-[#8c6e4b] bg-[#8c6e4b]/5 text-[#3d3123]' 
                         : isPassed 
-                          ? 'border-emerald-500/10 bg-emerald-500/5 text-emerald-400' 
-                          : 'border-white/5 bg-[#0b1125]/40 text-muted'
+                          ? 'border-emerald-500/20 bg-emerald-500/5 text-emerald-700' 
+                          : 'border-[#8c6e4b]/10 bg-white/20 text-[#736251]'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <BlockIcon className="h-4 w-4" />
-                        <span className="text-xs font-semibold font-inter">{name}</span>
+                        <span className="text-xs font-semibold">{name}</span>
                       </div>
-                      {isPassed && <span className="text-[10px] uppercase font-bold text-emerald-400">Пройден</span>}
-                      {isCurrent && <span className="text-[10px] uppercase font-bold text-accentSoft animate-pulse">Текущий</span>}
+                      {isPassed && <span className="text-[10px] uppercase font-bold text-emerald-600">Пройден</span>}
+                      {isCurrent && <span className="text-[10px] uppercase font-bold text-[#8c6e4b] animate-pulse">Текущий</span>}
                     </div>
                   </div>
                 );
@@ -347,40 +247,38 @@ export default function AssessmentPage() {
           </div>
         </aside>
 
-        {/* Карточный интерфейс */}
-        <section className="glass-panel rounded-[32px] p-6 lg:p-8 bg-[#0b1125]/60 backdrop-blur-md border-white/10 flex flex-col justify-between overflow-hidden relative min-h-[500px]">
+        {/* Карточный интерфейс вопросов */}
+        <section className="glass-panel rounded-[32px] p-6 lg:p-8 flex flex-col justify-between overflow-hidden relative min-h-[500px]">
           
           {isWaitingForNext && (
-            <div className="absolute inset-0 z-50 bg-[#0b1125]/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-[32px]">
-              <Loader2 className="h-10 w-10 animate-spin text-accentSoft mb-4" />
-              <p className="text-sm font-bold text-white">Синхронизация ответа...</p>
+            <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-[32px]">
+              <Loader2 className="h-10 w-10 animate-spin text-[#8c6e4b] mb-4" />
+              <p className="text-sm font-bold text-text">Синхронизация ответа...</p>
               {store.isOffline && <p className="text-xs text-muted mt-2">Ожидание подключения к сети</p>}
             </div>
           )}
 
           <div className="space-y-6 flex-1 flex flex-col justify-between relative z-10">
             <div>
-              <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-accentSoft font-syncopate">
+              <div className="flex items-center justify-between gap-4 border-b border-[#8c6e4b]/10 pb-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#8c6e4b]/20 bg-[#8c6e4b]/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#8c6e4b] font-sans">
                   <Icon className="h-3.5 w-3.5" />
                   {blockNames[currentQuestion.test_type]}
                 </div>
-                <span className="text-xs text-muted font-inter">
-                  Шкала: {currentQuestion.question_id.split('_')[1].toUpperCase()}
-                </span>
               </div>
 
               <div className="grid gap-6 md:grid-cols-[1fr_130px] items-center mt-6">
                 <div className="space-y-4">
-                  <h2 className="text-2xl font-bold font-unbounded text-text leading-snug lg:text-3xl">
+                  <h2 className="text-2xl font-bold text-text leading-snug lg:text-3xl font-sans">
                     {currentQuestion.question_text}
                   </h2>
-                  <p className="text-xs text-muted font-inter leading-relaxed">
-                    Выбери вариант ответа ниже или нажми соответствующую цифру на клавиатуре (1–5).
+                  <p className="text-xs text-muted leading-relaxed">
+                    Выбери вариант ответа ниже. Вы также можете использовать клавиши 1-5 на клавиатуре.
                   </p>
                 </div>
-                {/* Фоновое ИИ-изображение (Fallback) */}
-                <div className="relative w-full h-[130px] rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center">
+                
+                {/* Иллюстрация (Fallback) */}
+                <div className="relative w-full h-[130px] rounded-2xl border border-[#8c6e4b]/10 bg-white/40 overflow-hidden flex items-center justify-center">
                   {!imgError ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img 
@@ -390,32 +288,20 @@ export default function AssessmentPage() {
                       onError={() => setImgError(true)}
                     />
                   ) : (
-                    <div className="text-white/20">
-                      <HeroOrb />
+                    <div className="text-[#8c6e4b]/40 flex flex-col items-center justify-center gap-2">
+                      <Brain className="h-10 w-10 animate-pulse text-[#8c6e4b]" />
+                      <span className="text-[10px] uppercase tracking-wider font-semibold font-sans">Диагностика</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0b1125] to-transparent opacity-40" />
                 </div>
               </div>
 
-              {/* Кнопки Ликерта */}
+              {/* Варианты Ликерта */}
               <div className="grid gap-3 mt-8">
                 {currentQuestion.available_answers.map((ans) => {
                   const active = lastSelectedValue === ans.value;
-                  const colors = [
-                    'hover:border-red-500/30 hover:bg-red-500/5',
-                    'hover:border-orange-500/30 hover:bg-orange-500/5',
-                    'hover:border-yellow-500/30 hover:bg-yellow-500/5',
-                    'hover:border-indigo-500/30 hover:bg-indigo-500/5',
-                    'hover:border-purple-500/30 hover:bg-purple-500/5',
-                  ];
-                  const activeColors = [
-                    'border-red-500 bg-red-500/10 text-white shadow-[0_0_30px_rgba(239,68,68,0.15)]',
-                    'border-orange-500 bg-orange-500/10 text-white shadow-[0_0_30px_rgba(249,115,22,0.15)]',
-                    'border-yellow-500 bg-yellow-500/10 text-white shadow-[0_0_30px_rgba(234,179,8,0.15)]',
-                    'border-indigo-500 bg-indigo-500/10 text-white shadow-[0_0_30px_rgba(99,102,241,0.15)]',
-                    'border-purple-500 bg-purple-500/10 text-white shadow-[0_0_30px_rgba(168,85,247,0.15)]',
-                  ];
+                  const borderActive = 'border-[#8c6e4b] bg-[#8c6e4b]/10 text-[#3d3123] shadow-sm';
+                  const borderNormal = 'border-[#8c6e4b]/15 bg-white/50 text-[#736251] hover:border-[#8c6e4b]/40 hover:bg-[#8c6e4b]/5';
 
                   return (
                     <button
@@ -423,22 +309,20 @@ export default function AssessmentPage() {
                       type="button"
                       onClick={() => handleChooseAnswer(ans.value)}
                       disabled={store.isLoading || isWaitingForNext}
-                      className={`flex items-center gap-4 rounded-2xl border p-4.5 text-left transition duration-200 ${
-                        active
-                          ? activeColors[ans.value - 1]
-                          : `border-white/10 bg-white/5 text-text ${colors[ans.value - 1]}`
+                      className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition duration-200 ${
+                        active ? borderActive : borderNormal
                       }`}
                     >
                       <div
                         className={`flex h-8 w-8 items-center justify-center rounded-xl border text-xs font-bold transition ${
                           active 
-                            ? 'border-white bg-white text-[#0b1125] font-extrabold shadow-glow' 
-                            : 'border-white/20 text-muted'
+                            ? 'border-[#8c6e4b] bg-[#8c6e4b] text-white' 
+                            : 'border-[#8c6e4b]/20 text-[#8c6e4b]'
                         }`}
                       >
                         {ans.value}
                       </div>
-                      <span className="text-sm font-semibold font-inter">{ans.label}</span>
+                      <span className="text-sm font-semibold">{ans.label}</span>
                     </button>
                   );
                 })}
@@ -446,20 +330,20 @@ export default function AssessmentPage() {
             </div>
 
             {/* Панель навигации */}
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-6">
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[#8c6e4b]/10 pt-6">
               <button
                 type="button"
                 onClick={() => store.goBack()}
-                disabled={store.isLoading || currentQuestion.progress_percent === 0 || isWaitingForNext}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-text transition hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none"
+                disabled={store.isLoading || currentQuestionNumber <= 1 || isWaitingForNext}
+                className="inline-flex items-center gap-2 rounded-xl border border-[#8c6e4b]/20 bg-white/50 px-5 py-3 text-sm font-semibold text-text transition hover:bg-white/80 disabled:opacity-40 disabled:pointer-events-none"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Назад
               </button>
 
-              <div className="text-xs text-muted font-mono flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                <span>Сессия синхронизирована</span>
+              <div className="text-xs text-muted flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Диагностика онлайн</span>
               </div>
             </div>
           </div>

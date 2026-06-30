@@ -1,82 +1,93 @@
 import { NextResponse } from 'next/server';
-import { cookies, headers } from 'next/headers';
+import { headers } from 'next/headers';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
-import { checkRateLimit } from '../../../../lib/rate-limit';
 import { auth } from '../../../../lib/auth';
 
 export async function POST(request: Request) {
   try {
-    // Rate limit: 5 запросов в минуту с одного IP
-    const rlResponse = await checkRateLimit(request, 'register_session', 5, 60);
-    if (rlResponse) return rlResponse;
+    const body = await request.json().catch(() => ({}));
+    const { coachSessionId } = body;
 
-    // Авторизация пользователя через Better Auth
+    let userId = null;
+    let username = 'Гость';
+
+    // 1. Попытка авторизации через Better Auth
     const session = await auth.api.getSession({
       headers: await headers()
     });
 
-    if (!session || !session.user) {
-      return NextResponse.json({ error: 'Требуется авторизация' }, { status: 401 });
+    if (session && session.user) {
+      userId = session.user.id;
+      username = session.user.name;
+    } else if (coachSessionId) {
+      // 2. Если не авторизован, но передан coachSessionId, берем пользователя из сессии коуча
+      const coachSession = await prisma.coachSession.findUnique({
+        where: { id: coachSessionId },
+        include: { user: true }
+      });
+      if (coachSession) {
+        userId = coachSession.userId;
+        username = coachSession.user.name;
+      }
     }
-    const user = session.user as any;
 
-    const { is_deep } = await request.json().catch(() => ({ is_deep: true }));
-    const isDeep = is_deep !== false;
+    if (!userId) {
+      // Создаем гостевого пользователя, если нет сессии и коуча
+      const tempEmail = `guest_${Math.random().toString(36).substring(2, 11)}@moiprizvanie.ru`;
+      const user = await prisma.user.create({
+        data: {
+          name: 'Гость',
+          email: tempEmail,
+          role: 'STUDENT'
+        }
+      });
+      userId = user.id;
+    }
 
-    // 2. Создаем сессию диагностики. Начинаем с riasec
-    const diagnosticSession = await prisma.diagnosticSession.create({
-      data: {
-        userId: user.id,
-        testId: 'riasec',
-        status: 'in_progress',
-      },
-    });
+    // 3. Генерируем новый UUID для сессии диагностики
+    const sessionId = crypto.randomUUID();
 
-    // 3. Кэшируем сессию в Redis (для быстрого доступа на 2 часа)
+    // 4. Записываем состояние сессии в Redis кэш
     const sessionData = {
-      sessionId: diagnosticSession.sessionId,
-      userId: user.id,
-      username: user.name,
-      grade: user.grade || 8,
-      testId: 'riasec',
-      isDeep,
-      fraudPoints: 0,
+      sessionId,
+      userId,
+      username,
+      currentQuestionIndex: 0,
+      answers: {},
+      startedAt: new Date().toISOString()
     };
-    
+
     await redisClient.set(
-      `session:${diagnosticSession.sessionId}`,
+      `session:${sessionId}`,
       JSON.stringify(sessionData),
       'EX',
-      7200
+      7200 // Храним в кэше 2 часа
     );
 
-    // 4. Устанавливаем HttpOnly cookie для подтверждения владения сессией диагностики
     const res = NextResponse.json({
       success: true,
       data: {
-        session_id: diagnosticSession.sessionId,
-        user_id: user.id,
-        test_id: 'riasec',
-      },
+        session_id: sessionId,
+        user_id: userId,
+        username
+      }
     });
 
+    // Устанавливаем куку
     res.cookies.set({
       name: 'diagnostic_session_id',
-      value: diagnosticSession.sessionId,
+      value: sessionId,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7200, // 2 часа
-      path: '/',
+      maxAge: 7200,
+      path: '/'
     });
 
     return res;
   } catch (error: any) {
-    console.error('Ошибка регистрации сессии:', error);
-    return NextResponse.json(
-      { error: 'Внутренняя ошибка сервера' },
-      { status: 500 }
-    );
+    console.error('Ошибка регистрации сессии диагностики:', error);
+    return NextResponse.json({ error: 'Внутренняя ошибка сервера' }, { status: 500 });
   }
 }

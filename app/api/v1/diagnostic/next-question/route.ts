@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
-import { checkRateLimit } from '../../../../lib/rate-limit';
+import { diagnosticQuestions } from '../../../../data/questions';
+import { env } from '../../../../lib/env';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
-    const rlResponse = await checkRateLimit(request, 'next_question', 60, 60);
-    if (rlResponse) return rlResponse;
-
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('session_id');
 
@@ -18,158 +15,252 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Не указан session_id' }, { status: 400 });
     }
 
-    // Проверка владения сессией (Ownership check)
-    const cookieSessionId = cookies().get('diagnostic_session_id')?.value;
-    if (cookieSessionId !== sessionId) {
-      return NextResponse.json({ error: 'Нет доступа к данной сессии' }, { status: 403 });
+    // 1. Получаем сессию из кэша
+    const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+    if (!sessionDataRaw) {
+      return NextResponse.json({ error: 'Сессия не найдена или истекла' }, { status: 404 });
     }
 
-    // 1. Получаем сессию (из Redis или Postgres)
-    let sessionDataRaw = await redisClient.get(`session:${sessionId}`);
-    let sessionData: any = null;
+    const sessionData = JSON.parse(sessionDataRaw);
+    const currentQuestionIndex = typeof sessionData.currentQuestionIndex === 'number' ? sessionData.currentQuestionIndex : 0;
+    const answers = sessionData.answers || {};
 
-    if (sessionDataRaw) {
-      sessionData = JSON.parse(sessionDataRaw);
-    } else {
-      const session = await prisma.diagnosticSession.findUnique({
-        where: { sessionId },
-        include: { user: true },
+    const totalQuestions = diagnosticQuestions.length;
+    const progressPercent = Math.round((currentQuestionIndex / totalQuestions) * 100);
+
+    // Если все вопросы отвечены
+    if (currentQuestionIndex >= totalQuestions) {
+      // 2. Рассчитываем результаты (СКОРИНГ)
+      const riasecScores: Record<string, number> = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+      const bigFiveScores: Record<string, number> = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+      let correctIcarAnswers = 0;
+      let procrastinationScore = 0;
+
+      const riasecCounts: Record<string, number> = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+      const bigFiveCounts: Record<string, number> = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+      const procrastinationCounts = { count: 0 };
+
+      diagnosticQuestions.forEach((q) => {
+        const value = answers[q.id];
+        if (value === undefined) return;
+
+        if (q.testCode === 'RIASEC') {
+          riasecScores[q.scale] += value;
+          riasecCounts[q.scale] += 1;
+        } else if (q.testCode === 'BFI') {
+          const finalVal = q.reverseScored ? 6 - value : value;
+          bigFiveScores[q.scale] += finalVal;
+          bigFiveCounts[q.scale] += 1;
+        } else if (q.testCode === 'ICAR') {
+          // ICAR-1: 64 (index 3, value 4)
+          // ICAR-2: З (index 1, value 2)
+          // ICAR-3: Медь может быть металлом, а может и нет (index 1, value 2)
+          let isCorrect = false;
+          if (q.id === 'icar-1' && value === 4) isCorrect = true;
+          if (q.id === 'icar-2' && value === 2) isCorrect = true;
+          if (q.id === 'icar-3' && value === 2) isCorrect = true;
+          if (isCorrect) correctIcarAnswers += 1;
+        } else if (q.testCode === 'PROCRASTINATION') {
+          const finalVal = q.reverseScored ? 6 - value : value;
+          procrastinationScore += finalVal;
+          procrastinationCounts.count += 1;
+        }
       });
 
-      if (!session) {
-        return NextResponse.json({ error: 'Сессия не найдена' }, { status: 404 });
-      }
+      // Переводим шкалы RIASEC и BFI в средний балл (1-5)
+      const finalRiasec = Object.fromEntries(
+        Object.entries(riasecScores).map(([key, val]) => [key, riasecCounts[key] ? parseFloat((val / riasecCounts[key]).toFixed(2)) : 3])
+      );
+      const finalBigFive = Object.fromEntries(
+        Object.entries(bigFiveScores).map(([key, val]) => [key, bigFiveCounts[key] ? parseFloat((val / bigFiveCounts[key]).toFixed(2)) : 3])
+      );
 
-      const user = session.user as any;
-      sessionData = {
-        sessionId: session.sessionId,
-        userId: session.userId,
-        username: user.name,
-        grade: user.grade,
-        testId: session.testId,
-        fraudPoints: 0,
+      // Сохраняем по одной записи DiagnosticResult для каждого теста в БД
+      const userId = sessionData.userId;
+
+      await prisma.diagnosticResult.createMany({
+        data: [
+          {
+            userId,
+            testCode: 'RIASEC',
+            rawResponses: answers,
+            scores: finalRiasec,
+            reliability: 'high'
+          },
+          {
+            userId,
+            testCode: 'BFI',
+            rawResponses: answers,
+            scores: finalBigFive,
+            reliability: 'high'
+          },
+          {
+            userId,
+            testCode: 'ICAR',
+            rawResponses: answers,
+            scores: { score: correctIcarAnswers },
+            reliability: 'medium'
+          },
+          {
+            userId,
+            testCode: 'PROCRASTINATION',
+            rawResponses: answers,
+            scores: { score: procrastinationScore },
+            reliability: 'high'
+          }
+        ]
+      });
+
+      // Загружаем качественные данные коуча
+      const coachSession = await prisma.coachSession.findUnique({
+        where: { userId }
+      });
+      const coachExtracted = coachSession ? (coachSession.extractedData as Record<string, any>) : {};
+
+      // Сборка цифрового профиля
+      const summaryProfile = {
+        riasec: finalRiasec,
+        bigFive: finalBigFive,
+        icar: correctIcarAnswers,
+        procrastination: procrastinationScore,
+        coachData: {
+          dreams: coachExtracted.dreams || 'Не указано',
+          idols: coachExtracted.idols || 'Не указано',
+          values: coachExtracted.values || 'Не указано',
+          barriers: coachExtracted.barriers || 'Не указано'
+        }
       };
 
-      await redisClient.set(
-        `session:${sessionId}`,
-        JSON.stringify(sessionData),
-        'EX',
-        7200
-      );
-    }
-
-    // 2. Получаем список всех отвеченных вопросов для этой сессии
-    const answered = await prisma.userDiagnosticAnswer.findMany({
-      where: { sessionId },
-      select: { questionId: true },
-    });
-    const answeredIds = new Set(answered.map((a) => a.questionId));
-
-    // 3. Получаем все вопросы из всех трех тестов
-    // Порядок тестов: riasec (30) -> big_five (30) -> career_anchors (24)
-    const allQuestions = await prisma.diagnosticQuestion.findMany({
-      orderBy: [
-        { testId: 'desc' }, // Сортируем так, чтобы порядок был: riasec, big_five, career_anchors
-        { questionId: 'asc' },
-      ],
-    });
-
-    // Нам нужен стабильный порядок. Напрямую отсортируем в JS, чтобы гарантировать: riasec -> big_five -> career_anchors
-    const testOrder = { riasec: 1, big_five: 2, career_anchors: 3 };
-    const sortedQuestions = allQuestions.sort((a, b) => {
-      const orderA = testOrder[a.testId as keyof typeof testOrder] || 99;
-      const orderB = testOrder[b.testId as keyof typeof testOrder] || 99;
-      if (orderA !== orderB) return orderA - orderB;
-      return a.questionId.localeCompare(b.questionId);
-    });
-
-    const isDeep = sessionData.isDeep !== false;
-    const questionsToUse = isDeep
-      ? sortedQuestions
-      : sortedQuestions.filter((q) => q.testId === 'riasec');
-
-    const totalQuestions = questionsToUse.length;
-    const answeredCount = answeredIds.size;
-    const progressPercent = parseFloat(((answeredCount / totalQuestions) * 100).toFixed(1));
-
-    // Находим первый неотвеченный вопрос
-    const nextQuestion = questionsToUse.find((q) => !answeredIds.has(q.questionId));
-
-    if (!nextQuestion) {
-      // Все вопросы отвечены!
-      // Обновляем статус сессии на completed
-      await prisma.diagnosticSession.update({
-        where: { sessionId },
-        data: { status: 'completed', testId: 'career_anchors' },
+      await prisma.digitalProfile.create({
+        data: {
+          userId,
+          summary: summaryProfile
+        }
       });
 
-      // Обновляем в Redis
-      sessionData.status = 'completed';
-      sessionData.testId = 'career_anchors';
-      await redisClient.set(`session:${sessionId}`, JSON.stringify(sessionData), 'EX', 7200);
+      // 3. Генерация ИИ-отчета через ProxyAPI
+      const apiKey = env.PROXYAPI_KEY;
+      const apiUrl = env.PROXYAPI_URL;
+
+      const systemPrompt = `Вы — ведущий мировой эксперт в профориентации подростков и возрастной психологии.
+Ваша задача — проанализировать результаты диагностики (RIASEC, Big Five, логический тест, прокрастинация) и качественные данные от коуча, чтобы составить подробный, вдохновляющий отчет.
+
+Данные для анализа:
+- Профиль интересов (RIASEC): ${JSON.stringify(finalRiasec)}
+- Профиль личности (Big Five): ${JSON.stringify(finalBigFive)}
+- Логика (ICAR): ${correctIcarAnswers} из 3 правильных ответов
+- Прокрастинация (Лэй): ${procrastinationScore} баллов (шкала 4-20)
+- Качественные данные коуча: Мечты: ${summaryProfile.coachData.dreams}, Кумиры: ${summaryProfile.coachData.idols}, Ценности: ${summaryProfile.coachData.values}, Барьеры: ${summaryProfile.coachData.barriers}
+
+Правила формирования отчета:
+1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
+2. Проанализируйте Big Five черты.
+3. Опишите сильные стороны и зоны развития с учетом прокрастинации (если балл прокрастинации выше 12, дайте совет, как с этим справляться) и логических задач.
+4. Раздел кумиров и мечт: явно укажите с пометкой "Источник: диалог с нейрокоучем" их качественный анализ.
+5. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
+6. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
+
+Ответьте СТРОГО в формате JSON.
+Структура JSON:
+{
+  "studentName": "${sessionData.username}",
+  "heroSummary": ["Одно-два вдохновляющих предложения."],
+  "personalityTraits": [
+    {
+      "name": "Название шкалы Big Five",
+      "score": 20-100 (переведите балл 1-5 в проценты),
+      "description": "Как проявляется."
+    }
+  ],
+  "riasecSummary": "Краткое описание ведущих типов интересов.",
+  "strengths": ["Сильная сторона 1", "Сильная сторона 2"],
+  "growthAreas": ["Зона развития 1", "Зона развития 2"],
+  "coachSection": {
+    "dreams": "Анализ мечт",
+    "idols": "Анализ кумиров",
+    "values": "Анализ ценностей"
+  },
+  "professions": [
+    {
+      "name": "Название профессии",
+      "score": 90,
+      "why": "Почему подходит"
+    }
+  ]
+}`;
+
+      const aiResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: 'Ты возвращаешь только валидный JSON.' },
+            { role: 'user', content: systemPrompt }
+          ],
+          temperature: 0.7
+        })
+      });
+
+      let htmlReportContent = '{}';
+      if (aiResponse.ok) {
+        const aiData = await aiResponse.json();
+        htmlReportContent = aiData.choices?.[0]?.message?.content || '{}';
+      }
+
+      // Сохраняем отчет в БД
+      await prisma.report.create({
+        data: {
+          userId,
+          htmlContent: htmlReportContent
+        }
+      });
+
+      // Кэшируем отчет в Redis
+      await redisClient.set(`report:${sessionId}`, htmlReportContent, 'EX', 86400);
+
+      // Очищаем сессию из Redis
+      await redisClient.del(`session:${sessionId}`);
 
       return NextResponse.json({
         status: 'success',
         data: {
           session_id: sessionId,
           completed: true,
-          progress_percent: 100.0,
-        },
+          progress_percent: 100
+        }
       });
     }
 
-    // Если текущий тест в сессии не совпадает с тестом следующего вопроса, обновляем сессию
-    if (sessionData.testId !== nextQuestion.testId) {
-      await prisma.diagnosticSession.update({
-        where: { sessionId },
-        data: { testId: nextQuestion.testId },
-      });
-      sessionData.testId = nextQuestion.testId;
-      await redisClient.set(`session:${sessionId}`, JSON.stringify(sessionData), 'EX', 7200);
-    }
-
-    // Задаем доступные варианты ответов по шкале Ликерта (5-балльной)
-    let availableAnswers = [
-      { label: 'Категорически не нравится', value: 1 },
-      { label: 'Не нравится', value: 2 },
-      { label: 'Нейтрально', value: 3 },
-      { label: 'Нравится', value: 4 },
-      { label: 'Очень нравится', value: 5 },
-    ];
-
-    if (nextQuestion.testId === 'big_five') {
-      availableAnswers = [
-        { label: 'Полностью не согласен', value: 1 },
-        { label: 'Скорее не согласен', value: 2 },
-        { label: 'Нейтрально', value: 3 },
-        { label: 'Скорее согласен', value: 4 },
-        { label: 'Полностью согласен', value: 5 },
-      ];
-    } else if (nextQuestion.testId === 'career_anchors') {
-      availableAnswers = [
-        { label: 'Полностью не согласен', value: 1 },
-        { label: 'Не согласен', value: 2 },
-        { label: 'Затрудняюсь ответить', value: 3 },
-        { label: 'Согласен', value: 4 },
-        { label: 'Полностью согласен', value: 5 },
-      ];
-    }
+    // Если прохождение продолжается, отдаем текущий вопрос
+    const nextQuestion = diagnosticQuestions[currentQuestionIndex];
+    
+    // Подготовка вариантов ответов
+    let availableAnswers = nextQuestion.options.map((opt, i) => ({
+      label: opt,
+      value: i + 1
+    }));
 
     return NextResponse.json({
       status: 'success',
       data: {
         session_id: sessionId,
-        question_id: nextQuestion.questionId,
-        test_type: nextQuestion.testId,
+        question_id: nextQuestion.id,
+        test_type: nextQuestion.testCode.toLowerCase(),
         progress_percent: progressPercent,
-        question_text: nextQuestion.questionText,
+        question_text: nextQuestion.text,
         visual_asset_url: nextQuestion.visualAssetUrl,
-        ui_layout_type: 'tinder_card',
-        available_answers: availableAnswers,
-      },
+        ui_layout_type: nextQuestion.testCode === 'ICAR' ? 'select' : 'likert',
+        available_answers: availableAnswers
+      }
     });
+
   } catch (error: any) {
-    console.error('Ошибка получения следующего вопроса:', error);
+    console.error('Ошибка в next-question route:', error);
     return NextResponse.json({ error: 'Внутренняя ошибка сервера' }, { status: 500 });
   }
 }

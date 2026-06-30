@@ -67,18 +67,18 @@ export function SpaceBackground() {
       >
         <defs>
           <linearGradient id="lightLineGrad" x1="0%" y1="50%" x2="100%" y2="50%">
-            <stop offset="0%" stopColor="#9bbbcf" stopOpacity="0" />
-            <stop offset="35%" stopColor="#b7d2df" stopOpacity="0.32" />
-            <stop offset="70%" stopColor="#8aaec4" stopOpacity="0.42" />
-            <stop offset="100%" stopColor="#9bbbcf" stopOpacity="0" />
+            <stop offset="0%" stopColor="#c2ab87" stopOpacity="0" />
+            <stop offset="35%" stopColor="#ecdcc3" stopOpacity="0.32" />
+            <stop offset="70%" stopColor="#8c6e4b" stopOpacity="0.42" />
+            <stop offset="100%" stopColor="#c2ab87" stopOpacity="0" />
           </linearGradient>
 
           <radialGradient id="windParticleGrad">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="38%" stopColor="#d7bd79" stopOpacity="0.72" />
-            <stop offset="62%" stopColor="#e9b9bd" stopOpacity="0.24" />
-            <stop offset="82%" stopColor="#9bbbcf" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#9bbbcf" stopOpacity="0" />
+            <stop offset="38%" stopColor="#c2ab87" stopOpacity="0.72" />
+            <stop offset="62%" stopColor="#ecdcc3" stopOpacity="0.24" />
+            <stop offset="82%" stopColor="#8c6e4b" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="#8c6e4b" stopOpacity="0" />
           </radialGradient>
 
           <filter id="windGlow" x="-50%" y="-50%" width="200%" height="200%">
