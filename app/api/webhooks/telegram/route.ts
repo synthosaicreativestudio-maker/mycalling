@@ -274,6 +274,29 @@ export async function POST(req: Request) {
         );
 
         if (authLink) {
+          // Переносим коуч-сессию с гостевого аккаунта на реальный аккаунт пользователя
+          if (authLink.userId && authLink.userId !== user.id) {
+            try {
+              // 1. Удаляем старую коуч-сессию реального пользователя, если она существует
+              await prisma.coachSession.deleteMany({
+                where: { userId: user.id }
+              });
+
+              // 2. Переносим текущую гостевую сессию на реального пользователя
+              await prisma.coachSession.updateMany({
+                where: { userId: authLink.userId },
+                data: { userId: user.id }
+              });
+
+              // 3. Удаляем гостевого пользователя из БД для очистки
+              await prisma.user.delete({
+                where: { id: authLink.userId }
+              });
+            } catch (e) {
+              console.error('Error migrating guest session in Telegram webhook:', e);
+            }
+          }
+
           await prisma.authLink.update({
             where: { id: authLink.id },
             data: {
