@@ -126,15 +126,16 @@ if (coachSession && coachSession.status === 'COMPLETED') {
 1. Пользователь нажимает Telegram/MAX ID в чате → переходит в бот → делится контактом.
 2. Webhook обрабатывает контакт → создаёт сессию → обновляет AuthLink на `COMPLETED`.
 3. Coach page через poll обнаруживает `COMPLETED` + `sessionToken`.
-4. Выполняет **silent fetch** к callback-эндпоинту:
+4. Записывает куку авторизации на клиенте напрямую, а также делает резервный silent fetch к callback-эндпоинту:
    ```typescript
+   document.cookie = `better-auth.session_token=${data.sessionToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
    await fetch(`/api/auth/telegram/callback?token=${data.sessionToken}`, {
      credentials: 'include',
      redirect: 'manual'
    });
    ```
-5. Ответ содержит `Set-Cookie: better-auth.session_token=...` → cookie устанавливается в браузере.
-6. При переходе в ЛК (`/auth`) → `authClient.useSession()` обнаруживает сессию → автоматический редирект в `/report`.
+5. Токен `better-auth.session_token` мгновенно устанавливается в браузере.
+6. При переходе в ЛК (`/auth` или `/report`) → сессия обнаруживается → автоматический редирект на нужный шаг.
 
 ---
 
