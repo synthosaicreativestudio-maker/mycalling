@@ -16,7 +16,7 @@ export function SpaceBackground() {
   return (
     <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#fdfcfb] print:hidden">
       <div 
-        className="absolute inset-x-0 bottom-0 top-[56px] bg-cover bg-center pointer-events-none opacity-30"
+        className="absolute inset-x-0 bottom-0 top-[40px] bg-cover bg-center pointer-events-none opacity-30"
         style={{ backgroundImage: 'url(/assets/backgrounds/light-bg4.webp)' }}
       />
       
