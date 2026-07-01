@@ -79,8 +79,9 @@ export default function CoachPage() {
           clearInterval(interval);
           setPhoneConfirmed(true);
 
-          // Автоматически устанавливаем cookie авторизации (silent fetch)
+          // Гарантированно устанавливаем cookie авторизации на клиенте напрямую
           if (data.sessionToken) {
+            document.cookie = `better-auth.session_token=${data.sessionToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
             try {
               await fetch(`/api/auth/telegram/callback?token=${data.sessionToken}`, {
                 credentials: 'include',
@@ -361,16 +362,11 @@ export default function CoachPage() {
             const isCoach = msg.role === 'assistant';
             const tgPayload = linkCode || '';
 
-            const telegramBotLink = isMobile
-              ? `tg://resolve?domain=moyoprizvanie_bot${tgPayload ? `&start=${tgPayload}` : ''}`
-              : `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
-              
-            const maxIdLink = isMobile
-              ? `max://maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`
-              : `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
+            const telegramBotLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+            const maxIdLink = `https://im.max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
 
-            const qrTelegramLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
-            const qrMaxIdLink = `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
+            const qrTelegramLink = telegramBotLink;
+            const qrMaxIdLink = maxIdLink;
 
             return (
               <motion.div

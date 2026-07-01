@@ -72,13 +72,9 @@ function LinkCard() {
   const isTelegram = provider === 'telegram';
   const qrLink = isTelegram
     ? `https://t.me/moyoprizvanie_bot?start=${code}`
-    : `https://max.ru/maxid_bot/start/${code}`;
+    : `https://im.max.ru/maxid_bot?start=${code}`;
 
-  const botLink = isMobile
-    ? (isTelegram
-      ? `tg://resolve?domain=moyoprizvanie_bot&start=${code}`
-      : `max://maxid_bot/start/${code}`)
-    : qrLink;
+  const botLink = qrLink;
 
   return (
     <motion.div

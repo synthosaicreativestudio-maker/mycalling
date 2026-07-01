@@ -88,17 +88,12 @@ function AuthCard() {
 
   const tgPayload = linkCode || '';
 
-  const telegramBotLink = isMobile
-    ? `tg://resolve?domain=moyoprizvanie_bot${tgPayload ? `&start=${tgPayload}` : ''}`
-    : `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
-    
-  const maxIdLink = isMobile
-    ? `max://maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`
-    : `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
+  const telegramBotLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+  const maxIdLink = `https://im.max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
 
   // Динамические QR-коды
-  const qrTelegramLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
-  const qrMaxIdLink = `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
+  const qrTelegramLink = telegramBotLink;
+  const qrMaxIdLink = maxIdLink;
 
   return (
     <motion.div

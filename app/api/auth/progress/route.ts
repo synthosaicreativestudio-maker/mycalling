@@ -28,7 +28,8 @@ export async function GET() {
     return NextResponse.json({
       authenticated: true,
       coachCompleted: coachSession?.status === 'COMPLETED',
-      testCompleted: !!diagnosticResult
+      testCompleted: !!diagnosticResult,
+      sessionId: coachSession?.id || null
     });
   } catch (error: any) {
     console.error('Error fetching progress status:', error);

@@ -2,15 +2,30 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
 
+import { headers } from 'next/headers';
+import { auth } from '../../../../lib/auth';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const sessionId = searchParams.get('session_id');
+    let sessionId = searchParams.get('session_id');
+
+    // Проверяем сессию Better Auth
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+
+    const userId = session?.user?.id;
+
+    // Если session_id не передан, но пользователь авторизован — используем его userId
+    if (!sessionId && userId) {
+      sessionId = userId;
+    }
 
     if (!sessionId) {
-      return NextResponse.json({ error: 'Не указан session_id' }, { status: 400 });
+      return NextResponse.json({ error: 'Не указан session_id и пользователь не авторизован' }, { status: 400 });
     }
 
     // 1. Попытка загрузить кэшированный отчет из Redis

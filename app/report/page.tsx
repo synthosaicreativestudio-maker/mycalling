@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Brain, Compass, Sparkles, Award, RefreshCw, AlertCircle, ArrowLeft, Download, Loader2, ShieldCheck, Clock } from 'lucide-react';
 
 type Trait = {
@@ -76,6 +76,7 @@ const defaultReport: ReportData = {
 };
 
 function ReportPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
 
@@ -86,15 +87,45 @@ function ReportPageContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!sessionId) {
-      return;
-    }
-
-    const loadReport = async () => {
+    const checkProgressAndLoad = async () => {
       setIsLoading(true);
       setError(null);
+      
       try {
-        const res = await fetch(`/api/v1/diagnostic/results?session_id=${sessionId}`);
+        let targetSessionId = sessionId;
+
+        // Если зашли в ЛК без параметров — проверяем авторизацию и прогресс
+        if (!targetSessionId) {
+          const progressRes = await fetch('/api/auth/progress');
+          if (!progressRes.ok) {
+            throw new Error('Ошибка проверки статуса авторизации');
+          }
+          const progressData = await progressRes.json();
+
+          if (!progressData.authenticated) {
+            router.push('/auth');
+            return;
+          }
+
+          if (!progressData.coachCompleted) {
+            router.push('/coach');
+            return;
+          }
+
+          if (!progressData.testCompleted) {
+            router.push('/assessment');
+            return;
+          }
+
+          targetSessionId = progressData.sessionId;
+        }
+
+        if (!targetSessionId) {
+          throw new Error('Не удалось определить сессию пользователя');
+        }
+
+        // Загружаем отчёт по определенному sessionId
+        const res = await fetch(`/api/v1/diagnostic/results?session_id=${targetSessionId}`);
         if (!res.ok) {
           throw new Error('Не удалось загрузить отчет. Возможно, результаты еще не готовы.');
         }
@@ -109,8 +140,8 @@ function ReportPageContent() {
       }
     };
 
-    loadReport();
-  }, [sessionId]);
+    checkProgressAndLoad();
+  }, [sessionId, router]);
 
   if (isLoading) {
     return (
