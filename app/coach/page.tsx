@@ -12,9 +12,9 @@ interface Message {
 
 const STEP_NAMES: Record<number, string> = {
   0: 'Подготовка к диалогу',
-  1: 'Подключение канала связи',
-  2: 'Знакомство',
-  3: 'Интересы и увлечения',
+  1: 'Знакомство',
+  2: 'Подключение канала связи',
+  3: 'Город и интересы',
   4: 'Ценности и мотивация',
   5: 'Проверка гипотез',
   6: 'Подведение итогов'
@@ -78,6 +78,18 @@ export default function CoachPage() {
         if (data.status === 'COMPLETED') {
           clearInterval(interval);
           setPhoneConfirmed(true);
+
+          // Автоматически устанавливаем cookie авторизации (silent fetch)
+          if (data.sessionToken) {
+            try {
+              await fetch(`/api/auth/telegram/callback?token=${data.sessionToken}`, {
+                credentials: 'include',
+                redirect: 'manual' // Не следуем за редиректом, только получаем cookie
+              });
+            } catch (e) {
+              // Ничего страшного — cookie может уже быть установлена
+            }
+          }
           
           // Отправляем системное сообщение коучу, чтобы мгновенно продвинуть шаг
           const chatRes = await fetch('/api/v1/coach/chat', {
@@ -387,7 +399,7 @@ export default function CoachPage() {
                   )}
                   {msg.content}
 
-                  {isCoach && step >= 1 && step < 6 && !phoneConfirmed && idx === messages.length - 1 && (
+                  {isCoach && step >= 2 && step < 6 && !phoneConfirmed && idx === messages.length - 1 && (
                     <div className="mt-4 p-4 rounded-xl bg-[#8c6e4b]/5 border border-[#8c6e4b]/15 space-y-3">
                       <p className="text-xs font-bold text-[#8c6e4b] flex items-center gap-1.5">
                         <span>📲</span> Подключите удобный канал связи для получения отчета:

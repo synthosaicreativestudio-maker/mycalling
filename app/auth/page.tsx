@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Send, Fingerprint, QrCode, ExternalLink, AlertCircle } from 'lucide-react';
 import TelegramLoginWidget from '../components/TelegramLoginWidget';
 import { authClient } from '../lib/auth-client';
+import { QRCodeSVG } from 'qrcode.react';
 
 function AuthCard() {
   const router = useRouter();
@@ -98,8 +99,6 @@ function AuthCard() {
   // Динамические QR-коды
   const qrTelegramLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
   const qrMaxIdLink = `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
-  const telegramQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrTelegramLink)}&color=34-158-217`;
-  const maxIdQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrMaxIdLink)}&color=139-92-246`;
 
   return (
     <motion.div
@@ -160,8 +159,7 @@ function AuthCard() {
 
           {/* QR-код */}
           <div className="mx-auto w-[210px] h-[210px] bg-white rounded-3xl p-4 flex items-center justify-center shadow-lg border border-[#349ed9]/20">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={telegramQrUrl} alt="Telegram QR Link" className="w-[180px] h-[180px] select-none" />
+            <QRCodeSVG value={qrTelegramLink} size={180} fgColor="#349ed9" level="H" includeMargin={true} />
           </div>
 
           {/* Ссылка */}
@@ -192,8 +190,7 @@ function AuthCard() {
 
           {/* QR-код */}
           <div className="mx-auto w-[210px] h-[210px] bg-white rounded-3xl p-4 flex items-center justify-center shadow-lg border border-[#8b5cf6]/20">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={maxIdQrUrl} alt="MAX ID QR Link" className="w-[180px] h-[180px] select-none" />
+            <QRCodeSVG value={qrMaxIdLink} size={180} fgColor="#8b5cf6" level="H" includeMargin={true} />
           </div>
 
           {/* Ссылка */}

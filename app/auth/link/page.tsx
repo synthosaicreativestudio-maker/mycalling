@@ -5,13 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Send, Fingerprint, QrCode, ExternalLink, Loader2, CheckCircle2 } from 'lucide-react';
 import { SpaceBackground } from '../../components/SpaceBackground';
+import { QRCodeSVG } from 'qrcode.react';
 
 function LinkCard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   const provider = searchParams.get('provider') || 'telegram';
-  
+
   const [status, setStatus] = useState<'PENDING' | 'COMPLETED' | 'EXPIRED'>('PENDING');
   const [isMobile, setIsMobile] = useState(false);
 
@@ -38,7 +39,7 @@ function LinkCard() {
         if (data.status === 'COMPLETED') {
           clearInterval(interval);
           setStatus('COMPLETED');
-          
+
           // Если есть токен сессии, выполняем автоматический вход (для мобильного устройства)
           if (data.sessionToken) {
             setTimeout(() => {
@@ -74,13 +75,10 @@ function LinkCard() {
     : `https://max.ru/maxid_bot/start/${code}`;
 
   const botLink = isMobile
-    ? (isTelegram 
-        ? `tg://resolve?domain=moyoprizvanie_bot&start=${code}`
-        : `max://maxid_bot/start/${code}`)
+    ? (isTelegram
+      ? `tg://resolve?domain=moyoprizvanie_bot&start=${code}`
+      : `max://maxid_bot/start/${code}`)
     : qrLink;
-
-  const qrColor = isTelegram ? '34-158-217' : '139-92-246';
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrLink)}&color=${qrColor}`;
 
   return (
     <motion.div
@@ -90,9 +88,8 @@ function LinkCard() {
       className="w-full max-w-[420px] rounded-[32px] border border-[#8c6e4b]/15 bg-white/70 p-8 backdrop-blur-xl shadow-2xl relative z-10 text-center space-y-6"
     >
       <div className="flex flex-col items-center">
-        <div className={`inline-flex h-16 w-16 items-center justify-center rounded-2xl ${
-          isTelegram ? 'bg-[#349ed9]/10 text-[#349ed9]' : 'bg-[#8b5cf6]/10 text-[#8b5cf6]'
-        } border border-current/15 mb-4`}>
+        <div className={`inline-flex h-16 w-16 items-center justify-center rounded-2xl ${isTelegram ? 'bg-[#349ed9]/10 text-[#349ed9]' : 'bg-[#8b5cf6]/10 text-[#8b5cf6]'
+          } border border-current/15 mb-4`}>
           {isTelegram ? <Send className="h-7 w-7" /> : <Fingerprint className="h-7 w-7" />}
         </div>
         <h1 className="text-xl font-bold font-sans text-[#253243]">
@@ -107,8 +104,13 @@ function LinkCard() {
         <>
           {/* QR-код */}
           <div className="mx-auto w-[240px] h-[240px] bg-white rounded-3xl p-2.5 flex items-center justify-center shadow-md border border-[#8c6e4b]/10">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrUrl} alt="Bot QR Link" className="w-[220px] h-[220px] select-none rounded-xl" />
+            <QRCodeSVG
+              value={qrLink}
+              size={220}
+              fgColor={isTelegram ? '#349ed9' : '#8b5cf6'}
+              level="H"
+              includeMargin={true}
+            />
           </div>
 
           {/* Кнопка открытия */}
@@ -116,11 +118,10 @@ function LinkCard() {
             href={botLink}
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-full h-[54px] inline-flex items-center justify-center gap-2.5 rounded-2xl text-sm font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-lg ${
-              isTelegram 
-                ? 'bg-[#349ed9] hover:bg-[#2d8bc0] shadow-[#349ed9]/25' 
+            className={`w-full h-[54px] inline-flex items-center justify-center gap-2.5 rounded-2xl text-sm font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-lg ${isTelegram
+                ? 'bg-[#349ed9] hover:bg-[#2d8bc0] shadow-[#349ed9]/25'
                 : 'bg-[#8b5cf6] hover:bg-[#7c4df2] shadow-[#8b5cf6]/25'
-            }`}
+              }`}
           >
             Открыть чат-бот <ExternalLink className="h-4 w-4" />
           </a>
@@ -134,7 +135,7 @@ function LinkCard() {
       )}
 
       {status === 'COMPLETED' && (
-        <motion.div 
+        <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="py-8 space-y-4"
@@ -175,7 +176,7 @@ export default function LinkPage() {
   return (
     <main className="flex min-h-[100dvh] flex-col items-center justify-center p-6 relative">
       <SpaceBackground />
-      
+
       <Suspense fallback={
         <div className="w-full max-w-[420px] rounded-[32px] border border-[#8c6e4b]/15 bg-white/70 p-8 backdrop-blur-xl flex flex-col items-center justify-center min-h-[300px]">
           <Loader2 className="h-8 w-8 animate-spin text-[#8c6e4b]" />
