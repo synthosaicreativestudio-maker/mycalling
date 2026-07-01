@@ -41,6 +41,7 @@ model User {
   diagnostics   DiagnosticResult[]
   profile       DigitalProfile?
   report        Report?
+  authLinks     AuthLink[]
 
   // Отношение Родитель-Ребенок
   childId       String?             @map("child_id") @db.Uuid
@@ -141,3 +142,19 @@ model Report {
 
   @@map("reports")
 }
+
+model AuthLink {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code         String   @unique
+  status       String   @default("PENDING") // PENDING, COMPLETED, EXPIRED
+  telegramId   String?  @map("telegram_id")
+  maxUserId    String?  @map("max_user_id")
+  userId       String?  @map("user_id") @db.Uuid
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken String?  @map("session_token")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("auth_links")
+}
+

@@ -266,7 +266,19 @@ export async function POST(req: Request) {
     // ==========================================
     // ЭТАП ЭКСТРАКЦИИ (происходит на лету в одном запросе)
     // ==========================================
-    if (!isInitMessage && currentStep < 6) {
+    const isPhoneConfirmedMsg = message === 'Телефон подтвержден через бот';
+
+    if (!isInitMessage && currentStep < 6 && isPhoneConfirmedMsg) {
+      parsedData = { shouldAdvanceStep: true };
+      nextStep = 2; // Переходим сразу к знакомству (Шаг 2)
+      extractedData.currentStep = nextStep;
+      
+      const dbUser = await prisma.user.findUnique({ where: { id: coachSession.userId } });
+      if (dbUser) {
+        extractedData.fullName = dbUser.name;
+        extractedData.phone = dbUser.phone;
+      }
+    } else if (!isInitMessage && currentStep < 6) {
       const extractionPrompt = `Ты — анализатор текста. Проанализируй сообщение пользователя и текущий шаг сценария нейрокоуча.
 Извлеки структурированные данные.
 

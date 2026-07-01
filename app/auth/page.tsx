@@ -15,6 +15,7 @@ function AuthCard() {
   const isRegisterDenied = errorParam === 'register_denied';
 
   const [isMobile, setIsMobile] = useState(false);
+  const [linkCode, setLinkCode] = useState<string | null>(null);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -24,12 +25,70 @@ function AuthCard() {
     setIsMobile(checkMobile());
   }, []);
 
-  const telegramBotLink = isMobile ? "tg://resolve?domain=moyoprizvanie_bot" : "https://t.me/moyoprizvanie_bot";
-  const maxIdLink = isMobile ? "max://maxid_bot" : "https://max.ru/maxid_bot";
+  // Получаем временный код авторизации
+  useEffect(() => {
+    async function getLinkCode() {
+      try {
+        const res = await fetch('/api/auth/link-code', { method: 'POST' });
+        const data = await res.json();
+        if (data.code) {
+          setLinkCode(data.code);
+        }
+      } catch (err) {
+        console.error('Error fetching link code:', err);
+      }
+    }
+    getLinkCode();
+  }, []);
+
+  // Поллинг состояния авторизации
+  useEffect(() => {
+    if (!linkCode) return;
+
+    let isSubscribed = true;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/auth/poll?code=${linkCode}`);
+        const data = await res.json();
+
+        if (!isSubscribed) return;
+
+        if (data.status === 'COMPLETED' && data.sessionToken) {
+          clearInterval(interval);
+          router.push(`/api/auth/telegram/callback?token=${data.sessionToken}`);
+        } else if (data.status === 'EXPIRED') {
+          clearInterval(interval);
+          // Перезапрашиваем новый код при истечении старого
+          const newRes = await fetch('/api/auth/link-code', { method: 'POST' });
+          const newData = await newRes.json();
+          if (newData.code) {
+            setLinkCode(newData.code);
+          }
+        }
+      } catch (err) {
+        console.error('Polling error:', err);
+      }
+    }, 2000);
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(interval);
+    };
+  }, [linkCode, router]);
+
+  const tgPayload = linkCode || '';
+
+  const telegramBotLink = isMobile
+    ? `tg://resolve?domain=moyoprizvanie_bot${tgPayload ? `&start=${tgPayload}` : ''}`
+    : `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+    
+  const maxIdLink = isMobile
+    ? `max://maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`
+    : `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
 
   // Динамические QR-коды
-  const qrTelegramLink = "https://t.me/moyoprizvanie_bot";
-  const qrMaxIdLink = "https://max.ru/maxid_bot";
+  const qrTelegramLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+  const qrMaxIdLink = `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
   const telegramQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrTelegramLink)}&color=34-158-217`;
   const maxIdQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrMaxIdLink)}&color=139-92-246`;
 

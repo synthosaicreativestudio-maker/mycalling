@@ -44,8 +44,21 @@ export async function POST(req: Request) {
     if (updateType === 'bot_started') {
       const userId = body.user?.user_id;
       const name = body.user?.name || '';
-      
+      const startParam = body.payload;
+
       if (userId) {
+        if (startParam) {
+          const authLink = await prisma.authLink.findUnique({
+            where: { code: startParam }
+          });
+          if (authLink && authLink.status === 'PENDING') {
+            await prisma.authLink.update({
+              where: { id: authLink.id },
+              data: { maxUserId: String(userId) }
+            });
+          }
+        }
+
         await sendMaxMessage(botToken, userId, 
           `Привет, ${name}! Рад встрече. Я официальный чат-бот MAX ID платформы «МоёПризвание».\n\nПожалуйста, нажмите кнопку ниже, чтобы поделиться контактом. Мы сразу подтвердим ваш профиль MAX ID и вышлем ссылку на Личный кабинет.`,
           [
@@ -74,6 +87,21 @@ export async function POST(req: Request) {
       
       // Если пользователь ввел /start
       if (text && text.trim().startsWith('/start')) {
+        const parts = text.trim().split(/\s+/);
+        const startParam = parts[1];
+
+        if (startParam && userId) {
+          const authLink = await prisma.authLink.findUnique({
+            where: { code: startParam }
+          });
+          if (authLink && authLink.status === 'PENDING') {
+            await prisma.authLink.update({
+              where: { id: authLink.id },
+              data: { maxUserId: String(userId) }
+            });
+          }
+        }
+
         await sendMaxMessage(botToken, userId, 
           `Привет, ${firstName}! Рад встрече. Я официальный чат-бот MAX ID платформы «МоёПризвание».\n\nПожалуйста, нажмите кнопку ниже, чтобы поделиться контактом. Мы сразу подтвердим ваш профиль MAX ID и вышлем ссылку на Личный кабинет.`,
           [
@@ -172,18 +200,51 @@ export async function POST(req: Request) {
         
         const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
         
-        await sendMaxMessage(botToken, userId, 
-          `🎉 Ваш профиль MAX ID успешно подтвержден!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nНажмите кнопку ниже для быстрого входа в Личный кабинет на сайте:`,
-          [
+        // Проверяем, есть ли активный AuthLink для этого maxUserId
+        const authLink = await prisma.authLink.findFirst({
+          where: {
+            maxUserId: String(userId),
+            status: 'PENDING'
+          },
+          orderBy: { createdAt: 'desc' }
+        });
+
+        if (authLink) {
+          await prisma.authLink.update({
+            where: { id: authLink.id },
+            data: {
+              status: 'COMPLETED',
+              userId: user.id,
+              sessionToken: sessionToken
+            }
+          });
+
+          await sendMaxMessage(botToken, userId, 
+            `🎉 Вход выполнен!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nВы успешно вошли на компьютере. Можете вернуться к окну браузера!`,
             [
-              {
-                type: 'link',
-                text: '🔑 Войти в Личный кабинет',
-                url: loginUrl
-              }
+              [
+                {
+                  type: 'link',
+                  text: '🔑 Войти на этом устройстве (мобильном)',
+                  url: loginUrl
+                }
+              ]
             ]
-          ]
-        );
+          );
+        } else {
+          await sendMaxMessage(botToken, userId, 
+            `🎉 Ваш профиль MAX ID успешно подтвержден!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nНажмите кнопку ниже для быстрого входа в Личный кабинет на сайте:`,
+            [
+              [
+                {
+                  type: 'link',
+                  text: '🔑 Войти в Личный кабинет',
+                  url: loginUrl
+                }
+              ]
+            ]
+          );
+        }
       }
     }
     

@@ -36,6 +36,21 @@ export async function POST(req: Request) {
       
       // 1. Команда /start
       if (text && text.startsWith('/start')) {
+        const parts = text.split(' ');
+        const startParam = parts[1];
+
+        if (startParam) {
+          const authLink = await prisma.authLink.findUnique({
+            where: { code: startParam }
+          });
+          if (authLink && authLink.status === 'PENDING') {
+            await prisma.authLink.update({
+              where: { id: authLink.id },
+              data: { telegramId: String(body.message.from.id) }
+            });
+          }
+        }
+
         await sendTelegramMessage(botToken, chat_id, 
           'Привет! Рад встрече. Я официальный чат-бот платформы «МоёПризвание».\n\nПожалуйста, нажмите кнопку ниже, чтобы поделиться контактом. Мы сразу подтвердим ваш профиль и вышлем ссылку на Личный кабинет.',
           {
@@ -123,15 +138,44 @@ export async function POST(req: Request) {
         });
         
         const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
-        
-        await sendTelegramMessage(botToken, chat_id, 
-          `🎉 Ваш профиль успешно подтвержден!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nНажмите кнопку ниже для быстрого входа в Личный кабинет на сайте:`,
-          {
-            inline_keyboard: [
-              [{ text: '🔑 Войти в Личный кабинет', url: loginUrl }]
-            ]
-          }
-        );
+
+        // Проверяем, есть ли активный AuthLink для этого telegramId
+        const authLink = await prisma.authLink.findFirst({
+          where: {
+            telegramId: String(tgUserId),
+            status: 'PENDING'
+          },
+          orderBy: { createdAt: 'desc' }
+        });
+
+        if (authLink) {
+          await prisma.authLink.update({
+            where: { id: authLink.id },
+            data: {
+              status: 'COMPLETED',
+              userId: user.id,
+              sessionToken: sessionToken
+            }
+          });
+
+          await sendTelegramMessage(botToken, chat_id, 
+            `🎉 Вход выполнен!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nВы успешно вошли на компьютере. Можете вернуться к окну браузера!`,
+            {
+              inline_keyboard: [
+                [{ text: '🔑 Войти на этом устройстве (мобильном)', url: loginUrl }]
+              ]
+            }
+          );
+        } else {
+          await sendTelegramMessage(botToken, chat_id, 
+            `🎉 Ваш профиль успешно подтвержден!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nНажмите кнопку ниже для быстрого входа в Личный кабинет на сайте:`,
+            {
+              inline_keyboard: [
+                [{ text: '🔑 Войти в Личный кабинет', url: loginUrl }]
+              ]
+            }
+          );
+        }
         return NextResponse.json({ ok: true });
       }
     }

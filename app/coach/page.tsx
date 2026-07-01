@@ -29,6 +29,7 @@ export default function CoachPage() {
   const [step, setStep] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [phoneConfirmed, setPhoneConfirmed] = useState(false);
+  const [linkCode, setLinkCode] = useState<string | null>(null);
   
   const [isMobile, setIsMobile] = useState(false);
   
@@ -39,7 +40,71 @@ export default function CoachPage() {
     };
     setIsMobile(checkMobile());
   }, []);
-  
+
+  // Получаем временный код авторизации для подтверждения телефона
+  useEffect(() => {
+    async function getLinkCode() {
+      try {
+        const res = await fetch('/api/auth/link-code', { method: 'POST' });
+        const data = await res.json();
+        if (data.code) {
+          setLinkCode(data.code);
+        }
+      } catch (err) {
+        console.error('Error fetching link code:', err);
+      }
+    }
+    getLinkCode();
+  }, []);
+
+  // Поллинг подтверждения телефона/авторизации через ботов
+  useEffect(() => {
+    if (!linkCode || phoneConfirmed || !sessionId) return;
+
+    let isSubscribed = true;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/auth/poll?code=${linkCode}`);
+        const data = await res.json();
+
+        if (!isSubscribed) return;
+
+        if (data.status === 'COMPLETED') {
+          clearInterval(interval);
+          setPhoneConfirmed(true);
+          
+          // Отправляем системное сообщение коучу, чтобы мгновенно продвинуть шаг
+          const chatRes = await fetch('/api/v1/coach/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'Телефон подтвержден через бот', sessionId })
+          });
+          const chatData = await chatRes.json();
+          if (chatData.reply) {
+            setMessages(prev => [...prev, { role: 'assistant', content: chatData.reply }]);
+          }
+          if (chatData.currentStep !== undefined) {
+            setStep(chatData.currentStep);
+          }
+        } else if (data.status === 'EXPIRED') {
+          clearInterval(interval);
+          const newRes = await fetch('/api/auth/link-code', { method: 'POST' });
+          const newData = await newRes.json();
+          if (newData.code) {
+            setLinkCode(newData.code);
+          }
+        }
+      } catch (err) {
+        console.error('Polling error:', err);
+      }
+    }, 2000);
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(interval);
+    };
+  }, [linkCode, phoneConfirmed, sessionId]);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Инициализация первой реплики коуча
@@ -269,6 +334,19 @@ export default function CoachPage() {
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {messages.map((msg, idx) => {
             const isCoach = msg.role === 'assistant';
+            const tgPayload = linkCode || '';
+
+            const telegramBotLink = isMobile
+              ? `tg://resolve?domain=moyoprizvanie_bot${tgPayload ? `&start=${tgPayload}` : ''}`
+              : `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+              
+            const maxIdLink = isMobile
+              ? `max://maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`
+              : `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
+
+            const qrTelegramLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+            const qrMaxIdLink = `https://max.ru/maxid_bot${tgPayload ? `/start/${tgPayload}` : ''}`;
+
             return (
               <motion.div
                 key={idx}
@@ -306,12 +384,12 @@ export default function CoachPage() {
                         <div className="flex flex-col items-center p-3 bg-white/90 rounded-lg border border-[#8c6e4b]/10 text-center space-y-2">
                           <span className="text-[11px] font-bold text-[#253243]">Через Telegram</span>
                           <img 
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://t.me/moyoprizvanie_bot')}&color=140-110-75`} 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrTelegramLink)}&color=140-110-75`} 
                             alt="Telegram QR" 
                             className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
                           />
                           <a 
-                            href={isMobile ? "tg://resolve?domain=moyoprizvanie_bot" : "https://t.me/moyoprizvanie_bot"} 
+                            href={telegramBotLink} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-[10px] text-[#8c6e4b] hover:underline font-bold"
@@ -323,12 +401,12 @@ export default function CoachPage() {
                         <div className="flex flex-col items-center p-3 bg-white/90 rounded-lg border border-[#8c6e4b]/10 text-center space-y-2">
                           <span className="text-[11px] font-bold text-[#253243]">Через MAX ID</span>
                           <img 
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent('https://max.ru/maxid_bot')}&color=140-110-75`} 
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrMaxIdLink)}&color=140-110-75`} 
                             alt="MAX ID QR" 
                             className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
                           />
                           <a 
-                            href={isMobile ? "max://maxid_bot" : "https://max.ru/maxid_bot"} 
+                            href={maxIdLink} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="text-[10px] text-[#8c6e4b] hover:underline font-bold"
