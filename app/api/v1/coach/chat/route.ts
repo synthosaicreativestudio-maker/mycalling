@@ -289,6 +289,7 @@ export async function POST(req: Request) {
         sessionId: coachSession.id,
         userId: coachSession.userId,
         currentStep: 0,
+        phoneConfirmed: false,
         sessionStatus: coachSession.status,
         extracted: {}
       });
@@ -545,6 +546,7 @@ export async function POST(req: Request) {
       reply: replyContent,
       sessionId: coachSession.id,
       currentStep: nextStep,
+      phoneConfirmed: !!dbUser?.phone,
       sessionStatus: status,
       extracted: parsedData
     });

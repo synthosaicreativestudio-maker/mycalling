@@ -105,6 +105,9 @@ export default function CoachPage() {
           if (chatData.currentStep !== undefined) {
             setStep(chatData.currentStep);
           }
+          if (chatData.phoneConfirmed !== undefined) {
+            setPhoneConfirmed(chatData.phoneConfirmed);
+          }
         } else if (data.status === 'EXPIRED') {
           clearInterval(interval);
           const newRes = await fetch('/api/auth/link-code', { method: 'POST' });
@@ -213,8 +216,9 @@ export default function CoachPage() {
       }
       if (chatData.currentStep !== undefined) {
         setStep(chatData.currentStep);
-        // Если получен телефон от экстрактора — помечаем как подтвержденный
-        if (chatData.extracted?.phone) {
+        if (chatData.phoneConfirmed !== undefined) {
+          setPhoneConfirmed(chatData.phoneConfirmed);
+        } else if (chatData.extracted?.phone) {
           setPhoneConfirmed(true);
         }
         if (chatData.currentStep === 6) {
