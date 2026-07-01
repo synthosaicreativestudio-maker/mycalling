@@ -47,6 +47,7 @@ export async function POST(req: Request) {
       const startParam = body.payload;
 
       if (userId) {
+        // Сохраняем startParam в AuthLink
         if (startParam) {
           const authLink = await prisma.authLink.findUnique({
             where: { code: startParam }
@@ -59,13 +60,101 @@ export async function POST(req: Request) {
           }
         }
 
+        // ═══════════════════════════════════════════════════════════════
+        // ПРОВЕРКА: Пользователь уже зарегистрирован?
+        // ═══════════════════════════════════════════════════════════════
+        const existingUser = await prisma.user.findFirst({
+          where: { maxUserId: String(userId) }
+        });
+
+        if (existingUser && existingUser.phone) {
+          // Пользователь уже зарегистрирован.
+          const pendingAuthLink = startParam
+            ? await prisma.authLink.findFirst({
+                where: { code: startParam, status: 'PENDING' }
+              })
+            : null;
+
+          if (pendingAuthLink) {
+            // Мгновенно завершаем привязку без повторного запроса контакта
+            const sessionToken = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+
+            await prisma.session.create({
+              data: {
+                token: sessionToken,
+                userId: existingUser.id,
+                expiresAt: expiresAt
+              }
+            });
+
+            await prisma.authLink.update({
+              where: { id: pendingAuthLink.id },
+              data: {
+                status: 'COMPLETED',
+                userId: existingUser.id,
+                sessionToken: sessionToken
+              }
+            });
+
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+
+            await sendMaxMessage(botToken, userId, 
+              `👋 С возвращением, ${existingUser.name || existingUser.fullName || name || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Ваш профиль привязан — можете вернуться к браузеру, всё готово!\n\nИли нажмите кнопку ниже, чтобы войти прямо с телефона:`,
+              [
+                [
+                  {
+                    type: 'link',
+                    text: '🌐 Перейти на платформу',
+                    url: loginUrl
+                  }
+                ]
+              ]
+            );
+          } else {
+            // Просто повторный /start без активной привязки
+            const sessionToken = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+
+            await prisma.session.create({
+              data: {
+                token: sessionToken,
+                userId: existingUser.id,
+                expiresAt: expiresAt
+              }
+            });
+
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+
+            await sendMaxMessage(botToken, userId,
+              `👋 С возвращением, ${existingUser.name || existingUser.fullName || name || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Нажмите кнопку ниже, чтобы перейти в Личный кабинет:`,
+              [
+                [
+                  {
+                    type: 'link',
+                    text: '🌐 Перейти на платформу',
+                    url: loginUrl
+                  }
+                ]
+              ]
+            );
+          }
+
+          return NextResponse.json({ ok: true });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // НОВЫЙ ПОЛЬЗОВАТЕЛЬ — запрос контакта
+        // ═══════════════════════════════════════════════════════════════
         await sendMaxMessage(botToken, userId, 
-          `Привет, ${name}! Рад встрече. Я официальный чат-бот MAX ID платформы «МоёПризвание».\n\nПожалуйста, нажмите кнопку ниже, чтобы поделиться контактом. Мы сразу подтвердим ваш профиль MAX ID и вышлем ссылку на Личный кабинет.`,
+          `👋 Привет${name ? ', ' + name : ''}! Я — официальный бот MAX ID платформы «МоёПризвание».\n\nЧтобы подключить ваш профиль, нажмите кнопку 👇 «📱 Поделиться контактом» ниже.\n\nЭто безопасно — мы сохраним только ваш номер телефона для привязки результатов.`,
           [
             [
               {
                 type: 'request_contact',
-                text: '📱 Поделиться контактом MAX ID'
+                text: '📱 Поделиться контактом'
               }
             ]
           ]
@@ -102,13 +191,82 @@ export async function POST(req: Request) {
           }
         }
 
+        // Проверяем: пользователь уже зарегистрирован?
+        const existingUser = await prisma.user.findFirst({
+          where: { maxUserId: String(userId) }
+        });
+
+        if (existingUser && existingUser.phone) {
+          const pendingAuthLink = startParam
+            ? await prisma.authLink.findFirst({
+                where: { code: startParam, status: 'PENDING' }
+              })
+            : null;
+
+          if (pendingAuthLink) {
+            const sessionToken = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+
+            await prisma.session.create({
+              data: {
+                token: sessionToken,
+                userId: existingUser.id,
+                expiresAt: expiresAt
+              }
+            });
+
+            await prisma.authLink.update({
+              where: { id: pendingAuthLink.id },
+              data: {
+                status: 'COMPLETED',
+                userId: existingUser.id,
+                sessionToken: sessionToken
+              }
+            });
+
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+
+            await sendMaxMessage(botToken, userId,
+              `👋 С возвращением, ${existingUser.name || 'друг'}!\n\nВаш профиль привязан — вернитесь к браузеру, всё готово! Или нажмите кнопку ниже:`,
+              [
+                [{ type: 'link', text: '🌐 Перейти на платформу', url: loginUrl }]
+              ]
+            );
+          } else {
+            const sessionToken = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+
+            await prisma.session.create({
+              data: {
+                token: sessionToken,
+                userId: existingUser.id,
+                expiresAt: expiresAt
+              }
+            });
+
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+
+            await sendMaxMessage(botToken, userId,
+              `👋 С возвращением, ${existingUser.name || 'друг'}!\n\nВы уже подключены к платформе. Нажмите кнопку ниже, чтобы перейти в Личный кабинет:`,
+              [
+                [{ type: 'link', text: '🌐 Перейти на платформу', url: loginUrl }]
+              ]
+            );
+          }
+
+          return NextResponse.json({ ok: true });
+        }
+
+        // Новый пользователь — запрос контакта
         await sendMaxMessage(botToken, userId, 
-          `Привет, ${firstName}! Рад встрече. Я официальный чат-бот MAX ID платформы «МоёПризвание».\n\nПожалуйста, нажмите кнопку ниже, чтобы поделиться контактом. Мы сразу подтвердим ваш профиль MAX ID и вышлем ссылку на Личный кабинет.`,
+          `👋 Привет, ${firstName}! Я — официальный бот MAX ID платформы «МоёПризвание».\n\nЧтобы подключить ваш профиль, нажмите кнопку 👇 «📱 Поделиться контактом» ниже.\n\nЭто безопасно — мы сохраним только ваш номер телефона для привязки результатов.`,
           [
             [
               {
                 type: 'request_contact',
-                text: '📱 Поделиться контактом MAX ID'
+                text: '📱 Поделиться контактом'
               }
             ]
           ]
@@ -248,12 +406,12 @@ export async function POST(req: Request) {
           });
 
           await sendMaxMessage(botToken, userId, 
-            `🎉 Вход выполнен!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nВы успешно вошли на компьютере. Можете вернуться к окну браузера!`,
+            `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nВы вошли на компьютере — можете вернуться к браузеру! Или нажмите кнопку ниже:`,
             [
               [
                 {
                   type: 'link',
-                  text: '🔑 Войти на этом устройстве (мобильном)',
+                  text: '🌐 Перейти на платформу',
                   url: loginUrl
                 }
               ]
@@ -261,12 +419,12 @@ export async function POST(req: Request) {
           );
         } else {
           await sendMaxMessage(botToken, userId, 
-            `🎉 Ваш профиль MAX ID успешно подтвержден!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nНажмите кнопку ниже для быстрого входа в Личный кабинет на сайте:`,
+            `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nНажмите кнопку ниже, чтобы перейти на платформу:`,
             [
               [
                 {
                   type: 'link',
-                  text: '🔑 Войти в Личный кабинет',
+                  text: '🌐 Перейти на платформу',
                   url: loginUrl
                 }
               ]

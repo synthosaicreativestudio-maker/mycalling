@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       const chat_id = body.message.chat.id;
       const text = body.message.text;
       const contact = body.message.contact;
+      const tgUserId = body.message.from?.id;
       
       const botToken = process.env.TELEGRAM_BOT_TOKEN;
       if (!botToken) {
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
         const parts = text.split(' ');
         const startParam = parts[1];
 
+        // Сохраняем startParam (код привязки) в AuthLink, если он передан
         if (startParam) {
           const authLink = await prisma.authLink.findUnique({
             where: { code: startParam }
@@ -46,19 +48,106 @@ export async function POST(req: Request) {
           if (authLink && authLink.status === 'PENDING') {
             await prisma.authLink.update({
               where: { id: authLink.id },
-              data: { telegramId: String(body.message.from.id) }
+              data: { telegramId: String(tgUserId) }
             });
           }
         }
 
+        // ═══════════════════════════════════════════════════════════════
+        // ПРОВЕРКА: Пользователь уже зарегистрирован?
+        // Ищем в БД существующего пользователя с таким telegramId
+        // ═══════════════════════════════════════════════════════════════
+        const existingUser = await prisma.user.findFirst({
+          where: { telegramId: String(tgUserId) }
+        });
+
+        if (existingUser && existingUser.phone) {
+          // Пользователь уже зарегистрирован и у него есть телефон.
+          // Проверяем, есть ли активная привязка (из коуч-сессии на сайте).
+          const pendingAuthLink = startParam
+            ? await prisma.authLink.findFirst({
+                where: { code: startParam, status: 'PENDING' }
+              })
+            : null;
+
+          if (pendingAuthLink) {
+            // Есть активная привязка — значит пользователь пришел с сайта.
+            // Мгновенно завершаем привязку без повторного запроса контакта.
+            const sessionToken = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+
+            await prisma.session.create({
+              data: {
+                token: sessionToken,
+                userId: existingUser.id,
+                expiresAt: expiresAt
+              }
+            });
+
+            await prisma.authLink.update({
+              where: { id: pendingAuthLink.id },
+              data: {
+                status: 'COMPLETED',
+                userId: existingUser.id,
+                sessionToken: sessionToken
+              }
+            });
+
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+
+            await sendTelegramMessage(botToken, chat_id, 
+              `👋 С возвращением, ${existingUser.name || existingUser.fullName || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Ваш профиль привязан — можете вернуться к браузеру, всё готово!\n\nИли нажмите кнопку ниже, чтобы войти прямо с телефона:`,
+              {
+                inline_keyboard: [
+                  [{ text: '🌐 Перейти на платформу', url: loginUrl }]
+                ]
+              }
+            );
+          } else {
+            // Нет активной привязки — пользователь просто зашел в бота повторно.
+            // Генерируем свежий токен для входа и предлагаем перейти на платформу.
+            const sessionToken = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+
+            await prisma.session.create({
+              data: {
+                token: sessionToken,
+                userId: existingUser.id,
+                expiresAt: expiresAt
+              }
+            });
+
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+
+            await sendTelegramMessage(botToken, chat_id,
+              `👋 С возвращением, ${existingUser.name || existingUser.fullName || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Нажмите кнопку ниже, чтобы перейти в Личный кабинет:`,
+              {
+                inline_keyboard: [
+                  [{ text: '🌐 Перейти на платформу', url: loginUrl }]
+                ]
+              }
+            );
+          }
+
+          return NextResponse.json({ ok: true });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // НОВЫЙ ПОЛЬЗОВАТЕЛЬ — запрос контакта
+        // Используем ReplyKeyboardMarkup с input_field_placeholder
+        // для максимальной заметности кнопки
+        // ═══════════════════════════════════════════════════════════════
         await sendTelegramMessage(botToken, chat_id, 
-          'Привет! Рад встрече. Я официальный чат-бот платформы «МоёПризвание».\n\nПожалуйста, нажмите кнопку ниже, чтобы поделиться контактом. Мы сразу подтвердим ваш профиль и вышлем ссылку на Личный кабинет.',
+          '👋 Привет! Я — официальный бот платформы «МоёПризвание».\n\nЧтобы подключить ваш профиль, нажмите кнопку 👇 «📱 Поделиться контактом» внизу экрана.\n\nЭто безопасно — мы сохраним только ваш номер телефона для привязки результатов.',
           {
             keyboard: [
               [{ text: '📱 Поделиться контактом', request_contact: true }]
             ],
             one_time_keyboard: true,
-            resize_keyboard: true
+            resize_keyboard: true,
+            input_field_placeholder: '👇 Нажмите кнопку ниже, чтобы поделиться контактом'
           }
         );
         return NextResponse.json({ ok: true });
@@ -67,7 +156,7 @@ export async function POST(req: Request) {
       // 2. Обработка полученного контакта
       if (contact) {
         const phone = contact.phone_number;
-        const tgUserId = body.message.from?.id || contact.user_id;
+        const tgContactUserId = body.message.from?.id || contact.user_id;
         const firstName = contact.first_name;
         
         // Нормализуем телефонный номер
@@ -82,7 +171,7 @@ export async function POST(req: Request) {
         // Проверяем, есть ли активная привязка (AuthLink) для этого telegramId
         const authLink = await prisma.authLink.findFirst({
           where: {
-            telegramId: String(tgUserId),
+            telegramId: String(tgContactUserId),
             status: 'PENDING'
           },
           orderBy: { createdAt: 'desc' }
@@ -101,7 +190,7 @@ export async function POST(req: Request) {
               where: { id: user.id },
               data: {
                 phone: normalizedPhone,
-                telegramId: String(tgUserId),
+                telegramId: String(tgContactUserId),
                 name: user.name === 'Гость' ? (firstName || 'Ученик') : user.name,
                 fullName: user.fullName || firstName || 'Ученик'
               }
@@ -116,7 +205,7 @@ export async function POST(req: Request) {
               OR: [
                 { phone: normalizedPhone },
                 { phone: '+' + normalizedPhone },
-                { telegramId: String(tgUserId) }
+                { telegramId: String(tgContactUserId) }
               ]
             }
           });
@@ -124,24 +213,24 @@ export async function POST(req: Request) {
         
         if (!user) {
           // Создаем нового пользователя
-          const tempEmail = `tg_${tgUserId}@moiprizvanie.ru`;
+          const tempEmail = `tg_${tgContactUserId}@moiprizvanie.ru`;
           user = await prisma.user.create({
             data: {
               name: firstName || 'Ученик',
               fullName: firstName || 'Ученик',
               email: tempEmail,
               phone: normalizedPhone,
-              telegramId: String(tgUserId),
+              telegramId: String(tgContactUserId),
               role: 'STUDENT'
             }
           });
         } else {
           // Обновляем существующего
-          if (user.telegramId !== String(tgUserId) || user.phone !== normalizedPhone) {
+          if (user.telegramId !== String(tgContactUserId) || user.phone !== normalizedPhone) {
             user = await prisma.user.update({
               where: { id: user.id },
               data: { 
-                telegramId: String(tgUserId),
+                telegramId: String(tgContactUserId),
                 phone: normalizedPhone
               }
             });
@@ -150,13 +239,13 @@ export async function POST(req: Request) {
         
         // Создаем Account для авторизации
         let account = await prisma.account.findFirst({
-          where: { providerId: 'telegram', accountId: String(tgUserId) }
+          where: { providerId: 'telegram', accountId: String(tgContactUserId) }
         });
         if (!account) {
           await prisma.account.create({
             data: {
               providerId: 'telegram',
-              accountId: String(tgUserId),
+              accountId: String(tgContactUserId),
               userId: user.id
             }
           });
@@ -177,6 +266,13 @@ export async function POST(req: Request) {
         
         const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
 
+        // Убираем ReplyKeyboard и отправляем подтверждение с inline-кнопкой
+        // Шаг 1: Убираем клавиатуру
+        await sendTelegramMessage(botToken, chat_id,
+          `✅ Контакт получен! Подключаю ваш профиль...`,
+          { remove_keyboard: true }
+        );
+
         if (authLink) {
           await prisma.authLink.update({
             where: { id: authLink.id },
@@ -187,20 +283,21 @@ export async function POST(req: Request) {
             }
           });
 
+          // Шаг 2: Подтверждение с inline-кнопкой
           await sendTelegramMessage(botToken, chat_id, 
-            `🎉 Вход выполнен!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nВы успешно вошли на компьютере. Можете вернуться к окну браузера!`,
+            `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nВы вошли на компьютере — можете вернуться к браузеру! Или нажмите кнопку ниже, чтобы войти с мобильного:`,
             {
               inline_keyboard: [
-                [{ text: '🔑 Войти на этом устройстве (мобильном)', url: loginUrl }]
+                [{ text: '🌐 Перейти на платформу', url: loginUrl }]
               ]
             }
           );
         } else {
           await sendTelegramMessage(botToken, chat_id, 
-            `🎉 Ваш профиль успешно подтвержден!\n\nИмя: ${user.name}\nТелефон: ${user.phone}\n\nНажмите кнопку ниже для быстрого входа в Личный кабинет на сайте:`,
+            `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nНажмите кнопку ниже, чтобы перейти на платформу:`,
             {
               inline_keyboard: [
-                [{ text: '🔑 Войти в Личный кабинет', url: loginUrl }]
+                [{ text: '🌐 Перейти на платформу', url: loginUrl }]
               ]
             }
           );
