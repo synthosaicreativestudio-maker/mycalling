@@ -4,8 +4,9 @@ import prisma from '../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
+    const { userId } = await req.json().catch(() => ({}));
     const randomHex = crypto.randomBytes(8).toString('hex');
     const code = `auth_${randomHex}`;
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 минут
@@ -14,6 +15,7 @@ export async function POST() {
       data: {
         code,
         status: 'PENDING',
+        userId: userId || null,
         expiresAt
       }
     });

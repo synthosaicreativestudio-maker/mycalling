@@ -138,17 +138,49 @@ export async function POST(req: Request) {
         if (normalizedPhone.length === 10) {
           normalizedPhone = '7' + normalizedPhone;
         }
-        
-        // Ищем пользователя
-        let user = await prisma.user.findFirst({
+
+        // Проверяем, есть ли активный AuthLink для этого maxUserId
+        const authLink = await prisma.authLink.findFirst({
           where: {
-            OR: [
-              { phone: normalizedPhone },
-              { phone: '+' + normalizedPhone },
-              { maxUserId: String(userId) }
-            ]
-          }
+            maxUserId: String(userId),
+            status: 'PENDING'
+          },
+          orderBy: { createdAt: 'desc' }
         });
+
+        let user = null;
+
+        // Если в привязке уже есть userId (гостевой профиль из коуч-сессии)
+        if (authLink && authLink.userId) {
+          user = await prisma.user.findUnique({
+            where: { id: authLink.userId }
+          });
+          if (user) {
+            // Обновляем гостевого пользователя данными из MAX ID
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                phone: normalizedPhone,
+                maxUserId: String(userId),
+                name: user.name === 'Гость' ? (firstName || 'Пользователь MAX ID') : user.name,
+                fullName: user.fullName || firstName || 'Пользователь MAX ID'
+              }
+            });
+          }
+        }
+
+        // Если пользователя все еще нет, ищем по телефону или maxUserId
+        if (!user) {
+          user = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { phone: normalizedPhone },
+                { phone: '+' + normalizedPhone },
+                { maxUserId: String(userId) }
+              ]
+            }
+          });
+        }
         
         if (!user) {
           // Создаем нового пользователя
@@ -165,10 +197,15 @@ export async function POST(req: Request) {
           });
         } else {
           // Обновляем существующего
-          user = await prisma.user.update({
-            where: { id: user.id },
-            data: { maxUserId: String(userId) }
-          });
+          if (user.maxUserId !== String(userId) || user.phone !== normalizedPhone) {
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: { 
+                maxUserId: String(userId),
+                phone: normalizedPhone
+              }
+            });
+          }
         }
         
         // Создаем Account для авторизации (providerId: 'maxid')
@@ -199,15 +236,6 @@ export async function POST(req: Request) {
         });
         
         const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
-        
-        // Проверяем, есть ли активный AuthLink для этого maxUserId
-        const authLink = await prisma.authLink.findFirst({
-          where: {
-            maxUserId: String(userId),
-            status: 'PENDING'
-          },
-          orderBy: { createdAt: 'desc' }
-        });
 
         if (authLink) {
           await prisma.authLink.update({

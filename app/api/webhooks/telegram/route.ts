@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       // 2. Обработка полученного контакта
       if (contact) {
         const phone = contact.phone_number;
-        const tgUserId = contact.user_id;
+        const tgUserId = body.message.from?.id || contact.user_id;
         const firstName = contact.first_name;
         
         // Нормализуем телефонный номер
@@ -78,16 +78,49 @@ export async function POST(req: Request) {
         if (normalizedPhone.length === 10) {
           normalizedPhone = '7' + normalizedPhone;
         }
-        
-        // Ищем пользователя
-        let user = await prisma.user.findFirst({
+
+        // Проверяем, есть ли активная привязка (AuthLink) для этого telegramId
+        const authLink = await prisma.authLink.findFirst({
           where: {
-            OR: [
-              { phone: normalizedPhone },
-              { phone: '+' + normalizedPhone }
-            ]
-          }
+            telegramId: String(tgUserId),
+            status: 'PENDING'
+          },
+          orderBy: { createdAt: 'desc' }
         });
+
+        let user = null;
+
+        // Если в привязке уже есть userId (гостевой профиль из коуч-сессии)
+        if (authLink && authLink.userId) {
+          user = await prisma.user.findUnique({
+            where: { id: authLink.userId }
+          });
+          if (user) {
+            // Обновляем гостевого пользователя данными из Telegram
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                phone: normalizedPhone,
+                telegramId: String(tgUserId),
+                name: user.name === 'Гость' ? (firstName || 'Ученик') : user.name,
+                fullName: user.fullName || firstName || 'Ученик'
+              }
+            });
+          }
+        }
+
+        // Если пользователя все еще нет, ищем по телефону или telegramId
+        if (!user) {
+          user = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { phone: normalizedPhone },
+                { phone: '+' + normalizedPhone },
+                { telegramId: String(tgUserId) }
+              ]
+            }
+          });
+        }
         
         if (!user) {
           // Создаем нового пользователя
@@ -104,10 +137,15 @@ export async function POST(req: Request) {
           });
         } else {
           // Обновляем существующего
-          user = await prisma.user.update({
-            where: { id: user.id },
-            data: { telegramId: String(tgUserId) }
-          });
+          if (user.telegramId !== String(tgUserId) || user.phone !== normalizedPhone) {
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: { 
+                telegramId: String(tgUserId),
+                phone: normalizedPhone
+              }
+            });
+          }
         }
         
         // Создаем Account для авторизации
@@ -138,15 +176,6 @@ export async function POST(req: Request) {
         });
         
         const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
-
-        // Проверяем, есть ли активный AuthLink для этого telegramId
-        const authLink = await prisma.authLink.findFirst({
-          where: {
-            telegramId: String(tgUserId),
-            status: 'PENDING'
-          },
-          orderBy: { createdAt: 'desc' }
-        });
 
         if (authLink) {
           await prisma.authLink.update({

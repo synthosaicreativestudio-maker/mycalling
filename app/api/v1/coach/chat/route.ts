@@ -1,9 +1,11 @@
 // API Route — Server Side Only (НЕ ставить "use client" — это ломает серверные модули!)
 
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 import crypto from 'crypto';
 import prisma from '../../../../lib/prisma';
 import { env } from '../../../../lib/env';
+import { auth } from '../../../../lib/auth';
 
 const SCENARIO_STEPS = [
   {
@@ -196,7 +198,21 @@ export async function POST(req: Request) {
     let coachSession = null;
     let userId = null;
 
-    if (sessionId) {
+    // Сначала проверяем авторизованного пользователя через Better Auth
+    const session = await auth.api.getSession({
+      headers: await headers()
+    });
+
+    if (session && session.user) {
+      userId = session.user.id;
+      coachSession = await prisma.coachSession.findUnique({
+        where: { userId },
+        include: { user: true }
+      });
+    }
+
+    // Если нет авторизованного пользователя, ищем по переданному sessionId
+    if (!coachSession && sessionId) {
       coachSession = await prisma.coachSession.findUnique({
         where: { id: sessionId },
         include: { user: true }
@@ -234,6 +250,17 @@ export async function POST(req: Request) {
     // Флаг того, что это первое инициализирующее сообщение
     const isInitMessage = message === 'Начать сессию с коучем';
 
+    if (isInitMessage && transcript.length > 0) {
+      return NextResponse.json({
+        history: transcript,
+        sessionId: coachSession.id,
+        userId: coachSession.userId,
+        currentStep: currentStep,
+        phoneConfirmed: !!coachSession.user.phone,
+        extracted: {}
+      });
+    }
+
     // Если это первое сообщение — сразу возвращаем фиксированную фразу без обращения к ИИ
     if (isInitMessage && transcript.length === 0) {
       let greeting = FALLBACK_REPLIES[0];
@@ -248,6 +275,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         reply: greeting,
         sessionId: coachSession.id,
+        userId: coachSession.userId,
         currentStep: 0,
         extracted: {}
       });

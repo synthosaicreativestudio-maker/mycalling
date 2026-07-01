@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award } from 'lucide-react';
+import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -25,6 +25,7 @@ export default function CoachPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
@@ -43,9 +44,14 @@ export default function CoachPage() {
 
   // Получаем временный код авторизации для подтверждения телефона
   useEffect(() => {
+    if (!userId) return;
     async function getLinkCode() {
       try {
-        const res = await fetch('/api/auth/link-code', { method: 'POST' });
+        const res = await fetch('/api/auth/link-code', { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
         const data = await res.json();
         if (data.code) {
           setLinkCode(data.code);
@@ -55,7 +61,7 @@ export default function CoachPage() {
       }
     }
     getLinkCode();
-  }, []);
+  }, [userId]);
 
   // Поллинг подтверждения телефона/авторизации через ботов
   useEffect(() => {
@@ -114,19 +120,28 @@ export default function CoachPage() {
       try {
         const searchParams = new URLSearchParams(window.location.search);
         const isFromLogin = searchParams.get('error') === 'register_first';
+        const savedSessionId = typeof window !== 'undefined' ? localStorage.getItem('coachSessionId') : null;
 
         const res = await fetch('/api/v1/coach/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             message: 'Начать сессию с коучем',
+            sessionId: savedSessionId,
             fromLoginError: isFromLogin
           })
         });
         const data = await res.json();
-        if (data.reply) {
+        if (data.history && data.history.length > 0) {
+          setMessages(data.history);
+          setSessionId(data.sessionId);
+          setUserId(data.userId || null);
+          setStep(data.currentStep || 0);
+          setPhoneConfirmed(data.phoneConfirmed || false);
+        } else if (data.reply) {
           setMessages([{ role: 'assistant', content: data.reply }]);
           setSessionId(data.sessionId);
+          setUserId(data.userId || null);
           setStep(data.currentStep || 0);
           if (typeof window !== 'undefined') {
             localStorage.setItem('coachSessionId', data.sessionId);
@@ -139,12 +154,6 @@ export default function CoachPage() {
       }
     }
 
-    // Проверяем, есть ли уже сохраненная сессия в localStorage
-    const savedSessionId = typeof window !== 'undefined' ? localStorage.getItem('coachSessionId') : null;
-    if (savedSessionId) {
-      setSessionId(savedSessionId);
-      // Загружаем историю (можно было бы запросить историю из БД, но для MVP начнем новую или продолжим)
-    }
     initSession();
   }, []);
 
@@ -377,43 +386,27 @@ export default function CoachPage() {
                   {isCoach && step >= 1 && step < 6 && !phoneConfirmed && idx === messages.length - 1 && (
                     <div className="mt-4 p-4 rounded-xl bg-[#8c6e4b]/5 border border-[#8c6e4b]/15 space-y-3">
                       <p className="text-xs font-bold text-[#8c6e4b] flex items-center gap-1.5">
-                        <span>📲</span> Подтвердите регистрацию через чат-бот для мгновенного входа:
+                        <span>📲</span> Подтвердите регистрацию через мессенджер:
                       </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex flex-wrap gap-3">
                         {/* Telegram */}
-                        <div className="flex flex-col items-center p-3 bg-white/90 rounded-lg border border-[#8c6e4b]/10 text-center space-y-2">
-                          <span className="text-[11px] font-bold text-[#253243]">Через Telegram</span>
-                          <img 
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrTelegramLink)}&color=140-110-75`} 
-                            alt="Telegram QR" 
-                            className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
-                          />
-                          <a 
-                            href={telegramBotLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-[10px] text-[#8c6e4b] hover:underline font-bold"
-                          >
-                            Открыть чат-бот ↗
-                          </a>
-                        </div>
+                        <a 
+                          href={`/auth/link?code=${tgPayload}&provider=telegram`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2.5 bg-[#349ed9] hover:bg-[#2d8bc0] text-xs font-bold text-white rounded-xl shadow transition duration-200"
+                        >
+                          <Send className="h-3.5 w-3.5" /> Telegram
+                        </a>
                         {/* MAX ID */}
-                        <div className="flex flex-col items-center p-3 bg-white/90 rounded-lg border border-[#8c6e4b]/10 text-center space-y-2">
-                          <span className="text-[11px] font-bold text-[#253243]">Через MAX ID</span>
-                          <img 
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrMaxIdLink)}&color=140-110-75`} 
-                            alt="MAX ID QR" 
-                            className="w-20 h-20 select-none border border-[#8c6e4b]/10 rounded" 
-                          />
-                          <a 
-                            href={maxIdLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-[10px] text-[#8c6e4b] hover:underline font-bold"
-                          >
-                            Открыть чат-бот ↗
-                          </a>
-                        </div>
+                        <a 
+                          href={`/auth/link?code=${tgPayload}&provider=maxid`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2.5 bg-[#8b5cf6] hover:bg-[#7c4df2] text-xs font-bold text-white rounded-xl shadow transition duration-200"
+                        >
+                          <Fingerprint className="h-3.5 w-3.5" /> MAX ID
+                        </a>
                       </div>
                     </div>
                   )}
