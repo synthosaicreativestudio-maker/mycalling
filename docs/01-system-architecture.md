@@ -8,29 +8,34 @@
 
 ```mermaid
 graph TD
-    User([Пользователь / Ребенок]) -->|1. Диалог| WebUI[Frontend Web App: Next.js + React]
-    WebUI -->|2. Запросы к API| CoachAPI[API-роуты: /api/v1/coach/*]
-    CoachAPI -->|3. Инференс| ProxyAPI[ProxyAPI GPT-4o-mini]
-    CoachAPI -->|4. Сохранение данных| Prisma[(Prisma ORM & PostgreSQL)]
+    User(["Пользователь / Ребенок"]) -->|1. Диалог| WebUI["Frontend Web App: Next.js + React"]
+    WebUI -->|2. Запросы к API| CoachAPI["API-роуты: /api/v1/coach/*"]
+    CoachAPI -->|3. Инференс| ProxyAPI["ProxyAPI GPT-4o-mini"]
+    CoachAPI -->|4. Сохранение данных| Prisma[("Prisma ORM & PostgreSQL / Supabase")]
     
     %% Интеграционные потоки %%
-    CoachAPI -->|5. Новые лиды и резюме| TG_Admin[Чат администраторов RBN]
-    CoachAPI -->|5. Синхронизация профиля| MAXID_CRM[MAX ID CRM API]
+    CoachAPI -->|5. Новые лиды и резюме| TG_Admin["Чат администраторов RBN"]
+    CoachAPI -->|5. Синхронизация профиля| MAXID_CRM["MAX ID CRM API"]
     
     %% Авторизация через ботов %%
-    WebUI -->|6. Ссылки на ботов| TG_Bot[Telegram-бот: @moyoprizvanie_bot]
-    WebUI -->|6. Ссылки на ботов| MAX_Bot[МАКС-бот: @maxid_bot]
+    WebUI -->|6. QR-код + ссылка /auth/link| TG_Bot["Telegram-бот: @moyoprizvanie_bot"]
+    WebUI -->|6. QR-код + ссылка /auth/link| MAX_Bot["МАКС-бот: @maxid_bot"]
     
     %% Обработка вебхуков %%
-    TG_Bot -->|7. Webhook через Caddy-прокси| TG_Webhook[Webhook: /api/webhooks/telegram]
-    MAX_Bot -->|7. Webhook напрямую| MAX_Webhook[Webhook: /api/webhooks/maxid]
+    TG_Bot -->|7. Webhook через Caddy-прокси| TG_Webhook["Webhook: /api/webhooks/telegram"]
+    MAX_Bot -->|7. Webhook напрямую| MAX_Webhook["Webhook: /api/webhooks/maxid"]
     
-    TG_Webhook -->|8. Вход по токену| WebUI
-    MAX_Webhook -->|8. Вход по токену| WebUI
+    %% Callback авторизации %%
+    TG_Webhook -->|8. AuthLink COMPLETED + Session| Prisma
+    MAX_Webhook -->|8. AuthLink COMPLETED + Session| Prisma
+    
+    %% Поллинг и cookie %%
+    WebUI -->|9. Poll /api/auth/poll| Prisma
+    WebUI -->|10. Silent fetch callback| CookieSet["Set-Cookie: better-auth.session_token"]
     
     %% Переход к тестированию %%
-    WebUI -->|9. Интерактивные тесты| Diagnostic[Диагностический движок]
-    Diagnostic -->|10. PDF-отчет| PDFGen[Генератор отчетов]
+    WebUI -->|11. Интерактивные тесты| Diagnostic["Диагностический движок"]
+    Diagnostic -->|12. PDF-отчет| PDFGen["Генератор отчетов"]
 ```
 
 ---
@@ -38,21 +43,40 @@ graph TD
 ## 2. Сценарий Нейрокоуча Романа (`/coach`)
 
 - **Интерфейс**: Чат-интерфейс с поддержкой плавных микровзаимодействий, анимаций сообщений (Framer Motion) и клавиатурного управления (выход по кнопке `Escape`).
-- **Бэкенд-обработка (`/api/v1/coach/chat`)**: 
+- **Прогресс-бар**: Отображает текущий шаг сессии и процент завершения. Имена шагов:
+  ```
+  0: Подготовка к диалогу → 1: Знакомство → 2: Подключение канала связи → 
+  3: Город и интересы → 4: Ценности и мотивация → 5: Проверка гипотез → 6: Подведение итогов
+  ```
+- **Бэкенд-обработка (`/api/v1/coach/chat`)**:
   - Формирует историю транскрипта и сохраняет её в таблицу `coach_sessions`.
   - При первой инициализации возвращает фиксированное приветствие коуча без вызова ИИ, что экономит токены и гарантирует мгновенный старт.
   - Направляет запросы к модели через `ProxyAPI` под маской наставника **Романа** с жестким запретом на упоминание ИИ, роботов и языковых моделей.
   - В системный промт внедрено строгое ограничение против дублирования и эхо-повторения фраз пользователя.
 
+### Порядок шагов и перескоки
+
+| Шаг | Название | Цель | Перескок |
+|-----|----------|------|----------|
+| 0 | Подготовка | Создать доверие, представиться | — |
+| 1 | Знакомство | Узнать имя и возраст | — |
+| 2 | Канал связи | Подключить Telegram / MAX ID | Пропускается, если телефон уже в БД |
+| 3 | Город и интересы | Город, класс, мечты, увлечения | — |
+| 4 | Ценности | Мотивация, сильные стороны | — |
+| 5 | Гипотезы | Стиль принятия решений | — |
+| 6 | Итоги | Резюме, архетип, PDF-отчёт | — |
+
 ---
 
-## 3. Экстрактор данных и интеграции (`/api/v1/coach/extract`)
+## 3. Экстрактор данных и интеграции (`/api/v1/coach/chat`)
 
-Экстрактор работает на лету на каждом шаге диалога, анализируя сообщения пользователя:
-- **Нативная регистрация (Этап 1)**: Выделяет имя, роль (STUDENT / PARENT), класс, возраст, город и телефон. Обновляет профиль `User` в БД.
-- **Качественные показатели (Этапы 2-5)**: Выделяет мечты, интересы, достижения, кумиров, ценности, мотивацию, сильные стороны, стиль мышления/общения.
+Экстрактор работает на лету на каждом шаге диалога, анализируя сообщения пользователя через отдельный запрос к GPT-4o-mini с промтом-экстрактором:
+
+- **Этап 1 (Знакомство)**: Выделяет имя (`fullName`) и возраст (`age`). Обновляет профиль `User` в БД.
+- **Этап 2 (Канал связи)**: При подтверждении через бота — получает `phone` из webhook. При вводе в чат — извлекает `phone` регулярным выражением.
+- **Этапы 3-5 (Качественные показатели)**: Выделяет `city`, `grade`, `dreams`, `interests`, `achievements`, `idols`, `values`, `motivation`, `strengths`, `weaknesses`, `cognitiveStyle`, `decisionStyle`, `communicationStyle`, `hypotheses`.
 - **Событийные триггеры**:
-  1. **При регистрации телефона**: Мгновенно отправляет карточку лида в Telegram-администратора и систему MAX ID.
+  1. **При подтверждении телефона**: Мгновенно отправляет карточку лида в Telegram-администратора и систему MAX ID.
   2. **При завершении (Этап 6)**: Записывает эмпатичное резюме Романа в поле `preliminaryFeedback` и осуществляет полную выгрузку профиля в Telegram и MAX ID. Также отправляет готовое резюме пользователю лично в чат-боты.
 
 ---
@@ -76,38 +100,41 @@ graph TD
   - Переменная окружения `TELEGRAM_API_BASE_URL` на стейджинг-сервере настроена на `http://37.1.212.51/tg-bot`. 
   - Все исходящие вызовы API (отправка сообщений, регистрация вебхука) отправляются на бастион, который перенаправляет их на оригинальный API Telegram.
 
-- **Схема авторизации**:
-  1. Пользователь нажимает кнопку «Поделиться контактом» в `@moyoprizvanie_bot`.
-  2. Вебхук `/api/webhooks/telegram` принимает POST-запрос с объектом контакта.
-  3. Бэкенд сопоставляет номер, генерирует сессионный токен Better Auth и создает запись в таблице `session`.
-  4. Пользователю отправляется инлайн-кнопка со ссылкой: `https://synthosai.ru/api/auth/telegram/callback?token={token}`.
+### Схема авторизации через AuthLink
 
-**Пример POST-запроса от Telegram Webhook (вход по контакту):**
-```json
-{
-  "update_id": 987654321,
-  "message": {
-    "message_id": 42,
-    "from": {
-      "id": 12345678,
-      "is_bot": false,
-      "first_name": "Иван"
-    },
-    "chat": {
-      "id": 12345678,
-      "type": "private"
-    },
-    "date": 1719750000,
-    "contact": {
-      "phone_number": "79991234567",
-      "first_name": "Иван",
-      "user_id": 12345678
-    }
-  }
-}
+```mermaid
+sequenceDiagram
+    participant U as Пользователь (браузер)
+    participant C as Coach Page
+    participant API as /api/auth/link-code
+    participant Link as /auth/link
+    participant Bot as Telegram/MAX Бот
+    participant WH as Webhook
+    participant Poll as /api/auth/poll
+    participant CB as /api/auth/telegram/callback
+
+    U->>C: Начинает коуч-сессию
+    C->>API: POST /api/auth/link-code
+    API-->>C: { code: "abc123" }
+    Note over C: QR-код и кнопки TG/MAX генерируются с кодом
+    U->>Link: Нажимает кнопку "Telegram"
+    Link->>Bot: Открывает бота с ?start=abc123
+    Bot->>U: "Поделиться контактом"
+    U->>Bot: Отправляет контакт
+    Bot->>WH: POST webhook с контактом
+    WH->>WH: Парсит телефон, создаёт User/Session
+    WH->>WH: AuthLink.status = COMPLETED
+    
+    loop Каждые 2 секунды
+        C->>Poll: GET /api/auth/poll?code=abc123
+        Poll-->>C: { status: "COMPLETED", sessionToken: "..." }
+    end
+    
+    C->>CB: Silent fetch (redirect: manual, credentials: include)
+    CB-->>C: Set-Cookie: better-auth.session_token
+    C->>C: Отправляет "Телефон подтвержден через бот"
+    C->>C: Перескок на Шаг 3
 ```
-
----
 
 ### Мессенджер МАКС (MAX Bot API)
 
@@ -149,16 +176,29 @@ graph TD
 }
 ```
 
-**Решение для парсинга номера в TypeScript:**
-```typescript
-const contactAttachment = message.attachments.find((att: any) => att.type === 'contact');
-if (contactAttachment && contactAttachment.payload?.vcf_info) {
-  const vcard = contactAttachment.payload.vcf_info;
-  const phoneMatch = vcard.match(/TEL;[^:]*:([^\n\r]+)/i);
-  if (phoneMatch) {
-    const rawPhone = phoneMatch[1].trim(); // "+79991234567"
-  }
-}
+---
+
+### Логика возвращающихся пользователей в ботах
+
+Оба бота (Telegram и MAX) реализуют **state-aware** `/start` обработку:
+
+```mermaid
+flowchart TD
+    A["/start от пользователя"] --> B{"Есть telegramId/maxUserId в БД?"}
+    B -- Да --> C{"Есть phone?"}
+    C -- Да --> D["Возвращающийся пользователь"]
+    D --> E["Сообщение: С возвращением!"]
+    E --> F["Инлайн-кнопка: Перейти на платформу"]
+    D --> G{"Есть AuthLink код в /start?"}
+    G -- Да --> H["AuthLink → COMPLETED, создать сессию"]
+    G -- Нет --> I["Создать сессию без AuthLink"]
+    
+    C -- Нет --> J["Показать кнопку Поделиться контактом"]
+    B -- Нет --> J
+    J --> K["Получение контакта"]
+    K --> L["Создать/обновить User"]
+    L --> M["AuthLink → COMPLETED"]
+    M --> N["Отправить ссылку входа"]
 ```
 
 ---
@@ -169,3 +209,41 @@ if (contactAttachment && contactAttachment.payload?.vcf_info) {
 - **Эндпоинт**: `https://api.maxid.ru/v1/leads`
 - **Метод**: `POST`
 - **Передаваемые данные**: Системные контакты + метаданные коуч-сессии (мечты, ценности, барьеры, резюме коуча).
+
+---
+
+## 5. Зависимости и ключевые библиотеки
+
+| Библиотека | Назначение |
+|-----------|------------|
+| `next` 14.2.5 | Фреймворк (App Router, API Routes, Standalone mode) |
+| `prisma` | ORM для PostgreSQL / Supabase |
+| `better-auth` | Авторизация и сессии (cookie-based) |
+| `framer-motion` | Анимации UI |
+| `qrcode.react` | Локальная генерация QR-кодов (SVG) |
+| `lucide-react` | Иконки |
+| `zustand` | Стейт-менеджмент (диагностика) |
+
+---
+
+## 6. Ключевые файлы проекта
+
+### Бэкенд (API Routes)
+| Файл | Назначение |
+|------|------------|
+| `app/api/v1/coach/chat/route.ts` | Основная логика коуч-сессии: шаги, экстракция, генерация ответа |
+| `app/api/webhooks/telegram/route.ts` | Webhook Telegram: обработка /start, контактов, возвращающихся |
+| `app/api/webhooks/maxid/route.ts` | Webhook MAX: аналогичная логика для мессенджера МАКС |
+| `app/api/auth/link-code/route.ts` | Генерация временных кодов AuthLink |
+| `app/api/auth/poll/route.ts` | Поллинг статуса AuthLink |
+| `app/api/auth/telegram/callback/route.ts` | Установка cookie сессии и редиректы |
+
+### Фронтенд (Pages)
+| Файл | Назначение |
+|------|------------|
+| `app/page.tsx` | Главная страница (лендинг) |
+| `app/coach/page.tsx` | Чат с коучем Романом |
+| `app/auth/page.tsx` | Страница входа в ЛК (QR-коды, Telegram-виджет) |
+| `app/auth/link/page.tsx` | Страница подключения мессенджера (QR + кнопка) |
+| `app/assessment/page.tsx` | Интерактивные тесты |
+| `app/report/page.tsx` | Личный кабинет с результатами |

@@ -155,3 +155,42 @@ npx prisma db push --accept-data-loss
   ```bash
   sudo tail -f /var/log/nginx/error.log
   ```
+
+---
+
+## 7. Процедура полного деплоя (одна команда)
+
+Для деплоя изменений с локальной машины на стейджинг-сервер используется следующая SSH-цепочка:
+
+```bash
+# Шаг 1: Коммит и push
+git add -A && git commit -m "описание изменений" && git push origin main
+
+# Шаг 2: Деплой на сервер (через бастион)
+ssh root@37.1.212.51 "ssh ubuntu@111.88.145.206 'cd /home/ubuntu/mycalling && \
+  git pull origin main && \
+  npm install && \
+  npm run build && \
+  cp -r public .next/standalone/ && \
+  cp -r .next/static .next/standalone/.next/ && \
+  pm2 restart mycalling'"
+```
+
+> [!WARNING]
+> После `npm run build` необходимо **обязательно** скопировать `public/` и `.next/static/` в `.next/standalone/`, иначе статические ресурсы (шрифты, иконки, изображения) не будут доступны.
+
+---
+
+## 8. Ключевые npm-зависимости
+
+| Пакет | Назначение |
+|-------|------------|
+| `next` 14.2.5 | Фреймворк (App Router, API Routes, Standalone) |
+| `@prisma/client` | ORM для PostgreSQL / Supabase |
+| `better-auth` | Авторизация и сессии (cookie-based) |
+| `framer-motion` | Анимации UI |
+| `qrcode.react` | Локальная генерация QR-кодов (SVG, без внешних API) |
+| `lucide-react` | Иконки |
+| `zustand` | Стейт-менеджмент (диагностика) |
+| `sharp` | Оптимизация изображений |
+
