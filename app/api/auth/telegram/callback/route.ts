@@ -27,6 +27,13 @@ export async function GET(request: Request) {
     });
     if (coachSession && coachSession.status === 'COMPLETED') {
       redirectPath = '/assessment'; // Если сессия завершена — на диагностику
+      
+      const diagnosticResult = await prisma.diagnosticResult.findFirst({
+        where: { userId: session.userId }
+      });
+      if (diagnosticResult) {
+        redirectPath = '/report'; // Если и тесты завершены — в личный кабинет
+      }
     }
 
     const response = NextResponse.redirect(new URL(redirectPath, request.url));

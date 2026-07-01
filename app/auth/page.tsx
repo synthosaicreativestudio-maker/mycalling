@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Send, Fingerprint, QrCode, ExternalLink, AlertCircle } from 'lucide-react';
 import TelegramLoginWidget from '../components/TelegramLoginWidget';
+import { authClient } from '../lib/auth-client';
 
 function AuthCard() {
   const router = useRouter();
@@ -16,6 +17,14 @@ function AuthCard() {
 
   const [isMobile, setIsMobile] = useState(false);
   const [linkCode, setLinkCode] = useState<string | null>(null);
+
+  const { data: session } = authClient.useSession();
+
+  useEffect(() => {
+    if (session) {
+      router.push('/report');
+    }
+  }, [session, router]);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -111,14 +120,14 @@ function AuthCard() {
         </p>
       </div>
 
-      {/* Вывод ошибки запрета регистрации через кнопку */}
+      {/* Вывод ошибки запрета входа напрямую */}
       {isRegisterDenied && (
         <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-center space-y-2">
           <div className="flex items-center justify-center gap-2 text-red-400 font-bold text-xs uppercase tracking-wider">
             <AlertCircle className="h-4 w-4" /> Доступ ограничен
           </div>
           <p className="text-xs text-red-300/90 leading-relaxed">
-            Регистрация через кнопку входа недоступна. Пожалуйста, начните сессию с наставником Романом на главной странице для создания аккаунта.
+            Вход недоступен. Пожалуйста, начните диалог с наставником Романом на главной странице, чтобы подключить ваш профиль.
           </p>
         </div>
       )}

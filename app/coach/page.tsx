@@ -132,6 +132,10 @@ export default function CoachPage() {
           })
         });
         const data = await res.json();
+        if (data.sessionStatus === 'COMPLETED') {
+          router.push('/assessment');
+          return;
+        }
         if (data.history && data.history.length > 0) {
           setMessages(data.history);
           setSessionId(data.sessionId);
@@ -386,7 +390,7 @@ export default function CoachPage() {
                   {isCoach && step >= 1 && step < 6 && !phoneConfirmed && idx === messages.length - 1 && (
                     <div className="mt-4 p-4 rounded-xl bg-[#8c6e4b]/5 border border-[#8c6e4b]/15 space-y-3">
                       <p className="text-xs font-bold text-[#8c6e4b] flex items-center gap-1.5">
-                        <span>📲</span> Подтвердите регистрацию через мессенджер:
+                        <span>📲</span> Подключите удобный канал связи для получения отчета:
                       </p>
                       <div className="flex flex-wrap gap-3">
                         {/* Telegram */}

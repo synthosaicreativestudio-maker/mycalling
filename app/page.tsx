@@ -54,18 +54,33 @@ export default function HomePage() {
 
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== 'undefined') {
-      const coachSessionId = localStorage.getItem('coachSessionId');
-      // В реальном сценарии мы можем проверять флаг в localStorage
-      const studentName = localStorage.getItem('studentName');
-      if (studentName) {
-        setCoachCompleted(true);
+    
+    async function checkProgress() {
+      try {
+        const res = await fetch('/api/auth/progress');
+        const data = await res.json();
+        if (data.authenticated) {
+          setCoachCompleted(data.coachCompleted || false);
+          setTestCompleted(data.testCompleted || false);
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking progress:', err);
       }
-      const diagnosticCompleted = localStorage.getItem('diagnosticCompleted');
-      if (diagnosticCompleted) {
-        setTestCompleted(true);
+
+      if (typeof window !== 'undefined') {
+        const studentName = localStorage.getItem('studentName');
+        if (studentName) {
+          setCoachCompleted(true);
+        }
+        const diagnosticCompleted = localStorage.getItem('diagnosticCompleted');
+        if (diagnosticCompleted) {
+          setTestCompleted(true);
+        }
       }
     }
+
+    checkProgress();
   }, []);
 
   // Определяем, куда ведет главная кнопка

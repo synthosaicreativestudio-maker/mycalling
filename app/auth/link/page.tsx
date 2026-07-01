@@ -63,7 +63,7 @@ function LinkCard() {
   if (!code) {
     return (
       <div className="text-center p-6 text-red-500 font-bold bg-white/10 rounded-2xl">
-        Неверный или отсутствующий код авторизации.
+        Код подключения недействителен или отсутствует.
       </div>
     );
   }
@@ -96,7 +96,7 @@ function LinkCard() {
           {isTelegram ? <Send className="h-7 w-7" /> : <Fingerprint className="h-7 w-7" />}
         </div>
         <h1 className="text-xl font-bold font-sans text-[#253243]">
-          Подтверждение через {isTelegram ? 'Telegram' : 'MAX ID'}
+          Подключение через {isTelegram ? 'Telegram' : 'MAX ID'}
         </h1>
         <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
           Отсканируйте QR-код камерой телефона или нажмите кнопку ниже, чтобы запустить бот
@@ -143,9 +143,9 @@ function LinkCard() {
             <CheckCircle2 className="h-10 w-10" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#253243]">Профиль успешно подтвержден!</h3>
+            <h3 className="text-base font-bold text-[#253243]">Канал связи успешно подключен!</h3>
             <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Вы успешно авторизовались. Эта вкладка закроется, а на основном устройстве откроется личный кабинет.
+              Вы успешно подключили мессенджер. Эта вкладка закроется, а на основном устройстве продолжится сессия.
             </p>
           </div>
           <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400">
