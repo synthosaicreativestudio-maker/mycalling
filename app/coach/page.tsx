@@ -363,7 +363,7 @@ export default function CoachPage() {
             const tgPayload = linkCode || '';
 
             const telegramBotLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
-            const maxIdLink = `https://im.max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+            const maxIdLink = `https://max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
 
             const qrTelegramLink = telegramBotLink;
             const qrMaxIdLink = maxIdLink;

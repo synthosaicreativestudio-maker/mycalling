@@ -72,9 +72,10 @@ function LinkCard() {
   const isTelegram = provider === 'telegram';
   const qrLink = isTelegram
     ? `https://t.me/moyoprizvanie_bot?start=${code}`
-    : `https://im.max.ru/maxid_bot?start=${code}`;
+    : `https://max.ru/maxid_bot?start=${code}`;
 
-  const botLink = qrLink;
+  const telegramBotLink = `https://t.me/moyoprizvanie_bot?start=${code}`;
+  const maxIdLink = `https://max.ru/maxid_bot?start=${code}`;
 
   return (
     <motion.div
@@ -111,7 +112,7 @@ function LinkCard() {
 
           {/* Кнопка открытия */}
           <a
-            href={botLink}
+            href={isTelegram ? telegramBotLink : maxIdLink}
             target="_blank"
             rel="noopener noreferrer"
             className={`w-full h-[54px] inline-flex items-center justify-center gap-2.5 rounded-2xl text-sm font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-lg ${isTelegram
