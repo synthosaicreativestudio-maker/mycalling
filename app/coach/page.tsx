@@ -100,7 +100,13 @@ export default function CoachPage() {
           });
           const chatData = await chatRes.json();
           if (chatData.reply) {
-            setMessages(prev => [...prev, { role: 'assistant', content: chatData.reply }]);
+            setMessages(prev => {
+              const lastMsg = prev[prev.length - 1];
+              if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content === chatData.reply) {
+                return prev;
+              }
+              return [...prev, { role: 'assistant', content: chatData.reply }];
+            });
           }
           if (chatData.currentStep !== undefined) {
             setStep(chatData.currentStep);
@@ -212,7 +218,13 @@ export default function CoachPage() {
       const chatData = await chatRes.json();
 
       if (chatData.reply) {
-        setMessages(prev => [...prev, { role: 'assistant', content: chatData.reply }]);
+        setMessages(prev => {
+          const lastMsg = prev[prev.length - 1];
+          if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content === chatData.reply) {
+            return prev;
+          }
+          return [...prev, { role: 'assistant', content: chatData.reply }];
+        });
       }
       if (chatData.currentStep !== undefined) {
         setStep(chatData.currentStep);
@@ -337,20 +349,20 @@ export default function CoachPage() {
       {/* progress top panel */}
       <div className="w-full max-w-3xl mb-6 glass-card p-4 rounded-2xl flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-[#8c6e4b]/10 rounded-xl flex items-center justify-center text-[#8c6e4b]">
+          <div className="h-10 w-10 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center text-[#3B82F6]">
             <Brain className="h-5 w-5 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-sm font-bold font-sans text-text">
+            <h2 className="text-sm font-bold font-sans text-white">
               Шаг {step} из 6: {STEP_NAMES[step] || 'Знакомство'}
             </h2>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-[#8c6e4b]">{progressPercent}%</span>
-          <div className="w-24 h-2 bg-[#8c6e4b]/10 rounded-full overflow-hidden">
+          <span className="text-xs font-bold text-[#3B82F6]">{progressPercent}%</span>
+          <div className="w-24 h-2 bg-white/5 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-[#8c6e4b] transition-all duration-500" 
+              className="h-full bg-[#3B82F6] transition-all duration-500" 
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -380,28 +392,28 @@ export default function CoachPage() {
                 className={`flex gap-3 max-w-[80%] ${isCoach ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
               >
                 <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${
-                  isCoach ? 'bg-[#c2ab87]/15 text-[#8c6e4b]' : 'bg-[#8c6e4b] text-white'
+                  isCoach ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#3B82F6] text-white'
                 }`}>
                   {isCoach ? <Brain className="h-4 w-4" /> : <User className="h-4 w-4" />}
                 </div>
                 <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
                   isCoach 
                     ? (step === 6 && idx === messages.length - 1
-                        ? 'bg-gradient-to-br from-white/95 to-[#fcfaf6] text-text border-2 border-[#8c6e4b] rounded-tl-none shadow-[0_8px_30px_rgba(140,110,75,0.15)] ring-1 ring-[#8c6e4b]/20 relative overflow-hidden'
-                        : 'bg-white/80 text-text border border-[#8c6e4b]/10 rounded-tl-none shadow-sm'
+                        ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
+                        : 'bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm'
                       )
-                    : 'bg-[#8c6e4b] text-white rounded-tr-none shadow-md'
+                    : 'bg-[#3B82F6]/20 text-[#E8ECF0] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
                 }`}>
                   {isCoach && step === 6 && idx === messages.length - 1 && (
-                    <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#8c6e4b] mb-2">
+                    <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] mb-2">
                       <span>✨</span> Резюме наставника Романа
                     </div>
                   )}
                   {msg.content}
 
                   {isCoach && step >= 2 && step < 6 && !phoneConfirmed && idx === messages.length - 1 && (
-                    <div className="mt-4 p-4 rounded-xl bg-[#8c6e4b]/5 border border-[#8c6e4b]/15 space-y-3">
-                      <p className="text-xs font-bold text-[#8c6e4b] flex items-center gap-1.5">
+                    <div className="mt-4 p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/15 space-y-3">
+                      <p className="text-xs font-bold text-[#3B82F6] flex items-center gap-1.5">
                         <span>📲</span> Подключите удобный канал связи для получения отчета:
                       </p>
                       <div className="flex flex-wrap gap-3">
@@ -433,13 +445,13 @@ export default function CoachPage() {
 
           {isTyping && (
             <div className="flex gap-3 max-w-[80%] mr-auto">
-              <div className="h-8 w-8 rounded-full bg-[#c2ab87]/15 text-[#8c6e4b] flex items-center justify-center">
+              <div className="h-8 w-8 rounded-full bg-[#3B82F6]/10 text-[#3B82F6] flex items-center justify-center">
                 <Brain className="h-4 w-4" />
               </div>
-              <div className="p-4 rounded-2xl bg-white/80 border border-[#8c6e4b]/10 rounded-tl-none shadow-sm flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#8c6e4b] animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-2 h-2 rounded-full bg-[#8c6e4b] animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-2 h-2 rounded-full bg-[#8c6e4b] animate-bounce" />
+              <div className="p-4 rounded-2xl bg-[#080C14]/80 border border-white/5 rounded-tl-none shadow-sm flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce" />
               </div>
             </div>
           )}
@@ -448,22 +460,22 @@ export default function CoachPage() {
         </div>
 
         {/* Input area */}
-        <div className="p-4 border-t border-[#8c6e4b]/10 bg-white/45 backdrop-blur-md">
+        <div className="p-4 border-t border-white/5 bg-[#040506]/45 backdrop-blur-md">
           {step === 6 ? (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="text-center p-4 space-y-4"
             >
-              <h3 className="text-lg font-bold text-text">Коуч-сессия успешно завершена!</h3>
-              <p className="text-xs text-muted max-w-md mx-auto">
+              <h3 className="text-lg font-bold text-white">Коуч-сессия успешно завершена!</h3>
+              <p className="text-xs text-[#7A8A9E] max-w-md mx-auto">
                 Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
               </p>
               <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
                 <button 
                   type="button"
                   onClick={downloadPreliminaryReport}
-                  className="bg-white hover:bg-gray-50 border border-[#8c6e4b]/40 text-[#8c6e4b] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                  className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#3B82F6]/30 text-[#3B82F6] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
                 >
                   📥 Скачать резюме (PDF)
                 </button>
@@ -485,12 +497,12 @@ export default function CoachPage() {
                 onChange={e => setInput(e.target.value)}
                 disabled={loading || isTyping}
                 placeholder="Напишите ответ..."
-                className="flex-1 h-12 px-4 rounded-xl border border-[#8c6e4b]/20 bg-white/70 outline-none focus:border-[#8c6e4b]/40 text-text placeholder:text-[#a89a8a]"
+                className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#3B82F6]/30 text-white placeholder:text-[#7A8A9E]"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || loading || isTyping}
-                className="h-12 w-12 rounded-xl bg-[#8c6e4b] text-white flex items-center justify-center hover:bg-[#735a3d] transition disabled:opacity-50"
+                className="h-12 w-12 rounded-xl bg-[#3B82F6] text-white flex items-center justify-center hover:bg-[#2563EB] transition disabled:opacity-50"
               >
                 <Send className="h-5 w-5" />
               </button>

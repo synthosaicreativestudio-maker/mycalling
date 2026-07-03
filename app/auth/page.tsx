@@ -131,7 +131,7 @@ function AuthCard() {
         <button
           onClick={() => setActiveTab('telegram')}
           className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 text-xs font-bold uppercase tracking-wider transition ${
-            activeTab === 'telegram' ? 'bg-white text-[#253243] shadow-glass' : 'text-muted hover:text-white'
+            activeTab === 'telegram' ? 'bg-[#3B82F6] text-white shadow-[0_0_15px_rgba(59,130,246,0.25)]' : 'text-muted hover:text-white'
           }`}
         >
           <Send className="h-4 w-4" /> Telegram
@@ -139,7 +139,7 @@ function AuthCard() {
         <button
           onClick={() => setActiveTab('maxid')}
           className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 text-xs font-bold uppercase tracking-wider transition ${
-            activeTab === 'maxid' ? 'bg-white text-[#253243] shadow-glass' : 'text-muted hover:text-white'
+            activeTab === 'maxid' ? 'bg-[#3B82F6] text-white shadow-[0_0_15px_rgba(59,130,246,0.25)]' : 'text-muted hover:text-white'
           }`}
         >
           <Fingerprint className="h-4 w-4" /> MAX ID

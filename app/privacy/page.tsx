@@ -1,14 +1,14 @@
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-24 z-10 relative bg-white/80 backdrop-blur-md rounded-[32px] my-12 border border-[#e2e8f0]">
-      <h1 className="text-3xl font-extrabold text-[#253243] font-sans mb-8">Политика конфиденциальности и обработки персональных данных</h1>
-      <div className="prose text-[#566679] max-w-none">
+    <main className="mx-auto max-w-4xl px-6 py-24 z-10 relative bg-[#080C14]/90 backdrop-blur-md rounded-[32px] my-12 border border-[#3B82F6]/20 shadow-2xl">
+      <h1 className="text-3xl font-extrabold text-white font-sans mb-8">Политика конфиденциальности и обработки персональных данных</h1>
+      <div className="prose prose-invert text-[#7A8A9E] max-w-none">
         <p>Мы серьезно относимся к защите данных пользователей, особенно несовершеннолетних.</p>
-        <h2>1. Какие данные мы собираем</h2>
+        <h2 className="text-white">1. Какие данные мы собираем</h2>
         <p>Имя, класс обучения и результаты интерактивных заданий.</p>
-        <h2>2. Цель обработки</h2>
+        <h2 className="text-white">2. Цель обработки</h2>
         <p>Формирование персонализированного отчета по профориентации.</p>
-        <h2>3. Хранение и защита</h2>
+        <h2 className="text-white">3. Хранение и защита</h2>
         <p>Мы используем зашифрованные каналы передачи данных. Ваши данные не передаются сторонним рекламным сетям.</p>
       </div>
     </main>

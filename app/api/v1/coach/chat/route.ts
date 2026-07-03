@@ -295,6 +295,24 @@ export async function POST(req: Request) {
       });
     }
 
+    // Защита от race condition: если пришло системное сообщение о подтверждении телефона,
+    // но в истории оно уже есть или текущий шаг уже 3+, просто возвращаем последний ответ коуча.
+    if (message === 'Телефон подтвержден через бот') {
+      const alreadyConfirmed = transcript.some(m => m.role === 'user' && m.content === 'Телефон подтвержден через бот');
+      if (alreadyConfirmed || currentStep >= 3) {
+        const lastAssistantMsg = [...transcript].reverse().find(m => m.role === 'assistant');
+        const dbUser = await prisma.user.findUnique({ where: { id: coachSession.userId } });
+        return NextResponse.json({
+          reply: lastAssistantMsg ? lastAssistantMsg.content : FALLBACK_REPLIES[currentStep],
+          sessionId: coachSession.id,
+          currentStep: currentStep,
+          phoneConfirmed: !!dbUser?.phone,
+          sessionStatus: coachSession.status,
+          extracted: {}
+        });
+      }
+    }
+
     let userMsgContent = message;
 
     // Добавляем сообщение пользователя в транскрипт

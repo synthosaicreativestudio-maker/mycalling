@@ -1,14 +1,14 @@
 export default function TermsPage() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-24 z-10 relative bg-white/80 backdrop-blur-md rounded-[32px] my-12 border border-[#e2e8f0]">
-      <h1 className="text-3xl font-extrabold text-[#253243] font-sans mb-8">Пользовательское соглашение и Публичная оферта</h1>
-      <div className="prose text-[#566679] max-w-none">
+    <main className="mx-auto max-w-4xl px-6 py-24 z-10 relative bg-[#080C14]/90 backdrop-blur-md rounded-[32px] my-12 border border-[#3B82F6]/20 shadow-2xl">
+      <h1 className="text-3xl font-extrabold text-white font-sans mb-8">Пользовательское соглашение и Публичная оферта</h1>
+      <div className="prose prose-invert text-[#7A8A9E] max-w-none">
         <p>Настоящее пользовательское соглашение устанавливает правила использования сервиса «МоёПризвание».</p>
-        <h2>1. Общие положения</h2>
+        <h2 className="text-white">1. Общие положения</h2>
         <p>Сервис предоставляет услуги профориентационного тестирования на основе ответов пользователя.</p>
-        <h2>2. Согласие родителей</h2>
+        <h2 className="text-white">2. Согласие родителей</h2>
         <p>Используя сервис, вы подтверждаете, что являетесь законным представителем несовершеннолетнего (если пользователю менее 18 лет) или получили согласие от родителей.</p>
-        <h2>3. Ограничение ответственности</h2>
+        <h2 className="text-white">3. Ограничение ответственности</h2>
         <p>Результаты носят рекомендательный характер и не являются прямым указанием к действию.</p>
       </div>
     </main>

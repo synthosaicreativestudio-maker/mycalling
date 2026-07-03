@@ -148,10 +148,10 @@ function ReportPageContent() {
       <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] glass-card p-12 text-center relative overflow-hidden">
           <div className="relative z-10 flex flex-col items-center space-y-8">
-            <Loader2 className="h-16 w-16 animate-spin text-[#8c6e4b]" />
+            <Loader2 className="h-16 w-16 animate-spin text-[#3B82F6]" />
             <div className="space-y-3">
-              <h1 className="text-2xl font-bold font-sans text-[#3d3123]">Генерация карты призвания</h1>
-              <p className="max-w-md text-sm text-[#736251] leading-relaxed">
+              <h1 className="text-2xl font-bold font-sans text-white">Генерация карты призвания</h1>
+              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
                 Пожалуйста, подождите. ИИ-эксперт анализирует ваши ответы, сопоставляет интересы с базой профессий и формулирует персональные рекомендации. Это займет около 15 секунд...
               </p>
             </div>
@@ -164,12 +164,12 @@ function ReportPageContent() {
   if (error) {
     return (
       <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
-        <div className="rounded-[32px] glass-card p-10 text-center border border-red-500/20 bg-white/70">
+        <div className="rounded-[32px] glass-card p-10 text-center border border-red-500/20 bg-[#080C14]/85">
           <div className="relative z-10 flex flex-col items-center space-y-6">
             <AlertCircle className="h-16 w-16 text-red-500" />
             <div className="space-y-3">
-              <h1 className="text-xl font-bold text-[#3d3123] font-sans">Не удалось загрузить отчет</h1>
-              <p className="max-w-md text-sm text-[#736251] leading-relaxed">
+              <h1 className="text-xl font-bold text-white font-sans">Не удалось загрузить отчет</h1>
+              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
                 {error}
               </p>
             </div>
@@ -216,16 +216,16 @@ function ReportPageContent() {
         
         <div className="relative z-10">
           {/* Шапка отчета */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-[#8c6e4b]/15 pb-8 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8 mb-8">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#8c6e4b]/20 bg-[#8c6e4b]/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#8c6e4b] font-sans">
-                <Award className="h-3.5 w-3.5 text-[#8c6e4b]" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#3B82F6] font-sans">
+                <Award className="h-3.5 w-3.5 text-[#3B82F6]" />
                 Итоговый отчет
               </div>
-              <h1 className="text-3xl font-extrabold text-[#3d3123] sm:text-4xl lg:text-5xl leading-tight font-sans">
+              <h1 className="text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl leading-tight font-sans">
                 Карта талантов: {report.studentName}
               </h1>
-              <p className="text-xs text-[#736251]">
+              <p className="text-xs text-[#7A8A9E]">
                 Диагностика успешно пройдена · Отчет подготовлен нейросетевыми алгоритмами
               </p>
             </div>
@@ -241,7 +241,7 @@ function ReportPageContent() {
               </button>
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 rounded-xl border border-[#8c6e4b]/20 bg-white/50 px-5 py-3 text-sm font-semibold text-text transition hover:bg-white/80"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.06]"
               >
                 <ArrowLeft className="h-4 w-4" />
                 На главную
@@ -260,11 +260,11 @@ function ReportPageContent() {
           )}
 
           {/* Переключатель вкладок */}
-          <div className="flex border-b border-[#8c6e4b]/15 mb-8 gap-6 md:gap-8 overflow-x-auto pb-px">
+          <div className="flex border-b border-white/5 mb-8 gap-6 md:gap-8 overflow-x-auto pb-px">
             <button
               onClick={() => setActiveTab('talents')}
               className={`pb-4 text-sm md:text-base font-bold transition relative whitespace-nowrap ${
-                activeTab === 'talents' ? 'text-[#3d3123] border-b-2 border-[#8c6e4b]' : 'text-[#736251] hover:text-[#3d3123]'
+                activeTab === 'talents' ? 'text-white border-b-2 border-[#3B82F6]' : 'text-[#7A8A9E] hover:text-white'
               }`}
             >
               Карта талантов
@@ -272,7 +272,7 @@ function ReportPageContent() {
             <button
               onClick={() => setActiveTab('career')}
               className={`pb-4 text-sm md:text-base font-bold transition relative whitespace-nowrap ${
-                activeTab === 'career' ? 'text-[#3d3123] border-b-2 border-[#8c6e4b]' : 'text-[#736251] hover:text-[#3d3123]'
+                activeTab === 'career' ? 'text-white border-b-2 border-[#3B82F6]' : 'text-[#7A8A9E] hover:text-white'
               }`}
             >
               Карьерные рекомендации
@@ -288,8 +288,8 @@ function ReportPageContent() {
                 <div className="space-y-8">
                   {/* Главное резюме потенциала */}
                   <div className="glass-card rounded-[28px] p-8">
-                    <h2 className="text-lg font-bold text-[#3d3123] mb-4">Главное резюме потенциала</h2>
-                    <div className="space-y-3 text-[#736251] text-base leading-relaxed">
+                    <h2 className="text-lg font-bold text-white mb-4">Главное резюме потенциала</h2>
+                    <div className="space-y-3 text-[#7A8A9E] text-base leading-relaxed">
                       {report.heroSummary.map((sentence, idx) => (
                         <p key={idx}>{sentence}</p>
                       ))}
@@ -300,26 +300,26 @@ function ReportPageContent() {
                   {report.coachSection && (
                     <div className="glass-card rounded-[28px] p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <Brain className="h-5 w-5 text-[#8c6e4b]" />
-                        <h2 className="text-lg font-bold text-[#3d3123]">Качественный анализ диалога (Нейрокоуч)</h2>
+                        <Brain className="h-5 w-5 text-[#3B82F6]" />
+                        <h2 className="text-lg font-bold text-white">Качественный анализ диалога (Нейрокоуч)</h2>
                       </div>
                       <div className="space-y-4">
                         {report.coachSection.dreams && (
-                          <div className="p-4 bg-white/40 border border-[#8c6e4b]/10 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#8c6e4b] mb-1">Мечты и устремления</h4>
-                            <p className="text-sm text-[#736251] leading-relaxed">{report.coachSection.dreams}</p>
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-1">Мечты и устремления</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.dreams}</p>
                           </div>
                         )}
                         {report.coachSection.idols && (
-                          <div className="p-4 bg-white/40 border border-[#8c6e4b]/10 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#8c6e4b] mb-1">Ролевые модели и кумиры</h4>
-                            <p className="text-sm text-[#736251] leading-relaxed">{report.coachSection.idols}</p>
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-1">Ролевые модели и кумиры</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.idols}</p>
                           </div>
                         )}
                         {report.coachSection.values && (
-                          <div className="p-4 bg-white/40 border border-[#8c6e4b]/10 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#8c6e4b] mb-1">Ключевые ценности</h4>
-                            <p className="text-sm text-[#736251] leading-relaxed">{report.coachSection.values}</p>
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-1">Ключевые ценности</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.values}</p>
                           </div>
                         )}
                       </div>
@@ -333,20 +333,20 @@ function ReportPageContent() {
                   {report.personalityTraits && report.personalityTraits.length > 0 && (
                     <div className="glass-card rounded-[28px] p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <Sparkles className="h-5 w-5 text-[#8c6e4b]" />
-                        <h2 className="text-lg font-bold text-[#3d3123]">Личностные особенности (Big Five)</h2>
+                        <Sparkles className="h-5 w-5 text-[#3B82F6]" />
+                        <h2 className="text-lg font-bold text-white">Личностные особенности (Big Five)</h2>
                       </div>
                       <div className="space-y-4">
                         {report.personalityTraits.map((trait) => (
                           <div key={trait.name} className="space-y-2">
-                            <div className="flex items-center justify-between text-xs font-bold text-[#3d3123]">
+                            <div className="flex items-center justify-between text-xs font-bold text-white">
                               <span>{trait.name}</span>
-                              <span className="text-[#8c6e4b]">{trait.score}%</span>
+                              <span className="text-[#3B82F6]">{trait.score}%</span>
                             </div>
-                            <div className="h-1.5 bg-black/5 rounded-full overflow-hidden">
-                              <div className="h-full bg-[#8c6e4b] rounded-full" style={{ width: `${trait.score}%` }} />
+                            <div className="h-1.5 bg-black/20 rounded-full overflow-hidden">
+                              <div className="h-full bg-[#3B82F6] rounded-full" style={{ width: `${trait.score}%` }} />
                             </div>
-                            <p className="text-[11px] text-[#736251] leading-relaxed">{trait.description}</p>
+                            <p className="text-[11px] text-[#7A8A9E] leading-relaxed">{trait.description}</p>
                           </div>
                         ))}
                       </div>
@@ -355,17 +355,17 @@ function ReportPageContent() {
 
                   {/* Силы и Зоны развития */}
                   <div className="glass-card rounded-[28px] p-8">
-                    <h2 className="text-lg font-bold text-[#3d3123] mb-4">Сильные стороны и зоны развития</h2>
+                    <h2 className="text-lg font-bold text-white mb-4">Сильные стороны и зоны развития</h2>
                     <div className="space-y-4">
                       <div>
-                        <h4 className="text-xs uppercase tracking-wider font-bold text-emerald-700 mb-2">Сильные стороны</h4>
-                        <ul className="list-disc list-inside space-y-1.5 text-xs text-[#736251]">
+                        <h4 className="text-xs uppercase tracking-wider font-bold text-emerald-400 mb-2">Сильные стороны</h4>
+                        <ul className="list-disc list-inside space-y-1.5 text-xs text-[#7A8A9E]">
                           {report.strengths.map((s, i) => <li key={i}>{s}</li>)}
                         </ul>
                       </div>
                       <div>
-                        <h4 className="text-xs uppercase tracking-wider font-bold text-[#8c6e4b] mb-2">Зоны развития</h4>
-                        <ul className="list-disc list-inside space-y-1.5 text-xs text-[#736251]">
+                        <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-2">Зоны развития</h4>
+                        <ul className="list-disc list-inside space-y-1.5 text-xs text-[#7A8A9E]">
                           {report.growthAreas.map((g, i) => <li key={i}>{g}</li>)}
                         </ul>
                       </div>
@@ -382,26 +382,26 @@ function ReportPageContent() {
                 {report.riasecSummary && (
                   <div className="glass-card rounded-[28px] p-8">
                     <div className="flex items-center gap-3 mb-4">
-                      <Compass className="h-5 w-5 text-[#8c6e4b]" />
-                      <h2 className="text-lg font-bold text-[#3d3123]">Профессиональные интересы (RIASEC)</h2>
+                      <Compass className="h-5 w-5 text-[#3B82F6]" />
+                      <h2 className="text-lg font-bold text-white">Профессиональные интересы (RIASEC)</h2>
                     </div>
-                    <p className="text-[#736251] text-sm leading-relaxed">{report.riasecSummary}</p>
+                    <p className="text-[#7A8A9E] text-sm leading-relaxed">{report.riasecSummary}</p>
                   </div>
                 )}
 
                 {/* Рекомендуемые профессии */}
                 <div className="glass-card rounded-[28px] p-8">
-                  <h2 className="text-lg font-bold text-[#3d3123] mb-6">Подходящие профессии для развития</h2>
+                  <h2 className="text-lg font-bold text-white mb-6">Подходящие профессии для развития</h2>
                   <div className="grid gap-6 md:grid-cols-2">
                     {report.professions.map((prof, idx) => (
-                      <div key={idx} className="p-6 bg-white/40 border border-[#8c6e4b]/10 rounded-2xl space-y-3">
+                      <div key={idx} className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3">
                         <div className="flex items-center justify-between">
-                          <h3 className="font-bold text-[#3d3123]">{prof.name}</h3>
-                          <span className="text-xs font-bold px-2.5 py-1 bg-[#8c6e4b]/10 text-[#8c6e4b] rounded-full">
+                          <h3 className="font-bold text-white">{prof.name}</h3>
+                          <span className="text-xs font-bold px-2.5 py-1 bg-[#3B82F6]/10 text-[#3B82F6] rounded-full">
                             Совпадение: {prof.score}%
                           </span>
                         </div>
-                        <p className="text-xs text-[#736251] leading-relaxed">{prof.why}</p>
+                        <p className="text-xs text-[#7A8A9E] leading-relaxed">{prof.why}</p>
                       </div>
                     ))}
                   </div>
@@ -465,7 +465,7 @@ export default function ReportPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-[#8c6e4b]" />
+        <Loader2 className="h-12 w-12 animate-spin text-[#3B82F6]" />
       </div>
     }>
       <ReportPageContent />
