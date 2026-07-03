@@ -18,10 +18,10 @@ export function AnimatedLogo({
       href="/" 
       className={`flex items-center gap-0 w-fit select-none no-underline hover:opacity-90 transition ${className}`}
     >
-      <span className="text-xl md:text-[22px] font-extrabold tracking-[0.06em] uppercase text-[#8c6e4b] font-sans">
+      <span className="text-xl md:text-[22px] font-extrabold tracking-[0.06em] uppercase text-[#3B82F6] font-sans">
         МОЁ
       </span>
-      <span className="text-xl md:text-[22px] font-light tracking-[0.06em] uppercase text-[#3d3123] font-sans">
+      <span className="text-xl md:text-[22px] font-light tracking-[0.06em] uppercase text-white font-sans">
         ПРИЗВАНИЕ
       </span>
     </Link>

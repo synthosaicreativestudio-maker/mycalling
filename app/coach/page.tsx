@@ -280,18 +280,18 @@ export default function CoachPage() {
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 4px 30px rgba(0,0,0,0.03);
-            border: 2px solid #8c6e4b;
+            border: 2px solid #3B82F6;
           }
           .header {
             text-align: center;
-            border-bottom: 2px solid rgba(140, 110, 75, 0.2);
+            border-bottom: 2px solid rgba(59, 130, 246, 0.2);
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
           .logo {
             font-size: 24px;
             font-weight: bold;
-            color: #8c6e4b;
+            color: #3B82F6;
           }
           .title {
             font-size: 20px;

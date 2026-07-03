@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Send, Fingerprint, QrCode, ExternalLink, Loader2, CheckCircle2 } from 'lucide-react';
-import { SpaceBackground } from '../../components/SpaceBackground';
+import { DarkCosmicBackground } from '../../components/DarkCosmicBackground';
 import { QRCodeSVG } from 'qrcode.react';
 
 function LinkCard() {
@@ -82,17 +82,17 @@ function LinkCard() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full max-w-[420px] rounded-[32px] border border-[#8c6e4b]/15 bg-white/70 p-8 backdrop-blur-xl shadow-2xl relative z-10 text-center space-y-6"
+      className="w-full max-w-[420px] rounded-[32px] border border-white/5 bg-[#080C14]/90 p-8 backdrop-blur-xl shadow-2xl relative z-10 text-center space-y-6"
     >
       <div className="flex flex-col items-center">
         <div className={`inline-flex h-16 w-16 items-center justify-center rounded-2xl ${isTelegram ? 'bg-[#349ed9]/10 text-[#349ed9]' : 'bg-[#8b5cf6]/10 text-[#8b5cf6]'
           } border border-current/15 mb-4`}>
           {isTelegram ? <Send className="h-7 w-7" /> : <Fingerprint className="h-7 w-7" />}
         </div>
-        <h1 className="text-xl font-bold font-sans text-[#253243]">
+        <h1 className="text-xl font-bold font-sans text-white">
           Подключение через {isTelegram ? 'Telegram' : 'MAX ID'}
         </h1>
-        <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+        <p className="text-xs text-[#7A8A9E] mt-1.5 leading-relaxed">
           Отсканируйте QR-код камерой телефона или нажмите кнопку ниже, чтобы запустить бот
         </p>
       </div>
@@ -100,7 +100,7 @@ function LinkCard() {
       {status === 'PENDING' && (
         <>
           {/* QR-код */}
-          <div className="mx-auto w-[240px] h-[240px] bg-white rounded-3xl p-2.5 flex items-center justify-center shadow-md border border-[#8c6e4b]/10">
+          <div className="mx-auto w-[240px] h-[240px] bg-white rounded-3xl p-2.5 flex items-center justify-center shadow-md border border-[#3B82F6]/20">
             <QRCodeSVG
               value={qrLink}
               size={220}
@@ -124,8 +124,8 @@ function LinkCard() {
           </a>
 
           {/* Поллинг индикатор */}
-          <div className="flex items-center justify-center gap-2 text-xs text-slate-400 pt-2 border-t border-[#8c6e4b]/10">
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-[#8c6e4b]" />
+          <div className="flex items-center justify-center gap-2 text-xs text-[#7A8A9E] pt-2 border-t border-white/5">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
             Ожидание подтверждения в мессенджере...
           </div>
         </>
@@ -141,12 +141,12 @@ function LinkCard() {
             <CheckCircle2 className="h-10 w-10" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#253243]">Канал связи успешно подключен!</h3>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+            <h3 className="text-base font-bold text-white">Канал связи успешно подключен!</h3>
+            <p className="text-xs text-[#7A8A9E] mt-1 leading-relaxed">
               Вы успешно подключили мессенджер. Эта вкладка закроется, а на основном устройстве продолжится сессия.
             </p>
           </div>
-          <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400">
+          <div className="flex items-center justify-center gap-2 text-[11px] text-[#7A8A9E]">
             <Loader2 className="h-3 w-3 animate-spin text-emerald-600" /> Выполняется перенаправление...
           </div>
         </motion.div>
@@ -158,8 +158,8 @@ function LinkCard() {
             <span className="text-2xl">⚠️</span>
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#253243]">Срок действия кода истек</h3>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+            <h3 className="text-base font-bold text-white">Срок действия кода истек</h3>
+            <p className="text-xs text-[#7A8A9E] mt-1 leading-relaxed">
               Пожалуйста, вернитесь на предыдущую страницу и запросите QR-код повторно.
             </p>
           </div>
@@ -172,11 +172,11 @@ function LinkCard() {
 export default function LinkPage() {
   return (
     <main className="flex min-h-[100dvh] flex-col items-center justify-center p-6 relative">
-      <SpaceBackground />
+      <DarkCosmicBackground />
 
       <Suspense fallback={
-        <div className="w-full max-w-[420px] rounded-[32px] border border-[#8c6e4b]/15 bg-white/70 p-8 backdrop-blur-xl flex flex-col items-center justify-center min-h-[300px]">
-          <Loader2 className="h-8 w-8 animate-spin text-[#8c6e4b]" />
+        <div className="w-full max-w-[420px] rounded-[32px] border border-white/5 bg-[#080C14]/90 p-8 backdrop-blur-xl flex flex-col items-center justify-center min-h-[300px]">
+          <Loader2 className="h-8 w-8 animate-spin text-[#3B82F6]" />
         </div>
       }>
         <LinkCard />

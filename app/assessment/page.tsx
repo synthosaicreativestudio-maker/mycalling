@@ -156,7 +156,7 @@ export default function AssessmentPage() {
         <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-200 backdrop-blur-sm shadow-lg max-w-4xl mx-auto transition-opacity">
           <div className="flex items-center gap-3">
             <WifiOff className="h-5 w-5 text-red-400 shrink-0 animate-pulse" />
-            <p className="text-xs md:text-sm leading-relaxed text-[#3d3123]">
+            <p className="text-xs md:text-sm leading-relaxed text-red-200">
               Сеть временно недоступна. 
               {store.offlineAnswersBuffer.length > 0 && (
                 <span className="font-bold ml-2">Неотправленных ответов: {store.offlineAnswersBuffer.length}</span>
