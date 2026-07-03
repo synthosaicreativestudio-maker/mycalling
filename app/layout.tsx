@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Manrope, Prata, Marck_Script } from 'next/font/google';
 import { AnimatedLogo } from './components/AnimatedLogo';
 import { DarkCosmicBackground } from './components/DarkCosmicBackground';
+import { ParticleBackground } from './components/ParticleBackground';
 
 import { ExitIntentPopup } from './components/ExitIntentPopup';
 import { CookieBanner } from './components/CookieBanner';
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           
           {/* Слой 1: Космический фон (самый нижний) */}
           <DarkCosmicBackground />
+          <ParticleBackground />
           
           {/* Sticky Header */}
           <header className="site-header print:hidden">
