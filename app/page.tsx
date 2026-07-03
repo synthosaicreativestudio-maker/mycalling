@@ -212,7 +212,7 @@ export default function HomePage() {
               {/* Шаг 1: Коуч-сессия */}
               <m.div
                 variants={fadeUpVariants}
-                className="glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden border border-[#3B82F6]/20"
+                className="glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden"
               >
                 <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">01</div>
                 <div className="space-y-4">
@@ -235,8 +235,8 @@ export default function HomePage() {
               {/* Шаг 2: Диагностика (тесты) */}
               <m.div
                 variants={fadeUpVariants}
-                className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden border ${
-                  coachCompleted ? 'border-[#3B82F6]/20' : 'opacity-60 border-white/5'
+                className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden ${
+                  coachCompleted ? '' : 'opacity-60 pointer-events-none'
                 }`}
               >
                 <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">02</div>
@@ -268,8 +268,8 @@ export default function HomePage() {
               {/* Шаг 3: Отчёт */}
               <m.div
                 variants={fadeUpVariants}
-                className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden border ${
-                  coachCompleted && testCompleted ? 'border-[#3B82F6]/20' : 'opacity-60 border-white/5'
+                className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden ${
+                  coachCompleted && testCompleted ? '' : 'opacity-60 pointer-events-none'
                 }`}
               >
                 <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">03</div>

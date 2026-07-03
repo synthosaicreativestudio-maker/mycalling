@@ -10,11 +10,11 @@ export function DarkCosmicBackground() {
   }, []);
 
   if (!mounted) {
-    return <div className="fixed inset-0 -z-50 bg-[#040506]" />;
+    return <div className="fixed inset-0 -z-10 bg-[#040506]" />;
   }
 
   return (
-    <div className="fixed inset-0 -z-50 h-full w-full overflow-hidden bg-[#040506] print:hidden">
+    <div className="fixed inset-0 -z-10 h-full w-full overflow-hidden bg-[#040506] print:hidden">
       {/* Слой 1: Сплошная ультра-темная заливка (Абисс) */}
       <div className="absolute inset-0 bg-[#040506]" />
 
