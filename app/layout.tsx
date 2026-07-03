@@ -4,7 +4,7 @@ import './lib/env';
 import Link from 'next/link';
 import { Manrope, Prata, Marck_Script } from 'next/font/google';
 import { AnimatedLogo } from './components/AnimatedLogo';
-import { SpaceBackground } from './components/SpaceBackground';
+import { DarkCosmicBackground } from './components/DarkCosmicBackground';
 
 import { ExitIntentPopup } from './components/ExitIntentPopup';
 import { CookieBanner } from './components/CookieBanner';
@@ -70,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
 
       </head>
-      <body className="relative min-h-screen bg-transparent text-[#1a2536]">
+      <body className="relative min-h-screen bg-transparent text-[#E8ECF0]">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -92,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         
         {/* Слой 1: Космический фон (самый нижний) */}
-        <SpaceBackground />
+        <DarkCosmicBackground />
         
         {/* Sticky Header */}
         <header className="site-header print:hidden">
@@ -111,7 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div className="flex items-center gap-6">
                   <Link
                     href="/auth"
-                    className="text-sm font-medium text-slate-500 hover:text-[#1a2536] transition duration-300"
+                    className="text-sm font-medium text-slate-400 hover:text-white transition duration-300"
                   >
                     Личный кабинет
                   </Link>

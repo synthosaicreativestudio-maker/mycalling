@@ -3,22 +3,25 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
-  --accent-brown: #8c6e4b;
-  --accent-gold: #c2ab87;
-  --beige-light: #fbf9f6;
-  --beige-medium: #f2ebd9;
-  --beige-dark: #e6dac3;
-  --brown-light: #b39f85;
-  --brown-dark: #403223;
-  --bg-deep: #f7f3eb;
-  --bg-surface: #ffffff;
-  --text-primary: #3d3123;
-  --text-muted: #736251;
-  --sky-soft: #dcd0bf;
-  --sky-muted: #b09e86;
-  --rose-soft: #ecdcc3;
-  --rose-muted: #cbb497;
+  color-scheme: dark;
+  --accent-brown: #3B82F6; /* cold blue primary */
+  --accent-gold: #60A5FA; /* cold blue glow */
+  --accent-glow: #60A5FA;
+  --beige-light: #040506; /* background dark cosmic base */
+  --beige-medium: #06080C;
+  --beige-dark: #090E16;
+  --brown-light: #1E3A5F;
+  --brown-dark: #1E3A5F;
+  --bg-deep: #040506;
+  --bg-surface: rgba(8, 12, 20, 0.6);
+  --text-primary: #E8ECF0;
+  --text-muted: #7A8A9E;
+  --sky-soft: #1E3A5F;
+  --sky-muted: #193B57;
+  --rose-soft: #1E3A5F;
+  --rose-muted: #193B57;
+  --border-subtle: rgba(59, 130, 246, 0.12);
+  --border-hover: rgba(59, 130, 246, 0.3);
 }
 
 html {
@@ -64,8 +67,8 @@ button {
 }
 
 ::selection {
-  background: rgba(140, 110, 75, 0.15);
-  color: var(--text-primary);
+  background: rgba(59, 130, 246, 0.25);
+  color: #FFFFFF;
 }
 
 /* ─── Sticky Header ─── */
@@ -79,11 +82,11 @@ button {
 }
 
 .site-header-inner {
-  background: rgba(251, 249, 246, 0.65);
-  border-bottom: 1px solid rgba(140, 110, 75, 0.1);
-  box-shadow: 0 12px 36px rgba(140, 110, 75, 0.04);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(4, 5, 6, 0.75);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* ─── Content Layer (scrolls over fixed bg) ─── */
@@ -98,21 +101,22 @@ button {
 
 /* ─── Glass Cards (по примеру из ТЗ) ─── */
 .glass-card {
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(140, 110, 75, 0.18),
-              inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.03);
   transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(140, 110, 75, 0.3);
-  box-shadow: 0 12px 32px rgba(140, 110, 75, 0.22),
-              inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: rgba(12, 18, 30, 0.65);
+  border-color: var(--border-hover);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
+              0 0 20px rgba(59, 130, 246, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transform: translateY(-2px);
 }
 
@@ -144,24 +148,24 @@ h1, h2, h3, .font-title {
   justify-content: center;
   gap: 0.75rem;
   font-weight: 700;
-  color: var(--brown-dark);
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #FFFFFF;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
   border-radius: 9999px;
-  box-shadow: 0 8px 24px rgba(140, 110, 75, 0.12),
-              inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.15),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cta-glass:hover {
-  color: #000000;
-  border-color: rgba(140, 110, 75, 0.4);
-  background: rgba(255, 255, 255, 0.75);
-  box-shadow: 0 12px 32px rgba(140, 110, 75, 0.18),
-              inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  color: #FFFFFF;
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(96, 165, 250, 0.6);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.25),
+              0 0 60px rgba(59, 130, 246, 0.1);
   transform: translateY(-2px);
 }
 
@@ -171,42 +175,42 @@ h1, h2, h3, .font-title {
 
 /* ─── Glass Panel (для форм, карточек) ─── */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(140, 110, 75, 0.15);
-  box-shadow: 0 16px 48px rgba(140, 110, 75, 0.08);
+  background: rgba(8, 12, 20, 0.7);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
 
 /* ─── Utility ─── */
 .soft-chip {
-  border: 1px solid rgba(140, 110, 75, 0.15);
-  background: rgba(140, 110, 75, 0.05);
-  color: var(--accent-brown);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--accent-gold);
 }
 
 .input-shell {
-  border: 1px solid rgba(140, 110, 75, 0.15);
-  background: rgba(255, 255, 255, 0.65);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(8, 12, 20, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
   transition: border-color 180ms ease, box-shadow 180ms ease;
   color: var(--text-primary);
 }
 
 .input-shell:focus-within {
-  border-color: rgba(140, 110, 75, 0.45);
-  box-shadow: 0 0 0 4px rgba(140, 110, 75, 0.08), 0 8px 24px rgba(140, 110, 75, 0.04);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 /* ─── Focus visible for accessibility ─── */
 :focus-visible {
-  outline: 2px solid rgba(140, 110, 75, 0.4);
+  outline: 2px solid rgba(59, 130, 246, 0.5);
   outline-offset: 2px;
 }
 
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid rgba(140, 110, 75, 0.4);
+  outline: 2px solid rgba(59, 130, 246, 0.5);
   outline-offset: 2px;
   border-radius: 4px;
 }

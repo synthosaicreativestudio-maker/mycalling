@@ -106,19 +106,19 @@ export default function HomePage() {
             className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[70vw] lg:max-w-[65vw]"
           >
             <p
-              className="mb-5 text-[11px] font-bold uppercase tracking-[0.24em] text-[#8c6e4b] font-sans"
+              className="mb-5 text-[11px] font-bold uppercase tracking-[0.24em] text-[#3B82F6] font-sans"
             >
               Диагностика потенциала для школьников и родителей
             </p>
 
             <h1
-              className="w-full text-3xl leading-[1.15] font-extrabold text-[#3d3123] font-sans sm:text-4xl md:text-5xl lg:text-[3.5rem] mb-1"
+              className="w-full text-3xl leading-[1.15] font-extrabold text-white font-sans sm:text-4xl md:text-5xl lg:text-[3.5rem] mb-1"
             >
               Поможем школьнику <br className="hidden md:inline" />найти своё призвание
             </h1>
 
             <p
-              className="mt-9 w-full text-[0.98rem] sm:text-[1.08rem] md:text-[1.2rem] leading-relaxed text-[#736251] font-normal font-sans"
+              className="mt-9 w-full text-[0.98rem] sm:text-[1.08rem] md:text-[1.2rem] leading-relaxed text-[#7A8A9E] font-normal font-sans"
             >
               Раскройте сильные стороны ребёнка через 30 минут интерактивной диагностики и получите понятный план развития для всей семьи.
             </p>
@@ -131,7 +131,7 @@ export default function HomePage() {
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
-            <span className="text-xs font-semibold text-[#b39f85] mt-3 pl-2">Бесплатно · Без длинных анкет и скучных тестов</span>
+            <span className="text-xs font-semibold text-[#60A5FA]/70 mt-3 pl-2">Бесплатно · Без длинных анкет и скучных тестов</span>
           </div>
         )}
 
@@ -160,33 +160,33 @@ export default function HomePage() {
         <div className="mx-auto max-w-5xl">
           <div className="space-y-16">
             <div className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8c6e4b] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
                 Интерактивная карта
               </p>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#3d3123] font-sans">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans">
                 Шаги к вашему цифровому профилю
               </h2>
-              <p className="text-sm text-[#736251] max-w-xl mx-auto">
+              <p className="text-sm text-[#7A8A9E] max-w-xl mx-auto">
                 Последовательно пройдите все этапы. Доступ к следующему шагу открывается автоматически по завершении предыдущего.
               </p>
             </div>
 
             <div className="grid gap-8 md:grid-cols-3 relative">
               {/* Шаг 1: Коуч-сессия */}
-              <div className="glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden border border-[#8c6e4b]/20">
-                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#8c6e4b]/20">01</div>
+              <div className="glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden border border-[#3B82F6]/20">
+                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">01</div>
                 <div className="space-y-4">
-                  <div className="h-12 w-12 rounded-2xl bg-[#8c6e4b]/10 flex items-center justify-center text-[#8c6e4b]">
+                  <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 flex items-center justify-center text-[#3B82F6]">
                     <Brain className="h-6 w-6" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#3d3123]">Нейрокоуч-сессия</h3>
-                  <p className="text-sm text-[#736251] leading-relaxed">
+                  <h3 className="text-xl font-bold text-white">Нейрокоуч-сессия</h3>
+                  <p className="text-sm text-[#7A8A9E] leading-relaxed">
                     Доверительный диалог о мечтах, увлечениях и ценностях. Нативная регистрация.
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#8c6e4b] uppercase tracking-wider">Открыто</span>
-                  <Link href="/coach" className="text-sm font-semibold text-[#8c6e4b] hover:underline flex items-center gap-1">
+                  <span className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">Открыто</span>
+                  <Link href="/coach" className="text-sm font-semibold text-[#3B82F6] hover:underline flex items-center gap-1">
                     Войти <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
@@ -194,26 +194,26 @@ export default function HomePage() {
 
               {/* Шаг 2: Диагностика (тесты) */}
               <div className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden border ${
-                coachCompleted ? 'border-[#8c6e4b]/20' : 'opacity-60 border-black/5'
+                coachCompleted ? 'border-[#3B82F6]/20' : 'opacity-60 border-white/5'
               }`}>
-                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#8c6e4b]/20">02</div>
+                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">02</div>
                 <div className="space-y-4">
                   <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${
-                    coachCompleted ? 'bg-[#8c6e4b]/10 text-[#8c6e4b]' : 'bg-black/5 text-[#736251]'
+                    coachCompleted ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-white/5 text-[#7A8A9E]'
                   }`}>
-                    {coachCompleted ? <Compass className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[#736251]" />}
+                    {coachCompleted ? <Compass className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[#7A8A9E]" />}
                   </div>
-                  <h3 className="text-xl font-bold text-[#3d3123]">Интерактивная диагностика</h3>
-                  <p className="text-sm text-[#736251] leading-relaxed">
+                  <h3 className="text-xl font-bold text-white">Интерактивная диагностика</h3>
+                  <p className="text-sm text-[#7A8A9E] leading-relaxed">
                     Короткие валидированные тесты интересов (RIASEC), личности (Big Five) и когнитивных проб.
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#736251]">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#7A8A9E]">
                     {coachCompleted ? 'Открыто' : 'Заблокировано'}
                   </span>
                   {coachCompleted ? (
-                    <Link href="/assessment" className="text-sm font-semibold text-[#8c6e4b] hover:underline flex items-center gap-1">
+                    <Link href="/assessment" className="text-sm font-semibold text-[#3B82F6] hover:underline flex items-center gap-1">
                       Войти <ArrowRight className="h-4 w-4" />
                     </Link>
                   ) : (
@@ -224,26 +224,26 @@ export default function HomePage() {
 
               {/* Шаг 3: Отчёт */}
               <div className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden border ${
-                coachCompleted && testCompleted ? 'border-[#8c6e4b]/20' : 'opacity-60 border-black/5'
+                coachCompleted && testCompleted ? 'border-[#3B82F6]/20' : 'opacity-60 border-white/5'
               }`}>
-                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#8c6e4b]/20">03</div>
+                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">03</div>
                 <div className="space-y-4">
                   <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${
-                    coachCompleted && testCompleted ? 'bg-[#8c6e4b]/10 text-[#8c6e4b]' : 'bg-black/5 text-[#736251]'
+                    coachCompleted && testCompleted ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-white/5 text-[#7A8A9E]'
                   }`}>
-                    {coachCompleted && testCompleted ? <FileCheck className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[#736251]" />}
+                    {coachCompleted && testCompleted ? <FileCheck className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[#7A8A9E]" />}
                   </div>
-                  <h3 className="text-xl font-bold text-[#3d3123]">Персональный отчёт</h3>
-                  <p className="text-sm text-[#736251] leading-relaxed">
+                  <h3 className="text-xl font-bold text-white">Персональный отчёт</h3>
+                  <p className="text-sm text-[#7A8A9E] leading-relaxed">
                     Готовый цифровой профиль, рекомендации по развитию и выбору направлений обучения. Web + PDF.
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#736251]">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#7A8A9E]">
                     {coachCompleted && testCompleted ? 'Открыто' : 'Заблокировано'}
                   </span>
                   {coachCompleted && testCompleted ? (
-                    <Link href="/report" className="text-sm font-semibold text-[#8c6e4b] hover:underline flex items-center gap-1">
+                    <Link href="/report" className="text-sm font-semibold text-[#3B82F6] hover:underline flex items-center gap-1">
                       Открыть отчёт <ArrowRight className="h-4 w-4" />
                     </Link>
                   ) : (
@@ -263,27 +263,27 @@ export default function HomePage() {
             className="space-y-12"
           >
             <div className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8c6e4b] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
                 Для кого
               </p>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#3d3123] font-sans">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans">
                 Кому подходит диагностика
               </h2>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <ForWhomCard
-                icon={<Users className="h-6 w-6 text-[#8c6e4b]" />}
+                icon={<Users className="h-6 w-6 text-[#3B82F6]" />}
                 title="Школьникам 8–11 классов"
                 text="Идеальный возраст для осознанного выбора направления: от 13 до 18 лет"
               />
               <ForWhomCard
-                icon={<Shield className="h-6 w-6 text-[#c2ab87]" />}
+                icon={<Shield className="h-6 w-6 text-[#60A5FA]" />}
                 title="Родителям"
                 text="Понятный отчёт с конкретными рекомендациями — без сложной психологической терминологии"
               />
               <ForWhomCard
-                icon={<HelpCircle className="h-6 w-6 text-[#b39f85]" />}
+                icon={<HelpCircle className="h-6 w-6 text-[#93C5FD]" />}
                 title="Тем, кто сомневается"
                 text="Снимем тревогу вокруг выбора профессии и покажем реальные сильные стороны"
               />
@@ -299,10 +299,10 @@ export default function HomePage() {
             className="space-y-12"
           >
             <div className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8c6e4b] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
                 Почему нам доверяют
               </p>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#3d3123] font-sans">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans">
                 Надёжная методика и прозрачность
               </h2>
             </div>
@@ -326,9 +326,9 @@ export default function HomePage() {
             </div>
 
             <div className="glass-card rounded-[22px] p-8 text-center space-y-4">
-              <Shield className="h-8 w-8 text-[#8c6e4b] mx-auto" />
-              <h3 className="text-lg font-bold text-[#3d3123]">Безопасность данных</h3>
-              <p className="text-sm text-[#736251] leading-relaxed max-w-2xl mx-auto">
+              <Shield className="h-8 w-8 text-[#3B82F6] mx-auto" />
+              <h3 className="text-lg font-bold text-white">Безопасность данных</h3>
+              <p className="text-sm text-[#7A8A9E] leading-relaxed max-w-2xl mx-auto">
                 Мы собираем минимум информации, не передаём её третьим лицам и используем исключительно для формирования персонального отчёта. Все данные защищены.
               </p>
             </div>
@@ -343,10 +343,10 @@ export default function HomePage() {
             className="space-y-12"
           >
             <div className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8c6e4b] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
                 Реальные истории
               </p>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#3d3123] font-sans">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans">
                 Отзывы родителей и школьников
               </h2>
             </div>
@@ -376,10 +376,10 @@ export default function HomePage() {
             className="space-y-12"
           >
             <div className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8c6e4b] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
                 Частые вопросы
               </p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#3d3123] font-sans">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-sans">
                 Ответы для родителей
               </h2>
             </div>
@@ -401,7 +401,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="border-t border-[#8c6e4b]/10 bg-[#fbf9f6]/85 relative z-10 backdrop-blur-md">
+      <footer className="border-t border-[#3B82F6]/10 bg-[#040506]/85 relative z-10 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-6 lg:px-10 py-12">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-6">
@@ -409,19 +409,19 @@ export default function HomePage() {
                 showText={true}
                 className="h-8 w-auto opacity-60"
               />
-              <span className="text-xs text-[#736251] font-sans">
+              <span className="text-xs text-[#7A8A9E] font-sans">
                 © {new Date().getFullYear()} SynthosAI Creative Studio
               </span>
             </div>
             
-            <nav className="flex items-center gap-6 text-xs text-[#736251] font-sans">
+            <nav className="flex items-center gap-6 text-xs text-[#7A8A9E] font-sans">
               <Link href="/privacy">
-                <span className="hover:text-[#3d3123] transition cursor-pointer">Политика конфиденциальности</span>
+                <span className="hover:text-white transition cursor-pointer">Политика конфиденциальности</span>
               </Link>
               <Link href="/terms">
-                <span className="hover:text-[#3d3123] transition cursor-pointer">Пользовательское соглашение</span>
+                <span className="hover:text-white transition cursor-pointer">Пользовательское соглашение</span>
               </Link>
-              <a href="mailto:hello@synthosai.ru" className="hover:text-[#3d3123] transition">
+              <a href="mailto:hello@synthosai.ru" className="hover:text-white transition">
                 Контакты
               </a>
             </nav>

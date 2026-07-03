@@ -5,18 +5,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        /* ── Светлая премиальная палитра ── */
-        background: '#f7faf8',
-        surface: '#ffffff',
-        accent: '#c6a766',       // мягкое золото
-        accentSoft: '#d7bd79',   // светлое золото
-        sky: '#9bbbcf',          // нежный голубой
-        skyMuted: '#6f97ad',     // приглушённый голубой
-        rose: '#e9b9bd',         // нежный розовый
-        roseMuted: '#c98c97',    // приглушённый розовый
-        text: '#253243',         // графитово-синий
-        muted: '#566679',        // приглушённый текст
-        subtle: '#8a9aab',       // ещё мягче
+        /* ── Темная премиальная палитра ── */
+        background: '#040506',
+        surface: 'rgba(8, 12, 20, 0.6)',
+        accent: '#3B82F6',       // холодный синий
+        accentSoft: '#1E3A5F',   // приглушенный синий
+        sky: '#60A5FA',          // ярко-голубой
+        skyMuted: '#193B57',     // серо-синий
+        rose: '#1E3A5F',         // заменено на темный синий
+        roseMuted: '#193B57',    // заменено на серо-синий
+        text: '#E8ECF0',         // светлый текст
+        muted: '#7A8A9E',        // приглушенный текст
+        subtle: '#566679',       // мягкий текст
       },
       fontFamily: {
         manrope: ['var(--font-manrope)', 'sans-serif'],
@@ -24,9 +24,9 @@ const config: Config = {
         signature: ['var(--font-signature)', 'cursive'],
       },
       boxShadow: {
-        glow: '0 0 40px rgba(198,167,102,0.10)',
-        'glow-sky': '0 0 40px rgba(155,187,207,0.10)',
-        glass: '0 22px 58px rgba(68,86,104,0.055), inset 0 1px 0 rgba(255,255,255,0.72)',
+        glow: '0 0 40px rgba(59,130,246,0.15)',
+        'glow-sky': '0 0 40px rgba(96,165,250,0.15)',
+        glass: '0 22px 58px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.03)',
       },
       borderRadius: {
         'glass': '22px',
