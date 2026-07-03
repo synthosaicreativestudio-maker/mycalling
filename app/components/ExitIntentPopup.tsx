@@ -36,7 +36,7 @@ export function ExitIntentPopup() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#1a2536]/40 p-4 backdrop-blur-sm"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#040506]/75 p-4 backdrop-blur-sm"
         onClick={() => setIsVisible(false)}
       >
         <motion.div
@@ -44,20 +44,20 @@ export function ExitIntentPopup() {
           animate={{ scale: 1, y: 0, opacity: 1 }}
           exit={{ scale: 0.95, y: 20, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg rounded-[28px] bg-white p-8 shadow-[0_24px_48px_rgba(26,37,54,0.12)] border border-[#e2e8f0]"
+          className="relative w-full max-w-lg rounded-[28px] bg-[#080C14]/95 p-8 shadow-[0_24px_64px_rgba(0,0,0,0.6)] border border-[#3B82F6]/20 backdrop-blur-md"
         >
           <button
             onClick={() => setIsVisible(false)}
-            className="absolute right-6 top-6 text-[#8aaec4] hover:text-[#253243] transition-colors"
+            className="absolute right-6 top-6 text-[#7A8A9E] hover:text-white transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
 
           <div className="text-center space-y-4 pt-4">
-            <h2 className="text-2xl font-extrabold text-[#253243] font-sans">
+            <h2 className="text-2xl font-extrabold text-white font-sans">
               Уже уходите?
             </h2>
-            <p className="text-[#566679] text-[1.05rem] leading-relaxed font-sans pb-4">
+            <p className="text-[#7A8A9E] text-[1.05rem] leading-relaxed font-sans pb-4">
               Пройдите бесплатную диагностику талантов сейчас — это займёт всего 25 минут, а план развития останется с вами навсегда.
             </p>
             
@@ -72,7 +72,7 @@ export function ExitIntentPopup() {
             
             <button
               onClick={() => setIsVisible(false)}
-              className="mt-4 text-sm font-semibold text-[#8aaec4] hover:text-[#566679] transition-colors"
+              className="mt-4 text-sm font-semibold text-[#7A8A9E] hover:text-white transition-colors"
             >
               Нет, спасибо, я просто смотрю
             </button>
