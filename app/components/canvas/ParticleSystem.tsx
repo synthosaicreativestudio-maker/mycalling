@@ -128,7 +128,7 @@ const fragmentShader = `
 
 export function ParticleSystem() {
   const pointsRef = useRef<THREE.Points>(null);
-  const { pixelRatio } = useThree();
+  const pixelRatio = useThree((state) => state.viewport.dpr);
   const count = designConfig.particleCount;
 
   // Генерация координат и атрибутов частиц
