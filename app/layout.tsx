@@ -9,6 +9,7 @@ import { DarkCosmicBackground } from './components/DarkCosmicBackground';
 import { ExitIntentPopup } from './components/ExitIntentPopup';
 import { CookieBanner } from './components/CookieBanner';
 import logger from './lib/logger';
+import { LazyMotion, domAnimation } from 'framer-motion';
 
 const manrope = Manrope({
   subsets: ['latin', 'cyrillic'],
@@ -71,62 +72,64 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       </head>
       <body className="relative min-h-screen bg-transparent text-[#E8ECF0]">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              "name": "МоёПризвание",
-              "url": "https://synthosai.ru",
-              "applicationCategory": "EducationalApplication",
-              "operatingSystem": "All",
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "RUB"
-              }
-            }),
-          }}
-        />
+        <LazyMotion features={domAnimation}>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                "name": "МоёПризвание",
+                "url": "https://synthosai.ru",
+                "applicationCategory": "EducationalApplication",
+                "operatingSystem": "All",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "0",
+                  "priceCurrency": "RUB"
+                }
+              }),
+            }}
+          />
 
-        
-        {/* Слой 1: Космический фон (самый нижний) */}
-        <DarkCosmicBackground />
-        
-        {/* Sticky Header */}
-        <header className="site-header print:hidden">
-          <div className="site-header-inner">
-            <div className="mx-auto max-w-7xl px-6 lg:px-10">
-              <div className="flex items-center justify-between py-2">
-                <Link href="/" className="flex items-center transition hover:opacity-90">
-                  <AnimatedLogo
-                    showText={true}
-                    animate={true}
-                    isHeader={true}
-                    className="w-auto"
-                  />
-                </Link>
-                
-                <div className="flex items-center gap-6">
-                  <Link
-                    href="/auth"
-                    className="text-sm font-medium text-slate-400 hover:text-white transition duration-300"
-                  >
-                    Личный кабинет
+          
+          {/* Слой 1: Космический фон (самый нижний) */}
+          <DarkCosmicBackground />
+          
+          {/* Sticky Header */}
+          <header className="site-header print:hidden">
+            <div className="site-header-inner">
+              <div className="mx-auto max-w-7xl px-6 lg:px-10">
+                <div className="flex items-center justify-between py-2">
+                  <Link href="/" className="flex items-center transition hover:opacity-90">
+                    <AnimatedLogo
+                      showText={true}
+                      animate={true}
+                      isHeader={true}
+                      className="w-auto"
+                    />
                   </Link>
+                  
+                  <div className="flex items-center gap-6">
+                    <Link
+                      href="/auth"
+                      className="text-sm font-medium text-slate-400 hover:text-white transition duration-300"
+                    >
+                      Личный кабинет
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Слой 3: Контент (скроллится поверх фона) */}
-        <div className="content-layer">
-          {children}
-        </div>
-        
-        <CookieBanner />
+          {/* Слой 3: Контент (скроллится поверх фона) */}
+          <div className="content-layer">
+            {children}
+          </div>
+          
+          <CookieBanner />
+        </LazyMotion>
       </body>
     </html>
   );
