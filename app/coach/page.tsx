@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint } from 'lucide-react';
+import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -377,13 +377,53 @@ export default function CoachPage() {
     printWindow.document.close();
   };
 
+  const handleResetSession = async () => {
+    if (!confirm('Вы уверены, что хотите начать сессию с коучем заново? Все текущие ответы будут стерты.')) {
+      return;
+    }
+    setLoading(true);
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('coachSessionId');
+      }
+      setMessages([]);
+      setSessionId(null);
+      setUserId(null);
+      setStep(0);
+      setPhoneConfirmed(false);
+      
+      const res = await fetch('/api/v1/coach/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: 'Начать сессию с коучем',
+          sessionId: null
+        })
+      });
+      const data = await res.json();
+      if (data.reply) {
+        setMessages([{ role: 'assistant', content: data.reply }]);
+        setSessionId(data.sessionId);
+        setUserId(data.userId || null);
+        setStep(data.currentStep || 0);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('coachSessionId', data.sessionId);
+        }
+      }
+    } catch (err) {
+      console.error('Ошибка сброса сессии:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const progressPercent = Math.round((step / 6) * 100);
 
   return (
     <main className="min-h-screen pt-28 pb-12 flex flex-col items-center justify-center px-4 relative z-10">
       
       {/* progress top panel */}
-      <div className="w-full max-w-3xl mb-6 glass-card p-4 rounded-2xl flex items-center justify-between gap-4">
+      <div className="w-full max-w-3xl mb-6 glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center text-[#3B82F6]">
             <Brain className="h-5 w-5 animate-pulse" />
@@ -394,14 +434,26 @@ export default function CoachPage() {
             </h2>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-[#3B82F6]">{progressPercent}%</span>
-          <div className="w-24 h-2 bg-white/5 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-[#3B82F6] transition-all duration-500" 
-              style={{ width: `${progressPercent}%` }}
-            />
+        <div className="flex items-center gap-4 self-end sm:self-auto">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-[#3B82F6]">{progressPercent}%</span>
+            <div className="w-24 h-2 bg-white/5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#3B82F6] transition-all duration-500" 
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </div>
+          
+          <button
+            onClick={handleResetSession}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-sans font-medium text-white/70 hover:text-white transition duration-200 border border-white/10"
+            title="Начать заново"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Заново</span>
+          </button>
         </div>
       </div>
 
