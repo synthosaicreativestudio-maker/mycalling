@@ -205,47 +205,60 @@ export async function POST(req: Request) {
 
     if (session && session.user) {
       userId = session.user.id;
-      coachSession = await prisma.coachSession.findUnique({
-        where: { userId },
-        include: { user: true }
-      });
-
-      // Если у вошедшего пользователя еще нет сессии, но есть гостевая сессия (sessionId),
-      // привязываем гостевую сессию к его реальному аккаунту
-      if (!coachSession && sessionId) {
-        const guestSession = await prisma.coachSession.findUnique({
+      
+      // Ищем текущую гостевую сессию, переданную с клиента
+      let guestSession = null;
+      if (sessionId) {
+        guestSession = await prisma.coachSession.findUnique({
           where: { id: sessionId },
           include: { user: true }
         });
+      }
 
-        if (guestSession && guestSession.userId !== userId) {
-          // Обновляем сессию коуча, связывая ее с авторизованным пользователем
-          coachSession = await prisma.coachSession.update({
-            where: { id: sessionId },
-            data: { userId: userId },
-            include: { user: true }
+      // Если гостевая сессия найдена и она принадлежит временному гостю,
+      // перепривязываем ее к вошедшему пользователю (удаляя его старые сессии коуча)
+      if (guestSession && guestSession.userId !== userId) {
+        try {
+          // Удаляем старые сессии коуча вошедшего пользователя, чтобы избежать дубликатов
+          await prisma.coachSession.deleteMany({
+            where: { userId }
           });
-
-          // Переносим имя из гостевого профиля, если оно было введено
-          if (guestSession.user.name && guestSession.user.name !== 'Гость') {
-            await prisma.user.update({
-              where: { id: userId },
-              data: {
-                name: guestSession.user.name,
-                fullName: guestSession.user.fullName || guestSession.user.name
-              }
-            });
-          }
-
-          // Удаляем временного гостя из БД
-          try {
-            await prisma.user.delete({
-              where: { id: guestSession.userId }
-            });
-          } catch (e) {
-            console.error('Failed to clean up guest user during merge:', e);
-          }
+        } catch (e) {
+          console.error('Failed to delete old coach session during merge:', e);
         }
+
+        // Обновляем текущую сессию коуча, связывая ее с авторизованным пользователем
+        coachSession = await prisma.coachSession.update({
+          where: { id: sessionId },
+          data: { userId: userId },
+          include: { user: true }
+        });
+
+        // Переносим имя из гостевого профиля, если оно было введено
+        if (guestSession.user.name && guestSession.user.name !== 'Гость') {
+          await prisma.user.update({
+            where: { id: userId },
+            data: {
+              name: guestSession.user.name,
+              fullName: guestSession.user.fullName || guestSession.user.name
+            }
+          });
+        }
+
+        // Удаляем временного гостя из БД
+        try {
+          await prisma.user.delete({
+            where: { id: guestSession.userId }
+          });
+        } catch (e) {
+          console.error('Failed to clean up guest user during merge:', e);
+        }
+      } else {
+        // Если гостевая сессия не нуждается в слиянии, просто берем сессию вошедшего пользователя
+        coachSession = await prisma.coachSession.findUnique({
+          where: { userId },
+          include: { user: true }
+        });
       }
     }
 
