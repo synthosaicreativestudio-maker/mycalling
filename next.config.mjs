@@ -2,6 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   compress: true,
+  transpilePackages: ['three', '@react-three/fiber', '@react-three/drei'],
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },

@@ -3,14 +3,42 @@
  */
 export const designConfig = {
   // Включение/выключение трехмерных частиц WebGL на фоне
-  enableParticles: true, // включено по умолчанию для красивого анимированного фона
+  enableParticles: false,
 
-  // Количество частиц для симуляции (от 5000 до 30000)
-  particleCount: 15000,
-
-  // Цвет подсветки частиц в формате Three.js-совместимой строки
+  // Параметры по умолчанию
   particleColor: '#3B82F6',
-
-  // Включение эффектов пост-обработки (bloom, depth of field)
-  enablePostprocessing: false,
+  
+  // Профили производительности
+  performanceProfiles: {
+    ultra: {
+      particleCount: 250000,
+      enablePostprocessing: true,
+      enableBloom: true,
+      enableDOF: true,
+    },
+    high: {
+      particleCount: 150000,
+      enablePostprocessing: true,
+      enableBloom: true,
+      enableDOF: false,
+    },
+    medium: {
+      particleCount: 80000,
+      enablePostprocessing: false,
+      enableBloom: false,
+      enableDOF: false,
+    },
+    low: {
+      particleCount: 40000,
+      enablePostprocessing: false,
+      enableBloom: false,
+      enableDOF: false,
+    },
+    mobile: {
+      particleCount: 18000,
+      enablePostprocessing: false,
+      enableBloom: false,
+      enableDOF: false,
+    }
+  }
 };

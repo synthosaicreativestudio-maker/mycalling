@@ -1,25 +1,14 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { designConfig } from '@/app/config/design';
 
-// Загружаем трехмерную сцену частиц асинхронно с отключенным SSR
-const ParticleScene = dynamic(
-  () => import('./canvas/ParticleScene').then((mod) => mod.ParticleScene),
-  {
-    ssr: false,
-    loading: () => null, // во время загрузки ничего не показываем (остается статичный космический градиент)
-  }
-);
-
+/**
+ * Компонент ParticleBackground
+ * В текущей конфигурации отключен и возвращает null для оптимизации.
+ * При необходимости анимация может быть восстановлена из архива `canvas-archive`.
+ */
 export function ParticleBackground() {
-  if (!designConfig.enableParticles) {
-    return null;
-  }
-
-  return (
-    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden h-full w-full">
-      <ParticleScene />
-    </div>
-  );
+  // Поскольку 3D-анимация временно отключена и перенесена в архив,
+  // данный компонент ничего не рендерит.
+  return null;
 }
