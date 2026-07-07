@@ -351,27 +351,18 @@ export async function POST(req: Request) {
       });
     }
 
-    // Защита от повторной обработки при системном сообщении о подтверждении телефона
-    if (message === 'Телефон подтвержден через бот') {
-      const alreadyConfirmed = transcript.some(m => m.role === 'user' && m.content === 'Телефон подтвержден через бот');
-      if (alreadyConfirmed || hasPhone) {
-        const lastAssistantMsg = [...transcript].reverse().find(m => m.role === 'assistant');
-        return NextResponse.json({
-          reply: lastAssistantMsg ? lastAssistantMsg.content : FALLBACK_REPLIES[nextStep] || 'Давай продолжим наш диалог!',
-          sessionId: coachSession.id,
-          currentStep: nextStep,
-          phoneConfirmed: true,
-          sessionStatus: coachSession.status,
-          extracted: {}
-        });
-      }
-    }
-
     let userMsgContent = message;
+    if (message === 'Телефон подтвержден через бот') {
+      userMsgContent = 'Telegram-канал связи успешно подключен!';
+    }
 
     // Добавляем сообщение пользователя в транскрипт
     if (!isInitMessage) {
-      transcript.push({ role: 'user', content: userMsgContent, timestamp: new Date().toISOString() });
+      const isDuplicate = message === 'Телефон подтвержден через бот' && 
+                          transcript.some(m => m.role === 'user' && m.content === 'Telegram-канал связи успешно подключен!');
+      if (!isDuplicate) {
+        transcript.push({ role: 'user', content: userMsgContent, timestamp: new Date().toISOString() });
+      }
     }
 
     let parsedData: Record<string, any> = { shouldAdvanceStep: true };
