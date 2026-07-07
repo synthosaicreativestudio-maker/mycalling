@@ -96,7 +96,7 @@ export default function CoachPage() {
           const chatRes = await fetch('/api/v1/coach/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Телефон подтвержден через бот', sessionId })
+            body: JSON.stringify({ message: 'Телефон подтвержден через бот', sessionId, linkCode })
           });
           const chatData = await chatRes.json();
           if (chatData.reply) {

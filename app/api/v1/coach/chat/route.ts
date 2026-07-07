@@ -188,7 +188,7 @@ async function sendMaxIdSync(user: any, data: any) {
 
 export async function POST(req: Request) {
   try {
-    const { message, sessionId, fromLoginError } = await req.json();
+    const { message, sessionId, fromLoginError, linkCode } = await req.json();
 
     if (!message) {
       return NextResponse.json({ error: 'Сообщение пользователя не передано' }, { status: 400 });
@@ -203,8 +203,21 @@ export async function POST(req: Request) {
       headers: await headers()
     });
 
-    if (session && session.user) {
-      userId = session.user.id;
+    let authenticatedUserId = session?.user?.id || null;
+
+    // Если куки сессии еще не применились (актуально для Vercel/HTTPS),
+    // но передан linkCode, получаем userId авторизованного пользователя прямо из AuthLink
+    if (!authenticatedUserId && linkCode) {
+      const authLink = await prisma.authLink.findUnique({
+        where: { code: linkCode }
+      });
+      if (authLink && authLink.status === 'COMPLETED' && authLink.userId) {
+        authenticatedUserId = authLink.userId;
+      }
+    }
+
+    if (authenticatedUserId) {
+      userId = authenticatedUserId;
       
       // Ищем текущую гостевую сессию, переданную с клиента
       let guestSession = null;
