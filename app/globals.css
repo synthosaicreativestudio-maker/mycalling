@@ -11,24 +11,24 @@
 
 :root {
   color-scheme: dark;
-  --accent-brown: #F59E0B; /* warm gold accent */
-  --accent-gold: #FDBA74; /* peach/gold */
-  --accent-glow: #60A5FA; /* soft blue glow */
-  --beige-light: #06070a; /* background dark cosmic base */
-  --beige-medium: #0c0e14;
-  --beige-dark: #10141e;
-  --brown-light: #2a1e16; /* warm copper/brown hue from references */
-  --brown-dark: #1c140f;
-  --bg-deep: #050608;
-  --bg-surface: rgba(14, 20, 32, 0.7);
+  --accent-brown: #3B82F6; /* neon blue primary */
+  --accent-gold: #00F0FF; /* neon cyan */
+  --accent-glow: #00F0FF;
+  --beige-light: #040506;
+  --beige-medium: #06080C;
+  --beige-dark: #090E16;
+  --brown-light: #0D1B2A;
+  --brown-dark: #0B131E;
+  --bg-deep: #040506;
+  --bg-surface: rgba(8, 12, 20, 0.6);
   --text-primary: #E8ECF0;
-  --text-muted: #94A3B8;
-  --sky-soft: #60A5FA;
-  --sky-muted: #475569;
-  --rose-soft: #FCA5A5; /* gentle pink accent */
-  --rose-muted: #FDA4AF;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.16);
+  --text-muted: #7A8A9E;
+  --sky-soft: #3B82F6;
+  --sky-muted: #1E3A5F;
+  --rose-soft: #00F0FF;
+  --rose-muted: #193B57;
+  --border-subtle: rgba(0, 240, 255, 0.12);
+  --border-hover: rgba(0, 240, 255, 0.3);
 }
 
 html {
@@ -106,11 +106,11 @@ button {
   perspective: 1000px;
 }
 
-/* ─── Glass Cards с бегущим бликом по контуру ─── */
+/* ─── Glass Cards с бегущим неоново-синим бликом по контуру ─── */
 .glass-card {
   position: relative;
-  background: rgba(10, 14, 22, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(8, 12, 20, 0.95);
+  border: 1px solid rgba(0, 240, 255, 0.12);
   border-radius: 20px;
   transition: all 500ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -124,11 +124,11 @@ button {
   padding: 1.5px;
   background: conic-gradient(
     from var(--border-angle),
-    transparent 40%,
-    rgba(148, 163, 184, 0.2) 60%,  /* серебро */
-    rgba(96, 165, 250, 0.35) 75%,  /* нежный голубой */
-    rgba(253, 186, 116, 0.5) 85%,  /* теплое золото */
-    rgba(252, 165, 165, 0.35) 92%, /* персиково-розовый */
+    transparent 50%,
+    rgba(0, 102, 255, 0.25) 70%,   /* глубокий синий */
+    rgba(0, 240, 255, 0.7) 82%,    /* яркий неон */
+    rgba(255, 255, 255, 0.85) 86%,  /* белое ядро блика */
+    rgba(0, 240, 255, 0.7) 90%,    /* яркий неон */
     transparent 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -136,21 +136,21 @@ button {
   mask-composite: exclude;
   z-index: 10;
   pointer-events: none;
-  opacity: 0.35; /* блик виден всегда */
+  opacity: 0.4; /* блик виден всегда */
   animation: border-glint 10s linear infinite; /* постоянная плавная анимация */
   transition: opacity 0.5s ease, animation-duration 0.5s ease;
 }
 
 .glass-card:hover {
-  background: rgba(16, 22, 34, 0.85);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(10, 16, 28, 0.92);
+  border-color: rgba(0, 240, 255, 0.25);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6),
-              0 0 30px rgba(96, 165, 250, 0.08);
+              0 0 30px rgba(0, 240, 255, 0.15);
   transform: translateY(-4px);
 }
 
 .glass-card:hover::before {
-  opacity: 0.85; /* разгорается ярче при наведении */
+  opacity: 0.9; /* разгорается ярче при наведении */
   animation-duration: 4.5s; /* ускоряется при наведении */
 }
 
@@ -188,10 +188,10 @@ h1, h2, h3, .font-title {
   gap: 0.75rem;
   font-weight: 700;
   color: #FFFFFF;
-  background: rgba(16, 22, 34, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(13, 20, 35, 0.9);
+  border: 1px solid rgba(0, 240, 255, 0.3);
   border-radius: 9999px;
-  box-shadow: 0 0 15px rgba(96, 165, 250, 0.05),
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.1),
               inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -208,11 +208,11 @@ h1, h2, h3, .font-title {
   padding: 1.5px;
   background: conic-gradient(
     from var(--border-angle),
-    transparent 40%,
-    rgba(148, 163, 184, 0.25) 60%, /* серебро */
-    rgba(96, 165, 250, 0.45) 75%,  /* нежный голубой */
-    rgba(253, 186, 116, 0.6) 85%,  /* теплое золото */
-    rgba(252, 165, 165, 0.45) 92%, /* персиково-розовый */
+    transparent 50%,
+    rgba(0, 102, 255, 0.3) 70%,
+    rgba(0, 240, 255, 0.8) 82%,
+    rgba(255, 255, 255, 0.9) 86%,
+    rgba(0, 240, 255, 0.8) 90%,
     transparent 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -220,22 +220,22 @@ h1, h2, h3, .font-title {
   mask-composite: exclude;
   z-index: 10;
   pointer-events: none;
-  opacity: 0.4; /* блик виден всегда */
+  opacity: 0.45; /* блик виден всегда */
   animation: border-glint 8s linear infinite; /* постоянное плавное движение */
   transition: opacity 0.4s ease, animation-duration 0.4s ease;
 }
 
 .cta-glass:hover {
   color: #FFFFFF;
-  background: rgba(24, 34, 54, 0.9);
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 0 30px rgba(96, 165, 250, 0.2),
-              0 0 60px rgba(253, 186, 116, 0.08);
+  background: rgba(20, 30, 55, 0.85);
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.35),
+              0 0 60px rgba(0, 102, 255, 0.2);
   transform: translateY(-2px);
 }
 
 .cta-glass:hover::before {
-  opacity: 0.9; /* разгорается ярче при наведении */
+  opacity: 0.95; /* разгорается ярче при наведении */
   animation-duration: 3.5s; /* ускоряется при наведении */
 }
 
@@ -254,13 +254,13 @@ h1, h2, h3, .font-title {
 
 /* ─── Utility ─── */
 .soft-chip {
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  background: rgba(0, 240, 255, 0.08);
   color: var(--accent-gold);
 }
 
 .input-shell {
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(0, 240, 255, 0.2);
   background: rgba(8, 12, 20, 0.55);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
   transition: border-color 180ms ease, box-shadow 180ms ease;
@@ -268,19 +268,19 @@ h1, h2, h3, .font-title {
 }
 
 .input-shell:focus-within {
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 0 0 4px rgba(0, 240, 255, 0.15), 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 /* ─── Focus visible for accessibility ─── */
 :focus-visible {
-  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline: 2px solid rgba(0, 240, 255, 0.5);
   outline-offset: 2px;
 }
 
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline: 2px solid rgba(0, 240, 255, 0.5);
   outline-offset: 2px;
   border-radius: 4px;
 }
