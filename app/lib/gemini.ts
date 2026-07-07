@@ -1,13 +1,12 @@
-// Модуль интеграции с Google Gemini API напрямую с автоматической ротацией API-ключей.
+// Модуль интеграции с ИИ через Freemodel.dev API с сохранением сигнатур Gemini хелперов.
+import https from 'https';
 
-const GEMINI_KEYS = [
-  "AIzaSyD5wKvNG4vpE2TLOuiSaLpmfaghnzV4oeI",
-  "AIzaSyCcB06Nwk3Iyj_sZ6AkNUj9SP-yhf5j8iY",
-  "AIzaSyAsTzlS-veI0QNRo_cVAhny3xtHXjbcwLA"
-];
+// Используем рабочий API-ключ от Freemodel.dev, предоставленный пользователем
+const FREEMODEL_API_KEY = "fe_oa_6ec0280fc09c7fefefe7daf77633e730cec2de86201cedd0";
+const FREEMODEL_URL = "/v1/chat/completions";
 
-// Используем модель gemini-1.5-flash для идеального соотношения скорости, надежности и умных Structured Outputs
-const GEMINI_MODEL = "gemini-1.5-flash";
+// Используем модель Claude Sonnet по запросу пользователя для идеального коучинга
+const DEFAULT_MODEL = "claude-sonnet-4-20250514";
 
 interface Message {
   role: 'user' | 'assistant' | 'model';
@@ -15,127 +14,126 @@ interface Message {
 }
 
 /**
- * Выполняет запрос к Gemini API с ротацией ключей при ошибках.
+ * Выполняет запрос к Freemodel API с использованием стабильного модуля https.
  */
-async function callGeminiRaw(requestBody: any): Promise<any> {
-  let lastError = null;
-  
-  for (let i = 0; i < GEMINI_KEYS.length; i++) {
-    const key = GEMINI_KEYS[i];
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-        // Устанавливаем разумный таймаут
-        signal: AbortSignal.timeout(15000)
-      });
+async function callFreemodelRaw(requestBody: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const postData = JSON.stringify(requestBody);
+    
+    const options = {
+      hostname: 'api.freemodel.dev',
+      port: 443,
+      path: FREEMODEL_URL,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${FREEMODEL_API_KEY}`,
+        'Content-Length': Buffer.byteLength(postData)
+      },
+      timeout: 20000 // 20 секунд таймаут
+    };
 
-      if (response.ok) {
-        return await response.json();
-      } else {
-        const errorText = await response.text();
-        console.warn(`Gemini API key [${i}] failed with status ${response.status}: ${errorText.substring(0, 200)}`);
-        lastError = new Error(`Gemini API error [${response.status}]: ${errorText}`);
-        
-        // Если это превышение лимитов (429) или ошибка сервера (5xx), пробуем следующий ключ
-        if (response.status === 429 || response.status >= 500) {
-          continue;
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => {
+        body += chunk;
+      });
+      res.on('end', () => {
+        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            resolve(JSON.parse(body));
+          } catch (e: any) {
+            reject(new Error(`Failed to parse JSON response: ${e.message}`));
+          }
         } else {
-          // Для других ошибок (например, неверный JSON-запрос) сразу выходим, чтобы не тратить время
-          throw lastError;
+          reject(new Error(`Freemodel API error [${res.statusCode}]: ${body}`));
         }
-      }
-    } catch (err: any) {
-      console.warn(`Gemini API connection error with key [${i}]:`, err.message || err);
-      lastError = err;
-    }
-  }
-  
-  throw lastError || new Error("All Gemini API keys exhausted and failed");
+      });
+    });
+
+    req.on('error', (e) => {
+      reject(e);
+    });
+
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Request timed out'));
+    });
+
+    req.write(postData);
+    req.end();
+  });
 }
 
 /**
  * Генерирует текстовый ответ в режиме чата.
  */
 export async function generateText(systemPrompt: string, history: Message[], temperature = 0.7): Promise<string> {
-  // Нормализуем историю для формата Gemini:
-  // 1. Заменяем роль 'assistant' на 'model'
-  // 2. Убираем идущие подряд одинаковые роли
-  const contents: any[] = [];
+  const messages: any[] = [];
   
-  for (const msg of history) {
-    const role = msg.role === 'user' ? 'user' : 'model';
-    
-    if (contents.length > 0 && contents[contents.length - 1].role === role) {
-      contents[contents.length - 1].parts[0].text += "\n" + msg.content;
-    } else {
-      contents.push({
-        role,
-        parts: [{ text: msg.content }]
-      });
-    }
+  // Добавляем системный промпт
+  if (systemPrompt) {
+    messages.push({
+      role: 'system',
+      content: systemPrompt
+    });
   }
 
-  // Если история пуста, добавляем хотя бы одно пустое сообщение от пользователя
-  if (contents.length === 0) {
-    contents.push({
-      role: 'user',
-      parts: [{ text: 'Привет' }]
+  // Конвертируем историю диалога под формат OpenAI
+  for (const msg of history) {
+    const role = msg.role === 'model' || msg.role === 'assistant' ? 'assistant' : 'user';
+    messages.push({
+      role,
+      content: msg.content
     });
   }
 
   const requestBody = {
-    contents,
-    systemInstruction: {
-      parts: [{ text: systemPrompt }]
-    },
-    generationConfig: {
-      temperature,
-      maxOutputTokens: 1024
-    }
+    model: DEFAULT_MODEL,
+    messages,
+    temperature,
+    max_tokens: 1024
   };
 
-  const responseData = await callGeminiRaw(requestBody);
-  const text = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+  const responseData = await callFreemodelRaw(requestBody);
+  const text = responseData.choices?.[0]?.message?.content;
   
   if (!text) {
-    throw new Error("Empty response from Gemini API");
+    throw new Error("Empty response from Freemodel API");
   }
   
   return text.trim();
 }
 
 /**
- * Генерирует строго типизированный JSON по OpenAPI-схеме.
+ * Генерирует строго типизированный JSON.
  */
 export async function generateJson(systemPrompt: string, prompt: string, schema: any, temperature = 0.1): Promise<any> {
-  const requestBody = {
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: prompt }]
-      }
-    ],
-    systemInstruction: {
-      parts: [{ text: systemPrompt }]
+  const messages = [
+    {
+      role: 'system',
+      content: systemPrompt + "\nВы должны ответить СТРОГО в формате JSON. Не пишите никаких других текстов, кроме валидного JSON-объекта."
     },
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: schema,
-      temperature
+    {
+      role: 'user',
+      content: prompt
     }
+  ];
+
+  const requestBody = {
+    model: DEFAULT_MODEL,
+    messages,
+    response_format: { type: "json_object" },
+    temperature,
+    max_tokens: 2048
   };
 
-  const responseData = await callGeminiRaw(requestBody);
-  const text = responseData.candidates?.[0]?.content?.parts?.[0]?.text;
+  const responseData = await callFreemodelRaw(requestBody);
+  const text = responseData.choices?.[0]?.message?.content;
   
   if (!text) {
-    throw new Error("Empty response from Gemini API during JSON generation");
+    throw new Error("Empty response from Freemodel API during JSON generation");
   }
 
   return JSON.parse(text.trim());
