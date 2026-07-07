@@ -316,9 +316,20 @@ export async function POST(req: Request) {
     if (coachSession.user.phone && currentStep === 2) {
       currentStep = 3;
       extractedData.currentStep = 3;
+      
+      // Добавляем реплику-вопрос Шага 3 в транскрипт, чтобы пользователь сразу увидел вопрос коуча
+      transcript.push({
+        role: 'assistant',
+        content: FALLBACK_REPLIES[3],
+        timestamp: new Date().toISOString()
+      });
+
       await prisma.coachSession.update({
         where: { id: coachSession.id },
-        data: { extractedData }
+        data: { 
+          extractedData,
+          transcript
+        }
       });
     }
 
