@@ -69,34 +69,34 @@ export function IconReport() {
 
 export function UspCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
-    <div className="glass-card rounded-[22px] p-8 text-center space-y-5 group">
-      <div className="flex justify-center transition-transform duration-500 group-hover:scale-110">
+    <div className="glass-card rounded-[22px] p-8 text-center flex flex-col h-full group">
+      <div className="flex justify-center mb-5 transition-transform duration-500 group-hover:scale-110">
         {icon}
       </div>
-      <h3 className="text-xl font-bold text-white font-sans">{title}</h3>
-      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans">{text}</p>
+      <h3 className="text-xl font-bold text-white font-sans mb-3">{title}</h3>
+      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans flex-grow">{text}</p>
     </div>
   );
 }
 
 export function ForWhomCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
-    <div className="glass-card rounded-[22px] p-6 space-y-4">
-      <div className="w-12 h-12 rounded-2xl bg-[#1E3A5F]/20 border border-[#3B82F6]/20 flex items-center justify-center shadow-sm">
+    <div className="glass-card rounded-[22px] p-6 flex flex-col h-full space-y-4">
+      <div className="w-12 h-12 rounded-2xl bg-[#1E3A5F]/20 border border-[#3B82F6]/20 flex items-center justify-center shadow-sm shrink-0">
         {icon}
       </div>
       <h3 className="text-lg font-bold text-white font-sans">{title}</h3>
-      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans">{text}</p>
+      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans flex-grow">{text}</p>
     </div>
   );
 }
 
 export function TrustCard({ number, label, desc }: { number: string; label: string; desc: string }) {
   return (
-    <div className="glass-card rounded-[22px] p-6 text-center space-y-3">
+    <div className="glass-card rounded-[22px] p-6 text-center flex flex-col h-full space-y-3">
       <div className="text-4xl font-extrabold text-[#3B82F6] font-sans">{number}</div>
       <div className="text-sm font-bold uppercase tracking-wider text-[#60A5FA]">{label}</div>
-      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans">{desc}</p>
+      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans flex-grow">{desc}</p>
     </div>
   );
 }
@@ -128,16 +128,16 @@ export function FaqItem({ question, answer }: { question: string; answer: string
 
 export function ReviewCard({ author, text }: { author: string; text: string }) {
   return (
-    <div className="glass-card rounded-[22px] p-6 space-y-4">
-      <div className="flex text-[#60A5FA]">
+    <div className="glass-card rounded-[22px] p-6 flex flex-col h-full space-y-4">
+      <div className="flex text-[#60A5FA] shrink-0">
         {Array.from({ length: 5 }).map((_, i) => (
           <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
           </svg>
         ))}
       </div>
-      <p className="text-[#7A8A9E] text-sm leading-relaxed italic">«{text}»</p>
-      <div className="font-bold text-white text-sm pt-2 border-t border-white/10">{author}</div>
+      <p className="text-[#7A8A9E] text-sm leading-relaxed italic flex-grow">«{text}»</p>
+      <div className="font-bold text-white text-sm pt-2 border-t border-white/10 shrink-0">{author}</div>
     </div>
   );
 }

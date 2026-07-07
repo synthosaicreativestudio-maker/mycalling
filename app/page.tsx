@@ -177,7 +177,7 @@ export default function HomePage() {
               <m.div
                 key={idx}
                 variants={fadeUpVariants}
-                className="perspective-[1000px]"
+                className="perspective-[1000px] h-full"
               >
                 <UspCard icon={item.icon} title={item.title} text={item.text} />
               </m.div>
@@ -322,21 +322,21 @@ export default function HomePage() {
             </m.div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <ForWhomCard
                   icon={<Users className="h-6 w-6 text-[#3B82F6]" />}
                   title="Школьникам 8–11 классов"
                   text="Идеальный возраст для осознанного выбора направления: от 13 до 18 лет"
                 />
               </m.div>
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <ForWhomCard
                   icon={<Shield className="h-6 w-6 text-[#60A5FA]" />}
                   title="Родителям"
                   text="Понятный отчёт с конкретными рекомендациями — без сложной психологической терминологии"
                 />
               </m.div>
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <ForWhomCard
                   icon={<HelpCircle className="h-6 w-6 text-[#93C5FD]" />}
                   title="Тем, кто сомневается"
@@ -368,21 +368,21 @@ export default function HomePage() {
             </m.div>
 
             <div className="grid gap-6 sm:grid-cols-3">
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <TrustCard
                   number="2"
                   label="научных метода"
                   desc="RIASEC и Big Five — проверенные десятилетиями исследований методики психометрики талантов"
                 />
               </m.div>
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <TrustCard
                   number="30"
                   label="минут"
                   desc="Интерактивный формат в виде диалога и игр, вовлекающий ребёнка вместо скучных тестов"
                 />
               </m.div>
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <TrustCard
                   number="10+"
                   label="направлений"
@@ -422,19 +422,19 @@ export default function HomePage() {
             </m.div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <ReviewCard
                   author="Мария, мама 9-классника"
                   text="Сын совершенно не понимал, куда идти после 9 класса. Диагностика показала сильный перекос в инженерию и IT. Отчет разложил всё по полочкам: какие сферы развивать и на что обратить внимание."
                 />
               </m.div>
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <ReviewCard
                   author="Егор, 10 класс"
                   text="Думал идти в юристы, потому что родители советовали. А тест показал, что у меня склонность к творческим сферам и дизайну. Показал отчет маме, теперь она согласна со мной!"
                 />
               </m.div>
-              <m.div variants={fadeUpVariants}>
+              <m.div variants={fadeUpVariants} className="h-full">
                 <ReviewCard
                   author="Елена, мама выпускницы"
                   text="Очень удобный формат. Дочь прошла сессию с телефона за 30 минут, а я получила PDF-отчет с подробным анализом. Это сняло столько напряжения в семье перед экзаменами!"
