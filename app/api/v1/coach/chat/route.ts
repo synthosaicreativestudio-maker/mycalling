@@ -502,6 +502,12 @@ export async function POST(req: Request) {
         }
       }
 
+      // Жесткая валидация содержательности ответа (защита от точек, смайликов и пустого мусора)
+      const cleanMessage = message.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?\s]/g, "");
+      if (cleanMessage.length < 2) {
+        parsedData.shouldAdvanceStep = false;
+      }
+
       // Объединяем качественные данные
       if (parsedData.fullName) extractedData.fullName = parsedData.fullName;
       if (parsedData.role) extractedData.role = parsedData.role;
