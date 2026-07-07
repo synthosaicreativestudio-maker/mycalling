@@ -65,11 +65,14 @@ export async function GET(request: Request) {
     const response = NextResponse.redirect(new URL('/assessment', request.url));
     
     // Устанавливаем куки в формате Better Auth
+    const isHttps = request.url.startsWith('https:');
+    const cookieName = isHttps ? '__secure-better-auth.session_token' : 'better-auth.session_token';
+
     response.cookies.set({
-      name: 'better-auth.session_token',
+      name: cookieName,
       value: sessionToken,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
       expires: expiresAt

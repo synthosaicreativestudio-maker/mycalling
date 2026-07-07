@@ -81,6 +81,10 @@ export default function CoachPage() {
 
           // Гарантированно устанавливаем cookie авторизации на клиенте напрямую
           if (data.sessionToken) {
+            const isHttps = window.location.protocol === 'https:';
+            if (isHttps) {
+              document.cookie = `__secure-better-auth.session_token=${data.sessionToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
+            }
             document.cookie = `better-auth.session_token=${data.sessionToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
             try {
               await fetch(`/api/auth/telegram/callback?token=${data.sessionToken}`, {
