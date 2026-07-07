@@ -370,7 +370,7 @@ export default function CoachPage() {
       </div>
 
       {/* Main chat window */}
-      <div className="w-full max-w-3xl h-[60vh] glass-card rounded-3xl flex flex-col overflow-hidden relative">
+      <div className="w-full max-w-3xl max-h-[60vh] glass-card rounded-3xl flex flex-col overflow-hidden relative">
         
         {/* Chat message history */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">

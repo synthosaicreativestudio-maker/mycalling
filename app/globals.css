@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Анимируемое CSS-свойство для блика по контуру */
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 :root {
   color-scheme: dark;
   --accent-brown: #3B82F6; /* cold blue primary */
@@ -99,81 +106,55 @@ button {
   perspective: 1000px;
 }
 
-/* ─── Glass Cards с бегущим неоново-синим свечением ─── */
+/* ─── Glass Cards с бегущим бликом по контуру ─── */
 .glass-card {
   position: relative;
-  background: transparent;
+  background: rgba(8, 12, 20, 0.95);
   border: 1px solid rgba(59, 130, 246, 0.12);
   border-radius: 20px;
   transition: all 500ms cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-  padding: 1px;
 }
 
-/* Вращающийся неоновый луч */
+/* Блик, бегущий строго по периметру карточки (mask-composite) */
 .glass-card::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1.5px;
   background: conic-gradient(
-    from 0deg,
-    transparent 30%,
-    rgba(59, 130, 246, 0.4) 45%,
-    rgba(96, 165, 250, 0.7) 50%,
-    rgba(59, 130, 246, 0.4) 55%,
-    transparent 70%
+    from var(--border-angle),
+    transparent 60%,
+    rgba(96, 165, 250, 0.35) 78%,
+    rgba(59, 130, 246, 0.65) 82%,
+    rgba(96, 165, 250, 0.35) 86%,
+    transparent 100%
   );
-  transform-origin: center;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 10;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s ease;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Маска карточки: перекрывает центр вращающегося луча */
-.glass-card::after {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  background: rgba(8, 12, 20, 0.95);
-  border-radius: 19px;
-  z-index: 2;
-  transition: background-color 0.5s ease;
-  pointer-events: none;
-}
-
-/* Все дочерние элементы контента приподнимаются над маской */
-.glass-card > * {
-  position: relative;
-  z-index: 3;
 }
 
 .glass-card:hover {
-  border-color: rgba(59, 130, 246, 0.35);
+  background: rgba(10, 16, 28, 0.92);
+  border-color: rgba(59, 130, 246, 0.25);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6),
-              0 0 30px rgba(59, 130, 246, 0.15);
+              0 0 30px rgba(59, 130, 246, 0.1);
   transform: translateY(-4px);
 }
 
 .glass-card:hover::before {
   opacity: 1;
-  animation: border-beam-spin 3.5s linear infinite;
+  animation: border-glint 4s linear infinite;
 }
 
-.glass-card:hover::after {
-  background: rgba(10, 16, 28, 0.92);
-}
-
-@keyframes border-beam-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+@keyframes border-glint {
+  0% { --border-angle: 0deg; }
+  100% { --border-angle: 360deg; }
 }
 
 /* ─── Typography ─── */
@@ -196,7 +177,7 @@ h1, h2, h3, .font-title {
   text-transform: uppercase;
 }
 
-/* ─── Milk Glass CTA с неоновым свечением ─── */
+/* ─── CTA кнопка с бегущим бликом по контуру ─── */
 .cta-glass {
   position: relative;
   display: inline-flex;
@@ -205,7 +186,7 @@ h1, h2, h3, .font-title {
   gap: 0.75rem;
   font-weight: 700;
   color: #FFFFFF;
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(13, 20, 35, 0.9);
   border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 9999px;
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.1),
@@ -214,63 +195,44 @@ h1, h2, h3, .font-title {
   -webkit-backdrop-filter: blur(12px);
   cursor: pointer;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
 }
 
-/* Вращающийся световой луч для кнопки */
+/* Блик, бегущий строго по контуру кнопки */
 .cta-glass::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
+  border-radius: 9999px;
+  padding: 1.5px;
   background: conic-gradient(
-    from 0deg,
-    transparent 40%,
-    rgba(96, 165, 250, 0.8) 50%,
-    transparent 60%
+    from var(--border-angle),
+    transparent 60%,
+    rgba(96, 165, 250, 0.45) 78%,
+    rgba(59, 130, 246, 0.85) 82%,
+    rgba(96, 165, 250, 0.45) 86%,
+    transparent 100%
   );
-  transform-origin: center;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 10;
+  pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Маска кнопки */
-.cta-glass::after {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  background: rgba(13, 20, 35, 0.9);
-  border-radius: 9999px;
-  z-index: 2;
-  transition: background-color 0.4s ease;
-  pointer-events: none;
-}
-
-/* Контент кнопки поверх маски */
-.cta-glass > * {
-  position: relative;
-  z-index: 3;
 }
 
 .cta-glass:hover {
   color: #FFFFFF;
-  border-color: rgba(96, 165, 250, 0.6);
-  box-shadow: 0 0 30px rgba(59, 130, 246, 0.35),
-              0 0 60px rgba(59, 130, 246, 0.15);
+  background: rgba(20, 30, 55, 0.85);
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.25),
+              0 0 60px rgba(59, 130, 246, 0.1);
   transform: translateY(-2px);
 }
 
 .cta-glass:hover::before {
   opacity: 1;
-  animation: border-beam-spin 2.5s linear infinite;
-}
-
-.cta-glass:hover::after {
-  background: rgba(20, 30, 55, 0.85);
+  animation: border-glint 3s linear infinite;
 }
 
 .cta-glass:active {
