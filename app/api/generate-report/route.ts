@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { env } from '../../lib/env';
 import { checkRateLimit } from '../../lib/rate-limit';
+import { generateJson } from '../../lib/gemini';
 
 export async function POST(request: Request) {
   try {
@@ -190,55 +191,87 @@ export async function POST(request: Request) {
 
 Составь отчет по этим данным и верни строго JSON.`;
 
-    const modelsToTry = [
-      'claude-opus-4-7', 
-      'gpt-4o', 
-      'claude-3-5-sonnet-20241022' // Резервные модели
-    ];
-
-    let resultJson = null;
-    let lastError = null;
-
-    for (const modelName of modelsToTry) {
-      try {
-        console.log(`Пробуем сгенерировать отчет через модель: ${modelName}`);
-        const aiResponse = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            model: modelName,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt },
-            ],
-            temperature: 0.35,
-            response_format: { type: 'json_object' },
-          }),
-        });
-
-        if (!aiResponse.ok) {
-          const errorText = await aiResponse.text();
-          console.error(`Ошибка ProxyAPI (${modelName}):`, errorText);
-          throw new Error(`ProxyAPI returned status ${aiResponse.status} for ${modelName}`);
+    const reportSchema = {
+      type: "OBJECT",
+      properties: {
+        studentName: { type: "STRING" },
+        heroSummary: {
+          type: "ARRAY",
+          items: { type: "STRING" }
+        },
+        personalityTraits: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              name: { type: "STRING" },
+              score: { type: "INTEGER" },
+              description: { type: "STRING" }
+            },
+            required: ["name", "score", "description"]
+          }
+        },
+        multipleIntelligences: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              name: { type: "STRING" },
+              score: { type: "INTEGER" },
+              description: { type: "STRING" }
+            },
+            required: ["name", "score", "description"]
+          }
+        },
+        strengths: {
+          type: "ARRAY",
+          items: { type: "STRING" }
+        },
+        growthAreas: {
+          type: "ARRAY",
+          items: { type: "STRING" }
+        },
+        subjects: {
+          type: "ARRAY",
+          items: { type: "STRING" }
+        },
+        directions: {
+          type: "ARRAY",
+          items: { type: "STRING" }
+        },
+        professions: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              name: { type: "STRING" },
+              score: { type: "INTEGER" },
+              summary: { type: "STRING" },
+              why: { type: "STRING" },
+              subjects: {
+                type: "ARRAY",
+                items: { type: "STRING" }
+              },
+              directions: {
+                type: "ARRAY",
+                items: { type: "STRING" }
+              }
+            },
+            required: ["name", "score", "summary", "why", "subjects", "directions"]
+          }
+        },
+        parentSummary: {
+          type: "ARRAY",
+          items: { type: "STRING" }
         }
+      },
+      required: [
+        "studentName", "heroSummary", "personalityTraits", "multipleIntelligences",
+        "strengths", "growthAreas", "subjects", "directions", "professions", "parentSummary"
+      ]
+    };
 
-        const aiData = await aiResponse.json();
-        resultJson = JSON.parse(aiData.choices[0].message.content);
-        break; // Успех! Выходим из цикла
-      } catch (e: any) {
-        console.warn(`Модель ${modelName} недоступна или вернула ошибку. Переход к следующей...`);
-        lastError = e;
-      }
-    }
-
-    if (!resultJson) {
-      // Если ни одна модель не справилась
-      throw lastError || new Error('Все резервные ИИ-модели недоступны');
-    }
-
+    const resultJson = await generateJson(systemPrompt, userPrompt, reportSchema, 0.35);
     return NextResponse.json(resultJson);
   } catch (error: any) {
     console.error('Ошибка API-роута генерации отчета:', error);

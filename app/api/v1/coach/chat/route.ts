@@ -6,6 +6,7 @@ import crypto from 'crypto';
 import prisma from '../../../../lib/prisma';
 import { env } from '../../../../lib/env';
 import { auth } from '../../../../lib/auth';
+import { generateText, generateJson } from '../../../../lib/gemini';
 
 const SCENARIO_STEPS = [
   {
@@ -455,32 +456,40 @@ export async function POST(req: Request) {
   "shouldAdvanceStep": boolean
 }`;
 
-      try {
-        const aiResponse = await fetch(env.PROXYAPI_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${env.PROXYAPI_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            response_format: { type: 'json_object' },
-            messages: [
-              { role: 'system', content: 'Ты возвращаешь только валидный JSON.' },
-              { role: 'user', content: extractionPrompt }
-            ],
-            temperature: 0.1
-          })
-        });
+      const extractionSchema = {
+        type: "OBJECT",
+        properties: {
+          fullName: { type: "STRING" },
+          role: { type: "STRING" },
+          grade: { type: "INTEGER" },
+          age: { type: "INTEGER" },
+          city: { type: "STRING" },
+          dreams: { type: "STRING" },
+          interests: { type: "STRING" },
+          achievements: { type: "STRING" },
+          idols: { type: "STRING" },
+          values: { type: "STRING" },
+          motivation: { type: "STRING" },
+          strengths: { type: "STRING" },
+          weaknesses: { type: "STRING" },
+          cognitiveStyle: { type: "STRING" },
+          decisionStyle: { type: "STRING" },
+          communicationStyle: { type: "STRING" },
+          hypotheses: { type: "STRING" },
+          shouldAdvanceStep: { type: "BOOLEAN" }
+        },
+        required: ["shouldAdvanceStep"]
+      };
 
-        if (aiResponse.ok) {
-          const aiData = await aiResponse.json();
-          parsedData = JSON.parse(aiData.choices?.[0]?.message?.content || '{}');
-        } else {
-          throw new Error(`ProxyAPI returned status ${aiResponse.status}`);
-        }
+      try {
+        parsedData = await generateJson(
+          'Ты — система анализа диалогов, извлекающая профиль пользователя в формате JSON.',
+          extractionPrompt,
+          extractionSchema,
+          0.1
+        );
       } catch (err) {
-        console.warn('ProxyAPI extraction failed in chat route, using fallback:', err);
+        console.warn('Gemini extraction failed in chat route, using fallback:', err);
         // Регулярные выражения для fallback
         if (currentStep === 1) {
           const phoneMatch = message.match(/(?:\+7|8)[\s-]?\(?\d{3}\)?[\s-]?\d{3}\s?[-]?\d{2}\s?[-]?\d{2}/);
@@ -563,38 +572,11 @@ export async function POST(req: Request) {
 9. Если пользователь ответил кратко или неопределённо, прими его ответ и мягко уточни. Если ответ содержательный, признай его и двигайся к цели шага.
 `;
 
-    const modelMessages = [
-      { role: 'system', content: systemPrompt },
-      ...transcript.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content
-      }))
-    ];
-
     let replyContent = '';
     try {
-      const aiResponse = await fetch(env.PROXYAPI_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${env.PROXYAPI_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: modelMessages,
-          temperature: 0.7,
-          max_tokens: 300
-        })
-      });
-
-      if (aiResponse.ok) {
-        const aiData = await aiResponse.json();
-        replyContent = aiData.choices?.[0]?.message?.content || '';
-      } else {
-        throw new Error(`ProxyAPI returned status ${aiResponse.status}`);
-      }
+      replyContent = await generateText(systemPrompt, transcript, 0.7);
     } catch (err) {
-      console.warn('ProxyAPI chat generation failed, using fallback:', err);
+      console.warn('Gemini chat generation failed, using fallback:', err);
       replyContent = FALLBACK_REPLIES[nextStep] || 'Давай продолжим наш диалог!';
     }
 

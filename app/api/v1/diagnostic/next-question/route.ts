@@ -3,6 +3,7 @@ import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
 import { diagnosticQuestions } from '../../../../data/questions';
 import { env } from '../../../../lib/env';
+import { generateJson } from '../../../../lib/gemini';
 
 export const dynamic = 'force-dynamic';
 
@@ -189,27 +190,74 @@ export async function GET(request: Request) {
   ]
 }`;
 
-      const aiResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+      const nextQuestionReportSchema = {
+        type: "OBJECT",
+        properties: {
+          studentName: { type: "STRING" },
+          heroSummary: {
+            type: "ARRAY",
+            items: { type: "STRING" }
+          },
+          personalityTraits: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                name: { type: "STRING" },
+                score: { type: "INTEGER" },
+                description: { type: "STRING" }
+              },
+              required: ["name", "score", "description"]
+            }
+          },
+          riasecSummary: { type: "STRING" },
+          strengths: {
+            type: "ARRAY",
+            items: { type: "STRING" }
+          },
+          growthAreas: {
+            type: "ARRAY",
+            items: { type: "STRING" }
+          },
+          coachSection: {
+            type: "OBJECT",
+            properties: {
+              dreams: { type: "STRING" },
+              idols: { type: "STRING" },
+              values: { type: "STRING" }
+            },
+            required: ["dreams", "idols", "values"]
+          },
+          professions: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                name: { type: "STRING" },
+                score: { type: "INTEGER" },
+                why: { type: "STRING" }
+              },
+              required: ["name", "score", "why"]
+            }
+          }
         },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          response_format: { type: 'json_object' },
-          messages: [
-            { role: 'system', content: 'Ты возвращаешь только валидный JSON.' },
-            { role: 'user', content: systemPrompt }
-          ],
-          temperature: 0.7
-        })
-      });
+        required: [
+          "studentName", "heroSummary", "personalityTraits", "riasecSummary",
+          "strengths", "growthAreas", "coachSection", "professions"
+        ]
+      };
 
       let htmlReportContent = '{}';
-      if (aiResponse.ok) {
-        const aiData = await aiResponse.json();
-        htmlReportContent = aiData.choices?.[0]?.message?.content || '{}';
+      try {
+        const resultJson = await generateJson(
+          systemPrompt,
+          'Составь отчет по этим данным и верни строго JSON.',
+          nextQuestionReportSchema,
+          0.7
+        );
+        htmlReportContent = JSON.stringify(resultJson);
+      } catch (err) {
+        console.error('Gemini report generation failed in next-question, using empty JSON:', err);
       }
 
       // Сохраняем отчет в БД
