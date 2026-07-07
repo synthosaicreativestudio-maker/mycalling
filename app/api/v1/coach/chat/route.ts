@@ -382,13 +382,14 @@ export async function POST(req: Request) {
     } else if (!isInitMessage) {
       const extractionPrompt = `Ты — анализатор текста. Проанализируй сообщение пользователя в контексте диалога профориентации. Извлеки данные в формате JSON (без markdown).
 Последнее сообщение пользователя: "${message}"
-Извлекай: fullName, age, city, phone, dreams, idols, values, decisionStyle, shouldAdvanceStep(boolean)`;
+Извлекай: fullName, age, grade, city, phone, dreams, idols, values, decisionStyle, shouldAdvanceStep(boolean)`;
 
       const extractionSchema = {
         type: "OBJECT",
         properties: {
           fullName: { type: "STRING" },
           age: { type: "INTEGER" },
+          grade: { type: "STRING" },
           city: { type: "STRING" },
           phone: { type: "STRING" },
           dreams: { type: "STRING" },
@@ -411,6 +412,7 @@ export async function POST(req: Request) {
 
       if (parsedData.fullName) extractedData.fullName = parsedData.fullName;
       if (parsedData.age) extractedData.age = parsedData.age;
+      if (parsedData.grade) extractedData.grade = parsedData.grade;
       if (parsedData.city) extractedData.city = parsedData.city;
       if (parsedData.dreams) extractedData.dreams = (extractedData.dreams ? extractedData.dreams + '; ' : '') + parsedData.dreams;
       if (parsedData.idols) extractedData.idols = (extractedData.idols ? extractedData.idols + '; ' : '') + parsedData.idols;
@@ -419,7 +421,14 @@ export async function POST(req: Request) {
     }
 
     const updatedPhone = hasPhone || !!parsedData.phone;
-    const updatedPersonalInfo = !!extractedData.fullName && (!!extractedData.age || !!extractedData.grade || !!extractedData.city);
+    
+    // Проверяем заполненность отдельных полей личных данных
+    const hasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1;
+    const hasAgeOrGrade = !!extractedData.age || !!extractedData.grade;
+    const hasCity = !!extractedData.city && extractedData.city.trim().length > 1;
+    
+    // Личные данные считаются полностью собранными, если есть имя, возраст/класс и город
+    const updatedPersonalInfo = hasName && hasAgeOrGrade && hasCity;
     const updatedDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
     const updatedIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
     const updatedValues = !!extractedData.values && extractedData.values.trim().length > 6;
@@ -563,15 +572,25 @@ ${missingFields.join('\n')}
     
     // ИИ-коуч Роман включается только с Шага 3, когда собраны первичные данные и подключен Telegram/MAX
     if (currentVirtualStep < 3) {
-      replyContent = FALLBACK_REPLIES[currentVirtualStep];
-      
-      // Специальная заглушка на Шаге 1, если пользователь прислал точку/пустоту и мы не смогли распарсить личные данные
-      if (currentVirtualStep === 1 && !isInitMessage && !updatedPersonalInfo) {
-        replyContent = "Пожалуйста, напиши свое имя, возраст/класс и город, чтобы мы могли познакомиться и продолжить! 😊";
-      }
-      // Специальная заглушка на Шаге 2, если пользователь пишет обычный текст вместо клика по кнопкам или ввода MAX ID
-      if (currentVirtualStep === 2 && !isInitMessage && !updatedPhone) {
-        replyContent = "Пожалуйста, нажми на кнопку ниже, чтобы подключить Telegram, или введи свой MAX ID. Это нужно, чтобы результаты не потерялись! Как только подключишься, мы сразу начнем самое интересное. 😉";
+      if (currentVirtualStep === 0) {
+        replyContent = FALLBACK_REPLIES[0];
+      } else if (currentVirtualStep === 1) {
+        // Пошаговый нативный сбор личных данных
+        if (!hasName) {
+          replyContent = "Супер! Давай сначала познакомимся. Как тебя зовут?";
+        } else if (!hasAgeOrGrade) {
+          const name = extractedData.fullName.split(' ')[0]; // берем имя собеседника
+          replyContent = `Очень приятно, ${name}! А сколько тебе лет и в каком классе ты учишься?`;
+        } else if (!hasCity) {
+          replyContent = "Понял тебя. А из какого ты города?";
+        }
+      } else if (currentVirtualStep === 2) {
+        replyContent = "Приятно познакомиться! А теперь давай выберем удобный способ связи, чтобы я мог присылать тебе итоговый отчет и рекомендации. Проще всего подключить Telegram или MAX ID — так результаты точно не потеряются. Нажми кнопку ниже или введи свой MAX ID!";
+        
+        // Специальная заглушка на Шаге 2, если пользователь пишет обычный текст вместо клика по кнопкам или ввода MAX ID
+        if (!isInitMessage && !updatedPhone) {
+          replyContent = "Пожалуйста, нажми на кнопку ниже, чтобы подключить Telegram, или введи свой MAX ID. Это нужно, чтобы результаты не потерялись! Как только подключишься, мы сразу начнем самое интересное. 😉";
+        }
       }
     } else {
       try {
