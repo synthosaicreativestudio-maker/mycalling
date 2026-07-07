@@ -8,13 +8,13 @@ import { generateText, generateJson } from '../../../../lib/gemini';
 
 const FALLBACK_REPLIES: Record<number, string> = {
   0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы проведем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Скажи, готов ли ты начать?",
-  1: "Супер! Теперь давай познакомимся поближе. Расскажи, пожалуйста, как тебя зовут и сколько тебе лет?",
-  2: "Приятно познакомиться! А давай выберем удобный способ связи, чтобы я мог присылать тебе итоговый отчет и рекомендации? Проще всего подключить Telegram или MAX ID — так результаты точно не потеряются.",
-  3: "Очень приятно! Скажи, в каком городе ты живешь и в каком классе сейчас учишься? И сразу поделись: если бы у тебя была волшебная палочка и не существовало никаких преград, кем бы ты хотел видеть себя через 10 лет?",
+  1: "Супер! Теперь давай познакомимся поближе. Напиши, пожалуйста, как тебя зовут, в каком классе ты учишься, сколько тебе лет и из какого ты города?",
+  2: "Приятно познакомиться! А теперь давай выберем удобный способ связи, чтобы я мог присылать тебе итоговый отчет и рекомендации. Проще всего подключить Telegram или MAX ID — так результаты точно не потеряются. Нажми кнопку ниже или введи свой MAX ID!",
+  3: "Здорово, спасибо, что поделился! Давай начнем с мечты: если убрать вообще все ограничения, кем бы ты хотел быть через 10 лет?",
   4: "Интересно! А скажи, кто из известных людей, блогеров, ученых или персонажей фильмов тебя по-настоящему вдохновляет? Какие черты характера или дела в них тебе нравятся больше всего?",
   5: "Понял тебя. Давай подумаем о будущем: что для тебя ценнее всего в твоей работе? Например, создавать новое и творить, руководить и вести людей за собой, зарабатывать много денег или помогать другим?",
   6: "Ясно! А как ты обычно принимаешь важные решения: садишься и долго взвешиваешь факты и логику, или больше полагаешься на интуицию и внутренний голос?",
-  7: "Слушай, я проанализировал наш диалог. В тебе чувствуется сильный аналитический склад ума, богатое воображение и стремление к автономии. Ты прирожденный Создатель! Твои сильные стороны — логика и креативность. Ты можешь скачать предварительный отчет в формате PDF прямо сейчас. Теперь давай закрепим результаты интерактивными тестами!"
+  7: "Слушай, я проанализировал наш диалог. Ты отлично раскрылся! Ты можешь скачать предварительный отчет в формате PDF прямо сейчас. Теперь давай закрепим результаты интерактивными тестами!"
 };
 
 // ============================
@@ -434,16 +434,29 @@ export async function POST(req: Request) {
     const updatedValues = !!extractedData.values && extractedData.values.trim().length > 6;
     const updatedDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
 
-    let updatedBlocks = 0;
-    if (updatedPersonalInfo) updatedBlocks++;
-    if (updatedPhone) updatedBlocks++;
-    if (updatedDreams) updatedBlocks++;
-    if (updatedIdols) updatedBlocks++;
-    if (updatedValues) updatedBlocks++;
-    if (updatedDecisionStyle) updatedBlocks++;
+    // Считаем заполненные психологические блоки
+    let psychoBlocks = 0;
+    if (updatedDreams) psychoBlocks++;
+    if (updatedIdols) psychoBlocks++;
+    if (updatedValues) psychoBlocks++;
+    if (updatedDecisionStyle) psychoBlocks++;
 
-    const isFinalStateNow = updatedPersonalInfo && updatedDreams && updatedIdols && updatedValues && updatedDecisionStyle;
-    const currentVirtualStep = isFinalStateNow ? 6 : Math.min(5, updatedBlocks);
+    // Расчет шага строго поэтапно
+    let currentVirtualStep = 0;
+    if (!updatedPersonalInfo) {
+      currentVirtualStep = 1; // Шаг знакомства и личных данных
+    } else if (!updatedPhone) {
+      currentVirtualStep = 2; // Шаг выбора канала связи (Telegram / MAX ID)
+    } else {
+      // Шаги 3, 4, 5 в зависимости от заполненных психологических блоков
+      currentVirtualStep = Math.min(5, 3 + psychoBlocks);
+    }
+
+    const isFinalStateNow = updatedPersonalInfo && updatedPhone && updatedDreams && updatedIdols && updatedValues && updatedDecisionStyle;
+    if (isFinalStateNow) {
+      currentVirtualStep = 6; // Подведение итогов
+    }
+
     extractedData.currentStep = currentVirtualStep;
 
     // Обновляем пользователя при нативной регистрации
@@ -468,22 +481,46 @@ export async function POST(req: Request) {
     const collectedFields = [];
     const missingFields = [];
 
-    if (updatedPersonalInfo) collectedFields.push(`- Личные данные: ${extractedData.fullName || ''}, возраст ${extractedData.age || ''}, город ${extractedData.city || ''}`);
-    else missingFields.push("- Личные данные (Имя, возраст, город проживания).");
+    // Заполняем собранные поля
+    if (updatedPersonalInfo) {
+      collectedFields.push(`- Личные данные: Имя — ${extractedData.fullName || ''}, возраст/класс — ${extractedData.age || ''}, город — ${extractedData.city || ''}`);
+    }
+    if (updatedPhone) {
+      collectedFields.push(`- Канал связи: Telegram/телефон подключен и подтвержден.`);
+    }
+    if (updatedDreams) {
+      collectedFields.push(`- Мечты и образ будущего: ${extractedData.dreams}`);
+    }
+    if (updatedIdols) {
+      collectedFields.push(`- Вдохновители и авторитеты: ${extractedData.idols}`);
+    }
+    if (updatedValues) {
+      collectedFields.push(`- Ценности в работе: ${extractedData.values}`);
+    }
+    if (updatedDecisionStyle) {
+      collectedFields.push(`- Способ принятия решений: ${extractedData.decisionStyle}`);
+    }
 
-    if (updatedDreams) collectedFields.push(`- Мечты и смелый образ будущего: ${extractedData.dreams}`);
-    else missingFields.push("- Мечты и образ будущего: Кем подросток хочет быть через 10 лет без ограничений (методика WOOP / Внутренняя Игра Голви для снятия страхов и раскрытия амбиций).");
-
-    if (updatedIdols) collectedFields.push(`- Вдохновители и кумиры: ${extractedData.idols}`);
-    else missingFields.push("- Кумиры: Люди, блогеры, ученые или персонажи фильмов, которые вдохновляют, и какие черты в них привлекают подростка больше всего (проективная методика Strengths-Based coaching).");
-
-    if (updatedValues) collectedFields.push(`- Ценности в будущей работе: ${extractedData.values}`);
-    else missingFields.push("- Ценности и мотивация: Что подросток ценит в работе (свобода творчества, стабильность/деньги, лидерство, помощь другим).");
-
-    if (updatedDecisionStyle) collectedFields.push(`- Стиль решений: ${extractedData.decisionStyle}`);
-    else missingFields.push("- Стиль принятия решений: Доверяет ли подросток логике и анализу, либо интуиции и чувствам.");
-
-    if (!updatedPhone) missingFields.push("- Подключение канала связи (Telegram/MAX ID) для сохранения отчета.");
+    // Заполняем недостающие поля СТРОГО на основе текущего шага
+    if (currentVirtualStep < 2) {
+      missingFields.push("- Личные данные (Имя, возраст, город проживания). Спроси об этом мягко в рамках знакомства. Нам критически важно узнать это в самом начале.");
+    } else if (currentVirtualStep === 2) {
+      missingFields.push("- Подключение канала связи (Telegram или MAX ID). Напиши подростку, что теперь нужно подключить мессенджер Telegram (нажав на кнопку ниже) или ввести свой MAX ID, чтобы прогресс сохранился и мы могли продолжить диалог.");
+    } else {
+      // Шаг сбора психологии
+      if (!updatedDreams) {
+        missingFields.push("- Мечты и образ будущего: Кем подросток хочет быть через 10 лет без ограничений (методика WOOP / Внутренняя Игра Голви для снятия страхов и раскрытия амбиций).");
+      }
+      if (!updatedIdols) {
+        missingFields.push("- Кумиры: Люди, блогеры, ученые или персонажи фильмов, которые вдохновляют, и какие качества в них привлекают подростка больше всего (проективная методика Strengths-Based coaching).");
+      }
+      if (!updatedValues) {
+        missingFields.push("- Ценности и мотивация: Что подросток ценит в будущей работе (свобода творчества, стабильность/деньги, лидерство, помощь другим).");
+      }
+      if (!updatedDecisionStyle) {
+        missingFields.push("- Способ принятия решений: Доверяет ли подросток логике и анализу, либо интуиции и чувствам.");
+      }
+    }
 
     const isRefusalOrEmpty = !parsedData.shouldAdvanceStep;
 
@@ -532,11 +569,26 @@ ${missingFields.join('\n')}
     }
 
     let replyContent = '';
-    try {
-      replyContent = await generateText(systemPrompt, transcript, 0.7);
-    } catch (err) {
-      console.warn('Gemini chat generation failed, using fallback:', err);
-      replyContent = FALLBACK_REPLIES[currentVirtualStep] || 'Давай продолжим наш диалог!';
+    
+    // ИИ-коуч Роман включается только с Шага 3, когда собраны первичные данные и подключен Telegram/MAX
+    if (currentVirtualStep < 3) {
+      replyContent = FALLBACK_REPLIES[currentVirtualStep];
+      
+      // Специальная заглушка на Шаге 1, если пользователь прислал точку/пустоту и мы не смогли распарсить личные данные
+      if (currentVirtualStep === 1 && !isInitMessage && !updatedPersonalInfo) {
+        replyContent = "Пожалуйста, напиши свое имя, возраст/класс и город, чтобы мы могли познакомиться и продолжить! 😊";
+      }
+      // Специальная заглушка на Шаге 2, если пользователь пишет обычный текст вместо клика по кнопкам или ввода MAX ID
+      if (currentVirtualStep === 2 && !isInitMessage && !updatedPhone) {
+        replyContent = "Пожалуйста, нажми на кнопку ниже, чтобы подключить Telegram, или введи свой MAX ID. Это нужно, чтобы результаты не потерялись! Как только подключишься, мы сразу начнем самое интересное. 😉";
+      }
+    } else {
+      try {
+        replyContent = await generateText(systemPrompt, transcript, 0.7);
+      } catch (err) {
+        console.warn('AI chat generation failed, using fallback:', err);
+        replyContent = FALLBACK_REPLIES[currentVirtualStep] || 'Давай продолжим наш диалог!';
+      }
     }
 
     // Сохраняем предварительное резюме в БД на шаге 6
