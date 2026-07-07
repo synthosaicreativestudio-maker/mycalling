@@ -98,22 +98,41 @@ export default function CoachPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: 'Телефон подтвержден через бот', sessionId, linkCode })
           });
-          const chatData = await chatRes.json();
-          if (chatData.reply) {
-            setMessages(prev => {
-              const lastMsg = prev[prev.length - 1];
-              if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content === chatData.reply) {
-                return prev;
-              }
-              return [...prev, { role: 'assistant', content: chatData.reply }];
-            });
-          }
-          if (chatData.currentStep !== undefined) {
-            setStep(chatData.currentStep);
-          }
-          if (chatData.phoneConfirmed !== undefined) {
-            setPhoneConfirmed(chatData.phoneConfirmed);
-          }
+           const chatData = await chatRes.json();
+           if (chatData.reply) {
+             setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+             let currentText = '';
+             let index = 0;
+             const printInterval = setInterval(() => {
+               if (index < chatData.reply.length) {
+                 currentText += chatData.reply[index];
+                 setMessages(prev => {
+                   const updated = [...prev];
+                   if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+                     updated[updated.length - 1] = { role: 'assistant', content: currentText };
+                   }
+                   return updated;
+                 });
+                 index++;
+               } else {
+                 clearInterval(printInterval);
+                 setIsTyping(false);
+                 if (chatData.currentStep !== undefined) {
+                   setStep(chatData.currentStep);
+                 }
+                 if (chatData.phoneConfirmed !== undefined) {
+                   setPhoneConfirmed(chatData.phoneConfirmed);
+                 }
+               }
+             }, 15);
+           } else {
+             if (chatData.currentStep !== undefined) {
+               setStep(chatData.currentStep);
+             }
+             if (chatData.phoneConfirmed !== undefined) {
+               setPhoneConfirmed(chatData.phoneConfirmed);
+             }
+           }
         } else if (data.status === 'EXPIRED') {
           clearInterval(interval);
           const newRes = await fetch('/api/auth/link-code', { method: 'POST' });
@@ -218,31 +237,44 @@ export default function CoachPage() {
       const chatData = await chatRes.json();
 
       if (chatData.reply) {
-        setMessages(prev => {
-          const lastMsg = prev[prev.length - 1];
-          if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content === chatData.reply) {
-            return prev;
+        setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+        let currentText = '';
+        let index = 0;
+        const interval = setInterval(() => {
+          if (index < chatData.reply.length) {
+            currentText += chatData.reply[index];
+            setMessages(prev => {
+              const updated = [...prev];
+              if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+                updated[updated.length - 1] = { role: 'assistant', content: currentText };
+              }
+              return updated;
+            });
+            index++;
+          } else {
+            clearInterval(interval);
+            setIsTyping(false);
+            if (chatData.currentStep !== undefined) {
+              setStep(chatData.currentStep);
+              if (chatData.phoneConfirmed !== undefined) {
+                setPhoneConfirmed(chatData.phoneConfirmed);
+              } else if (chatData.extracted?.phone) {
+                setPhoneConfirmed(true);
+              }
+              if (chatData.currentStep === 6) {
+                // Записываем имя ученика в localStorage для страницы тестов
+                if (chatData.extracted?.fullName) {
+                  localStorage.setItem('studentName', chatData.extracted.fullName);
+                }
+              }
+            }
           }
-          return [...prev, { role: 'assistant', content: chatData.reply }];
-        });
-      }
-      if (chatData.currentStep !== undefined) {
-        setStep(chatData.currentStep);
-        if (chatData.phoneConfirmed !== undefined) {
-          setPhoneConfirmed(chatData.phoneConfirmed);
-        } else if (chatData.extracted?.phone) {
-          setPhoneConfirmed(true);
-        }
-        if (chatData.currentStep === 6) {
-          // Записываем имя ученика в localStorage для страницы тестов
-          if (chatData.extracted?.fullName) {
-            localStorage.setItem('studentName', chatData.extracted.fullName);
-          }
-        }
+        }, 15); // Скорость печати
+      } else {
+        setIsTyping(false);
       }
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
-    } finally {
       setIsTyping(false);
     }
   };
