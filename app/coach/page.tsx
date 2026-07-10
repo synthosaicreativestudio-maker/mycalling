@@ -31,6 +31,7 @@ export default function CoachPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [phoneConfirmed, setPhoneConfirmed] = useState(false);
   const [linkCode, setLinkCode] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   
   const [isMobile, setIsMobile] = useState(false);
   
@@ -63,82 +64,127 @@ export default function CoachPage() {
     getLinkCode();
   }, [userId]);
 
+  // Проверяем сессию и прогресс на сервере при входе на страницу
+  useEffect(() => {
+    async function checkAuthAndProgress() {
+      try {
+        console.log('[auth] Checking progress on coach page mount...');
+        const res = await fetch('/api/auth/progress');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated) {
+            console.log('[auth] User is authenticated. Progress status:', data);
+            if (data.coachCompleted) {
+              if (data.testCompleted) {
+                router.push('/report');
+              } else {
+                router.push('/assessment');
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[auth] Error checking progress on coach page:', err);
+      }
+    }
+    checkAuthAndProgress();
+  }, [router]);
+
   // Поллинг подтверждения телефона/авторизации через ботов
   useEffect(() => {
     if (!linkCode || phoneConfirmed || !sessionId) return;
 
     let isSubscribed = true;
-    const interval = setInterval(async () => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    const handleAuthCompleted = async (sessionToken: string | null) => {
+      if (!sessionToken) {
+        console.error('[auth] Completed status but no sessionToken received');
+        setAuthError('Не удалось получить токен сессии. Пожалуйста, попробуйте еще раз.');
+        return;
+      }
+      
       try {
+        console.log('[auth] Received sessionToken, calling callback...');
+        const res = await fetch(`/api/auth/telegram/callback?token=${sessionToken}`, {
+          credentials: 'include',
+          redirect: 'manual'
+        });
+        
+        if (!res.ok) {
+          throw new Error(`Callback status not ok: ${res.status}`);
+        }
+
+        console.log('[auth] Callback successful, setting phone confirmed');
+        setPhoneConfirmed(true);
+        setAuthError(null);
+
+        // Отправляем системное сообщение коучу, чтобы мгновенно продвинуть шаг
+        const chatRes = await fetch('/api/v1/coach/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: 'Телефон подтвержден через бот', sessionId, linkCode })
+        });
+        const chatData = await chatRes.json();
+        if (chatData.reply) {
+          setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+          let currentText = '';
+          let index = 0;
+          const printInterval = setInterval(() => {
+            if (index < chatData.reply.length) {
+              currentText += chatData.reply[index];
+              setMessages(prev => {
+                const updated = [...prev];
+                if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+                  updated[updated.length - 1] = { role: 'assistant', content: currentText };
+                }
+                return updated;
+              });
+              index++;
+            } else {
+              clearInterval(printInterval);
+              setIsTyping(false);
+              if (chatData.currentStep !== undefined) {
+                setStep(chatData.currentStep);
+              }
+              if (chatData.phoneConfirmed !== undefined) {
+                setPhoneConfirmed(chatData.phoneConfirmed);
+              }
+            }
+          }, 15);
+        } else {
+          if (chatData.currentStep !== undefined) {
+            setStep(chatData.currentStep);
+          }
+          if (chatData.phoneConfirmed !== undefined) {
+            setPhoneConfirmed(chatData.phoneConfirmed);
+          }
+        }
+      } catch (err) {
+        console.error('[auth] callback failed', err);
+        setAuthError('Не получилось завершить вход. Попробуйте ещё раз.');
+      }
+    };
+
+    const pollAuthStatus = async () => {
+      if (!isSubscribed) return;
+      try {
+        console.log('[auth] Polling status for code:', linkCode);
         const res = await fetch(`/api/auth/poll?code=${linkCode}`);
         const data = await res.json();
 
         if (!isSubscribed) return;
 
         if (data.status === 'COMPLETED') {
-          clearInterval(interval);
-          setPhoneConfirmed(true);
-
-          // Гарантированно устанавливаем cookie авторизации на клиенте напрямую
-          if (data.sessionToken) {
-            const isHttps = window.location.protocol === 'https:';
-            if (isHttps) {
-              document.cookie = `__secure-better-auth.session_token=${data.sessionToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
-            }
-            document.cookie = `better-auth.session_token=${data.sessionToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
-            try {
-              await fetch(`/api/auth/telegram/callback?token=${data.sessionToken}`, {
-                credentials: 'include',
-                redirect: 'manual' // Не следуем за редиректом, только получаем cookie
-              });
-            } catch (e) {
-              // Ничего страшного — cookie может уже быть установлена
-            }
-          }
+          if (intervalId) clearInterval(intervalId);
+          isSubscribed = false;
           
-          // Отправляем системное сообщение коучу, чтобы мгновенно продвинуть шаг
-          const chatRes = await fetch('/api/v1/coach/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: 'Телефон подтвержден через бот', sessionId, linkCode })
-          });
-           const chatData = await chatRes.json();
-           if (chatData.reply) {
-             setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-             let currentText = '';
-             let index = 0;
-             const printInterval = setInterval(() => {
-               if (index < chatData.reply.length) {
-                 currentText += chatData.reply[index];
-                 setMessages(prev => {
-                   const updated = [...prev];
-                   if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
-                     updated[updated.length - 1] = { role: 'assistant', content: currentText };
-                   }
-                   return updated;
-                 });
-                 index++;
-               } else {
-                 clearInterval(printInterval);
-                 setIsTyping(false);
-                 if (chatData.currentStep !== undefined) {
-                   setStep(chatData.currentStep);
-                 }
-                 if (chatData.phoneConfirmed !== undefined) {
-                   setPhoneConfirmed(chatData.phoneConfirmed);
-                 }
-               }
-             }, 15);
-           } else {
-             if (chatData.currentStep !== undefined) {
-               setStep(chatData.currentStep);
-             }
-             if (chatData.phoneConfirmed !== undefined) {
-               setPhoneConfirmed(chatData.phoneConfirmed);
-             }
-           }
+          await handleAuthCompleted(data.sessionToken);
         } else if (data.status === 'EXPIRED') {
-          clearInterval(interval);
+          if (intervalId) clearInterval(intervalId);
+          isSubscribed = false;
+          
+          console.log('[auth] Link code expired, requesting new code');
           const newRes = await fetch('/api/auth/link-code', { method: 'POST' });
           const newData = await newRes.json();
           if (newData.code) {
@@ -146,13 +192,29 @@ export default function CoachPage() {
           }
         }
       } catch (err) {
-        console.error('Polling error:', err);
+        console.error('[auth] Polling error:', err);
       }
-    }, 2000);
+    };
+
+    // Запускаем интервал
+    intervalId = setInterval(pollAuthStatus, 2000);
+
+    // Добавляем обработчик смены вкладки
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[auth] Visibility changed to visible, running instant poll...');
+        pollAuthStatus();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Мгновенный опрос при монтировании/изменении
+    pollAuthStatus();
 
     return () => {
       isSubscribed = false;
-      clearInterval(interval);
+      if (intervalId) clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [linkCode, phoneConfirmed, sessionId]);
 
@@ -422,6 +484,14 @@ export default function CoachPage() {
   return (
     <main className="min-h-screen pt-28 pb-12 flex flex-col items-center justify-center px-4 relative z-10">
       
+      {process.env.NODE_ENV !== 'production' && (
+        <div className="fixed top-4 left-4 z-50 bg-black/90 border border-white/10 rounded-xl p-3 text-[10px] text-slate-400 font-mono shadow-2xl space-y-1">
+          <div>[DEBUG] LinkCode: <span className="text-[#3B82F6]">{linkCode || 'null'}</span></div>
+          <div>[DEBUG] PhoneConfirmed: <span className={phoneConfirmed ? 'text-green-500' : 'text-red-500'}>{String(phoneConfirmed)}</span></div>
+          <div>[DEBUG] SessionId: <span className="text-purple-400">{sessionId || 'null'}</span></div>
+        </div>
+      )}
+
       {/* progress top panel */}
       <div className="w-full max-w-3xl mb-6 glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -524,6 +594,20 @@ export default function CoachPage() {
                           <Fingerprint className="h-3.5 w-3.5" /> MAX ID
                         </a>
                       </div>
+                      {authError && (
+                        <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 flex flex-col gap-2">
+                          <p>{authError}</p>
+                          <button
+                            onClick={() => {
+                              setAuthError(null);
+                              setLinkCode(null);
+                            }}
+                            className="w-fit px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-white rounded-lg transition"
+                          >
+                            Попробовать снова
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

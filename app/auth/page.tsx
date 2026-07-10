@@ -19,13 +19,31 @@ function AuthCard() {
   const [isMobile, setIsMobile] = useState(false);
   const [linkCode, setLinkCode] = useState<string | null>(null);
 
-  const { data: session } = authClient.useSession();
-
+  // Проверяем сессию и прогресс на сервере при входе на страницу
   useEffect(() => {
-    if (session) {
-      router.push('/report');
+    async function checkAuthAndRedirect() {
+      try {
+        console.log('[auth] Checking server session on mount...');
+        const res = await fetch('/api/auth/progress');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated) {
+            console.log('[auth] User authenticated, redirecting by progress:', data);
+            if (!data.coachCompleted) {
+              router.push('/coach');
+            } else if (!data.testCompleted) {
+              router.push('/assessment');
+            } else {
+              router.push('/report');
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[auth] Error checking server session:', err);
+      }
     }
-  }, [session, router]);
+    checkAuthAndRedirect();
+  }, [router]);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -51,24 +69,32 @@ function AuthCard() {
     getLinkCode();
   }, []);
 
-  // Поллинг состояния авторизации
+  // Поллинг состояния авторизации с поддержкой visibilitychange
   useEffect(() => {
     if (!linkCode) return;
 
     let isSubscribed = true;
-    const interval = setInterval(async () => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    const pollAuthStatus = async () => {
+      if (!isSubscribed) return;
       try {
+        console.log('[auth] Auth page polling status for code:', linkCode);
         const res = await fetch(`/api/auth/poll?code=${linkCode}`);
         const data = await res.json();
 
         if (!isSubscribed) return;
 
         if (data.status === 'COMPLETED' && data.sessionToken) {
-          clearInterval(interval);
+          if (intervalId) clearInterval(intervalId);
+          isSubscribed = false;
+          console.log('[auth] Auth page completed polling, redirecting to callback...');
           router.push(`/api/auth/telegram/callback?token=${data.sessionToken}`);
         } else if (data.status === 'EXPIRED') {
-          clearInterval(interval);
-          // Перезапрашиваем новый код при истечении старого
+          if (intervalId) clearInterval(intervalId);
+          isSubscribed = false;
+          
+          console.log('[auth] Auth page code expired, requesting new code');
           const newRes = await fetch('/api/auth/link-code', { method: 'POST' });
           const newData = await newRes.json();
           if (newData.code) {
@@ -76,13 +102,26 @@ function AuthCard() {
           }
         }
       } catch (err) {
-        console.error('Polling error:', err);
+        console.error('[auth] Polling error:', err);
       }
-    }, 2000);
+    };
+
+    intervalId = setInterval(pollAuthStatus, 2000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[auth] Auth page visibility changed to visible, polling instantly...');
+        pollAuthStatus();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    pollAuthStatus();
 
     return () => {
       isSubscribed = false;
-      clearInterval(interval);
+      if (intervalId) clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [linkCode, router]);
 

@@ -8,7 +8,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
 
+    console.log('[auth] Callback received request for token:', token ? '***' : null);
+
     if (!token) {
+      console.warn('[auth] Callback missing token');
       return NextResponse.redirect(new URL('/auth?error=missing_token', request.url));
     }
 
@@ -17,6 +20,7 @@ export async function GET(request: Request) {
     });
 
     if (!session || session.expiresAt < new Date()) {
+      console.warn('[auth] Callback session not found or expired:', { exists: !!session });
       return NextResponse.redirect(new URL('/auth?error=expired_session', request.url));
     }
 
@@ -36,11 +40,15 @@ export async function GET(request: Request) {
       }
     }
 
+    console.log('[auth] Callback redirection target:', { userId: session.userId, redirectPath });
+
     const response = NextResponse.redirect(new URL(redirectPath, request.url));
     
     // Устанавливаем куку сессии Better Auth
     const isHttps = request.url.startsWith('https:');
     const cookieName = isHttps ? '__secure-better-auth.session_token' : 'better-auth.session_token';
+
+    console.log('[auth] Callback setting cookie:', { name: cookieName, expiresAt: session.expiresAt });
 
     response.cookies.set({
       name: cookieName,

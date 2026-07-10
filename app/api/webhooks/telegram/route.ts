@@ -168,6 +168,8 @@ export async function POST(req: Request) {
           normalizedPhone = '7' + normalizedPhone;
         }
 
+        console.log('[auth] Telegram webhook received contact:', { phone: normalizedPhone, tgContactUserId, firstName });
+
         // Проверяем, есть ли активная привязка (AuthLink) для этого telegramId
         const authLink = await prisma.authLink.findFirst({
           where: {
@@ -176,6 +178,8 @@ export async function POST(req: Request) {
           },
           orderBy: { createdAt: 'desc' }
         });
+
+        console.log('[auth] Found AuthLink in webhook:', { exists: !!authLink, code: authLink?.code, userId: authLink?.userId });
 
         let user = null;
 
@@ -224,6 +228,7 @@ export async function POST(req: Request) {
               role: 'STUDENT'
             }
           });
+          console.log('[auth] Telegram webhook created new user:', { userId: user.id, phone: normalizedPhone });
         } else {
           // Обновляем существующего
           if (user.telegramId !== String(tgContactUserId) || user.phone !== normalizedPhone) {
@@ -234,6 +239,9 @@ export async function POST(req: Request) {
                 phone: normalizedPhone
               }
             });
+            console.log('[auth] Telegram webhook updated existing user:', { userId: user.id, phone: normalizedPhone });
+          } else {
+            console.log('[auth] Telegram webhook user already up to date:', { userId: user.id });
           }
         }
         
@@ -296,6 +304,13 @@ export async function POST(req: Request) {
               console.error('Error migrating guest session in Telegram webhook:', e);
             }
           }
+
+          console.log('[auth] Telegram webhook updating AuthLink status to COMPLETED:', {
+            authLinkId: authLink.id,
+            code: authLink.code,
+            userId: user.id,
+            sessionToken: sessionToken ? '***' : null
+          });
 
           await prisma.authLink.update({
             where: { id: authLink.id },

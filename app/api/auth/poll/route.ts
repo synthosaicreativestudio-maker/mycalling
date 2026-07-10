@@ -16,6 +16,8 @@ export async function GET(request: Request) {
       where: { code }
     });
 
+    console.log('[auth] Polling link code:', { code, status: authLink?.status, hasSessionToken: !!authLink?.sessionToken });
+
     if (!authLink) {
       return NextResponse.json({ status: 'EXPIRED' });
     }

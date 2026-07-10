@@ -20,6 +20,12 @@ export async function POST(req: Request) {
       }
     });
 
+    console.log('[auth] Generated link code:', {
+      code: authLink.code,
+      userId: authLink.userId,
+      expiresAt: authLink.expiresAt
+    });
+
     return NextResponse.json({
       code: authLink.code,
       expiresAt: authLink.expiresAt

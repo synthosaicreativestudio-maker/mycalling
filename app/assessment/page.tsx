@@ -30,6 +30,30 @@ export default function AssessmentPage() {
 
   const questionStartTime = useRef<number>(0);
 
+  // Проверка сессии и прогресса на сервере при монтировании
+  useEffect(() => {
+    async function checkAuthProgress() {
+      try {
+        console.log('[auth] Assessment page checking progress...');
+        const res = await fetch('/api/auth/progress');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated) {
+            console.log('[auth] Assessment page progress check result:', data);
+            if (!data.coachCompleted) {
+              router.push('/coach');
+            } else if (data.testCompleted) {
+              router.push('/report');
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[auth] Error checking progress on assessment page:', err);
+      }
+    }
+    checkAuthProgress();
+  }, [router]);
+
   // Восстановление сессии диагностики или редирект
   useEffect(() => {
     if (typeof window !== 'undefined') {
