@@ -12,17 +12,22 @@ interface Message {
 
 const STEP_NAMES: Record<number, string> = {
   0: 'Знакомство и контракт',
-  1: 'Сбор личных данных',
-  2: 'Увлечения и хобби',
-  3: 'Школа и предметы',
-  4: 'Мечты и цели (WOOP)',
-  5: 'Вдохновители и авторитеты',
-  6: 'Родители и семейное влияние',
-  7: 'Страхи и барьеры',
-  8: 'Практический опыт',
-  9: 'Ценности и стиль выбора',
-  10: 'Подключение канала связи',
-  11: 'Подведение итогов наставника'
+  1: 'Подключение канала связи',
+  2: 'Сбор личных данных',
+  3: 'Увлечения и хобби',
+  4: 'Школа и предметы',
+  5: 'Мечты и цели (WOOP)',
+  6: 'Вдохновители и авторитеты',
+  7: 'Родители и влияние',
+  8: 'Страхи и барьеры',
+  9: 'Практический опыт',
+  10: 'Желаемый формат работы',
+  11: 'Тип мышления',
+  12: 'Мерило успеха',
+  13: 'Источники энергии',
+  14: 'Командная роль',
+  15: 'Ценности и автономия',
+  16: 'Подведение итогов наставника'
 };
 
 export default function CoachPage() {
@@ -485,7 +490,7 @@ export default function CoachPage() {
     }
   };
 
-  const progressPercent = Math.round((step / 11) * 100);
+  const progressPercent = Math.round((step / 16) * 100);
 
   return (
     <main className="min-h-screen pt-28 pb-12 flex flex-col items-center justify-center px-4 relative z-10">
@@ -506,7 +511,7 @@ export default function CoachPage() {
           </div>
           <div>
             <h2 className="text-sm font-bold font-sans text-white">
-              Шаг {step} из 11: {STEP_NAMES[step] || 'Знакомство'}
+              Шаг {step} из 16: {STEP_NAMES[step] || 'Знакомство'}
             </h2>
           </div>
         </div>
@@ -562,20 +567,20 @@ export default function CoachPage() {
                 </div>
                 <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
                   isCoach 
-                    ? (step === 17 && idx === messages.length - 1
+                    ? (step === 16 && idx === messages.length - 1
                         ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
                         : 'bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm'
                       )
                     : 'bg-[#3B82F6]/20 text-[#E8ECF0] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
                 }`}>
-                  {isCoach && step === 17 && idx === messages.length - 1 && (
+                  {isCoach && step === 16 && idx === messages.length - 1 && (
                     <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] mb-2">
                       <span>✨</span> Резюме наставника Романа
                     </div>
                   )}
                   {msg.content}
 
-                  {isCoach && step === 16 && !phoneConfirmed && idx === messages.length - 1 && (
+                  {isCoach && step === 1 && !phoneConfirmed && idx === messages.length - 1 && (
                     <div className="mt-4 p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/15 space-y-3">
                       <p className="text-xs font-bold text-[#3B82F6] flex items-center gap-1.5">
                         <span>📲</span> Подключите удобный канал связи для получения отчета:
@@ -639,7 +644,7 @@ export default function CoachPage() {
 
         {/* Input area */}
         <div className="p-4 border-t border-white/5 bg-[#040506]/45 backdrop-blur-md">
-          {step === 17 ? (
+          {step === 16 ? (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
