@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw } from 'lucide-react';
+import WheelOfVocation from './WheelOfVocation';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -43,6 +44,8 @@ export default function CoachPage() {
   const [phoneConfirmed, setPhoneConfirmed] = useState(false);
   const [linkCode, setLinkCode] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [extractedData, setExtractedData] = useState<Record<string, any>>({});
+  const [showVocationModal, setShowVocationModal] = useState(false);
   
   const [isMobile, setIsMobile] = useState(false);
   
@@ -161,6 +164,7 @@ export default function CoachPage() {
               if (chatData.phoneConfirmed !== undefined) {
                 setPhoneConfirmed(chatData.phoneConfirmed);
               }
+              setExtractedData(chatData.extracted || {});
             }
           }, 15);
         } else {
@@ -170,6 +174,7 @@ export default function CoachPage() {
           if (chatData.phoneConfirmed !== undefined) {
             setPhoneConfirmed(chatData.phoneConfirmed);
           }
+          setExtractedData(chatData.extracted || {});
         }
       } catch (err) {
         console.error('[auth] callback failed', err);
@@ -263,11 +268,13 @@ export default function CoachPage() {
           setUserId(data.userId || null);
           setStep(data.currentStep || 0);
           setPhoneConfirmed(data.phoneConfirmed || false);
+          setExtractedData(data.extracted || {});
         } else if (data.reply) {
           setMessages([{ role: 'assistant', content: data.reply }]);
           setSessionId(data.sessionId);
           setUserId(data.userId || null);
           setStep(data.currentStep || 0);
+          setExtractedData(data.extracted || {});
           if (typeof window !== 'undefined') {
             localStorage.setItem('coachSessionId', data.sessionId);
           }
@@ -344,6 +351,7 @@ export default function CoachPage() {
               if (chatData.extracted?.fullName) {
                 localStorage.setItem('studentName', chatData.extracted.fullName);
               }
+              setExtractedData(chatData.extracted || {});
             }
           }
         }, 15); // Скорость печати
@@ -538,161 +546,221 @@ export default function CoachPage() {
         </div>
       </div>
 
-      {/* Main chat window */}
-      <div className="w-full max-w-3xl max-h-[60vh] glass-card rounded-3xl flex flex-col overflow-hidden relative">
+      {/* Main layout container: Chat + Wheel of Vocation */}
+      <div className="w-full max-w-6xl glass-card rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-3 h-[60vh] relative border border-white/5">
         
-        {/* Chat message history */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.map((msg, idx) => {
-            const isCoach = msg.role === 'assistant';
-            const tgPayload = linkCode || '';
+        {/* Left column: Chat History & Input */}
+        <div className="col-span-1 md:col-span-2 flex flex-col h-full overflow-hidden border-r border-white/5 relative">
+          
+          {/* Chat message history */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {messages.map((msg, idx) => {
+              const isCoach = msg.role === 'assistant';
+              const tgPayload = linkCode || '';
 
-            const telegramBotLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
-            const maxIdLink = `https://max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+              const telegramBotLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+              const maxIdLink = `https://max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
 
-            const qrTelegramLink = telegramBotLink;
-            const qrMaxIdLink = maxIdLink;
-
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex gap-3 max-w-[80%] ${isCoach ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
-              >
-                <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${
-                  isCoach ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#3B82F6] text-white'
-                }`}>
-                  {isCoach ? <Brain className="h-4 w-4" /> : <User className="h-4 w-4" />}
-                </div>
-                <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
-                  isCoach 
-                    ? (step === 16 && idx === messages.length - 1
-                        ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
-                        : 'bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm'
-                      )
-                    : 'bg-[#3B82F6]/20 text-[#E8ECF0] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
-                }`}>
-                  {isCoach && step === 16 && idx === messages.length - 1 && (
-                    <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] mb-2">
-                      <span>✨</span> Резюме наставника Романа
-                    </div>
-                  )}
-                  {msg.content}
-
-                  {isCoach && step === 1 && !phoneConfirmed && idx === messages.length - 1 && (
-                    <div className="mt-4 p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/15 space-y-3">
-                      <p className="text-xs font-bold text-[#3B82F6] flex items-center gap-1.5">
-                        <span>📲</span> Подключите удобный канал связи для получения отчета:
-                      </p>
-                      <div className="flex flex-wrap gap-3">
-                        {/* Telegram */}
-                        <a 
-                          href={`/auth/link?code=${tgPayload}&provider=telegram`}
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2.5 bg-[#349ed9] hover:bg-[#2d8bc0] text-xs font-bold text-white rounded-xl shadow transition duration-200"
-                        >
-                          <Send className="h-3.5 w-3.5" /> Telegram
-                        </a>
-                        {/* MAX ID */}
-                        <a 
-                          href={`/auth/link?code=${tgPayload}&provider=maxid`}
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2.5 bg-[#8b5cf6] hover:bg-[#7c4df2] text-xs font-bold text-white rounded-xl shadow transition duration-200"
-                        >
-                          <Fingerprint className="h-3.5 w-3.5" /> MAX ID
-                        </a>
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`flex gap-3 max-w-[80%] ${isCoach ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
+                >
+                  <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${
+                    isCoach ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#3B82F6] text-white'
+                  }`}>
+                    {isCoach ? <Brain className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                  </div>
+                  <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
+                    isCoach 
+                      ? (step === 16 && idx === messages.length - 1
+                          ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
+                          : 'bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm'
+                        )
+                      : 'bg-[#3B82F6]/25 text-[#E8ECF0] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
+                  }`}>
+                    {isCoach && step === 16 && idx === messages.length - 1 && (
+                      <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] mb-2">
+                        <span>✨</span> Резюме наставника Романа
                       </div>
-                      {authError && (
-                        <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 flex flex-col gap-2">
-                          <p>{authError}</p>
-                          <button
-                            onClick={() => {
-                              setAuthError(null);
-                              setLinkCode(null);
-                            }}
-                            className="w-fit px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-white rounded-lg transition"
-                          >
-                            Попробовать снова
-                          </button>
+                    )}
+                    {msg.content}
+
+                    {/* Вывод ИИ-аватара на шаге 16 */}
+                    {isCoach && step === 16 && idx === messages.length - 1 && extractedData.avatarUrl && (
+                      <div className="mt-4 mb-4 flex flex-col items-center gap-3">
+                        <div className="relative w-64 h-64 rounded-2xl overflow-hidden border border-[#3B82F6]/30 shadow-2xl bg-black/40">
+                          <img 
+                            src={extractedData.avatarUrl} 
+                            alt="Цифровой Аватар Личности"
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
                         </div>
-                      )}
-                    </div>
-                  )}
+                        <span className="text-[10px] text-slate-400 italic">Сгенерированный образ вашего таланта (Pollinations AI)</span>
+                      </div>
+                    )}
+
+                    {isCoach && step === 1 && !phoneConfirmed && idx === messages.length - 1 && (
+                      <div className="mt-4 p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/15 space-y-3">
+                        <p className="text-xs font-bold text-[#3B82F6] flex items-center gap-1.5">
+                          <span>📲</span> Подключите удобный канал связи для получения отчета:
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                          {/* Telegram */}
+                          <a 
+                            href={`/auth/link?code=${tgPayload}&provider=telegram`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-[#349ed9] hover:bg-[#2d8bc0] text-xs font-bold text-white rounded-xl shadow transition duration-200"
+                          >
+                            <Send className="h-3.5 w-3.5" /> Telegram
+                          </a>
+                          {/* MAX ID */}
+                          <a 
+                            href={`/auth/link?code=${tgPayload}&provider=maxid`}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-[#8b5cf6] hover:bg-[#7c4df2] text-xs font-bold text-white rounded-xl shadow transition duration-200"
+                          >
+                            <Fingerprint className="h-3.5 w-3.5" /> MAX ID
+                          </a>
+                        </div>
+                        {authError && (
+                          <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400 flex flex-col gap-2">
+                            <p>{authError}</p>
+                            <button
+                              onClick={() => {
+                                setAuthError(null);
+                                setLinkCode(null);
+                              }}
+                              className="w-fit px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-white rounded-lg transition"
+                            >
+                              Попробовать снова
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+
+            {isTyping && (
+              <div className="flex gap-3 max-w-[80%] mr-auto">
+                <div className="h-8 w-8 rounded-full bg-[#3B82F6]/10 text-[#3B82F6] flex items-center justify-center">
+                  <Brain className="h-4 w-4" />
+                </div>
+                <div className="p-4 rounded-2xl bg-[#080C14]/80 border border-white/5 rounded-tl-none shadow-sm flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce [animation-delay:-0.3s]" />
+                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce [animation-delay:-0.15s]" />
+                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce" />
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input area */}
+          <div className="p-4 border-t border-white/5 bg-[#040506]/45 backdrop-blur-md">
+            {step === 16 ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center p-4 space-y-4"
+              >
+                <h3 className="text-lg font-bold text-white">Коуч-сессия успешно завершена!</h3>
+                <p className="text-xs text-[#7A8A9E] max-w-md mx-auto">
+                  Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+                  <button 
+                    type="button"
+                    onClick={downloadPreliminaryReport}
+                    className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#3B82F6]/30 text-[#3B82F6] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                  >
+                    📥 Скачать резюме (PDF)
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleNextStep}
+                    className="cta-glass h-12 px-8 text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto"
+                  >
+                    Перейти к диагностике (тестам)
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
                 </div>
               </motion.div>
-            );
-          })}
-
-          {isTyping && (
-            <div className="flex gap-3 max-w-[80%] mr-auto">
-              <div className="h-8 w-8 rounded-full bg-[#3B82F6]/10 text-[#3B82F6] flex items-center justify-center">
-                <Brain className="h-4 w-4" />
-              </div>
-              <div className="p-4 rounded-2xl bg-[#080C14]/80 border border-white/5 rounded-tl-none shadow-sm flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce" />
-              </div>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
+            ) : (
+              <form onSubmit={handleSend} className="flex gap-2">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  disabled={loading || isTyping}
+                  placeholder="Напишите ответ..."
+                  className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#3B82F6]/30 text-white placeholder:text-[#7A8A9E]"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || loading || isTyping}
+                  className="h-12 w-12 rounded-xl bg-[#3B82F6] text-white flex items-center justify-center hover:bg-[#2563EB] transition disabled:opacity-50"
+                >
+                  <Send className="h-5 w-5" />
+                </button>
+              </form>
+            )}
+          </div>
         </div>
 
-        {/* Input area */}
-        <div className="p-4 border-t border-white/5 bg-[#040506]/45 backdrop-blur-md">
-          {step === 16 ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center p-4 space-y-4"
-            >
-              <h3 className="text-lg font-bold text-white">Коуч-сессия успешно завершена!</h3>
-              <p className="text-xs text-[#7A8A9E] max-w-md mx-auto">
-                Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
-                <button 
-                  type="button"
-                  onClick={downloadPreliminaryReport}
-                  className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#3B82F6]/30 text-[#3B82F6] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
-                >
-                  📥 Скачать резюме (PDF)
-                </button>
-                <button 
-                  type="button"
-                  onClick={handleNextStep}
-                  className="cta-glass h-12 px-8 text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto"
-                >
-                  Перейти к диагностике (тестам)
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSend} className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                disabled={loading || isTyping}
-                placeholder="Напишите ответ..."
-                className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#3B82F6]/30 text-white placeholder:text-[#7A8A9E]"
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || loading || isTyping}
-                className="h-12 w-12 rounded-xl bg-[#3B82F6] text-white flex items-center justify-center hover:bg-[#2563EB] transition disabled:opacity-50"
-              >
-                <Send className="h-5 w-5" />
-              </button>
-            </form>
-          )}
+        {/* Right column: Wheel of Vocation (Desktop only) */}
+        <div className="col-span-1 hidden md:block h-full overflow-y-auto bg-[#040506]/10">
+          <WheelOfVocation extractedData={extractedData} />
         </div>
       </div>
+
+      {/* Floating button for mobile view of Wheel Of Vocation */}
+      <div className="md:hidden fixed bottom-24 right-6 z-40">
+        <button
+          onClick={() => setShowVocationModal(true)}
+          className="h-12 w-12 rounded-full bg-[#3B82F6] text-white flex items-center justify-center shadow-lg shadow-[#3B82F6]/30 border border-white/10 hover:bg-[#2563EB] transition"
+        >
+          <Compass className="h-6 w-6 animate-pulse" />
+        </button>
+      </div>
+
+      {/* Mobile Modal for Wheel of Vocation */}
+      <AnimatePresence>
+        {showVocationModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:hidden"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              className="bg-[#080C14] border border-white/10 rounded-3xl p-6 w-full max-w-sm flex flex-col relative max-h-[90vh]"
+            >
+              <button
+                onClick={() => setShowVocationModal(false)}
+                className="absolute top-4 right-4 text-xs font-bold text-[#7A8A9E] hover:text-white px-2.5 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl"
+              >
+                Закрыть
+              </button>
+              <div className="flex-1 overflow-y-auto pt-4">
+                <WheelOfVocation extractedData={extractedData} />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

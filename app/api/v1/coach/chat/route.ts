@@ -399,7 +399,7 @@ export async function POST(req: Request) {
         currentStep: nextStep,
         phoneConfirmed: hasPhone,
         sessionStatus: coachSession.status,
-        extracted: {}
+        extracted: extractedData
       });
     }
 
@@ -427,7 +427,7 @@ export async function POST(req: Request) {
         currentStep: 0,
         phoneConfirmed: hasPhone,
         sessionStatus: 'IN_PROGRESS',
-        extracted: {}
+        extracted: extractedData
       });
     }
 
@@ -838,13 +838,33 @@ ${missingFields.join('\n')}
       replyContent = "Отлично! Telegram-канал связи успешно подключен. " + replyContent;
     }
 
-    // Сохраняем предварительное резюме в БД на шаге 6
+    // Сохраняем предварительное резюме в БД на шаге 16 и генерируем аватар
     let completedAt = coachSession.completedAt;
     let status = coachSession.status;
     if (isFinalStateNow && status !== 'COMPLETED') {
       status = 'COMPLETED';
       completedAt = new Date();
       extractedData.preliminaryFeedback = replyContent;
+
+      // Генерируем промпт для аватара на основе отчета
+      try {
+        const avatarPromptSystem = `Ты — эксперт по генерации промптов для ИИ-рисовалок (Stable Diffusion, Midjourney).
+Проанализируй коучинговое резюме подростка и составь ОДИН короткий, сочный промпт на АНГЛИЙСКОМ языке (до 20 слов), который визуализирует его характер и таланты.
+Подбирай художественный стиль изображения на основе психологического типа подростка:
+- Если он романтик, мечтатель, гуманитарий, творческий — используй стиль: "dreamy watercolor, soft fantasy illustration, warm cinematic lighting, celestial magical art".
+- Если он аналитик, логик, программист, технарь — используй стиль: "technical blueprint style, clean vector line art, minimal geometric schematics, glowing digital grid".
+- Если он практик, лидер, активный организатор, бунтарь — используй стиль: "vibrant street art, bold graffiti, high-contrast energetic sketch, modern grunge illustration".
+В ответе выведи только сам промпт, без кавычек, префиксов и лишнего текста.`;
+        
+        const aiPrompt = await generateText(avatarPromptSystem, [{ role: 'user', content: replyContent }], 0.8);
+        if (aiPrompt) {
+          const cleanPrompt = aiPrompt.replace(/["']/g, "").trim();
+          extractedData.avatarUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=600&height=600&nologo=true&private=true`;
+        }
+      } catch (e) {
+        console.warn('Failed to generate image avatar prompt, using fallback:', e);
+        extractedData.avatarUrl = `https://image.pollinations.ai/prompt/cybernetic%20neon%20avatar%20of%20a%20young%20mind,%20digital%20art,%20futurism?width=600&height=600&nologo=true&private=true`;
+      }
     }
 
     // Добавляем ответ коуча в транскрипт
@@ -878,7 +898,7 @@ ${missingFields.join('\n')}
       currentStep: currentVirtualStep,
       phoneConfirmed: updatedPhone,
       sessionStatus: status,
-      extracted: parsedData
+      extracted: extractedData
     });
 
   } catch (error: any) {
