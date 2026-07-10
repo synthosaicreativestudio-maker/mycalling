@@ -50,6 +50,8 @@ export async function POST(req: Request) {
               where: { id: authLink.id },
               data: { telegramId: String(tgUserId) }
             });
+            // Динамически настраиваем кнопку меню чата на запуск WebApp для привязки контакта
+            await setTelegramMenuButton(botToken, chat_id, startParam);
           }
         }
 
@@ -139,17 +141,20 @@ export async function POST(req: Request) {
         // Используем ReplyKeyboardMarkup с input_field_placeholder
         // для максимальной заметности кнопки
         // ═══════════════════════════════════════════════════════════════
+        const inlineKeyboard = startParam ? {
+          inline_keyboard: [
+            [{
+              text: '📱 Войти и привязать профиль',
+              web_app: {
+                url: `https://synthosai.ru/auth/telegram-webapp?code=${startParam}`
+              }
+            }]
+          ]
+        } : undefined;
+
         await sendTelegramMessage(botToken, chat_id, 
-          '👋 Привет! Я — официальный бот платформы «МоёПризвание».\n\nЧтобы привязать ваш профиль, нажмите кнопку 👇 «📱 Поделиться контактом» внизу экрана.\n\nИли **просто напишите ваш номер телефона сообщением в ответ** (например: 89991234567). Это абсолютно безопасно.',
-          {
-            keyboard: [
-              [{ text: '📱 Поделиться контактом', request_contact: true }]
-            ],
-            one_time_keyboard: true,
-            resize_keyboard: true,
-            is_persistent: true,
-            input_field_placeholder: 'Нажмите кнопку ниже или напишите телефон текстом'
-          }
+          '👋 Привет! Я — официальный бот платформы «МоёПризвание».\n\nЧтобы привязать ваш профиль, нажмите кнопку 👇 «📱 Войти и привязать профиль» прямо в этом сообщении, либо воспользуйтесь синей кнопкой в левом углу поля ввода.\n\nИли **просто напишите ваш номер телефона сообщением в ответ** (например: 89991234567). Это абсолютно безопасно.',
+          inlineKeyboard
         );
         return NextResponse.json({ ok: true });
       }
@@ -341,6 +346,8 @@ export async function POST(req: Request) {
             }
           );
         }
+        // Сбрасываем кнопку меню WebApp обратно в дефолтный вид
+        await resetTelegramMenuButton(botToken, chat_id);
         return NextResponse.json({ ok: true });
       }
       // 3. Обработка телефона, присланного обычным текстовым сообщением
@@ -492,6 +499,8 @@ export async function POST(req: Request) {
               }
             );
           }
+          // Сбрасываем кнопку меню WebApp обратно в дефолтный вид
+          await resetTelegramMenuButton(botToken, chat_id);
           return NextResponse.json({ ok: true });
         }
       }
@@ -517,5 +526,45 @@ async function sendTelegramMessage(botToken: string, chatId: number, text: strin
     });
   } catch (err) {
     console.error('Error sending Telegram message:', err);
+  }
+}
+
+async function setTelegramMenuButton(botToken: string, chatId: number, code: string) {
+  try {
+    await fetch(`${TG_API_BASE}/bot${botToken}/setChatMenuButton`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        menu_button: {
+          type: 'web_app',
+          text: '📱 Войти в профиль',
+          web_app: {
+            url: `https://synthosai.ru/auth/telegram-webapp?code=${code}`
+          }
+        }
+      })
+    });
+    console.log('[auth] Successfully set Telegram Menu Button for chat:', chatId);
+  } catch (err) {
+    console.error('Error setting Telegram Menu Button:', err);
+  }
+}
+
+async function resetTelegramMenuButton(botToken: string, chatId: number) {
+  try {
+    await fetch(`${TG_API_BASE}/bot${botToken}/setChatMenuButton`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        menu_button: {
+          type: 'default'
+        }
+      })
+    });
+    console.log('[auth] Successfully reset Telegram Menu Button to default for chat:', chatId);
+  } catch (err) {
+    console.error('Error resetting Telegram Menu Button:', err);
   }
 }
