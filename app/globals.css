@@ -284,3 +284,71 @@ a:focus-visible {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ─── Новые анимации логотипа и Brand Scene ─── */
+@keyframes petal-sweep {
+  0%, 15% {
+    stroke-opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 4px rgba(2, 132, 199, 0.8));
+    opacity: 1;
+  }
+  25%, 100% {
+    stroke-opacity: 0.6;
+    filter: drop-shadow(0 0 1.5px rgba(56, 189, 248, 0.15));
+    opacity: 0.8;
+  }
+}
+
+.petal-animated-1 { animation: petal-sweep 12s infinite; animation-delay: 0s; }
+.petal-animated-2 { animation: petal-sweep 12s infinite; animation-delay: 2s; }
+.petal-animated-3 { animation: petal-sweep 12s infinite; animation-delay: 4s; }
+.petal-animated-4 { animation: petal-sweep 12s infinite; animation-delay: 6s; }
+.petal-animated-5 { animation: petal-sweep 12s infinite; animation-delay: 8s; }
+.petal-animated-6 { animation: petal-sweep 12s infinite; animation-delay: 10s; }
+
+@keyframes wave-float-1 {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  50% { transform: translateY(-8px) rotate(0.5deg) scale(1.03); }
+}
+
+@keyframes wave-float-2 {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  50% { transform: translateY(6px) rotate(-0.5deg) scale(0.97); }
+}
+
+@keyframes wave-float-3 {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  50% { transform: translateY(-4px) rotate(0.2deg) scale(1.01); }
+}
+
+.wave-animated-1 {
+  animation: wave-float-1 12s ease-in-out infinite;
+}
+
+.wave-animated-2 {
+  animation: wave-float-2 15s ease-in-out infinite;
+}
+
+.wave-animated-3 {
+  animation: wave-float-3 18s ease-in-out infinite;
+}
+
+@keyframes glow-breath {
+  0%, 100% { opacity: 0.35; filter: blur(30px); }
+  50% { opacity: 0.55; filter: blur(40px); }
+}
+
+.ambient-glow-animated {
+  animation: glow-breath 8s ease-in-out infinite;
+}
+
+@keyframes particle-drift {
+  0% { transform: translate(0, 0); opacity: 0.15; }
+  50% { opacity: 0.45; }
+  100% { transform: translate(var(--drift-x, 20px), var(--drift-y, -25px)); opacity: 0.15; }
+}
+
+.particle-animated {
+  animation: particle-drift var(--drift-dur, 10s) ease-in-out infinite alternate;
+}
+

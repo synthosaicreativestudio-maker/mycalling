@@ -22,6 +22,7 @@ const STEP_NAMES: Record<number, string> = {
 
 export default function CoachPage() {
   const router = useRouter();
+  const isInitializing = useRef(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -106,13 +107,13 @@ export default function CoachPage() {
       
       try {
         console.log('[auth] Received sessionToken, calling callback...');
-        const res = await fetch(`/api/auth/telegram/callback?token=${sessionToken}`, {
-          credentials: 'include',
-          redirect: 'manual'
+        const res = await fetch(`/api/auth/telegram/callback?token=${sessionToken}&format=json`, {
+          credentials: 'include'
         });
         
         if (!res.ok) {
-          throw new Error(`Callback status not ok: ${res.status}`);
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Callback status not ok: ${res.status}`);
         }
 
         console.log('[auth] Callback successful, setting phone confirmed');
@@ -222,6 +223,9 @@ export default function CoachPage() {
 
   // Инициализация первой реплики коуча
   useEffect(() => {
+    if (isInitializing.current) return;
+    isInitializing.current = true;
+
     async function initSession() {
       setLoading(true);
       try {

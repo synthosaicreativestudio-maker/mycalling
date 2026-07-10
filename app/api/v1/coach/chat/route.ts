@@ -9,7 +9,7 @@ import { generateText, generateJson } from '../../../../lib/gemini';
 const FALLBACK_REPLIES: Record<number, string> = {
   0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы проведем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Скажи, готов ли ты начать?",
   1: "Супер! Теперь давай познакомимся поближе. Напиши, пожалуйста, как тебя зовут, в каком классе ты учишься, сколько тебе лет и из какого ты города?",
-  2: "Приятно познакомиться! А теперь давай выберем удобный способ связи, чтобы я мог присылать тебе итоговый отчет и рекомендации. Проще всего подключить Telegram или MAX ID — так результаты точно не потеряются. Нажми кнопку ниже или введи свой MAX ID!",
+  2: "Приятно познакомиться! А теперь выбери удобный канал связи ниже, чтобы результаты не потерялись. Подключи Telegram или укажи свой MAX ID, и мы сможем продолжить!",
   3: "Здорово, спасибо, что поделился! Давай начнем с мечты: если убрать вообще все ограничения, кем бы ты хотел быть через 10 лет?",
   4: "Интересно! А скажи, кто из известных людей, блогеров, ученых или персонажей фильмов тебя по-настоящему вдохновляет? Какие черты характера или дела в них тебе нравятся больше всего?",
   5: "Понял тебя. Давай подумаем о будущем: что для тебя ценнее всего в твоей работе? Например, создавать новое и творить, руководить и вести людей за собой, зарабатывать много денег или помогать другим?",
@@ -407,6 +407,19 @@ export async function POST(req: Request) {
         console.warn('Extraction failed, using fallback:', err);
       }
 
+      // Всегда подстраховываемся регулярными выражениями на случай сбоев/таймаутов LLM-экстракции
+      const prevHasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1;
+      const prevHasAgeOrGrade = !!extractedData.age || !!extractedData.grade;
+      const prevHasCity = !!extractedData.city && extractedData.city.trim().length > 1;
+
+      const fallbackData = fallbackExtract(message, nextStep, prevHasName, prevHasAgeOrGrade, prevHasCity);
+      parsedData = {
+        ...fallbackData,
+        ...parsedData
+      };
+
+      console.log('[auth] Extraction results:', { parsed: parsedData, fallback: fallbackData });
+
       const cleanMessage = message.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?\s]/g, "");
       if (cleanMessage.length < 2) parsedData.shouldAdvanceStep = false;
 
@@ -505,7 +518,7 @@ export async function POST(req: Request) {
     if (currentVirtualStep < 2) {
       missingFields.push("- Личные данные (Имя, возраст, город проживания). Спроси об этом мягко в рамках знакомства. Нам критически важно узнать это в самом начале.");
     } else if (currentVirtualStep === 2) {
-      missingFields.push("- Подключение канала связи (Telegram или MAX ID). Напиши подростку, что теперь нужно подключить мессенджер Telegram (нажав на кнопку ниже) или ввести свой MAX ID, чтобы прогресс сохранился и мы могли продолжить диалог.");
+      missingFields.push("- Подключение канала связи (Telegram или MAX ID). Предложи подростку выбрать удобный канал связи ниже (подключить Telegram или указать свой MAX ID), чтобы результаты не потерялись, и мы могли продолжить.");
     } else {
       // Шаг сбора психологии
       if (!updatedDreams) {
@@ -585,11 +598,11 @@ ${missingFields.join('\n')}
           replyContent = "Понял тебя. А из какого ты города?";
         }
       } else if (currentVirtualStep === 2) {
-        replyContent = "Приятно познакомиться! А теперь давай выберем удобный способ связи, чтобы я мог присылать тебе итоговый отчет и рекомендации. Проще всего подключить Telegram или MAX ID — так результаты точно не потеряются. Нажми кнопку ниже или введи свой MAX ID!";
+        replyContent = "Приятно познакомиться! А теперь выбери удобный канал связи ниже, чтобы результаты не потерялись. Подключи Telegram или укажи свой MAX ID, и мы сможем продолжить!";
         
         // Специальная заглушка на Шаге 2, если пользователь пишет обычный текст вместо клика по кнопкам или ввода MAX ID
         if (!isInitMessage && !updatedPhone) {
-          replyContent = "Пожалуйста, нажми на кнопку ниже, чтобы подключить Telegram, или введи свой MAX ID. Это нужно, чтобы результаты не потерялись! Как только подключишься, мы сразу начнем самое интересное. 😉";
+          replyContent = "Пожалуйста, выбери удобный канал связи ниже (подключи Telegram или укажи свой MAX ID), чтобы результаты не потерялись! Как только подключишься, мы сразу продолжим. 😉";
         }
       }
     } else {
@@ -648,4 +661,67 @@ ${missingFields.join('\n')}
     console.error('Error in coach chat route:', error);
     return NextResponse.json({ error: error.message || 'Внутренняя ошибка сервера' }, { status: 500 });
   }
+}
+
+/**
+ * Резервная экстракция данных с помощью регулярных выражений при сбоях ИИ
+ */
+function fallbackExtract(
+  message: string, 
+  currentStep: number, 
+  hasName: boolean, 
+  hasAgeOrGrade: boolean, 
+  hasCity: boolean
+): Record<string, any> {
+  const result: Record<string, any> = { shouldAdvanceStep: true };
+  const cleanMsg = message.trim();
+  
+  if (currentStep === 1) {
+    // 1. Извлечение имени
+    if (!hasName) {
+      const nameMatch = cleanMsg.match(/(?:меня зовут|я|зовут|это)\s+([А-ЯЁа-яёA-Za-z]+)/i);
+      if (nameMatch && nameMatch[1]) {
+        result.fullName = nameMatch[1].charAt(0).toUpperCase() + nameMatch[1].slice(1).toLowerCase();
+      } else if (cleanMsg.length > 1 && cleanMsg.length < 20 && !/\d/.test(cleanMsg)) {
+        const words = cleanMsg.split(/\s+/);
+        if (words.length <= 2) {
+          const firstWord = words[0].replace(/[^А-ЯЁа-яёA-Za-z]/g, "");
+          if (firstWord.length > 1) {
+            result.fullName = firstWord.charAt(0).toUpperCase() + firstWord.slice(1).toLowerCase();
+          }
+        }
+      }
+    }
+
+    // 2. Извлечение возраста и класса
+    if (hasName && !hasAgeOrGrade) {
+      const ageMatch = cleanMsg.match(/(\d+)\s*(?:лет|года|год)/i) || cleanMsg.match(/(?:мне|я)\s+(\d+)/i) || cleanMsg.match(/\b(1[0-9])\b/);
+      if (ageMatch) {
+        result.age = parseInt(ageMatch[1]);
+      }
+
+      const gradeMatch = cleanMsg.match(/(\d+)\s*(?:класс|классе)/i) || cleanMsg.match(/\b([1-9]|1[0-1])\b/);
+      if (gradeMatch) {
+        result.grade = gradeMatch[1] + " класс";
+      }
+    }
+
+    // 3. Извлечение города
+    if (hasName && hasAgeOrGrade && !hasCity) {
+      const cityMatch = cleanMsg.match(/(?:из|город|живу в)\s+([А-ЯЁа-яёA-Za-z\-]+)/i);
+      if (cityMatch && cityMatch[1]) {
+        result.city = cityMatch[1].charAt(0).toUpperCase() + cityMatch[1].slice(1).toLowerCase();
+      } else if (cleanMsg.length > 2 && cleanMsg.length < 25 && !/\d/.test(cleanMsg)) {
+        const words = cleanMsg.split(/\s+/);
+        if (words.length <= 2) {
+          const lastWord = words[words.length - 1].replace(/[^А-ЯЁа-яёA-Za-z\-]/g, "");
+          if (lastWord.length > 2) {
+            result.city = lastWord.charAt(0).toUpperCase() + lastWord.slice(1).toLowerCase();
+          }
+        }
+      }
+    }
+  }
+  
+  return result;
 }

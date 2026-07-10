@@ -4,14 +4,18 @@ import prisma from '../../../../lib/prisma';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const isJson = searchParams.get('format') === 'json';
   try {
-    const { searchParams } = new URL(request.url);
     const token = searchParams.get('token');
 
-    console.log('[auth] Callback received request for token:', token ? '***' : null);
+    console.log('[auth] Callback received request for token:', token ? '***' : null, { isJson });
 
     if (!token) {
       console.warn('[auth] Callback missing token');
+      if (isJson) {
+        return NextResponse.json({ error: 'missing_token' }, { status: 400 });
+      }
       return NextResponse.redirect(new URL('/auth?error=missing_token', request.url));
     }
 
@@ -21,6 +25,9 @@ export async function GET(request: Request) {
 
     if (!session || session.expiresAt < new Date()) {
       console.warn('[auth] Callback session not found or expired:', { exists: !!session });
+      if (isJson) {
+        return NextResponse.json({ error: 'expired_session' }, { status: 400 });
+      }
       return NextResponse.redirect(new URL('/auth?error=expired_session', request.url));
     }
 
@@ -42,7 +49,9 @@ export async function GET(request: Request) {
 
     console.log('[auth] Callback redirection target:', { userId: session.userId, redirectPath });
 
-    const response = NextResponse.redirect(new URL(redirectPath, request.url));
+    const response = isJson
+      ? NextResponse.json({ success: true, redirectPath })
+      : NextResponse.redirect(new URL(redirectPath, request.url));
     
     // Устанавливаем куку сессии Better Auth
     const isHttps = request.url.startsWith('https:');
@@ -63,6 +72,9 @@ export async function GET(request: Request) {
     return response;
   } catch (error) {
     console.error('Error in telegram callback:', error);
+    if (isJson) {
+      return NextResponse.json({ error: 'internal_error' }, { status: 500 });
+    }
     return NextResponse.redirect(new URL('/auth?error=internal_error', request.url));
   }
 }

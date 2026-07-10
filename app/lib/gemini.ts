@@ -1,8 +1,8 @@
 // Модуль интеграции с ИИ через Freemodel.dev API с сохранением сигнатур Gemini хелперов.
 import https from 'https';
 
-// Используем рабочий API-ключ от Freemodel.dev, предоставленный пользователем
-const FREEMODEL_API_KEY = "fe_oa_6ec0280fc09c7fefefe7daf77633e730cec2de86201cedd0";
+// Используем рабочий API-ключ от Freemodel.dev (из .env или хардкод как резерв)
+const FREEMODEL_API_KEY = process.env.PROXYAPI_KEY || "fe_oa_6ec0280fc09c7fefefe7daf77633e730cec2de86201cedd0";
 const FREEMODEL_URL = "/v1/chat/completions";
 
 // Используем модель Claude Sonnet по запросу пользователя для идеального коучинга
@@ -16,7 +16,7 @@ interface Message {
 /**
  * Выполняет запрос к Freemodel API с использованием стабильного модуля https.
  */
-async function callFreemodelRaw(requestBody: any): Promise<any> {
+async function callFreemodelRaw(requestBody: any, timeoutMs = 20000): Promise<any> {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify(requestBody);
     
@@ -30,7 +30,7 @@ async function callFreemodelRaw(requestBody: any): Promise<any> {
         'Authorization': `Bearer ${FREEMODEL_API_KEY}`,
         'Content-Length': Buffer.byteLength(postData)
       },
-      timeout: 20000 // 20 секунд таймаут
+      timeout: timeoutMs // Динамический таймаут
     };
 
     const req = https.request(options, (res) => {
@@ -107,6 +107,18 @@ export async function generateText(systemPrompt: string, history: Message[], tem
 }
 
 /**
+ * Вспомогательная функция для очистки строки от markdown-оберток JSON-кода.
+ */
+function cleanJsonString(str: string): string {
+  let clean = str.trim();
+  if (clean.startsWith('```')) {
+    // Удаляем ```json или ``` в начале и ``` в конце
+    clean = clean.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/, '').trim();
+  }
+  return clean;
+}
+
+/**
  * Генерирует строго типизированный JSON.
  */
 export async function generateJson(systemPrompt: string, prompt: string, schema: any, temperature = 0.1): Promise<any> {
@@ -129,12 +141,18 @@ export async function generateJson(systemPrompt: string, prompt: string, schema:
     max_tokens: 2048
   };
 
-  const responseData = await callFreemodelRaw(requestBody);
+  const responseData = await callFreemodelRaw(requestBody, 5000); // 5 секунд лимит для быстрой JSON экстракции
   const text = responseData.choices?.[0]?.message?.content;
   
   if (!text) {
     throw new Error("Empty response from Freemodel API during JSON generation");
   }
 
-  return JSON.parse(text.trim());
+  const cleanedText = cleanJsonString(text);
+  try {
+    return JSON.parse(cleanedText);
+  } catch (err: any) {
+    console.error('[auth] Failed to parse JSON response. Raw response was:', text);
+    throw new Error(`JSON parsing failed: ${err.message}. Raw text: ${text}`);
+  }
 }

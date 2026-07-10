@@ -108,7 +108,7 @@ export default function HomePage() {
             variants={sectionVariants}
             initial="hidden"
             animate="visible"
-            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[70vw] lg:max-w-[65vw]"
+            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[50vw] lg:max-w-[55vw]"
           >
             <m.p
               custom={0.2}
