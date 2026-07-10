@@ -88,6 +88,7 @@ export default function AssessmentPage() {
       questionStartTime.current = Date.now();
       setImgError(false);
       setPrevBlock(store.currentQuestion.test_type);
+      setLastSelectedValue(null); // Сброс выделения для нового вопроса
     }
   }, [store.currentQuestion?.question_id]);
 

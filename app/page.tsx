@@ -99,7 +99,7 @@ export default function HomePage() {
             variants={sectionVariants}
             initial="hidden"
             animate="visible"
-            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-xl lg:max-w-3xl"
+            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-2xl lg:max-w-4xl"
           >
             <m.p
               custom={0.2}
@@ -114,7 +114,7 @@ export default function HomePage() {
               variants={heroVariants}
               className="w-full text-3xl leading-[1.15] font-extrabold text-white font-sans sm:text-4xl md:text-5xl lg:text-[3.5rem] tracking-tight mb-1"
             >
-              Бесплатно поможем школьнику <br className="hidden md:inline" />найти своё призвание
+              Бесплатно поможем школьнику <br className="hidden sm:inline" />найти своё призвание
             </m.h1>
 
             <m.p

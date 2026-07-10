@@ -207,10 +207,7 @@ export default function CoachPage() {
           })
         });
         const data = await res.json();
-        if (data.sessionStatus === 'COMPLETED' && !shouldReset) {
-          router.push('/assessment');
-          return;
-        }
+        // Позволяем пользователю просматривать результаты завершенной сессии без редиректа
         if (data.history && data.history.length > 0) {
           setMessages(data.history);
           setSessionId(data.sessionId);
