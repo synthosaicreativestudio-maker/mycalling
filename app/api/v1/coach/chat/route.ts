@@ -7,14 +7,24 @@ import { auth } from '../../../../lib/auth';
 import { generateText, generateJson } from '../../../../lib/gemini';
 
 const FALLBACK_REPLIES: Record<number, string> = {
-  0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы проведем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Скажи, готов ли ты начать?",
-  1: "Супер! Теперь давай познакомимся поближе. Напиши, пожалуйста, как тебя зовут, в каком классе ты учишься, сколько тебе лет и из какого ты города?",
-  2: "Приятно познакомиться! А теперь выбери удобный канал связи ниже, чтобы результаты не потерялись, и мы сможем продолжить!",
-  3: "Здорово, спасибо, что поделился! Давай начнем с мечты: если убрать вообще все ограничения, кем бы ты хотел быть через 10 лет?",
-  4: "Интересно! А скажи, кто из известных людей, блогеров, ученых или персонажей фильмов тебя по-настоящему вдохновляет? Какие черты характера или дела в них тебе нравятся больше всего?",
-  5: "Понял тебя. Давай подумаем о будущем: что для тебя ценнее всего в твоей работе? Например, создавать новое и творить, руководить и вести людей за собой, зарабатывать много денег или помогать другим?",
-  6: "Ясно! А как ты обычно принимаешь важные решения: садишься и долго взвешиваешь факты и логику, или больше полагаешься на интуицию и внутренний голос?",
-  7: "Слушай, я проанализировал наш диалог. Ты отлично раскрылся! Ты можешь скачать предварительный отчет в формате PDF прямо сейчас. Теперь давай закрепим результаты интерактивными тестами!"
+  0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы проведем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Чтобы я смог составить максимально точный профиль, отвечай, пожалуйста, подробно и честно. Готов начать?",
+  1: "Супер! Теперь давай познакомимся поближе. Помни про подробные ответы — пиши развернуто. Напиши, пожалуйста, как тебя зовут, в каком классе ты учишься, сколько тебе лет и из какого ты города?",
+  2: "Расскажи, чем ты любишь заниматься в свободное время? Какое у тебя хобби, или от какого дела ты по-настоящему кайфуешь и теряешь счет времени?",
+  3: "Здорово! А давай заглянем в школу: какие предметы тебе даются легче всего и вызывают хоть какой-то интерес, а от каких хочется выть?",
+  4: "Давай теперь помечтаем: если убрать вообще все ограничения, кем бы ты хотел быть через 10 лет?",
+  5: "Интересно! А скажи, кто из известных людей, блогеров, ученых или персонажей фильмов тебя по-настоящему вдохновляет? Какие черты характера или дела в них тебе нравятся больше всего?",
+  6: "Понял тебя. Давай поговорим о твоих родителях: как их зовут, какие у вас отношения? Кем они видят тебя в будущем и советуют ли тебе какие-то конкретные профессии?",
+  7: "Спасибо за искренность. А что тебя больше всего пугает или напрягает, когда ты думаешь о будущем выборе профессии? Страх ошибиться, сложность экзаменов или что-то другое?",
+  8: "Интересно. А пробовал ли ты уже делать что-то практическое? Например, делать проекты, подрабатывать, вести свой блог, программировать или создавать что-то руками? Что понравилось, а что нет?",
+  9: "Понял тебя. А как тебе удобнее работать в будущем: сидеть дома на удаленке в тишине, ходить в современный офис и быть в центре движухи, или постоянно путешествовать и быть в разъездах?",
+  10: "Интересно! А если посмотреть на твое мышление: тебе легче и интереснее работать с цифрами, кодом и формулами, создавать рисунки и визуальные образы, или общаться с людьми и писать тексты?",
+  11: "Ясно! А что для тебя будет главным показателем успеха в карьере: зарабатывать очень много денег, получить мировую славу и признание, создать продукт, который изменит жизни миллионов, или иметь баланс работы и личной жизни?",
+  12: "Слушай, а откуда ты берешь энергию, когда устаешь? Что тебя наполняет силами — спорт, прогулки в одиночестве, игры, общение с близкими? И что, наоборот, сильнее всего утомляет?",
+  13: "Очень отзывается. А какую роль в компании друзей или в школьном проекте ты обычно выбираешь? Ты лидер, который всех организует; креатор, который придумывает идеи; или ответственный исполнитель, который делает основную работу руками?",
+  14: "Понял. А насколько тебе важна свобода действий? Тебе нравится самому решать, как и что делать, или комфортнее работать по понятным правилам, инструкциям и под руководством опытного наставника?",
+  15: "Ясно! И последний вопрос: что для тебя ценнее всего в твоей работе (например, свобода и творчество, стабильность и большие деньги, руководство людьми или помощь другим)? И как ты обычно принимаешь важные решения — головой или сердцем?",
+  16: "Слушай, мы проделали невероятную работу! Твой профиль талантов почти готов. Давай сохраним его, чтобы он не потерялся. Подключи Telegram или введи свой MAX ID ниже, и я сформирую твой финальный отчет!",
+  17: "Слушай, я проанализировал наш диалог. Ты отлично раскрылся! Ты можешь скачать свой предварительный отчет в формате PDF прямо сейчас. Теперь давай закрепим результаты интерактивными тестами!"
 };
 
 // ============================
@@ -286,8 +296,19 @@ export async function POST(req: Request) {
     // Вычисляем, какие блоки информации уже собраны
     const hasPhone = !!coachSession.user.phone || !!extractedData.phone;
     const hasPersonalInfo = !!extractedData.fullName && (!!extractedData.age || !!extractedData.grade) && !!extractedData.city;
+    const hasHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
+    const hasSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
     const hasDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
     const hasIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
+    const hasParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
+    const hasFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
+    const hasExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
+    const hasWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
+    const hasThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
+    const hasSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
+    const hasEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
+    const hasTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
+    const hasAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
     const hasValues = !!extractedData.values && extractedData.values.trim().length > 6;
     const hasDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
 
@@ -295,8 +316,19 @@ export async function POST(req: Request) {
     let blocksCompleted = 0;
     if (hasPersonalInfo) blocksCompleted++;
     if (hasPhone) blocksCompleted++;
+    if (hasHobbies) blocksCompleted++;
+    if (hasSchoolSubjects) blocksCompleted++;
     if (hasDreams) blocksCompleted++;
     if (hasIdols) blocksCompleted++;
+    if (hasParents) blocksCompleted++;
+    if (hasFears) blocksCompleted++;
+    if (hasExperience) blocksCompleted++;
+    if (hasWorkFormat) blocksCompleted++;
+    if (hasThinkingType) blocksCompleted++;
+    if (hasSuccessMeasure) blocksCompleted++;
+    if (hasEnergySources) blocksCompleted++;
+    if (hasTeamRole) blocksCompleted++;
+    if (hasAutonomyStyle) blocksCompleted++;
     if (hasValues) blocksCompleted++;
     if (hasDecisionStyle) blocksCompleted++;
 
@@ -304,23 +336,59 @@ export async function POST(req: Request) {
     let currentStepBefore = 1;
     if (!hasPersonalInfo) {
       currentStepBefore = 1;
-    } else if (!hasPhone) {
-      currentStepBefore = 2;
     } else {
       let psychoBlocksBefore = 0;
+      if (hasHobbies) psychoBlocksBefore++;
+      if (hasSchoolSubjects) psychoBlocksBefore++;
       if (hasDreams) psychoBlocksBefore++;
       if (hasIdols) psychoBlocksBefore++;
+      if (hasParents) psychoBlocksBefore++;
+      if (hasFears) psychoBlocksBefore++;
+      if (hasExperience) psychoBlocksBefore++;
+      if (hasWorkFormat) psychoBlocksBefore++;
+      if (hasThinkingType) psychoBlocksBefore++;
+      if (hasSuccessMeasure) psychoBlocksBefore++;
+      if (hasEnergySources) psychoBlocksBefore++;
+      if (hasTeamRole) psychoBlocksBefore++;
+      if (hasAutonomyStyle) psychoBlocksBefore++;
       if (hasValues) psychoBlocksBefore++;
       if (hasDecisionStyle) psychoBlocksBefore++;
-      currentStepBefore = Math.min(5, 3 + psychoBlocksBefore);
+      
+      // Свободный диалог длится до Шага 15 (когда собрано 14 психологических полей)
+      if (psychoBlocksBefore < 14) {
+        currentStepBefore = Math.min(15, 2 + psychoBlocksBefore);
+      } else {
+        if (!hasPhone) {
+          currentStepBefore = 16; // Шаг подключения Telegram
+        } else {
+          currentStepBefore = 17; // Шаг подведения итогов
+        }
+      }
     }
 
-    // Все содержательные психологические блоки должны быть обязательно собраны
-    const allPsychologyCollected = hasPersonalInfo && hasDreams && hasIdols && hasValues && hasDecisionStyle;
+    // Все содержательные психологические блоки должны быть собраны (или хотя бы 12 из 15 для стабильности)
+    let psychoBlocksCount = 0;
+    if (hasHobbies) psychoBlocksCount++;
+    if (hasSchoolSubjects) psychoBlocksCount++;
+    if (hasDreams) psychoBlocksCount++;
+    if (hasIdols) psychoBlocksCount++;
+    if (hasParents) psychoBlocksCount++;
+    if (hasFears) psychoBlocksCount++;
+    if (hasExperience) psychoBlocksCount++;
+    if (hasWorkFormat) psychoBlocksCount++;
+    if (hasThinkingType) psychoBlocksCount++;
+    if (hasSuccessMeasure) psychoBlocksCount++;
+    if (hasEnergySources) psychoBlocksCount++;
+    if (hasTeamRole) psychoBlocksCount++;
+    if (hasAutonomyStyle) psychoBlocksCount++;
+    if (hasValues) psychoBlocksCount++;
+    if (hasDecisionStyle) psychoBlocksCount++;
+
+    const allPsychologyCollected = hasPersonalInfo && (psychoBlocksCount >= 12);
     
-    // Сессия считается готовой к финалу, если собраны ключевые психологические параметры
+    // Сессия считается готовой к финалу, если собран необходимый объем данных
     const isFinalStep = allPsychologyCollected;
-    const nextStep = isFinalStep ? 6 : Math.min(5, blocksCompleted);
+    const nextStep = isFinalStep ? (hasPhone ? 17 : 16) : Math.min(15, 2 + psychoBlocksCount);
     extractedData.currentStep = nextStep;
 
     // Флаг того, что это первое инициализирующее сообщение
@@ -342,7 +410,7 @@ export async function POST(req: Request) {
     if (isInitMessage && transcript.length === 0) {
       let greeting = FALLBACK_REPLIES[0];
       if (fromLoginError) {
-        greeting = 'Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник. Я вижу, ты хотел зайти в Личный кабинет, но для этого нужно сначала пройти нашу короткую сессию. Не переживай — это не скучный тест, а увлекательное исследование твоих талантов. Готов начать?';
+        greeting = 'Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник. Я вижу, ты хотел зайти в Личный кабинет, но для этого нужно сначала пройти нашу короткую сессию. Не переживай — это не скучный тест, а увлекательное исследование твоих талантов. Отвечай максимально подробно, честно и развернуто — так я смогу точнее всего составить карту твоих талантов. Готов начать?';
       }
       transcript.push({ role: 'assistant', content: greeting, timestamp: new Date().toISOString() });
       
@@ -411,16 +479,23 @@ export async function POST(req: Request) {
         properties.grade = { type: "STRING" };
         properties.city = { type: "STRING" };
         fieldsToExtract += ", fullName, age, grade, city";
-      } else if (currentStepBefore === 3) {
+      } else if (currentStepBefore >= 3 && currentStepBefore <= 15) {
+        properties.hobbies = { type: "STRING" };
+        properties.schoolSubjects = { type: "STRING" };
         properties.dreams = { type: "STRING" };
-        fieldsToExtract += ", dreams";
-      } else if (currentStepBefore === 4) {
         properties.idols = { type: "STRING" };
-        fieldsToExtract += ", idols";
-      } else if (currentStepBefore === 5) {
+        properties.parents = { type: "STRING" };
+        properties.fears = { type: "STRING" };
+        properties.experience = { type: "STRING" };
+        properties.workFormat = { type: "STRING" };
+        properties.thinkingType = { type: "STRING" };
+        properties.successMeasure = { type: "STRING" };
+        properties.energySources = { type: "STRING" };
+        properties.teamRole = { type: "STRING" };
+        properties.autonomyStyle = { type: "STRING" };
         properties.values = { type: "STRING" };
         properties.decisionStyle = { type: "STRING" };
-        fieldsToExtract += ", values, decisionStyle";
+        fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle";
       }
 
       const extractionPrompt = `Ты — анализатор текста. Проанализируй сообщение пользователя в контексте диалога профориентации. Извлеки данные в формате JSON (без markdown).
@@ -454,8 +529,19 @@ export async function POST(req: Request) {
       if (parsedData.age) extractedData.age = parsedData.age;
       if (parsedData.grade) extractedData.grade = parsedData.grade;
       if (parsedData.city) extractedData.city = parsedData.city;
+      if (parsedData.hobbies) extractedData.hobbies = (extractedData.hobbies ? extractedData.hobbies + '; ' : '') + parsedData.hobbies;
+      if (parsedData.schoolSubjects) extractedData.schoolSubjects = (extractedData.schoolSubjects ? extractedData.schoolSubjects + '; ' : '') + parsedData.schoolSubjects;
       if (parsedData.dreams) extractedData.dreams = (extractedData.dreams ? extractedData.dreams + '; ' : '') + parsedData.dreams;
       if (parsedData.idols) extractedData.idols = (extractedData.idols ? extractedData.idols + '; ' : '') + parsedData.idols;
+      if (parsedData.parents) extractedData.parents = (extractedData.parents ? extractedData.parents + '; ' : '') + parsedData.parents;
+      if (parsedData.fears) extractedData.fears = (extractedData.fears ? extractedData.fears + '; ' : '') + parsedData.fears;
+      if (parsedData.experience) extractedData.experience = (extractedData.experience ? extractedData.experience + '; ' : '') + parsedData.experience;
+      if (parsedData.workFormat) extractedData.workFormat = (extractedData.workFormat ? extractedData.workFormat + '; ' : '') + parsedData.workFormat;
+      if (parsedData.thinkingType) extractedData.thinkingType = (extractedData.thinkingType ? extractedData.thinkingType + '; ' : '') + parsedData.thinkingType;
+      if (parsedData.successMeasure) extractedData.successMeasure = (extractedData.successMeasure ? extractedData.successMeasure + '; ' : '') + parsedData.successMeasure;
+      if (parsedData.energySources) extractedData.energySources = (extractedData.energySources ? extractedData.energySources + '; ' : '') + parsedData.energySources;
+      if (parsedData.teamRole) extractedData.teamRole = (extractedData.teamRole ? extractedData.teamRole + '; ' : '') + parsedData.teamRole;
+      if (parsedData.autonomyStyle) extractedData.autonomyStyle = (extractedData.autonomyStyle ? extractedData.autonomyStyle + '; ' : '') + parsedData.autonomyStyle;
       if (parsedData.values) extractedData.values = (extractedData.values ? extractedData.values + '; ' : '') + parsedData.values;
       if (parsedData.decisionStyle) extractedData.decisionStyle = (extractedData.decisionStyle ? extractedData.decisionStyle + '; ' : '') + parsedData.decisionStyle;
     }
@@ -471,30 +557,58 @@ export async function POST(req: Request) {
     const updatedPersonalInfo = hasName && hasAgeOrGrade && hasCity;
     const updatedDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
     const updatedIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
+    const updatedParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
+    const updatedHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
+    const updatedSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
+    const updatedFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
+    const updatedExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
+    const updatedWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
+    const updatedThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
+    const updatedSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
+    const updatedEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
+    const updatedTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
+    const updatedAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
     const updatedValues = !!extractedData.values && extractedData.values.trim().length > 6;
     const updatedDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
 
     // Считаем заполненные психологические блоки
     let psychoBlocks = 0;
+    if (updatedHobbies) psychoBlocks++;
+    if (updatedSchoolSubjects) psychoBlocks++;
     if (updatedDreams) psychoBlocks++;
     if (updatedIdols) psychoBlocks++;
+    if (updatedParents) psychoBlocks++;
+    if (updatedFears) psychoBlocks++;
+    if (updatedExperience) psychoBlocks++;
+    if (updatedWorkFormat) psychoBlocks++;
+    if (updatedThinkingType) psychoBlocks++;
+    if (updatedSuccessMeasure) psychoBlocks++;
+    if (updatedEnergySources) psychoBlocks++;
+    if (updatedTeamRole) psychoBlocks++;
+    if (updatedAutonomyStyle) psychoBlocks++;
     if (updatedValues) psychoBlocks++;
     if (updatedDecisionStyle) psychoBlocks++;
 
     // Расчет шага строго поэтапно
-    let currentVirtualStep = 0;
+    let currentVirtualStep = 1;
     if (!updatedPersonalInfo) {
       currentVirtualStep = 1; // Шаг знакомства и личных данных
-    } else if (!updatedPhone) {
-      currentVirtualStep = 2; // Шаг выбора канала связи (Telegram / MAX ID)
     } else {
-      // Шаги 3, 4, 5 в зависимости от заполненных психологических блоков
-      currentVirtualStep = Math.min(5, 3 + psychoBlocks);
+      // Свободный диалог длится до Шага 15 (когда собрано 14 психологических полей)
+      if (psychoBlocks < 14) {
+        currentVirtualStep = Math.min(15, 2 + psychoBlocks);
+      } else {
+        if (!updatedPhone) {
+          currentVirtualStep = 16; // Шаг подключения Telegram
+        } else {
+          currentVirtualStep = 17; // Шаг подведения итогов
+        }
+      }
     }
 
-    const isFinalStateNow = updatedPersonalInfo && updatedPhone && updatedDreams && updatedIdols && updatedValues && updatedDecisionStyle;
-    if (isFinalStateNow && currentStepBefore === 5) {
-      currentVirtualStep = 6; // Подведение итогов
+    const isFinalStateNow = updatedPersonalInfo && updatedPhone && (psychoBlocks >= 12);
+    if (isFinalStateNow) {
+      currentVirtualStep = 17;
     }
 
     extractedData.currentStep = currentVirtualStep;
@@ -528,11 +642,44 @@ export async function POST(req: Request) {
     if (updatedPhone) {
       collectedFields.push(`- Канал связи: Telegram/телефон подключен и подтвержден.`);
     }
+    if (updatedHobbies) {
+      collectedFields.push(`- Увлечения и хобби: ${extractedData.hobbies}`);
+    }
+    if (updatedSchoolSubjects) {
+      collectedFields.push(`- Любимые/нелюбимые предметы в школе: ${extractedData.schoolSubjects}`);
+    }
     if (updatedDreams) {
       collectedFields.push(`- Мечты и образ будущего: ${extractedData.dreams}`);
     }
     if (updatedIdols) {
       collectedFields.push(`- Вдохновители и авторитеты: ${extractedData.idols}`);
+    }
+    if (updatedParents) {
+      collectedFields.push(`- Отношения с родителями и их поддержка: ${extractedData.parents}`);
+    }
+    if (updatedFears) {
+      collectedFields.push(`- Страхи, барьеры и сомнения в выборе: ${extractedData.fears}`);
+    }
+    if (updatedExperience) {
+      collectedFields.push(`- Практический опыт и пробы: ${extractedData.experience}`);
+    }
+    if (updatedWorkFormat) {
+      collectedFields.push(`- Желаемый формат работы: ${extractedData.workFormat}`);
+    }
+    if (updatedThinkingType) {
+      collectedFields.push(`- Тип мышления: ${extractedData.thinkingType}`);
+    }
+    if (updatedSuccessMeasure) {
+      collectedFields.push(`- Мерило успеха: ${extractedData.successMeasure}`);
+    }
+    if (updatedEnergySources) {
+      collectedFields.push(`- Источники энергии и утомляемость: ${extractedData.energySources}`);
+    }
+    if (updatedTeamRole) {
+      collectedFields.push(`- Командная роль: ${extractedData.teamRole}`);
+    }
+    if (updatedAutonomyStyle) {
+      collectedFields.push(`- Отношение к автономии/правилам: ${extractedData.autonomyStyle}`);
     }
     if (updatedValues) {
       collectedFields.push(`- Ценности в работе: ${extractedData.values}`);
@@ -544,15 +691,48 @@ export async function POST(req: Request) {
     // Заполняем недостающие поля СТРОГО на основе текущего шага
     if (currentVirtualStep < 2) {
       missingFields.push("- Личные данные (Имя, возраст, город проживания). Спроси об этом мягко в рамках знакомства. Нам критически важно узнать это в самом начале.");
-    } else if (currentVirtualStep === 2) {
+    } else if (currentVirtualStep === 16) {
       missingFields.push("- Подключение канала связи (Telegram или MAX ID). Предложи подростку выбрать удобный канал связи ниже (подключить Telegram или указать свой MAX ID), чтобы результаты не потерялись, и мы могли продолжить.");
     } else {
       // Шаг сбора психологии
+      if (!updatedHobbies) {
+        missingFields.push("- Увлечения и хобби (Flow state): Чем подросток обожает заниматься в свободное время, от какого дела он кайфует и теряет счет времени.");
+      }
+      if (!updatedSchoolSubjects) {
+        missingFields.push("- Школа и предметы: Какие предметы даются легко и вызывают хоть какой-то интерес, а какие вызывают скуку или трудности.");
+      }
       if (!updatedDreams) {
         missingFields.push("- Мечты и образ будущего: Кем подросток хочет быть через 10 лет без ограничений (методика WOOP / Внутренняя Игра Голви для снятия страхов и раскрытия амбиций).");
       }
       if (!updatedIdols) {
         missingFields.push("- Кумиры: Люди, блогеры, ученые или персонажи фильмов, которые вдохновляют, и какие качества в них привлекают подростка больше всего (проективная методика Strengths-Based coaching).");
+      }
+      if (!updatedParents) {
+        missingFields.push("- Отношения с родителями и их поддержка: Как зовут родителей, какие с ними отношения, кем они видят подростка в будущем и насколько сильно влияют на его выбор.");
+      }
+      if (!updatedFears) {
+        missingFields.push("- Страхи и барьеры: Что больше всего пугает или вызывает стресс при мысли о будущем выборе (страх ошибиться, сложность экзаменов, неопределенность).");
+      }
+      if (!updatedExperience) {
+        missingFields.push("- Практический опыт: Был ли уже какой-то опыт проектов, подработки, кружков? Что понравилось, а от чего тошнило?");
+      }
+      if (!updatedWorkFormat) {
+        missingFields.push("- Желаемый формат работы и среда: Офис (работа в команде, движ), удаленка/фриланс (свобода, дом) или частые командировки/полевые условия.");
+      }
+      if (!updatedThinkingType) {
+        missingFields.push("- Тип мышления и обработки данных: Логика и формулы (технарь), образы и творчество (дизайнер/креатор) или тексты и люди (гуманитарий).");
+      }
+      if (!updatedSuccessMeasure) {
+        missingFields.push("- Мерило успеха и амбиции: Деньги и стабильность, слава и признание, создание продукта/изменение мира, либо баланс работы и жизни.");
+      }
+      if (!updatedEnergySources) {
+        missingFields.push("- Источники энергии и утомляемость: От чего подросток заряжается энергией (спорт, тишина, общение) и что его моментально выматывает.");
+      }
+      if (!updatedTeamRole) {
+        missingFields.push("- Командная роль: Кто он в группе (капитан/лидер, генератор идей, ответственный исполнитель или дипломат).");
+      }
+      if (!updatedAutonomyStyle) {
+        missingFields.push("- Отношение к автономии: Нужна ли ему полная свобода принятия решений или комфортнее работать по понятным правилам и инструкциям.");
       }
       if (!updatedValues) {
         missingFields.push("- Ценности и мотивация: Что подросток ценит в будущей работе (свобода творчества, стабильность/деньги, лидерство, помощь другим).");
@@ -571,17 +751,18 @@ export async function POST(req: Request) {
 
 Твоя единственная задача на этом финальном шаге:
 1. Выдать глубокое, вдохновляющее и невероятно эмпатичное резюме диалога (4-5 предложений), начав его со слов: «Слушай, я проанализировал наш диалог...» или похожей личной фразы.
-2. Сделай акцент на его сильных сторонах, мечтах и ценностях, которые он упомянул (определи его архетип потенциала, например, Создатель, Исследователь, Лидер, Гуманист).
-3. Объясни, что первичный профиль успешно сформирован, и предложи скачать отчет в формате PDF прямо в чате.
-4. Пригласи подростка пройти короткие интерактивные тесты на платформе, чтобы дополнить картину его талантов.
+2. Сделай акцент на его сильных сторонах, мечтах и ценностях, которые он упомянул.
+3. На основе его ответов (особенно про суперсилу, кумиров и отношение к трудностям) определи его ведущий архетип по Юнгу (Пирсон-Марр): например, Творец (желание создавать новое), Искатель (стремление к свободе и открытиям), Мудрец (поиск истины и логика), Герой (преодоление преград), Правитель (контроль и лидерство), Заботливый/Опекун (помощь другим) или Шут (юмор и игра). Назови этот архетип и коротко объясни подростку, в чем его суперсила.
+4. Объясни, что первичный профиль успешно сформирован, и предложи скачать отчет в формате PDF прямо в чате.
+5. Пригласи подростка пройти короткие интерактивные тесты на платформе, чтобы дополнить картину его талантов.
 НИКАКИХ новых вопросов в конце не задавай. Ты завершаешь сессию.`;
     } else if (currentVirtualStep === 1) {
       systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
 Твоя цель на текущем этапе диалога — познакомимся с подростком и собрать его личные данные: имя, сколько лет/класс и город проживания.
 
-Веди живой, дружеский, эмпатичный диалог:
+Веди живой, дружеский, эмпатичный диалог на равных:
 1. Тепло реагируй на ответы подростка. Например, если он назвал свой город (например, Тюмень), искренне похвали его (например: «О, Тюмень — классный город, один из лучших в Сибири!» или «Круто, у вас там отличные набережная и термальные источники!»). Если он назвал свой класс (например, 8-й класс), подбодри его (например: «8-й класс — самое лучшее время, чтобы начать приглядываться к профессиям, и я тебе в этом помогу!»).
-2. Спроси о недостающих данных, но делай это мягко и непринужденно в формате диалога на равных. Не устраивай допрос.
+2. Спроси о недостающих данных, но делай это мягко и непринужденно. Ты можешь использовать как открытые, так и закрытые или уточняющие вопросы (например, спросить конкретно: "Ты учишься в 8 классе, верно?" или "А из какого ты города?"), чтобы подростку было комфортно отвечать.
 Недостающие данные:
 ${missingFields.join('\n')}
 
@@ -590,6 +771,7 @@ ${collectedFields.length > 0 ? collectedFields.join('\n') : '- Пока ниче
 
 Критически важные правила общения:
 - Задавай строго ОДИН простой вопрос за раз. Не перегружай подростка.
+- Разбавляй диалог уместным молодежным юмором, шутками про школу или уроки, легкой самоиронией. Это должно быть похоже на теплое общение со старшим бро, а не на допрос в ведомстве!
 - Длина твоих реплик: до 3 предложений. Твоя речь должна быть живой, человечной, дружелюбной и понятной современному подростку.
 - Категорически запрещено использовать слова «ИИ», «алгоритм», «бот», «робот». Ты — коуч Роман.`;
     } else {
@@ -600,15 +782,17 @@ ${collectedFields.length > 0 ? collectedFields.join('\n') : '- Пока ниче
 1. CLEAR (Хокинс):
    - Contract (Контракт): Создай безопасное, доверительное пространство на равных. Покажи, что здесь нет оценок или тестов на правильность.
    - Listen (Слушание): Демонстрируй глубокое эмпатичное слушание. В начале каждой реплики коротко, тепло отреагируй на то, что сказал подросток, покажи, что ты его услышал и понял.
-   - Explore (Исследование): Раскрывай внутренний мир подростка через глубокие открытые вопросы.
+   - Explore (Исследование): Раскрывай внутренний мир подростка, гибко чередуя открытые, закрытые, альтернативные и уточняющие вопросы. Выбирай тип вопроса в зависимости от контекста, чтобы беседа шла естественно и не превращалась в однотипное интервью.
 2. Внутренняя Игра (Тимоти Голви):
    - Помоги подростку отключить внутреннего критика, страхи и сомнения. Убери барьеры вроде «у меня не получится» или «это нереально».
 3. WOOP (Габриэль Эттинген):
    - Wish (Желание): Помоги сформулировать самую смелую профессиональную мечту.
    - Outcome (Результат): Узнай, как изменится его жизнь при ее достижении, что он будет чувствовать.
-4. Strengths-Based Coaching (Коучинг сильных сторон):
-   - Фокусируйся на сильных сторонах, уникальности и талантах подростка. Не пытайся «исправлять» слабости, ищи зоны максимального раскрытия потенциала.
-   - Проективный метод: Спроси про людей, блогеров, персонажей книг или фильмов, которые его искренне вдохновляют, и какие именно их качества вызывают интерес. Это поможет вытащить его собственные скрытые ценности.
+4. Strengths-Based Coaching (Коучинг сильных сторон) и архетипы Юнга:
+   - Фокусируйся на сильных сторонах, уникальности и талантах подростка.
+   - Спроси про суперсилу, которая меняет мир (чтобы выявить стремление Творца, Мага или Искателя).
+   - Спроси про реакцию на сложности/неудачи (чтобы выявить архетип Героя, Опекуна или Бунтаря).
+   - Спроси про кумиров и вдохновителей.
 
 Уже известная информация о собеседнике:
 ${collectedFields.length > 0 ? collectedFields.join('\n') : '- Пока ничего не известно.'}
@@ -619,6 +803,7 @@ ${missingFields.join('\n')}
 Критически важные правила общения:
 - Задавай строго ОДИН вопрос за раз. Не перегружай подростка вопросами разной тематики.
 - Не будь опросником! Вопросы должны естественно вытекать из контекста беседы.
+- Разбавляй диалог уместным молодежным юмором, шутками про школу или уроки, легкой самоиронией, анекдотами. Это должно быть похоже на теплое общение со старшим бро, а не на допрос в ведомстве!
 - Если подросток дал короткий или поверхностный ответ, не бросай тему. Мягко уточни: «А почему именно это?», «Расскажи поподробнее, мне очень интересно!».
 - Если подросток прислал точку, смайлик или уклонился от ответа (флаг: ${isRefusalOrEmpty}), мягко и с юмором обрати на это внимание (например: «Ой, вижу многоточие... 😊 Давай вернемся к нашему вопросу...») и попроси ответить по существу.
 - Длина твоих реплик: до 3 предложений. Твоя речь должна быть живой, человечной, дружелюбной и понятной современному подростку.
@@ -628,20 +813,15 @@ ${missingFields.join('\n')}
     let replyContent = '';
     
     // Использовать ли ИИ-генерацию на текущем шаге
-    const useAI = (currentVirtualStep === 1 && !isInitMessage) || currentVirtualStep >= 3;
+    const useAI = (currentVirtualStep === 1 && !isInitMessage) || (currentVirtualStep >= 2 && currentVirtualStep <= 15) || currentVirtualStep === 17;
 
     if (!useAI) {
       if (currentVirtualStep === 0) {
         replyContent = FALLBACK_REPLIES[0];
       } else if (currentVirtualStep === 1 && isInitMessage) {
         replyContent = FALLBACK_REPLIES[1];
-      } else if (currentVirtualStep === 2) {
-        replyContent = "Приятно познакомиться! А теперь выбери удобный канал связи ниже, чтобы результаты не потерялись, и мы сможем продолжить!";
-        
-        // Специальная заглушка на Шаге 2, если пользователь пишет обычный текст вместо клика по кнопкам или ввода MAX ID
-        if (!isInitMessage && !updatedPhone) {
-          replyContent = "Пожалуйста, выбери удобный канал связи ниже, чтобы результаты не потерялись! Как только подключишься, мы сразу продолжим. 😉";
-        }
+      } else if (currentVirtualStep === 16) {
+        replyContent = "Пожалуйста, подключи удобный канал связи ниже (Telegram или MAX ID), чтобы результаты не потерялись. Как только подключишься, я сразу сформирую твой финальный отчет! 😉";
       }
     } else {
       try {
@@ -650,13 +830,8 @@ ${missingFields.join('\n')}
         console.warn('AI chat generation failed, using fallback:', err);
         // Резервный пошаговый сбор личных данных или стандартные реплики
         if (currentVirtualStep === 1) {
-          if (!hasName) {
-            replyContent = "Супер! Давай сначала познакомимся. Как тебя зовут?";
-          } else if (!hasAgeOrGrade) {
-            const name = extractedData.fullName.split(' ')[0];
-            replyContent = `Очень приятно, ${name}! А сколько тебе лет и в каком классе ты учишься?`;
-          } else if (!hasCity) {
-            replyContent = "Понял тебя. А из какого ты города?";
+          if (!hasPersonalInfo) {
+            replyContent = "Супер! Давай сначала познакомимся. Как тебя зовут, в каком ты классе, сколько лет и из какого ты города?";
           } else {
             replyContent = FALLBACK_REPLIES[1];
           }
