@@ -470,7 +470,7 @@ export async function POST(req: Request) {
       };
       let fieldsToExtract = "shouldAdvanceStep(boolean)";
 
-      if (currentStepBefore === 1) {
+      if (currentStepBefore === 2) {
         properties.fullName = { type: "STRING" };
         properties.age = { type: "INTEGER" };
         properties.grade = { type: "STRING" };
@@ -493,6 +493,13 @@ export async function POST(req: Request) {
         properties.values = { type: "STRING" };
         properties.decisionStyle = { type: "STRING" };
         fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle";
+        
+        // Дополнительно позволяем обновлять личные данные
+        properties.fullName = { type: "STRING" };
+        properties.age = { type: "INTEGER" };
+        properties.grade = { type: "STRING" };
+        properties.city = { type: "STRING" };
+        fieldsToExtract += ", fullName, age, grade, city";
       }
 
       const extractionPrompt = `Ты — анализатор текста. Проанализируй сообщение пользователя в контексте диалога профориентации. Извлеки данные в формате JSON (без markdown).

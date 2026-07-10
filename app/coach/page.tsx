@@ -140,7 +140,11 @@ export default function CoachPage() {
           isSubscribed = false;
           
           console.log('[auth] Link code expired, requesting new code');
-          const newRes = await fetch('/api/auth/link-code', { method: 'POST' });
+          const newRes = await fetch('/api/auth/link-code', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+          });
           const newData = await newRes.json();
           if (newData.code) {
             setLinkCode(newData.code);

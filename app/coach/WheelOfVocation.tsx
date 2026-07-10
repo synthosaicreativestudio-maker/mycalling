@@ -117,8 +117,8 @@ export default function WheelOfVocation({ extractedData }: WheelOfVocationProps)
         <p className="text-xs text-[#7A8A9E] font-medium">Ваш цифровой профиль талантов</p>
       </div>
 
-      <div className="relative w-[300px] h-[300px] flex items-center justify-center">
-        <svg width="300" height="300" viewBox="0 0 400 400" className="overflow-visible">
+      <div className="relative w-full max-w-[260px] aspect-square flex items-center justify-center">
+        <svg width="100%" height="100%" viewBox="0 0 400 400" className="overflow-visible">
           <defs>
             {sectors.map((sector, idx) => (
               <radialGradient id={`grad-${idx}`} key={idx} cx="50%" cy="50%" r="50%" fx="50%" fy="50%">

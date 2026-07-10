@@ -123,7 +123,7 @@ export default function HomePage() {
               variants={heroVariants}
               className="w-full text-3xl leading-[1.15] font-extrabold text-white font-sans sm:text-4xl md:text-5xl lg:text-[3.5rem] mb-1"
             >
-              Поможем школьнику <br className="hidden md:inline" />найти своё призвание
+              Бесплатно поможем школьнику <br className="hidden md:inline" />найти своё призвание
             </m.h1>
 
             <m.p
