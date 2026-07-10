@@ -51,6 +51,13 @@ export default function AssessmentPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, store.sessionId]);
 
+  // Автоматическая загрузка вопроса, если сессия уже есть, но вопрос равен null (например, при обновлении страницы)
+  useEffect(() => {
+    if (store.sessionId && !store.currentQuestion && !store.isLoading && !store.isCompleted) {
+      store.fetchNextQuestion();
+    }
+  }, [store.sessionId, store.currentQuestion, store.isLoading, store.isCompleted]);
+
   // Запуск таймера при появлении вопроса
   useEffect(() => {
     if (store.currentQuestion) {

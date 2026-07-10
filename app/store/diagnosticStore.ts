@@ -114,6 +114,16 @@ export const useDiagnosticStore = create<DiagnosticState>()(
           set({ isLoading: true });
           try {
             const res = await fetch(`/api/v1/diagnostic/next-question?session_id=${sessionId}`);
+            
+            if (res.status === 404) {
+              // Сессия истекла на сервере. Сбрасываем локальное состояние и запускаем новую сессию.
+              get().resetSession();
+              const name = typeof window !== 'undefined' ? localStorage.getItem('studentName') || 'Гость' : 'Гость';
+              const grade = typeof window !== 'undefined' ? localStorage.getItem('studentGrade') || '8' : '8';
+              await get().startSession(name, grade);
+              return;
+            }
+
             if (!res.ok) throw new Error('Ошибка получения вопроса');
             const data = await res.json();
 
