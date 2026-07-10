@@ -88,8 +88,7 @@ function AuthCard() {
         if (data.status === 'COMPLETED' && data.sessionToken) {
           if (intervalId) clearInterval(intervalId);
           isSubscribed = false;
-          console.log('[auth] Auth page completed polling, redirecting to callback...');
-          router.push(`/api/auth/telegram/callback?token=${data.sessionToken}`);
+          window.location.href = `/api/auth/telegram/callback?token=${data.sessionToken}`;
         } else if (data.status === 'EXPIRED') {
           if (intervalId) clearInterval(intervalId);
           isSubscribed = false;

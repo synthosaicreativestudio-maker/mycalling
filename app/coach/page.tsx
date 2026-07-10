@@ -111,73 +111,12 @@ export default function CoachPage() {
     let isSubscribed = true;
     let intervalId: NodeJS.Timeout | null = null;
 
-    const handleAuthCompleted = async (sessionToken: string | null) => {
-      if (!sessionToken) {
-        console.error('[auth] Completed status but no sessionToken received');
-        setAuthError('Не удалось получить токен сессии. Пожалуйста, попробуйте еще раз.');
-        return;
-      }
-      
+    const handleAuthCompleted = async (sessionToken: string) => {
       try {
-        console.log('[auth] Received sessionToken, calling callback...');
-        const res = await fetch(`/api/auth/telegram/callback?token=${sessionToken}&format=json`, {
-          credentials: 'include'
-        });
-        
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || `Callback status not ok: ${res.status}`);
-        }
-
-        console.log('[auth] Callback successful, setting phone confirmed');
-        setPhoneConfirmed(true);
-        setAuthError(null);
-
-        // Отправляем системное сообщение коучу, чтобы мгновенно продвинуть шаг
-        const chatRes = await fetch('/api/v1/coach/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: 'Телефон подтвержден через бот', sessionId, linkCode })
-        });
-        const chatData = await chatRes.json();
-        if (chatData.reply) {
-          setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-          let currentText = '';
-          let index = 0;
-          const printInterval = setInterval(() => {
-            if (index < chatData.reply.length) {
-              currentText += chatData.reply[index];
-              setMessages(prev => {
-                const updated = [...prev];
-                if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
-                  updated[updated.length - 1] = { role: 'assistant', content: currentText };
-                }
-                return updated;
-              });
-              index++;
-            } else {
-              clearInterval(printInterval);
-              setIsTyping(false);
-              if (chatData.currentStep !== undefined) {
-                setStep(chatData.currentStep);
-              }
-              if (chatData.phoneConfirmed !== undefined) {
-                setPhoneConfirmed(chatData.phoneConfirmed);
-              }
-              setExtractedData(chatData.extracted || {});
-            }
-          }, 15);
-        } else {
-          if (chatData.currentStep !== undefined) {
-            setStep(chatData.currentStep);
-          }
-          if (chatData.phoneConfirmed !== undefined) {
-            setPhoneConfirmed(chatData.phoneConfirmed);
-          }
-          setExtractedData(chatData.extracted || {});
-        }
+        console.log('[auth] Received sessionToken, redirecting to callback for cookie set...');
+        window.location.href = `/api/auth/telegram/callback?token=${sessionToken}`;
       } catch (err) {
-        console.error('[auth] callback failed', err);
+        console.error('[auth] Redirect to callback failed', err);
         setAuthError('Не получилось завершить вход. Попробуйте ещё раз.');
       }
     };
@@ -566,7 +505,7 @@ export default function CoachPage() {
                   key={idx}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-3 max-w-[80%] ${isCoach ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
+                  className={`flex gap-3 max-w-[72%] ${isCoach ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
                 >
                   <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${
                     isCoach ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#3B82F6] text-white'
