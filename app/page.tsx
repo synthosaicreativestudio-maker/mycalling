@@ -70,16 +70,7 @@ export default function HomePage() {
         console.error('Error checking progress:', err);
       }
 
-      if (typeof window !== 'undefined') {
-        const studentName = localStorage.getItem('studentName');
-        if (studentName) {
-          setCoachCompleted(true);
-        }
-        const diagnosticCompleted = localStorage.getItem('diagnosticCompleted');
-        if (diagnosticCompleted) {
-          setTestCompleted(true);
-        }
-      }
+
     }
 
     checkProgress();
@@ -108,7 +99,7 @@ export default function HomePage() {
             variants={sectionVariants}
             initial="hidden"
             animate="visible"
-            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-[50vw] lg:max-w-[55vw]"
+            className="relative z-10 flex w-full flex-col items-start text-left pointer-events-auto max-w-full md:max-w-xl lg:max-w-3xl"
           >
             <m.p
               custom={0.2}
@@ -121,7 +112,7 @@ export default function HomePage() {
             <m.h1
               custom={0.4}
               variants={heroVariants}
-              className="w-full text-3xl leading-[1.15] font-extrabold text-white font-sans sm:text-4xl md:text-5xl lg:text-[3.5rem] mb-1"
+              className="w-full text-3xl leading-[1.15] font-extrabold text-white font-sans sm:text-4xl md:text-5xl lg:text-[3.5rem] tracking-tight mb-1"
             >
               Бесплатно поможем школьнику <br className="hidden md:inline" />найти своё призвание
             </m.h1>

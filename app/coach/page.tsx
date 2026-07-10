@@ -188,8 +188,13 @@ export default function CoachPage() {
       setLoading(true);
       try {
         const searchParams = new URLSearchParams(window.location.search);
+        const shouldReset = searchParams.get('reset') === 'true';
         const isFromLogin = searchParams.get('error') === 'register_first';
-        const savedSessionId = typeof window !== 'undefined' ? localStorage.getItem('coachSessionId') : null;
+        const savedSessionId = shouldReset ? null : (typeof window !== 'undefined' ? localStorage.getItem('coachSessionId') : null);
+
+        if (shouldReset && typeof window !== 'undefined') {
+          localStorage.removeItem('coachSessionId');
+        }
 
         const res = await fetch('/api/v1/coach/chat', {
           method: 'POST',
@@ -201,7 +206,7 @@ export default function CoachPage() {
           })
         });
         const data = await res.json();
-        if (data.sessionStatus === 'COMPLETED') {
+        if (data.sessionStatus === 'COMPLETED' && !shouldReset) {
           router.push('/assessment');
           return;
         }
