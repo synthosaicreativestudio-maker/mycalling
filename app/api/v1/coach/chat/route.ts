@@ -285,7 +285,7 @@ export async function POST(req: Request) {
 
     // Вычисляем, какие блоки информации уже собраны
     const hasPhone = !!coachSession.user.phone || !!extractedData.phone;
-    const hasPersonalInfo = !!extractedData.fullName && (!!extractedData.age || !!extractedData.grade || !!extractedData.city);
+    const hasPersonalInfo = !!extractedData.fullName && (!!extractedData.age || !!extractedData.grade) && !!extractedData.city;
     const hasDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
     const hasIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
     const hasValues = !!extractedData.values && extractedData.values.trim().length > 6;
