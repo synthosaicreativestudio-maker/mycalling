@@ -9,7 +9,7 @@ import { generateText, generateJson } from '../../../../lib/gemini';
 const FALLBACK_REPLIES: Record<number, string> = {
   0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы проведем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Скажи, готов ли ты начать?",
   1: "Супер! Теперь давай познакомимся поближе. Напиши, пожалуйста, как тебя зовут, в каком классе ты учишься, сколько тебе лет и из какого ты города?",
-  2: "Приятно познакомиться! А теперь выбери удобный канал связи ниже, чтобы результаты не потерялись. Подключи Telegram или укажи свой MAX ID, и мы сможем продолжить!",
+  2: "Приятно познакомиться! А теперь выбери удобный канал связи ниже, чтобы результаты не потерялись, и мы сможем продолжить!",
   3: "Здорово, спасибо, что поделился! Давай начнем с мечты: если убрать вообще все ограничения, кем бы ты хотел быть через 10 лет?",
   4: "Интересно! А скажи, кто из известных людей, блогеров, ученых или персонажей фильмов тебя по-настоящему вдохновляет? Какие черты характера или дела в них тебе нравятся больше всего?",
   5: "Понял тебя. Давай подумаем о будущем: что для тебя ценнее всего в твоей работе? Например, создавать новое и творить, руководить и вести людей за собой, зарабатывать много денег или помогать другим?",
@@ -300,6 +300,21 @@ export async function POST(req: Request) {
     if (hasValues) blocksCompleted++;
     if (hasDecisionStyle) blocksCompleted++;
 
+    // Вычисляем виртуальный шаг до экстракции
+    let currentStepBefore = 1;
+    if (!hasPersonalInfo) {
+      currentStepBefore = 1;
+    } else if (!hasPhone) {
+      currentStepBefore = 2;
+    } else {
+      let psychoBlocksBefore = 0;
+      if (hasDreams) psychoBlocksBefore++;
+      if (hasIdols) psychoBlocksBefore++;
+      if (hasValues) psychoBlocksBefore++;
+      if (hasDecisionStyle) psychoBlocksBefore++;
+      currentStepBefore = Math.min(5, 3 + psychoBlocksBefore);
+    }
+
     // Все содержательные психологические блоки должны быть обязательно собраны
     const allPsychologyCollected = hasPersonalInfo && hasDreams && hasIdols && hasValues && hasDecisionStyle;
     
@@ -380,24 +395,41 @@ export async function POST(req: Request) {
         extractedData.phone = dbUser.phone;
       }
     } else if (!isInitMessage) {
+      // Для работы fallbackExtract
+      const prevHasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1;
+      const prevHasAgeOrGrade = !!extractedData.age || !!extractedData.grade;
+      const prevHasCity = !!extractedData.city && extractedData.city.trim().length > 1;
+
+      let properties: Record<string, any> = {
+        shouldAdvanceStep: { type: "BOOLEAN" }
+      };
+      let fieldsToExtract = "shouldAdvanceStep(boolean)";
+
+      if (currentStepBefore === 1) {
+        properties.fullName = { type: "STRING" };
+        properties.age = { type: "INTEGER" };
+        properties.grade = { type: "STRING" };
+        properties.city = { type: "STRING" };
+        fieldsToExtract += ", fullName, age, grade, city";
+      } else if (currentStepBefore === 3) {
+        properties.dreams = { type: "STRING" };
+        fieldsToExtract += ", dreams";
+      } else if (currentStepBefore === 4) {
+        properties.idols = { type: "STRING" };
+        fieldsToExtract += ", idols";
+      } else if (currentStepBefore === 5) {
+        properties.values = { type: "STRING" };
+        properties.decisionStyle = { type: "STRING" };
+        fieldsToExtract += ", values, decisionStyle";
+      }
+
       const extractionPrompt = `Ты — анализатор текста. Проанализируй сообщение пользователя в контексте диалога профориентации. Извлеки данные в формате JSON (без markdown).
 Последнее сообщение пользователя: "${message}"
-Извлекай: fullName, age, grade, city, phone, dreams, idols, values, decisionStyle, shouldAdvanceStep(boolean)`;
+Извлекай: ${fieldsToExtract}`;
 
       const extractionSchema = {
         type: "OBJECT",
-        properties: {
-          fullName: { type: "STRING" },
-          age: { type: "INTEGER" },
-          grade: { type: "STRING" },
-          city: { type: "STRING" },
-          phone: { type: "STRING" },
-          dreams: { type: "STRING" },
-          idols: { type: "STRING" },
-          values: { type: "STRING" },
-          decisionStyle: { type: "STRING" },
-          shouldAdvanceStep: { type: "BOOLEAN" }
-        },
+        properties,
         required: ["shouldAdvanceStep"]
       };
 
@@ -407,12 +439,7 @@ export async function POST(req: Request) {
         console.warn('Extraction failed, using fallback:', err);
       }
 
-      // Всегда подстраховываемся регулярными выражениями на случай сбоев/таймаутов LLM-экстракции
-      const prevHasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1;
-      const prevHasAgeOrGrade = !!extractedData.age || !!extractedData.grade;
-      const prevHasCity = !!extractedData.city && extractedData.city.trim().length > 1;
-
-      const fallbackData = fallbackExtract(message, nextStep, prevHasName, prevHasAgeOrGrade, prevHasCity);
+      const fallbackData = fallbackExtract(message, currentStepBefore, prevHasName, prevHasAgeOrGrade, prevHasCity);
       parsedData = {
         ...fallbackData,
         ...parsedData
@@ -466,7 +493,7 @@ export async function POST(req: Request) {
     }
 
     const isFinalStateNow = updatedPersonalInfo && updatedPhone && updatedDreams && updatedIdols && updatedValues && updatedDecisionStyle;
-    if (isFinalStateNow) {
+    if (isFinalStateNow && currentStepBefore === 5) {
       currentVirtualStep = 6; // Подведение итогов
     }
 
@@ -598,11 +625,11 @@ ${missingFields.join('\n')}
           replyContent = "Понял тебя. А из какого ты города?";
         }
       } else if (currentVirtualStep === 2) {
-        replyContent = "Приятно познакомиться! А теперь выбери удобный канал связи ниже, чтобы результаты не потерялись. Подключи Telegram или укажи свой MAX ID, и мы сможем продолжить!";
+        replyContent = "Приятно познакомиться! А теперь выбери удобный канал связи ниже, чтобы результаты не потерялись, и мы сможем продолжить!";
         
         // Специальная заглушка на Шаге 2, если пользователь пишет обычный текст вместо клика по кнопкам или ввода MAX ID
         if (!isInitMessage && !updatedPhone) {
-          replyContent = "Пожалуйста, выбери удобный канал связи ниже (подключи Telegram или укажи свой MAX ID), чтобы результаты не потерялись! Как только подключишься, мы сразу продолжим. 😉";
+          replyContent = "Пожалуйста, выбери удобный канал связи ниже, чтобы результаты не потерялись! Как только подключишься, мы сразу продолжим. 😉";
         }
       }
     } else {
@@ -612,6 +639,10 @@ ${missingFields.join('\n')}
         console.warn('AI chat generation failed, using fallback:', err);
         replyContent = FALLBACK_REPLIES[currentVirtualStep] || 'Давай продолжим наш диалог!';
       }
+    }
+
+    if (isPhoneConfirmedMsg) {
+      replyContent = "Отлично! Telegram-канал связи успешно подключен. " + replyContent;
     }
 
     // Сохраняем предварительное резюме в БД на шаге 6

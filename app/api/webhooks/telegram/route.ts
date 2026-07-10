@@ -147,6 +147,7 @@ export async function POST(req: Request) {
             ],
             one_time_keyboard: true,
             resize_keyboard: true,
+            is_persistent: true,
             input_field_placeholder: '👇 Нажмите кнопку ниже, чтобы поделиться контактом'
           }
         );

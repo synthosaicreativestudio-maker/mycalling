@@ -10,12 +10,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Неполные данные' }, { status: 400 });
     }
 
-    // Проверка владения сессией
-    const cookieSessionId = cookies().get('diagnostic_session_id')?.value;
-    if (cookieSessionId !== sessionId) {
-      return NextResponse.json({ error: 'Нет доступа к данной сессии' }, { status: 403 });
-    }
-
     const value = parseInt(rawValue, 10);
     const timeSpent = parseInt(timeSpentMs, 10);
 

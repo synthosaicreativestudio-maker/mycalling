@@ -53,20 +53,32 @@ export async function GET(request: Request) {
       ? NextResponse.json({ success: true, redirectPath })
       : NextResponse.redirect(new URL(redirectPath, request.url));
     
-    // Устанавливаем куку сессии Better Auth
+    // Устанавливаем куки сессии Better Auth для обоих протоколов (http и https)
+    // для гарантированной работы за прокси-серверами продакшна
     const isHttps = request.url.startsWith('https:');
-    const cookieName = isHttps ? '__secure-better-auth.session_token' : 'better-auth.session_token';
+    
+    console.log('[auth] Callback setting both HTTP and HTTPS session cookies for max compatibility');
 
-    console.log('[auth] Callback setting cookie:', { name: cookieName, expiresAt: session.expiresAt });
-
-    response.cookies.set({
-      name: cookieName,
+    const cookieOptions = {
       value: token,
       httpOnly: true,
-      secure: isHttps,
-      sameSite: 'lax',
+      sameSite: 'lax' as const,
       path: '/',
       expires: session.expiresAt
+    };
+
+    // 1. Стандартная кука (используется на localhost)
+    response.cookies.set({
+      name: 'better-auth.session_token',
+      secure: false,
+      ...cookieOptions
+    });
+
+    // 2. Защищенная кука (используется на продакшне https)
+    response.cookies.set({
+      name: '__secure-better-auth.session_token',
+      secure: true,
+      ...cookieOptions
     });
 
     return response;
