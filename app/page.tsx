@@ -56,7 +56,7 @@ export default function HomePage() {
 
   useEffect(() => {
     setMounted(true);
-    
+
     async function checkProgress() {
       try {
         const res = await fetch('/api/auth/progress');
@@ -79,7 +79,7 @@ export default function HomePage() {
   // Определяем, куда ведет главная кнопка
   let mainCtaLink = '/coach';
   let mainCtaText = 'Начать сессию с коучем';
-  
+
   if (coachCompleted && !testCompleted) {
     mainCtaLink = '/assessment';
     mainCtaText = 'Перейти к диагностике';
@@ -90,10 +90,10 @@ export default function HomePage() {
 
   return (
     <main className="relative z-10 w-full overflow-hidden">
-      
+
       {/* ─── HERO SECTION ─── */}
       <section className="relative min-h-screen flex items-center justify-start px-6 md:px-12 lg:px-24 pt-44 md:pt-52 pb-20">
-        
+
         {mounted && (
           <m.div
             variants={sectionVariants}
@@ -142,7 +142,7 @@ export default function HomePage() {
                 </Link>
               </m.div>
             </m.div>
-            <m.span 
+            <m.span
               custom={1.0}
               variants={heroVariants}
               className="text-xs font-semibold text-[#60A5FA]/70 mt-3 pl-2"
@@ -153,7 +153,7 @@ export default function HomePage() {
         )}
 
       </section>
- 
+
       {/* ─── УТП (3 карточки) ─── */}
       <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
@@ -226,15 +226,13 @@ export default function HomePage() {
               {/* Шаг 2: Диагностика (тесты) */}
               <m.div
                 variants={fadeUpVariants}
-                className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden ${
-                  coachCompleted ? '' : 'opacity-60 pointer-events-none'
-                }`}
+                className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden ${coachCompleted ? '' : 'opacity-60 pointer-events-none'
+                  }`}
               >
                 <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">02</div>
                 <div className="space-y-4">
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${
-                    coachCompleted ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-white/5 text-[#7A8A9E]'
-                  }`}>
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-white/5 text-[#7A8A9E]'
+                    }`}>
                     {coachCompleted ? <Compass className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[#7A8A9E]" />}
                   </div>
                   <h3 className="text-xl font-bold text-white">Интерактивная диагностика</h3>
@@ -259,15 +257,13 @@ export default function HomePage() {
               {/* Шаг 3: Отчёт */}
               <m.div
                 variants={fadeUpVariants}
-                className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden ${
-                  coachCompleted && testCompleted ? '' : 'opacity-60 pointer-events-none'
-                }`}
+                className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden ${coachCompleted && testCompleted ? '' : 'opacity-60 pointer-events-none'
+                  }`}
               >
                 <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">03</div>
                 <div className="space-y-4">
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${
-                    coachCompleted && testCompleted ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-white/5 text-[#7A8A9E]'
-                  }`}>
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted && testCompleted ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-white/5 text-[#7A8A9E]'
+                    }`}>
                     {coachCompleted && testCompleted ? <FileCheck className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[#7A8A9E]" />}
                   </div>
                   <h3 className="text-xl font-bold text-white">Персональный отчёт</h3>
@@ -486,7 +482,7 @@ export default function HomePage() {
                 © {new Date().getFullYear()} SynthosAI Creative Studio
               </span>
             </div>
-            
+
             <nav className="flex items-center gap-6 text-xs text-[#7A8A9E] font-sans">
               <Link href="/privacy">
                 <span className="hover:text-white transition cursor-pointer">Политика конфиденциальности</span>

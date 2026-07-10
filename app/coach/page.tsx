@@ -46,6 +46,7 @@ export default function CoachPage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [extractedData, setExtractedData] = useState<Record<string, any>>({});
   const [showVocationModal, setShowVocationModal] = useState(false);
+  const [isWheelHovered, setIsWheelHovered] = useState(false);
   
   const [isMobile, setIsMobile] = useState(false);
   
@@ -446,6 +447,118 @@ export default function CoachPage() {
     }
   };
 
+  const parseInlineElements = (text: string) => {
+    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
+    return (
+      <>
+        {parts.map((part, idx) => {
+          if (part.startsWith('`') && part.endsWith('`')) {
+            const clean = part.slice(1, -1);
+            return (
+              <span 
+                key={idx} 
+                className="inline-block px-2 py-0.5 mx-0.5 rounded bg-[#3B82F6]/10 text-[#60A5FA] font-sans text-xs border border-[#3B82F6]/25 font-bold shadow-[0_0_10px_rgba(59,130,246,0.1)]"
+              >
+                {clean}
+              </span>
+            );
+          }
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const clean = part.slice(2, -2);
+            return (
+              <strong key={idx} className="font-extrabold text-white">
+                {clean}
+              </strong>
+            );
+          }
+          return part;
+        })}
+      </>
+    );
+  };
+
+  const renderFormattedContent = (content: string) => {
+    // 1. Нормализуем слипшиеся списки профессий (1. `Генетик`)
+    let processed = content.replace(/(\d+\.\s+`[^`]+`)/g, '\n$1');
+    // 2. Нормализуем слипшиеся шаги плана (1) или `1)`)
+    processed = processed.replace(/(?:`?(\d+)\)`?\s*)/g, '\n$1) ');
+    // 3. Убираем дублирующиеся переносы строк
+    processed = processed.replace(/\n\s*\n/g, '\n');
+
+    const lines = processed.split('\n').filter(line => line.trim() !== '');
+
+    // Проверим, содержит ли сообщение шаги плана, чтобы визуализировать их в виде Roadmap
+    const hasRoadmapSteps = lines.some(line => line.match(/^\d+\)\s+/));
+
+    if (hasRoadmapSteps) {
+      return (
+        <div className="space-y-4 my-2">
+          {lines.map((line, i) => {
+            const stepMatch = line.match(/^\s*(\d+)\)\s+(.*)/);
+            if (stepMatch) {
+              const num = stepMatch[1];
+              const rest = stepMatch[2];
+              return (
+                <div key={i} className="flex gap-4 items-stretch">
+                  {/* Левая колонка: кружок с номером шага и светящаяся линия-коннектор */}
+                  <div className="flex flex-col items-center shrink-0">
+                    <div className="h-6 w-6 rounded-full bg-[#EAB308]/15 border border-[#EAB308]/30 text-[#EAB308] flex items-center justify-center text-xs font-bold shadow-[0_0_10px_rgba(234,179,8,0.15)] z-10 shrink-0">
+                      {num}
+                    </div>
+                    {i < lines.length - 1 && (
+                      <div className="w-[1.5px] flex-1 bg-gradient-to-b from-[#EAB308]/30 to-[#EAB308]/5 my-1" />
+                    )}
+                  </div>
+                  {/* Правая колонка: карточка шага */}
+                  <div className="flex-1 p-3.5 rounded-2xl bg-gradient-to-r from-white/[0.03] to-transparent border border-white/5 shadow-inner transition hover:from-white/[0.05]">
+                    <div className="text-sm text-[#E8ECF0] leading-relaxed">
+                      {parseInlineElements(rest)}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // Рендерим обычные вводные или итоговые строки внутри плана
+            return (
+              <p key={i} className="text-sm text-[#E8ECF0] leading-relaxed pl-1">
+                {parseInlineElements(line)}
+              </p>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // Стандартный рендеринг списков профессий или простого текста
+    return (
+      <div className="space-y-2.5">
+        {lines.map((line, i) => {
+          const listMatch = line.match(/^(\d+)\.\s+(.*)/);
+          if (listMatch) {
+            const num = listMatch[1];
+            const rest = listMatch[2];
+            return (
+              <div key={i} className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 shadow-inner my-1 transition hover:bg-white/[0.04]">
+                <div className="h-6 w-6 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5">
+                   {num}
+                </div>
+                <div className="text-sm text-[#E8ECF0] leading-relaxed flex-1">
+                  {parseInlineElements(rest)}
+                </div>
+              </div>
+            );
+          }
+          return (
+            <p key={i} className="text-sm text-[#E8ECF0] leading-relaxed">
+              {parseInlineElements(line)}
+            </p>
+          );
+        })}
+      </div>
+    );
+  };
+
   const progressPercent = Math.round((step / 16) * 100);
 
   return (
@@ -495,10 +608,10 @@ export default function CoachPage() {
       </div>
 
       {/* Main layout container: Chat + Wheel of Vocation */}
-      <div className="w-full max-w-6xl glass-card rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-3 h-[60vh] relative border border-white/5">
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 h-[60vh] relative">
         
         {/* Left column: Chat History & Input */}
-        <div className="col-span-1 md:col-span-2 flex flex-col h-full overflow-hidden border-r border-white/5 relative">
+        <div className="col-span-1 md:col-span-2 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
           
           {/* Chat message history */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -534,7 +647,7 @@ export default function CoachPage() {
                         <span>✨</span> Резюме наставника Романа
                       </div>
                     )}
-                    {msg.content}
+                    {renderFormattedContent(msg.content)}
 
                     {/* Вывод ИИ-аватара на шаге 16 */}
                     {isCoach && step === 16 && idx === messages.length - 1 && extractedData.avatarUrl && (
@@ -662,14 +775,17 @@ export default function CoachPage() {
                 </button>
               </form>
             )}
-          </div>
-        </div>
-
-        {/* Right column: Wheel of Vocation (Desktop only) */}
-        <div className="col-span-1 hidden md:block h-full overflow-y-auto bg-[#040506]/10">
-          <WheelOfVocation extractedData={extractedData} />
         </div>
       </div>
+
+      {/* Right column: Wheel of Vocation (Desktop only) */}
+      <div 
+        className="col-span-1 hidden md:block h-full cursor-zoom-in relative select-none"
+        onMouseEnter={() => setIsWheelHovered(true)}
+      >
+        <WheelOfVocation extractedData={extractedData} />
+      </div>
+    </div>
 
       {/* Floating button for mobile view of Wheel Of Vocation */}
       <div className="md:hidden fixed bottom-24 right-6 z-40">
@@ -705,6 +821,29 @@ export default function CoachPage() {
               <div className="flex-1 overflow-y-auto pt-4">
                 <WheelOfVocation extractedData={extractedData} />
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Zoom overlay for Wheel of Vocation on Desktop hover */}
+      <AnimatePresence>
+        {isWheelHovered && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onMouseLeave={() => setIsWheelHovered(false)}
+            className="fixed inset-0 z-50 bg-[#040508]/85 backdrop-blur-xl flex items-center justify-center cursor-zoom-out"
+          >
+            <motion.div
+              initial={{ scale: 0.7, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.7, opacity: 0, y: 30 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 180 }}
+              className="w-full max-w-xl aspect-square p-10 rounded-[36px] bg-[#040506]/65 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative flex items-center justify-center pointer-events-auto"
+            >
+              <WheelOfVocation extractedData={extractedData} standalone />
             </motion.div>
           </motion.div>
         )}

@@ -386,10 +386,55 @@ export async function POST(req: Request) {
     // Сессия считается готовой к финалу, если собран необходимый объем данных
     const isFinalStep = allPsychologyCollected;
     const nextStep = !hasPhone ? 1 : (!hasPersonalInfo ? 2 : (isFinalStep ? 16 : Math.min(15, 3 + psychoBlocksCount)));
-    extractedData.currentStep = nextStep;
 
-    // Флаг того, что это первое инициализирующее сообщение
+    // Защита от зависания шагов (когда ИИ-экстрактор не может надежно извлечь данные)
+    let finalNextStep = nextStep;
     const isInitMessage = message === 'Начать сессию с коучем';
+
+    if (!isInitMessage) {
+      const lastStep = extractedData.lastStep || 0;
+      let stepAttempts = extractedData.stepAttempts || 0;
+
+      if (nextStep === lastStep && nextStep >= 3 && nextStep <= 15) {
+        stepAttempts++;
+        if (stepAttempts >= 2) {
+          const psychoFields = [
+            { key: 'hobbies', has: hasHobbies },
+            { key: 'schoolSubjects', has: hasSchoolSubjects },
+            { key: 'dreams', has: hasDreams },
+            { key: 'idols', has: hasIdols },
+            { key: 'parents', has: hasParents },
+            { key: 'fears', has: hasFears },
+            { key: 'experience', has: hasExperience },
+            { key: 'workFormat', has: hasWorkFormat },
+            { key: 'thinkingType', has: hasThinkingType },
+            { key: 'successMeasure', has: hasSuccessMeasure },
+            { key: 'energySources', has: hasEnergySources },
+            { key: 'teamRole', has: hasTeamRole },
+            { key: 'autonomyStyle', has: hasAutonomyStyle },
+            { key: 'values', has: hasValues },
+            { key: 'decisionStyle', has: hasDecisionStyle }
+          ];
+          const firstEmpty = psychoFields.find(f => !f.has);
+          if (firstEmpty) {
+            extractedData[firstEmpty.key] = "Продолжено наставником";
+            psychoBlocksCount++;
+            const isFinalStepUpdated = hasPersonalInfo && (psychoBlocksCount >= 12);
+            finalNextStep = isFinalStepUpdated ? 16 : Math.min(15, 3 + psychoBlocksCount);
+          }
+          stepAttempts = 0;
+        }
+      } else {
+        stepAttempts = 0;
+      }
+      extractedData.lastStep = finalNextStep;
+      extractedData.stepAttempts = stepAttempts;
+    } else {
+      extractedData.lastStep = nextStep;
+      extractedData.stepAttempts = 0;
+    }
+
+    extractedData.currentStep = finalNextStep;
 
     if (isInitMessage && transcript.length > 0) {
       return NextResponse.json({
@@ -772,6 +817,7 @@ ${missingFields.join('\n')}
 ${collectedFields.length > 0 ? collectedFields.join('\n') : '- Пока ничего не известно.'}
 
 Критически важные правила общения:
+- Каждое твое сообщение ОБЯЗАТЕЛЬНО должно заканчиваться конкретным, простым, вовлекающим открытым вопросом или понятным призывом к действию (подталкиванием вперед), чтобы собеседнику было абсолютно ясно, о чем писать дальше. Не оставляй диалог зависшим.
 - Задавай строго ОДИН простой вопрос за раз. Не перегружай подростка.
 - Разбавляй диалог уместным молодежным юмором, шутками про школу или уроки, легкой самоиронией. Это должно быть похоже на теплое общение со старшим бро, а не на допрос в ведомстве!
 - Длина твоих реплик: до 3 предложений. Твоя речь должна быть живой, человечной, дружелюбной и понятной современному подростку.
@@ -803,12 +849,14 @@ ${collectedFields.length > 0 ? collectedFields.join('\n') : '- Пока ниче
 ${missingFields.join('\n')}
 
 Критически важные правила общения:
+- Каждое твое сообщение ОБЯЗАТЕЛЬНО должно заканчиваться конкретным, простым, вовлекающим открытым вопросом или понятным призывом к действию (подталкиванием вперед), чтобы собеседнику было абсолютно ясно, о чем писать дальше. Не оставляй диалог зависшим.
+- Если ты перечисляешь профессии, варианты или списки, ВСЕГДА переноси каждый пункт на НОВУЮ СТРОКУ, пиши их отдельными абзацами. Оформляй названия ключевых профессий в обратные кавычки (например, \`Генетик\`), чтобы клиентский интерфейс мог выделить их в красивые визуальные карточки.
 - Задавай строго ОДИН вопрос за раз. Не перегружай подростка вопросами разной тематики.
 - Не будь опросником! Вопросы должны естественно вытекать из контекста беседы.
-- Разбавляй диалог уместным молодежным юмором, шутками про школу или уроки, легкой самоиронией, анекдотами. Это должно быть похоже на теплое общение со старшим бро, а не на допрос в ведомстве!
+- Разбавляй диалог уместным молодежным юмором, шутками про школу или уроки, легкой самоиронией, анекдотами. Это должно быть похоже на теплое open-minded общение со старшим бро, а не на допрос в ведомстве!
 - Если подросток дал короткий или поверхностный ответ, не бросай тему. Мягко уточни: «А почему именно это?», «Расскажи поподробнее, мне очень интересно!».
 - Если подросток прислал точку, смайлик или уклонился от ответа (флаг: ${isRefusalOrEmpty}), мягко и с юмором обрати на это внимание (например: «Ой, вижу многоточие... 😊 Давай вернемся к нашему вопросу...») и попроси ответить по существу.
-- Длина твоих реплик: до 3 предложений. Твоя речь должна быть живой, человечной, дружелюбной и понятной современному подростку.
+- Длина твоих реплик: до 3 предложений (без учета пунктов списков профессий). Твоя речь должна быть живой, человечной, дружелюбной и понятной современному подростку.
 - Категорически запрещено использовать слова «ИИ», «искусственный интеллект», «алгоритм», «бот», «робот». Ты — реальный человек, коуч Роман.`;
     }
 

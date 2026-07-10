@@ -5,9 +5,10 @@ import { motion } from 'framer-motion';
 
 interface WheelOfVocationProps {
   extractedData: Record<string, any>;
+  standalone?: boolean;
 }
 
-export default function WheelOfVocation({ extractedData }: WheelOfVocationProps) {
+export default function WheelOfVocation({ extractedData, standalone = false }: WheelOfVocationProps) {
   // Вычисляем статус заполненности полей
   const hasHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
   const hasSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
@@ -110,11 +111,145 @@ export default function WheelOfVocation({ extractedData }: WheelOfVocationProps)
     ].join(' ');
   };
 
+  if (standalone) {
+    return (
+      <div className="relative w-full h-full aspect-square flex items-center justify-center">
+        <svg width="100%" height="100%" viewBox="0 0 400 400" className="overflow-visible">
+          <defs>
+            {sectors.map((sector, idx) => (
+              <radialGradient id={`grad-${idx}`} key={idx} cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity={0.15} />
+                <stop offset="70%" stopColor={sector.color} stopOpacity={0.6} />
+                <stop offset="100%" stopColor={sector.color} stopOpacity={0.9} />
+              </radialGradient>
+            ))}
+          </defs>
+
+          {/* Тонкая сетка кругов для ориентира */}
+          {[0.25, 0.5, 0.75, 1.0].map((scale, i) => (
+            <circle
+              key={i}
+              cx={cx}
+              cy={cy}
+              r={maxRadius * scale}
+              fill="none"
+              stroke="rgba(255,255,255,0.03)"
+              strokeWidth="1"
+              strokeDasharray={scale === 1.0 ? 'none' : '4 4'}
+            />
+          ))}
+
+          {/* Лучевые разделители секторов */}
+          {sectors.map((_, idx) => {
+            const angle = idx * 45;
+            const target = polarToCartesian(cx, cy, maxRadius, angle);
+            return (
+              <line
+                key={idx}
+                x1={cx}
+                y1={cy}
+                x2={target.x}
+                y2={target.y}
+                stroke="rgba(255, 255, 255, 0.05)"
+                strokeWidth="1.5"
+              />
+            );
+          })}
+
+          {/* Рисуем фоновые пустые сегменты колеса */}
+          {sectors.map((sector, idx) => {
+            const startAngle = idx * 45;
+            const endAngle = startAngle + 45;
+            const path = getSectorPath(maxRadius, startAngle, endAngle);
+
+            return (
+              <path
+                key={`bg-${idx}`}
+                d={path}
+                fill="rgba(255, 255, 255, 0.01)"
+                stroke="rgba(255, 255, 255, 0.03)"
+                strokeWidth="1"
+                className="transition duration-500 hover:fill-white/[0.02] cursor-pointer"
+              />
+            );
+          })}
+
+          {/* Рисуем заполненные сегменты с анимацией */}
+          {sectors.map((sector, idx) => {
+            const startAngle = idx * 45;
+            const endAngle = startAngle + 45;
+            const currentRadius = maxRadius * sector.value;
+            const path = getSectorPath(currentRadius, startAngle, endAngle);
+
+            return (
+              <g key={`filled-${idx}`}>
+                <motion.path
+                  initial={{ d: getSectorPath(0, startAngle, endAngle) }}
+                  animate={{ d: path }}
+                  transition={{ type: 'spring', stiffness: 60, damping: 15 }}
+                  fill={`url(#grad-${idx})`}
+                  stroke={sector.value > 0 ? sector.color : 'none'}
+                  strokeWidth="1.5"
+                  style={{
+                    filter: sector.value > 0 ? `drop-shadow(0 0 6px ${sector.glowColor})` : 'none',
+                  }}
+                  className="cursor-pointer"
+                />
+              </g>
+            );
+          })}
+
+          {/* Внешние текстовые маркеры-иконки для секторов */}
+          {sectors.map((sector, idx) => {
+            const angle = idx * 45 + 22.5; // Центр сектора
+            const labelPos = polarToCartesian(cx, cy, maxRadius + 24, angle);
+            const isRightSide = labelPos.x > cx;
+
+            return (
+              <g key={`label-${idx}`} className="select-none">
+                <text
+                  x={labelPos.x}
+                  y={labelPos.y}
+                  textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
+                  dominantBaseline="middle"
+                  fill={sector.value > 0 ? '#E8ECF0' : '#4E6178'}
+                  fontSize="12"
+                  fontWeight="bold"
+                  className="transition duration-500 font-sans tracking-wide"
+                >
+                  {sector.name}
+                </text>
+                <text
+                  x={labelPos.x}
+                  y={labelPos.y + 13}
+                  textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
+                  dominantBaseline="middle"
+                  fill={sector.value > 0 ? sector.color : '#2E3A4D'}
+                  fontSize="10"
+                  fontWeight="medium"
+                  className="transition duration-500 font-sans"
+                >
+                  {Math.round(sector.value * 100)}%
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Центральный декоративный элемент с иконкой */}
+          <circle cx={cx} cy={cy} r="18" fill="#040506" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
+          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fill="#3b82f6" fontSize="12" fontWeight="bold">
+            🎯
+          </text>
+        </svg>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-[#040506]/30 backdrop-blur-xl border border-white/5 rounded-3xl w-full h-full space-y-6">
       <div className="text-center space-y-1">
         <h3 className="text-md font-bold font-sans text-white tracking-wide">Колесо Призвания</h3>
-        <p className="text-xs text-[#7A8A9E] font-medium">Ваш цифровой профиль талантов</p>
+        <p className="text-xs text-[#7A8A9E] font-medium">Прогресс наполнения профиля талантов</p>
       </div>
 
       <div className="relative w-full max-w-[260px] aspect-square flex items-center justify-center">
@@ -263,6 +398,9 @@ export default function WheelOfVocation({ extractedData }: WheelOfVocationProps)
             </span>
           </div>
         ))}
+      </div>
+      <div className="text-[9px] text-[#7A8A9E]/60 italic font-sans text-center mt-1">
+        * Проценты отражают полноту извлеченных ИИ качественных данных по каждой сфере.
       </div>
     </div>
   );
