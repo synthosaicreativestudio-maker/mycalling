@@ -140,7 +140,7 @@ export async function POST(req: Request) {
         // для максимальной заметности кнопки
         // ═══════════════════════════════════════════════════════════════
         await sendTelegramMessage(botToken, chat_id, 
-          '👋 Привет! Я — официальный бот платформы «МоёПризвание».\n\nЧтобы подключить ваш профиль, нажмите кнопку 👇 «📱 Поделиться контактом» внизу экрана.\n\nЭто безопасно — мы сохраним только ваш номер телефона для привязки результатов.',
+          '👋 Привет! Я — официальный бот платформы «МоёПризвание».\n\nЧтобы привязать ваш профиль, нажмите кнопку 👇 «📱 Поделиться контактом» внизу экрана.\n\nИли **просто напишите ваш номер телефона сообщением в ответ** (например: 89991234567). Это абсолютно безопасно.',
           {
             keyboard: [
               [{ text: '📱 Поделиться контактом', request_contact: true }]
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
             one_time_keyboard: true,
             resize_keyboard: true,
             is_persistent: true,
-            input_field_placeholder: '👇 Нажмите кнопку ниже, чтобы поделиться контактом'
+            input_field_placeholder: 'Нажмите кнопку ниже или напишите телефон текстом'
           }
         );
         return NextResponse.json({ ok: true });
@@ -342,6 +342,158 @@ export async function POST(req: Request) {
           );
         }
         return NextResponse.json({ ok: true });
+      }
+      // 3. Обработка телефона, присланного обычным текстовым сообщением
+      if (text && !text.startsWith('/start')) {
+        const digits = text.replace(/\D/g, '');
+        if (digits.length === 10 || digits.length === 11) {
+          let normalizedPhone = digits;
+          if (normalizedPhone.startsWith('8') && normalizedPhone.length === 11) {
+            normalizedPhone = '7' + normalizedPhone.substring(1);
+          }
+          if (normalizedPhone.length === 10) {
+            normalizedPhone = '7' + normalizedPhone;
+          }
+
+          console.log('[auth] Telegram webhook received phone via text:', { phone: normalizedPhone, tgUserId });
+
+          // Ищем последнюю активную привязку PENDING для этого telegramId
+          const authLink = await prisma.authLink.findFirst({
+            where: {
+              telegramId: String(tgUserId),
+              status: 'PENDING'
+            },
+            orderBy: { createdAt: 'desc' }
+          });
+
+          let user = null;
+
+          if (authLink && authLink.userId) {
+            user = await prisma.user.findUnique({ where: { id: authLink.userId } });
+            if (user) {
+              user = await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                  phone: normalizedPhone,
+                  telegramId: String(tgUserId),
+                  name: user.name === 'Гость' ? (body.message.from?.first_name || 'Ученик') : user.name,
+                  fullName: user.fullName || body.message.from?.first_name || 'Ученик'
+                }
+              });
+            }
+          }
+
+          if (!user) {
+            user = await prisma.user.findFirst({
+              where: {
+                OR: [
+                  { phone: normalizedPhone },
+                  { phone: '+' + normalizedPhone },
+                  { telegramId: String(tgUserId) }
+                ]
+              }
+            });
+          }
+
+          if (!user) {
+            const tempEmail = `tg_${tgUserId}@moiprizvanie.ru`;
+            user = await prisma.user.create({
+              data: {
+                name: body.message.from?.first_name || 'Ученик',
+                fullName: body.message.from?.first_name || 'Ученик',
+                email: tempEmail,
+                phone: normalizedPhone,
+                telegramId: String(tgUserId),
+                role: 'STUDENT'
+              }
+            });
+          } else {
+            if (user.telegramId !== String(tgUserId) || user.phone !== normalizedPhone) {
+              user = await prisma.user.update({
+                where: { id: user.id },
+                data: { 
+                  telegramId: String(tgUserId),
+                  phone: normalizedPhone
+                }
+              });
+            }
+          }
+
+          let account = await prisma.account.findFirst({
+            where: { providerId: 'telegram', accountId: String(tgUserId) }
+          });
+          if (!account) {
+            await prisma.account.create({
+              data: {
+                providerId: 'telegram',
+                accountId: String(tgUserId),
+                userId: user.id
+              }
+            });
+          }
+
+          const sessionToken = crypto.randomBytes(32).toString('hex');
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 7);
+
+          await prisma.session.create({
+            data: {
+              token: sessionToken,
+              userId: user.id,
+              expiresAt: expiresAt
+            }
+          });
+
+          const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+
+          await sendTelegramMessage(botToken, chat_id,
+            `✅ Контакт получен! Подключаю ваш профиль...`,
+            { remove_keyboard: true }
+          );
+
+          if (authLink) {
+            if (authLink.userId && authLink.userId !== user.id) {
+              try {
+                await prisma.coachSession.deleteMany({ where: { userId: user.id } });
+                await prisma.coachSession.updateMany({
+                  where: { userId: authLink.userId },
+                  data: { userId: user.id }
+                });
+                await prisma.user.delete({ where: { id: authLink.userId } });
+              } catch (e) {
+                console.error('Error migrating guest session in Telegram webhook (text fallback):', e);
+              }
+            }
+
+            await prisma.authLink.update({
+              where: { id: authLink.id },
+              data: {
+                status: 'COMPLETED',
+                userId: user.id,
+                sessionToken: sessionToken
+              }
+            });
+
+            await sendTelegramMessage(botToken, chat_id, 
+              `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nВы вошли на компьютере — можете вернуться к браузеру! Или нажмите кнопку ниже, чтобы войти с мобильного:`,
+              {
+                inline_keyboard: [
+                  [{ text: '🌐 Перейти на платформу', url: loginUrl }]
+                ]
+              }
+            );
+          } else {
+            await sendTelegramMessage(botToken, chat_id, 
+              `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nНажмите кнопку ниже, чтобы перейти на платформу:`,
+              {
+                inline_keyboard: [
+                  [{ text: '🌐 Перейти на платформу', url: loginUrl }]
+                ]
+              }
+            );
+          }
+          return NextResponse.json({ ok: true });
+        }
       }
     }
     
