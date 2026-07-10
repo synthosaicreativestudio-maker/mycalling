@@ -180,14 +180,14 @@ export default function AssessmentPage() {
   const currentQuestionNumber = Math.round((currentQuestion.progress_percent / 100) * 29) + 1;
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-100px)] max-w-7xl px-6 py-10 lg:px-10 relative z-10 pt-28">
+    <main className="mx-auto h-[calc(100dvh-90px)] max-w-7xl px-4 py-4 lg:px-8 relative z-10 pt-20 flex flex-col justify-between overflow-hidden">
       
       {/* Плашка оффлайн-режима */}
       {store.isOffline && (
-        <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-200 backdrop-blur-sm shadow-lg max-w-4xl mx-auto transition-opacity">
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-3 text-red-200 backdrop-blur-sm shadow-lg max-w-4xl mx-auto transition-opacity w-full shrink-0">
           <div className="flex items-center gap-3">
-            <WifiOff className="h-5 w-5 text-red-400 shrink-0 animate-pulse" />
-            <p className="text-xs md:text-sm leading-relaxed text-red-200">
+            <WifiOff className="h-4 w-4 text-red-400 shrink-0 animate-pulse" />
+            <p className="text-xs leading-relaxed text-red-200">
               Сеть временно недоступна. 
               {store.offlineAnswersBuffer.length > 0 && (
                 <span className="font-bold ml-2">Неотправленных ответов: {store.offlineAnswersBuffer.length}</span>
@@ -196,52 +196,52 @@ export default function AssessmentPage() {
           </div>
           <button
             onClick={() => store.syncOfflineAnswers()}
-            className="text-xs font-bold text-white bg-red-500/20 hover:bg-red-500/35 border border-red-500/30 px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5"
+            className="text-[10px] font-bold text-white bg-red-500/20 hover:bg-red-500/35 border border-red-500/30 px-2.5 py-1 rounded-lg transition flex items-center gap-1"
           >
-            <RefreshCw className="h-3 w-3" />
+            <RefreshCw className="h-2.5 w-2.5" />
             Повторить
           </button>
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr] flex-1 min-h-0 overflow-hidden pb-4">
         
         {/* Боковая панель прогресса */}
-        <aside className="glass-panel space-y-6 rounded-[32px] p-6 lg:p-7">
+        <aside className="glass-panel rounded-[24px] p-4 lg:p-5 flex flex-col justify-between overflow-y-auto min-h-0 lg:max-h-full space-y-4">
           <div>
-            <span className="text-xs uppercase tracking-[0.25em] text-[#3B82F6] font-bold">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[#3B82F6] font-bold">
               Интерактивная диагностика
             </span>
-            <h1 className="text-2xl font-bold text-white mt-3 leading-tight font-sans">
+            <h1 className="text-xl font-bold text-white mt-1.5 leading-tight font-sans">
               Диагностика потенциала
             </h1>
-            <p className="mt-2 text-sm text-[#7A8A9E] leading-relaxed">
+            <p className="mt-1 text-xs text-[#7A8A9E] leading-relaxed">
               Отвечайте искренне. Здесь нет правильных или неправильных ответов.
             </p>
           </div>
 
           {/* Общий прогресс */}
-          <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-white font-sans">Общий прогресс</p>
-              <p className="text-sm font-bold text-[#3B82F6]">{currentQuestion.progress_percent}%</p>
+          <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold text-white font-sans">Общий прогресс</p>
+              <p className="text-xs font-bold text-[#3B82F6]">{currentQuestion.progress_percent}%</p>
             </div>
-            <div className="mt-3.5 h-1.5 rounded-full bg-black/10 overflow-hidden">
+            <div className="mt-2.5 h-1 rounded-full bg-black/10 overflow-hidden">
               <div
-                className="h-1.5 rounded-full bg-[#3B82F6] transition-all duration-300"
+                className="h-1 rounded-full bg-[#3B82F6] transition-all duration-300"
                 style={{ width: `${currentQuestion.progress_percent}%` }}
               />
             </div>
-            <div className="mt-3 flex items-center justify-between text-xs text-muted">
+            <div className="mt-2 flex items-center justify-between text-[10px] text-muted">
               <span>Вопрос {currentQuestionNumber > 29 ? 29 : currentQuestionNumber} из 29</span>
               <span>Блок: {blockNames[currentQuestion.test_type]}</span>
             </div>
           </div>
 
           {/* Список блоков теста */}
-          <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 space-y-3.5">
-            <p className="text-sm font-semibold text-white">Этапы диагностики</p>
-            <div className="space-y-3">
+          <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-3 space-y-2">
+            <p className="text-xs font-semibold text-white">Этапы диагностики</p>
+            <div className="space-y-2">
               {Object.entries(blockNames).map(([key, name]) => {
                 const BlockIcon = blockIcons[key] || Compass;
                 const isCurrent = currentQuestion.test_type === key;
@@ -255,7 +255,7 @@ export default function AssessmentPage() {
                 return (
                   <div 
                     key={key} 
-                    className={`rounded-xl border p-3 transition duration-200 ${
+                    className={`rounded-xl border p-2.5 transition duration-200 ${
                       isCurrent 
                         ? 'border-[#3B82F6] bg-[#3B82F6]/5 text-white' 
                         : isPassed 
@@ -263,13 +263,13 @@ export default function AssessmentPage() {
                           : 'border-white/5 bg-white/[0.01] text-[#7A8A9E]'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <BlockIcon className="h-4 w-4" />
-                        <span className="text-xs font-semibold">{name}</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <BlockIcon className="h-3.5 w-3.5" />
+                        <span className="text-[10px] font-semibold">{name}</span>
                       </div>
-                      {isPassed && <span className="text-[10px] uppercase font-bold text-emerald-400">Пройден</span>}
-                      {isCurrent && <span className="text-[10px] uppercase font-bold text-[#3B82F6] animate-pulse">Текущий</span>}
+                      {isPassed && <span className="text-[8px] uppercase font-bold text-emerald-400">Пройден</span>}
+                      {isCurrent && <span className="text-[8px] uppercase font-bold text-[#3B82F6] animate-pulse">Текущий</span>}
                     </div>
                   </div>
                 );
@@ -279,37 +279,37 @@ export default function AssessmentPage() {
         </aside>
 
         {/* Карточный интерфейс вопросов */}
-        <section className="glass-panel rounded-[32px] p-6 lg:p-8 flex flex-col justify-between overflow-hidden relative min-h-[500px]">
+        <section className="glass-panel rounded-[24px] p-4 lg:p-6 flex flex-col justify-between overflow-y-auto relative min-h-0 lg:max-h-full">
           
           {isWaitingForNext && (
-            <div className="absolute inset-0 z-50 bg-[#040506]/85 backdrop-blur-sm flex flex-col items-center justify-center rounded-[32px]">
-              <Loader2 className="h-10 w-10 animate-spin text-[#3B82F6] mb-4" />
-              <p className="text-sm font-bold text-white">Синхронизация ответа...</p>
-              {store.isOffline && <p className="text-xs text-muted mt-2">Ожидание подключения к сети</p>}
+            <div className="absolute inset-0 z-50 bg-[#040506]/85 backdrop-blur-sm flex flex-col items-center justify-center rounded-[24px]">
+              <Loader2 className="h-8 w-8 animate-spin text-[#3B82F6] mb-3" />
+              <p className="text-xs font-bold text-white">Синхронизация ответа...</p>
+              {store.isOffline && <p className="text-[10px] text-muted mt-1">Ожидание подключения к сети</p>}
             </div>
           )}
 
-          <div className="space-y-6 flex-1 flex flex-col justify-between relative z-10">
+          <div className="space-y-4 flex-1 flex flex-col justify-between relative z-10 min-h-0">
             <div>
-              <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#3B82F6] font-sans">
-                  <Icon className="h-3.5 w-3.5" />
+              <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#3B82F6] font-sans">
+                  <Icon className="h-3 w-3" />
                   {blockNames[currentQuestion.test_type]}
                 </div>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-[1fr_130px] items-center mt-6">
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-bold text-white leading-snug lg:text-3xl font-sans">
+              <div className="grid gap-4 md:grid-cols-[1fr_100px] items-center mt-4">
+                <div className="space-y-2">
+                  <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-white leading-snug font-sans">
                     {currentQuestion.question_text}
                   </h2>
-                  <p className="text-xs text-[#7A8A9E] leading-relaxed">
-                    Выбери вариант ответа ниже. Вы также можете использовать клавиши 1-5 на клавиатуре.
+                  <p className="text-[11px] text-[#7A8A9E] leading-relaxed">
+                    Выбери вариант ответа ниже или нажми клавишу 1-5 на клавиатуре.
                   </p>
                 </div>
                 
                 {/* Иллюстрация (Fallback) */}
-                <div className="relative w-full h-[130px] rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-[90px] rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex items-center justify-center shrink-0">
                   {!imgError ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img 
@@ -319,16 +319,16 @@ export default function AssessmentPage() {
                       onError={() => setImgError(true)}
                     />
                   ) : (
-                    <div className="text-[#3B82F6]/40 flex flex-col items-center justify-center gap-2">
-                      <Brain className="h-10 w-10 animate-pulse text-[#3B82F6]" />
-                      <span className="text-[10px] uppercase tracking-wider font-semibold font-sans">Диагностика</span>
+                    <div className="text-[#3B82F6]/40 flex flex-col items-center justify-center gap-1.5">
+                      <Brain className="h-8 w-8 animate-pulse text-[#3B82F6]" />
+                      <span className="text-[9px] uppercase tracking-wider font-semibold font-sans">Диагностика</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Варианты Ликерта */}
-              <div className="grid gap-3 mt-8">
+              <div className="grid gap-2 mt-4">
                 {currentQuestion.available_answers.map((ans) => {
                   const active = lastSelectedValue === ans.value;
                   const borderActive = 'border-[#3B82F6] bg-[#3B82F6]/10 text-white shadow-sm';
@@ -340,12 +340,12 @@ export default function AssessmentPage() {
                       type="button"
                       onClick={() => handleChooseAnswer(ans.value)}
                       disabled={store.isLoading || isWaitingForNext}
-                      className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition duration-200 ${
+                      className={`flex items-center gap-3 rounded-xl border py-2.5 px-4 text-left transition duration-200 ${
                         active ? borderActive : borderNormal
                       }`}
                     >
                       <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-xl border text-xs font-bold transition ${
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-xs font-bold transition ${
                           active 
                             ? 'border-[#3B82F6] bg-[#3B82F6] text-white' 
                             : 'border-white/10 text-[#7A8A9E]'
@@ -353,7 +353,7 @@ export default function AssessmentPage() {
                       >
                         {ans.value}
                       </div>
-                      <span className="text-sm font-semibold">{ans.label}</span>
+                      <span className="text-xs md:text-sm font-semibold">{ans.label}</span>
                     </button>
                   );
                 })}
@@ -361,14 +361,14 @@ export default function AssessmentPage() {
             </div>
 
             {/* Панель навигации */}
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-6">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-4 shrink-0">
               <button
                 type="button"
                 onClick={() => store.goBack()}
                 disabled={store.isLoading || currentQuestionNumber <= 1 || isWaitingForNext}
-                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.06] disabled:opacity-40 disabled:pointer-events-none"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-2 text-xs font-semibold text-white transition hover:bg-white/[0.06] disabled:opacity-40 disabled:pointer-events-none"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-3.5 w-3.5" />
                 Назад
               </button>
 

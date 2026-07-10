@@ -49,9 +49,33 @@ export async function GET(request: Request) {
 
     console.log('[auth] Callback redirection target:', { userId: session.userId, redirectPath });
 
-    const response = isJson
-      ? NextResponse.json({ success: true, redirectPath })
-      : NextResponse.redirect(new URL(redirectPath, request.url));
+    let response: NextResponse;
+    
+    if (isJson) {
+      response = NextResponse.json({ success: true, redirectPath });
+    } else {
+      // Чтобы избежать удаления кук в Next.js при HTTP-редиректе 307/302, 
+      // отдаем HTML 200 OK с автоматическим JS-перенаправлением
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta http-equiv="refresh" content="0;url=${redirectPath}">
+            <title>Авторизация...</title>
+            <script>window.location.href = "${redirectPath}";</script>
+          </head>
+          <body style="background:#080C14;color:#fff;display:flex;align-items:center;justify-content:center;font-family:sans-serif;height:100vh;margin:0;">
+            <div style="text-align:center;">
+              <p style="font-size:16px;opacity:0.8;">Авторизация успешна. Перенаправление...</p>
+            </div>
+          </body>
+        </html>
+      `;
+      response = new NextResponse(html, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
+      });
+    }
     
     // Устанавливаем куки сессии Better Auth для обоих протоколов (http и https)
     // для гарантированной работы за прокси-серверами продакшна
