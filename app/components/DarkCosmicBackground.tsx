@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 
 export function DarkCosmicBackground() {
   const [mounted, setMounted] = useState(false);
@@ -16,15 +15,17 @@ export function DarkCosmicBackground() {
 
   return (
     <div className="fixed inset-0 -z-10 h-full w-full overflow-hidden bg-[#040506] print:hidden">
-      {/* Слой 1: Фоновое изображение из новой дизайн-концепции */}
-      <Image
-        src="/assets/images/cosmic-bg.png"
-        alt="Космический фон"
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover opacity-90 select-none pointer-events-none"
-      />
+      {/* Слой 1: Фоновое видео высокой четкости */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover opacity-90 select-none pointer-events-none"
+      >
+        <source src="/assets/videos/background-video.mp4" type="video/mp4" />
+      </video>
 
       {/* Слой 2: Полупрозрачное затемнение для читаемости контента */}
       <div className="absolute inset-0 bg-[#040506]/40 pointer-events-none" />
