@@ -161,23 +161,34 @@ export async function GET(request: Request) {
         where: { userId }
       });
       const coachExtracted = coachSession ? (coachSession.extractedData as Record<string, any>) : {};
-      const isDeepMode = coachExtracted.sessionMode === 'DEEP';
 
-      // Сборка цифрового профиля
-      const coachData = isDeepMode ? {
-        sessionMode: 'DEEP',
-        deepGoal: coachExtracted.deepGoal || 'Не указано',
-        deepOutcome: coachExtracted.deepOutcome || 'Не указано',
-        deepEmotions: coachExtracted.deepEmotions || 'Не указано',
-        deepIdentity: coachExtracted.deepIdentity || 'Не указано',
-        deepActions: coachExtracted.deepActions || 'Не указано',
-        deepFirstStep: coachExtracted.deepFirstStep || 'Не указано'
-      } : {
-        sessionMode: 'EXPRESS',
-        dreams: coachExtracted.dreams || 'Не указано',
-        idols: coachExtracted.idols || 'Не указано',
-        values: coachExtracted.values || 'Не указано',
-        barriers: coachExtracted.barriers || 'Не указано'
+      // Сборка цифрового профиля из обеих сессий (Express и Deep) для дополнения отчета друг другом
+      const getField = (key: string): string => {
+        if (coachExtracted.expressExtracted && typeof coachExtracted.expressExtracted === 'object') {
+          if ((coachExtracted.expressExtracted as Record<string, any>)[key] !== undefined) {
+            return (coachExtracted.expressExtracted as Record<string, any>)[key] || '';
+          }
+        }
+        if (coachExtracted.deepExtracted && typeof coachExtracted.deepExtracted === 'object') {
+          if ((coachExtracted.deepExtracted as Record<string, any>)[key] !== undefined) {
+            return (coachExtracted.deepExtracted as Record<string, any>)[key] || '';
+          }
+        }
+        return coachExtracted[key] || '';
+      };
+
+      const coachData = {
+        dreams: getField('dreams') || 'Не указано',
+        idols: getField('idols') || 'Не указано',
+        values: getField('values') || 'Не указано',
+        barriers: getField('fears') || getField('barriers') || 'Не указано',
+        
+        deepGoal: getField('deepGoal') || '',
+        deepOutcome: getField('deepOutcome') || '',
+        deepEmotions: getField('deepEmotions') || '',
+        deepIdentity: getField('deepIdentity') || '',
+        deepActions: getField('deepActions') || '',
+        deepFirstStep: getField('deepFirstStep') || ''
       };
 
       const summaryProfile = {
@@ -205,10 +216,14 @@ export async function GET(request: Request) {
       const apiUrl = env.PROXYAPI_URL;
 
       let coachDataPrompt = '';
-      if (isDeepMode) {
-        coachDataPrompt = `Глубокий коучинг: Цель - ${coachData.deepGoal}, Ожидаемый результат - ${coachData.deepOutcome}, Эмоции - ${coachData.deepEmotions}, Идентичность - ${coachData.deepIdentity}, Шаги - ${coachData.deepActions}, Первый двухминутный шаг - ${coachData.deepFirstStep}`;
-      } else {
-        coachDataPrompt = `Экспресс-коучинг: Мечты - ${coachData.dreams}, Кумиры - ${coachData.idols}, Ценности - ${coachData.values}, Барьеры - ${coachData.barriers}`;
+      if (coachData.dreams !== 'Не указано' || coachData.idols !== 'Не указано') {
+        coachDataPrompt += `Экспресс-коучинг: Мечты - ${coachData.dreams}, Кумиры - ${coachData.idols}, Ценности - ${coachData.values}, – Барьеры/Страхи: ${coachData.barriers}. `;
+      }
+      if (coachData.deepGoal) {
+        coachDataPrompt += `Глубокий коучинг: Цель - ${coachData.deepGoal}, Ожидаемый результат - ${coachData.deepOutcome}, Эмоции - ${coachData.deepEmotions}, Идентичность - ${coachData.deepIdentity}, Шаги - ${coachData.deepActions}, Первый двухминутный шаг - ${coachData.deepFirstStep}.`;
+      }
+      if (!coachDataPrompt) {
+        coachDataPrompt = 'Данные коучинга не предоставлены.';
       }
 
       const systemPrompt = `Вы — ведущий мировой эксперт в профориентации подростков и возрастной психологии.

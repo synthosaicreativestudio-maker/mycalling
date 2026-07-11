@@ -40,6 +40,20 @@ function formatToTelegramHtml(text: string): string {
     .replace(/\*(.*?)\*/g, '<b>$1</b>');
 }
 
+function getSafeField(data: any, key: string): string {
+  if (data && data.expressExtracted && typeof data.expressExtracted === 'object') {
+    if (data.expressExtracted[key] !== undefined) {
+      return data.expressExtracted[key] || '';
+    }
+  }
+  if (data && data.deepExtracted && typeof data.deepExtracted === 'object') {
+    if (data.deepExtracted[key] !== undefined) {
+      return data.deepExtracted[key] || '';
+    }
+  }
+  return (data && data[key]) || '';
+}
+
 /** Отправить карточку лида администратору в Telegram */
 async function sendTelegramNotification(user: any, data: any) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -58,12 +72,12 @@ async function sendTelegramNotification(user: any, data: any) {
 *Виртуальный шаг:* ${data.currentStep || 0}
  
 *Результаты сессии:*
-*🎯 Цель (Что хочу):* ${data.deepGoal || 'Не указано'}
-*🌟 Результат:* ${data.deepOutcome || 'Не указано'}
-*🔥 Эмоции:* ${data.deepEmotions || 'Не указано'}
-*👑 Идентичность:* ${data.deepIdentity || 'Не указано'}
-*🚀 План & KPI:* ${data.deepActions || 'Не указано'}
-*⚡ Первый шаг:* ${data.deepFirstStep || 'Не указано'}
+*🎯 Цель (Что хочу):* ${getSafeField(data, 'deepGoal') || 'Не указано'}
+*🌟 Результат:* ${getSafeField(data, 'deepOutcome') || 'Не указано'}
+*🔥 Эмоции:* ${getSafeField(data, 'deepEmotions') || 'Не указано'}
+*👑 Идентичность:* ${getSafeField(data, 'deepIdentity') || 'Не указано'}
+*🚀 План & KPI:* ${getSafeField(data, 'deepActions') || 'Не указано'}
+*⚡ Первый шаг:* ${getSafeField(data, 'deepFirstStep') || 'Не указано'}
  
 *Резюме коуча:* ${data.preliminaryFeedback || 'Еще не сформировано'}`;
   } else {
@@ -74,10 +88,10 @@ async function sendTelegramNotification(user: any, data: any) {
 *Виртуальный шаг:* ${data.currentStep || 0}
  
 *Ответы:*
-*Мечты:* ${data.dreams || 'Не указано'}
-*Кумиры:* ${data.idols || 'Не указано'}
-*Ценности:* ${data.values || 'Не указано'}
-*Барьеры:* ${data.barriers || 'Не указано'}
+*Мечты:* ${getSafeField(data, 'dreams') || 'Не указано'}
+*Кумиры:* ${getSafeField(data, 'idols') || 'Не указано'}
+*Ценности:* ${getSafeField(data, 'values') || 'Не указано'}
+*Барьеры:* ${getSafeField(data, 'fears') || getSafeField(data, 'barriers') || 'Не указано'}
 *Резюме коуча:* ${data.preliminaryFeedback || 'Еще не сформировано'}`;
   }
 
@@ -110,9 +124,9 @@ async function sendTelegramReportToUser(user: any, data: any) {
   
   if (isDeep) {
     rawText = `*Манифест целей от наставника Романа*\n\n` +
-      `*🎯 Твоя цель:* ${data.deepGoal || 'Не указано'}\n` +
-      `*👑 Твоя идентичность:* ${data.deepIdentity || 'Не указано'}\n` +
-      `*⚡ Первый шаг:* ${data.deepFirstStep || 'Не указано'}\n\n` +
+      `*🎯 Твоя цель:* ${getSafeField(data, 'deepGoal') || 'Не указано'}\n` +
+      `*👑 Твоя идентичность:* ${getSafeField(data, 'deepIdentity') || 'Не указано'}\n` +
+      `*⚡ Первый шаг:* ${getSafeField(data, 'deepFirstStep') || 'Не указано'}\n\n` +
       `*Анализ наставника:*\n${feedback}\n\n` +
       `Теперь ты можешь пройти интерактивные тесты для полной профориентации:\nhttps://synthosai.ru/assessment`;
   } else {
@@ -197,10 +211,10 @@ async function sendMaxIdSync(user: any, data: any) {
         role: user.role,
         source: 'NeuroCoach Web',
         meta: {
-          dreams: data.dreams,
-          idols: data.idols,
-          values: data.values,
-          barriers: data.barriers,
+          dreams: getSafeField(data, 'dreams'),
+          idols: getSafeField(data, 'idols'),
+          values: getSafeField(data, 'values'),
+          barriers: getSafeField(data, 'fears') || getSafeField(data, 'barriers'),
           preliminaryFeedback: data.preliminaryFeedback
         }
       })
@@ -350,10 +364,68 @@ export async function POST(req: Request) {
       }
     }
 
-    let transcript = coachSession.transcript as any[] || [];
-    let extractedData = (coachSession.extractedData as Record<string, any>) || {};
+    let rawTranscript = coachSession.transcript;
+    let expressTranscript: any[] = [];
+    let deepTranscript: any[] = [];
+    let transcript: any[] = [];
+
+    if (Array.isArray(rawTranscript)) {
+      expressTranscript = rawTranscript;
+      deepTranscript = [];
+    } else if (rawTranscript && typeof rawTranscript === 'object') {
+      const obj = rawTranscript as Record<string, any>;
+      expressTranscript = Array.isArray(obj.EXPRESS) ? obj.EXPRESS : [];
+      deepTranscript = Array.isArray(obj.DEEP) ? obj.DEEP : [];
+    }
+
+    let rawExtractedData = (coachSession.extractedData as Record<string, any>) || {};
+    let extractedData = { ...rawExtractedData };
+
+    if (!extractedData.expressExtracted && !extractedData.deepExtracted) {
+      const expressExtracted: Record<string, any> = {};
+      const deepExtracted: Record<string, any> = {};
+      
+      const expressKeys = [
+        'hobbies', 'schoolSubjects', 'dreams', 'idols', 'parents', 'fears',
+        'experience', 'workFormat', 'thinkingType', 'successMeasure',
+        'energySources', 'teamRole', 'autonomyStyle', 'values', 'decisionStyle'
+      ];
+      const deepKeys = [
+        'deepGoal', 'deepOutcome', 'deepEmotions', 'deepIdentity', 'deepActions', 'deepFirstStep'
+      ];
+      
+      for (const k of expressKeys) {
+        if (extractedData[k] !== undefined) expressExtracted[k] = extractedData[k];
+      }
+      for (const k of deepKeys) {
+        if (extractedData[k] !== undefined) deepExtracted[k] = extractedData[k];
+      }
+      
+      extractedData = {
+        fullName: extractedData.fullName,
+        phone: extractedData.phone,
+        age: extractedData.age,
+        grade: extractedData.grade,
+        city: extractedData.city,
+        sessionMode: extractedData.sessionMode || 'EXPRESS',
+        currentStep: extractedData.currentStep,
+        lastStep: extractedData.lastStep,
+        stepAttempts: extractedData.stepAttempts,
+        preliminaryFeedback: extractedData.preliminaryFeedback,
+        avatarUrl: extractedData.avatarUrl,
+        
+        expressStep: extractedData.sessionMode === 'DEEP' ? 2 : extractedData.currentStep,
+        expressStatus: coachSession.status === 'COMPLETED' && extractedData.sessionMode !== 'DEEP' ? 'COMPLETED' : 'IN_PROGRESS',
+        expressExtracted,
+        
+        deepStep: extractedData.sessionMode === 'DEEP' ? extractedData.currentStep : 10,
+        deepStatus: coachSession.status === 'COMPLETED' && extractedData.sessionMode === 'DEEP' ? 'COMPLETED' : 'IN_PROGRESS',
+        deepExtracted
+      };
+    }
 
     const isDeepMode = extractedData.sessionMode === 'DEEP';
+    transcript = isDeepMode ? deepTranscript : expressTranscript;
 
     // Вычисляем, какие блоки информации уже собраны
     const hasPhone = !!coachSession.user.phone || !!extractedData.phone;
@@ -364,12 +436,12 @@ export async function POST(req: Request) {
     let nextStep = 1;
 
     if (isDeepMode) {
-      const hasDeepGoal = getStrLen(extractedData.deepGoal) > 6;
-      const hasDeepOutcome = getStrLen(extractedData.deepOutcome) > 6;
-      const hasDeepEmotions = getStrLen(extractedData.deepEmotions) > 3;
-      const hasDeepIdentity = getStrLen(extractedData.deepIdentity) > 6;
-      const hasDeepActions = getStrLen(extractedData.deepActions) > 6;
-      const hasDeepFirstStep = getStrLen(extractedData.deepFirstStep) > 6;
+      const hasDeepGoal = getStrLen(extractedData.deepExtracted?.deepGoal) > 6;
+      const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 6;
+      const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 3;
+      const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 6;
+      const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 6;
+      const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 6;
 
       if (!hasPhone) {
         currentStepBefore = 1;
@@ -400,21 +472,21 @@ export async function POST(req: Request) {
         nextStep = 16;
       }
     } else {
-      const hasHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
-      const hasSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
-      const hasDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
-      const hasIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
-      const hasParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
-      const hasFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
-      const hasExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
-      const hasWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
-      const hasThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
-      const hasSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
-      const hasEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
-      const hasTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
-      const hasAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
-      const hasValues = !!extractedData.values && extractedData.values.trim().length > 6;
-      const hasDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
+      const hasHobbies = getStrLen(extractedData.expressExtracted?.hobbies) > 6;
+      const hasSchoolSubjects = getStrLen(extractedData.expressExtracted?.schoolSubjects) > 6;
+      const hasDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
+      const hasIdols = getStrLen(extractedData.expressExtracted?.idols) > 6;
+      const hasParents = getStrLen(extractedData.expressExtracted?.parents) > 6;
+      const hasFears = getStrLen(extractedData.expressExtracted?.fears) > 6;
+      const hasExperience = getStrLen(extractedData.expressExtracted?.experience) > 6;
+      const hasWorkFormat = getStrLen(extractedData.expressExtracted?.workFormat) > 6;
+      const hasThinkingType = getStrLen(extractedData.expressExtracted?.thinkingType) > 6;
+      const hasSuccessMeasure = getStrLen(extractedData.expressExtracted?.successMeasure) > 6;
+      const hasEnergySources = getStrLen(extractedData.expressExtracted?.energySources) > 6;
+      const hasTeamRole = getStrLen(extractedData.expressExtracted?.teamRole) > 6;
+      const hasAutonomyStyle = getStrLen(extractedData.expressExtracted?.autonomyStyle) > 6;
+      const hasValues = getStrLen(extractedData.expressExtracted?.values) > 6;
+      const hasDecisionStyle = getStrLen(extractedData.expressExtracted?.decisionStyle) > 6;
 
       if (!hasPhone) {
         currentStepBefore = 1;
@@ -479,21 +551,21 @@ export async function POST(req: Request) {
         stepAttempts++;
         if (!isDeepMode && nextStep >= 3 && nextStep <= 15) {
           if (stepAttempts >= 2) {
-            const hasHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
-            const hasSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
-            const hasDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
-            const hasIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
-            const hasParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
-            const hasFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
-            const hasExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
-            const hasWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
-            const hasThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
-            const hasSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
-            const hasEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
-            const hasTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
-            const hasAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
-            const hasValues = !!extractedData.values && extractedData.values.trim().length > 6;
-            const hasDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
+            const hasHobbies = getStrLen(extractedData.expressExtracted?.hobbies) > 6;
+            const hasSchoolSubjects = getStrLen(extractedData.expressExtracted?.schoolSubjects) > 6;
+            const hasDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
+            const hasIdols = getStrLen(extractedData.expressExtracted?.idols) > 6;
+            const hasParents = getStrLen(extractedData.expressExtracted?.parents) > 6;
+            const hasFears = getStrLen(extractedData.expressExtracted?.fears) > 6;
+            const hasExperience = getStrLen(extractedData.expressExtracted?.experience) > 6;
+            const hasWorkFormat = getStrLen(extractedData.expressExtracted?.workFormat) > 6;
+            const hasThinkingType = getStrLen(extractedData.expressExtracted?.thinkingType) > 6;
+            const hasSuccessMeasure = getStrLen(extractedData.expressExtracted?.successMeasure) > 6;
+            const hasEnergySources = getStrLen(extractedData.expressExtracted?.energySources) > 6;
+            const hasTeamRole = getStrLen(extractedData.expressExtracted?.teamRole) > 6;
+            const hasAutonomyStyle = getStrLen(extractedData.expressExtracted?.autonomyStyle) > 6;
+            const hasValues = getStrLen(extractedData.expressExtracted?.values) > 6;
+            const hasDecisionStyle = getStrLen(extractedData.expressExtracted?.decisionStyle) > 6;
 
             const psychoFields = [
               { key: 'hobbies', has: hasHobbies },
@@ -514,7 +586,8 @@ export async function POST(req: Request) {
             ];
             const firstEmpty = psychoFields.find(f => !f.has);
             if (firstEmpty) {
-              extractedData[firstEmpty.key] = "Продолжено наставником";
+              if (!extractedData.expressExtracted) extractedData.expressExtracted = {};
+              extractedData.expressExtracted[firstEmpty.key] = "Продолжено наставником";
               let psychoBlocksCount = 0;
               psychoFields.forEach(f => {
                 if (f.key === firstEmpty.key || f.has) psychoBlocksCount++;
@@ -563,7 +636,7 @@ export async function POST(req: Request) {
 
     if (isInitMessage && transcript.length > 0) {
       return NextResponse.json({
-        history: transcript,
+        history: isDeepMode ? deepTranscript : expressTranscript,
         sessionId: coachSession.id,
         userId: coachSession.userId,
         currentStep: nextStep,
@@ -574,19 +647,22 @@ export async function POST(req: Request) {
     }
 
     // Если это самое первое сообщение — приветствуем и заключаем контракт (CLEAR / Внутренняя Игра)
-    if (isInitMessage && transcript.length === 0) {
+    if (isInitMessage && expressTranscript.length === 0 && deepTranscript.length === 0) {
       let greeting = FALLBACK_REPLIES[0];
       if (fromLoginError) {
         greeting = 'Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник. Я вижу, ты хотел зайти в Личный кабинет, но для этого нужно сначала пройти нашу короткую сессию. Не переживай — это не скучный тест, а увлекательное исследование твоих талантов. Отвечай максимально подробно, честно и развернуто — так я смогу точнее всего составить карту твоих талантов. Готов начать?';
       } else if (isDeepMode && hasPersonalInfo && hasPhone) {
         greeting = 'Отличный выбор! Мы начинаем Глубокий самокоучинг по методологии «Что хочу → Действие». Наш путь состоит из 6 важных шагов: мы найдем твое истинное желание, оцифруем образ результата, подключим эмоции, сформулируем твою идентичность («Кто я?»), составим план с KPI и зафиксируем первый шаг. \n\nДавай начнем: Что именно ты хочешь изменить, достичь или в чем реализоваться в плане будущей профессии?';
       }
-      transcript.push({ role: 'assistant', content: greeting, timestamp: new Date().toISOString() });
+      
+      const newMsg = { role: 'assistant', content: greeting, timestamp: new Date().toISOString() };
+      expressTranscript.push(newMsg);
+      deepTranscript.push(newMsg);
       
       await prisma.coachSession.update({
         where: { id: coachSession.id },
         data: { 
-          transcript, 
+          transcript: { EXPRESS: expressTranscript, DEEP: deepTranscript }, 
           extractedData: { ...extractedData, currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 10 : 0 },
           status: 'IN_PROGRESS'
         }
@@ -599,7 +675,8 @@ export async function POST(req: Request) {
         currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 10 : 0,
         phoneConfirmed: hasPhone,
         sessionStatus: 'IN_PROGRESS',
-        extracted: extractedData
+        extracted: extractedData,
+        history: isDeepMode ? deepTranscript : expressTranscript
       });
     }
 
@@ -613,7 +690,18 @@ export async function POST(req: Request) {
       const isDuplicate = message === 'Телефон подтвержден через бот' && 
                           transcript.some(m => m.role === 'user' && m.content === 'Telegram-канал связи успешно подключен!');
       if (!isDuplicate) {
-        transcript.push({ role: 'user', content: userMsgContent, timestamp: new Date().toISOString() });
+        const newUserMsg = { role: 'user', content: userMsgContent, timestamp: new Date().toISOString() };
+        if (isDeepMode) {
+          deepTranscript.push(newUserMsg);
+          if (currentStepBefore <= 2) {
+            expressTranscript.push(newUserMsg);
+          }
+        } else {
+          expressTranscript.push(newUserMsg);
+          if (currentStepBefore <= 2) {
+            deepTranscript.push(newUserMsg);
+          }
+        }
       }
     }
 
@@ -664,7 +752,19 @@ export async function POST(req: Request) {
         properties.autonomyStyle = { type: "STRING" };
         properties.values = { type: "STRING" };
         properties.decisionStyle = { type: "STRING" };
-        fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle";
+        
+        properties.talentScores = {
+          type: "OBJECT",
+          properties: {
+            creative: { type: "INTEGER", description: "Оценка склонности к творчеству (дизайн, тексты, искусство) от 0 до 100" },
+            tech: { type: "INTEGER", description: "Оценка склонности к технологиям (код, роботы, инженерия) от 0 до 100" },
+            analytical: { type: "INTEGER", description: "Оценка склонности к аналитике (логика, формулы, исследования) от 0 до 100" },
+            social: { type: "INTEGER", description: "Оценка склонности к коммуникации (общение, обучение, продажи) от 0 до 100" },
+            organizational: { type: "INTEGER", description: "Оценка склонности к организации (менеджмент, процессы, порядок) от 0 до 100" },
+            startup: { type: "INTEGER", description: "Оценка склонности к лидерству (предпринимательство, проекты) от 0 до 100" }
+          }
+        };
+        fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle, talentScores (scores 0-100 reflecting the user's vocational areas)";
         
         properties.fullName = { type: "STRING" };
         properties.age = { type: "INTEGER" };
@@ -697,6 +797,7 @@ export async function POST(req: Request) {
 Последнее сообщение пользователя: "${message}"
 Текущий шаг диалога: ${currentStepBefore} (где 10=Что хочу/Цель, 11=Результат/Образ, 12=Эмоции, 13=Идентичность, 14=Действия/Навыки/KPI, 15=Первый шаг).
 Для shouldAdvanceStep: установи true, если пользователь дал осмысленный ответ по сути текущего шага. Если пользователь уклоняется от ответа или задает встречный вопрос, установи false.
+Если анализируется Экспресс-коучинг (шаги 3..15), в поле talentScores оцени склонности пользователя по 6 шкалам (от 0 до 100) на основе всего диалога и его увлечений, хобби, школьных предметов, отношения к задачам и т.д.
 Извлекай: ${fieldsToExtract}`;
 
       const extractionSchema = {
@@ -726,29 +827,61 @@ export async function POST(req: Request) {
       if (parsedData.age) extractedData.age = parsedData.age;
       if (parsedData.grade) extractedData.grade = parsedData.grade;
       if (parsedData.city) extractedData.city = parsedData.city;
-      if (parsedData.hobbies) extractedData.hobbies = (extractedData.hobbies ? extractedData.hobbies + '; ' : '') + parsedData.hobbies;
-      if (parsedData.schoolSubjects) extractedData.schoolSubjects = (extractedData.schoolSubjects ? extractedData.schoolSubjects + '; ' : '') + parsedData.schoolSubjects;
-      if (parsedData.dreams) extractedData.dreams = (extractedData.dreams ? extractedData.dreams + '; ' : '') + parsedData.dreams;
-      if (parsedData.idols) extractedData.idols = (extractedData.idols ? extractedData.idols + '; ' : '') + parsedData.idols;
-      if (parsedData.parents) extractedData.parents = (extractedData.parents ? extractedData.parents + '; ' : '') + parsedData.parents;
-      if (parsedData.fears) extractedData.fears = (extractedData.fears ? extractedData.fears + '; ' : '') + parsedData.fears;
-      if (parsedData.experience) extractedData.experience = (extractedData.experience ? extractedData.experience + '; ' : '') + parsedData.experience;
-      if (parsedData.workFormat) extractedData.workFormat = (extractedData.workFormat ? extractedData.workFormat + '; ' : '') + parsedData.workFormat;
-      if (parsedData.thinkingType) extractedData.thinkingType = (extractedData.thinkingType ? extractedData.thinkingType + '; ' : '') + parsedData.thinkingType;
-      if (parsedData.successMeasure) extractedData.successMeasure = (extractedData.successMeasure ? extractedData.successMeasure + '; ' : '') + parsedData.successMeasure;
-      if (parsedData.energySources) extractedData.energySources = (extractedData.energySources ? extractedData.energySources + '; ' : '') + parsedData.energySources;
-      if (parsedData.teamRole) extractedData.teamRole = (extractedData.teamRole ? extractedData.teamRole + '; ' : '') + parsedData.teamRole;
-      if (parsedData.autonomyStyle) extractedData.autonomyStyle = (extractedData.autonomyStyle ? extractedData.autonomyStyle + '; ' : '') + parsedData.autonomyStyle;
-      if (parsedData.values) extractedData.values = (extractedData.values ? extractedData.values + '; ' : '') + parsedData.values;
-      if (parsedData.decisionStyle) extractedData.decisionStyle = (extractedData.decisionStyle ? extractedData.decisionStyle + '; ' : '') + parsedData.decisionStyle;
+      
+      if (!extractedData.expressExtracted) extractedData.expressExtracted = {};
+      if (!extractedData.deepExtracted) extractedData.deepExtracted = {};
+      
+      const updateExpressField = (key: string, val: any) => {
+        if (val) {
+          extractedData.expressExtracted[key] = (extractedData.expressExtracted[key] ? extractedData.expressExtracted[key] + '; ' : '') + val;
+        }
+      };
+      
+      updateExpressField('hobbies', parsedData.hobbies);
+      updateExpressField('schoolSubjects', parsedData.schoolSubjects);
+      updateExpressField('dreams', parsedData.dreams);
+      updateExpressField('idols', parsedData.idols);
+      updateExpressField('parents', parsedData.parents);
+      updateExpressField('fears', parsedData.fears);
+      updateExpressField('experience', parsedData.experience);
+      updateExpressField('workFormat', parsedData.workFormat);
+      updateExpressField('thinkingType', parsedData.thinkingType);
+      updateExpressField('successMeasure', parsedData.successMeasure);
+      updateExpressField('energySources', parsedData.energySources);
+      updateExpressField('teamRole', parsedData.teamRole);
+      updateExpressField('autonomyStyle', parsedData.autonomyStyle);
+      updateExpressField('values', parsedData.values);
+      updateExpressField('decisionStyle', parsedData.decisionStyle);
+      
+      if (parsedData.talentScores) {
+        if (!extractedData.expressExtracted.talentScores) {
+          extractedData.expressExtracted.talentScores = {
+            creative: 0, tech: 0, analytical: 0, social: 0, organizational: 0, startup: 0
+          };
+        }
+        const prevScores = extractedData.expressExtracted.talentScores;
+        const newScores = parsedData.talentScores;
+        const updateScore = (key: string) => {
+          if (typeof newScores[key] === 'number') {
+            prevScores[key] = Math.max(prevScores[key] || 0, newScores[key]);
+          }
+        };
+        updateScore('creative');
+        updateScore('tech');
+        updateScore('analytical');
+        updateScore('social');
+        updateScore('organizational');
+        updateScore('startup');
+        extractedData.expressExtracted.talentScores = prevScores;
+      }
       
       // Глубокий коучинг
-      if (parsedData.deepGoal) extractedData.deepGoal = parsedData.deepGoal;
-      if (parsedData.deepOutcome) extractedData.deepOutcome = parsedData.deepOutcome;
-      if (parsedData.deepEmotions) extractedData.deepEmotions = parsedData.deepEmotions;
-      if (parsedData.deepIdentity) extractedData.deepIdentity = parsedData.deepIdentity;
-      if (parsedData.deepActions) extractedData.deepActions = parsedData.deepActions;
-      if (parsedData.deepFirstStep) extractedData.deepFirstStep = parsedData.deepFirstStep;
+      if (parsedData.deepGoal) extractedData.deepExtracted.deepGoal = parsedData.deepGoal;
+      if (parsedData.deepOutcome) extractedData.deepExtracted.deepOutcome = parsedData.deepOutcome;
+      if (parsedData.deepEmotions) extractedData.deepExtracted.deepEmotions = parsedData.deepEmotions;
+      if (parsedData.deepIdentity) extractedData.deepExtracted.deepIdentity = parsedData.deepIdentity;
+      if (parsedData.deepActions) extractedData.deepExtracted.deepActions = parsedData.deepActions;
+      if (parsedData.deepFirstStep) extractedData.deepExtracted.deepFirstStep = parsedData.deepFirstStep;
     }
 
     const updatedPhone = hasPhone || !!parsedData.phone;
@@ -760,21 +893,21 @@ export async function POST(req: Request) {
     
     // Личные данные считаются полностью собранными, если есть имя, возраст/класс и город
     const updatedPersonalInfo = hasName && hasAgeOrGrade && hasCity;
-    const updatedDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
-    const updatedIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
-    const updatedParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
-    const updatedHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
-    const updatedSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
-    const updatedFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
-    const updatedExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
-    const updatedWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
-    const updatedThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
-    const updatedSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
-    const updatedEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
-    const updatedTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
-    const updatedAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
-    const updatedValues = !!extractedData.values && extractedData.values.trim().length > 6;
-    const updatedDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
+    const updatedDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
+    const updatedIdols = getStrLen(extractedData.expressExtracted?.idols) > 6;
+    const updatedParents = getStrLen(extractedData.expressExtracted?.parents) > 6;
+    const updatedHobbies = getStrLen(extractedData.expressExtracted?.hobbies) > 6;
+    const updatedSchoolSubjects = getStrLen(extractedData.expressExtracted?.schoolSubjects) > 6;
+    const updatedFears = getStrLen(extractedData.expressExtracted?.fears) > 6;
+    const updatedExperience = getStrLen(extractedData.expressExtracted?.experience) > 6;
+    const updatedWorkFormat = getStrLen(extractedData.expressExtracted?.workFormat) > 6;
+    const updatedThinkingType = getStrLen(extractedData.expressExtracted?.thinkingType) > 6;
+    const updatedSuccessMeasure = getStrLen(extractedData.expressExtracted?.successMeasure) > 6;
+    const updatedEnergySources = getStrLen(extractedData.expressExtracted?.energySources) > 6;
+    const updatedTeamRole = getStrLen(extractedData.expressExtracted?.teamRole) > 6;
+    const updatedAutonomyStyle = getStrLen(extractedData.expressExtracted?.autonomyStyle) > 6;
+    const updatedValues = getStrLen(extractedData.expressExtracted?.values) > 6;
+    const updatedDecisionStyle = getStrLen(extractedData.expressExtracted?.decisionStyle) > 6;
 
     // Считаем заполненные психологические блоки
     let psychoBlocks = 0;
@@ -799,12 +932,12 @@ export async function POST(req: Request) {
     let isFinalStateNow = false;
 
     if (isDeepMode) {
-      const hasDeepGoal = getStrLen(extractedData.deepGoal) > 6;
-      const hasDeepOutcome = getStrLen(extractedData.deepOutcome) > 6;
-      const hasDeepEmotions = getStrLen(extractedData.deepEmotions) > 3;
-      const hasDeepIdentity = getStrLen(extractedData.deepIdentity) > 6;
-      const hasDeepActions = getStrLen(extractedData.deepActions) > 6;
-      const hasDeepFirstStep = getStrLen(extractedData.deepFirstStep) > 6;
+      const hasDeepGoal = getStrLen(extractedData.deepExtracted?.deepGoal) > 6;
+      const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 6;
+      const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 3;
+      const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 6;
+      const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 6;
+      const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 6;
 
       if (!updatedPhone) {
         currentVirtualStep = 1;
@@ -1179,13 +1312,29 @@ ${missingFields.join('\n')}
     }
 
     // Добавляем ответ коуча в транскрипт
-    transcript.push({ role: 'assistant', content: replyContent, timestamp: new Date().toISOString() });
+    const coachMsg = { role: 'assistant', content: replyContent, timestamp: new Date().toISOString() };
+    if (isDeepMode) {
+      deepTranscript.push(coachMsg);
+      if (currentVirtualStep <= 2) {
+        expressTranscript.push(coachMsg);
+      }
+    } else {
+      expressTranscript.push(coachMsg);
+      if (currentVirtualStep <= 2) {
+        deepTranscript.push(coachMsg);
+      }
+    }
+
+    const finalDbTranscript = {
+      EXPRESS: expressTranscript,
+      DEEP: deepTranscript
+    };
 
     // Сохраняем обновленную сессию в БД
     await prisma.coachSession.update({
       where: { id: coachSession.id },
       data: {
-        transcript,
+        transcript: finalDbTranscript,
         extractedData,
         status,
         completedAt
@@ -1209,7 +1358,8 @@ ${missingFields.join('\n')}
       currentStep: currentVirtualStep,
       phoneConfirmed: updatedPhone,
       sessionStatus: status,
-      extracted: extractedData
+      extracted: extractedData,
+      history: isDeepMode ? deepTranscript : expressTranscript
     });
 
   } catch (error: any) {

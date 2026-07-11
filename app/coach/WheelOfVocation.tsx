@@ -9,94 +9,78 @@ interface WheelOfVocationProps {
 }
 
 export default function WheelOfVocation({ extractedData, standalone = false }: WheelOfVocationProps) {
-  // Вычисляем статус заполненности полей
-  const hasHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
-  const hasSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
-  const hasDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
-  const hasIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
-  const hasParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
-  const hasFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
-  const hasExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
-  const hasWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
-  const hasThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
-  const hasSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
-  const hasEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
-  const hasTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
-  const hasAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
-  const hasValues = !!extractedData.values && extractedData.values.trim().length > 6;
-  const hasDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
+  // Безопасное извлечение оценок талантов
+  const getScore = (key: string): number => {
+    let scoresObj = extractedData.expressExtracted?.talentScores || extractedData.talentScores;
+    if (scoresObj && typeof scoresObj === 'object') {
+      const val = scoresObj[key];
+      if (typeof val === 'number') return val;
+    }
+    return 0;
+  };
 
-  // Группируем по 8 секторам баланса
+  // Группируем по 6 сферам талантов (сбалансированная динамическая карта)
   const sectors = [
     {
-      name: 'Интересы & Хобби',
+      name: 'Креатив & Искусство',
       emoji: '🎨',
-      description: 'Любимые дела и школьные предметы',
-      value: (hasHobbies ? 0.5 : 0) + (hasSchoolSubjects ? 0.5 : 0),
-      color: '#38bdf8', // Голубой
-      glowColor: 'rgba(56, 189, 248, 0.4)',
-    },
-    {
-      name: 'Мечты & Образ будущего',
-      emoji: '🚀',
-      description: 'Карьерные мечты и авторитеты',
-      value: (hasDreams ? 0.5 : 0) + (hasIdols ? 0.5 : 0),
-      color: '#a855f7', // Фиолетовый
-      glowColor: 'rgba(168, 85, 247, 0.4)',
-    },
-    {
-      name: 'Семейное влияние',
-      emoji: '👨‍👩‍👧',
-      description: 'Отношения и мнение родителей',
-      value: hasParents ? 1.0 : 0,
+      description: 'Творчество, дизайн, тексты',
+      value: Math.max(0.15, getScore('creative') / 100), // Минимальный радиус 15% для красоты
+      rawScore: getScore('creative'),
       color: '#ec4899', // Розовый
       glowColor: 'rgba(236, 72, 153, 0.4)',
     },
     {
-      name: 'Барьеры & Страхи',
-      emoji: '🛡️',
-      description: 'Что тревожит в выборе',
-      value: hasFears ? 1.0 : 0,
-      color: '#f97316', // Оранжевый
-      glowColor: 'rgba(249, 115, 22, 0.4)',
-    },
-    {
-      name: 'Опыт & Проекты',
-      emoji: '💼',
-      description: 'Практические пробы и кружки',
-      value: hasExperience ? 1.0 : 0,
-      color: '#10b981', // Зеленый
-      glowColor: 'rgba(16, 185, 129, 0.4)',
-    },
-    {
-      name: 'Формат & Мышление',
-      emoji: '💡',
-      description: 'Среда работы и тип ума',
-      value: (hasWorkFormat ? 0.5 : 0) + (hasThinkingType ? 0.5 : 0),
+      name: 'Технологии & Код',
+      emoji: '💻',
+      description: 'Программирование, инженерия',
+      value: Math.max(0.15, getScore('tech') / 100),
+      rawScore: getScore('tech'),
       color: '#3b82f6', // Синий
       glowColor: 'rgba(59, 130, 246, 0.4)',
     },
     {
-      name: 'Мотивация & Энергия',
-      emoji: '⚡',
-      description: 'Что заряжает и мерило успеха',
-      value: (hasSuccessMeasure ? 0.5 : 0) + (hasEnergySources ? 0.5 : 0),
+      name: 'Наука & Аналитика',
+      emoji: '🔬',
+      description: 'Логика, формулы, исследования',
+      value: Math.max(0.15, getScore('analytical') / 100),
+      rawScore: getScore('analytical'),
+      color: '#a855f7', // Фиолетовый
+      glowColor: 'rgba(168, 85, 247, 0.4)',
+    },
+    {
+      name: 'Коммуникация & Люди',
+      emoji: '🗣️',
+      description: 'Общение, продажи, обучение',
+      value: Math.max(0.15, getScore('social') / 100),
+      rawScore: getScore('social'),
       color: '#eab308', // Золотой
       glowColor: 'rgba(234, 179, 8, 0.4)',
     },
     {
-      name: 'Ценности & Роли',
-      emoji: '🤝',
-      description: 'Командный стиль и принципы',
-      value: (hasTeamRole ? 0.33 : 0) + (hasAutonomyStyle ? 0.33 : 0) + ((hasValues || hasDecisionStyle) ? 0.34 : 0),
-      color: '#84cc16', // Салатовый
-      glowColor: 'rgba(132, 204, 22, 0.4)',
+      name: 'Организация & Системы',
+      emoji: '📊',
+      description: 'Менеджмент, процессы, порядок',
+      value: Math.max(0.15, getScore('organizational') / 100),
+      rawScore: getScore('organizational'),
+      color: '#10b981', // Зеленый
+      glowColor: 'rgba(16, 185, 129, 0.4)',
+    },
+    {
+      name: 'Стартап & Лидерство',
+      emoji: '🚀',
+      description: 'Предпринимательство, проекты',
+      value: Math.max(0.15, getScore('startup') / 100),
+      rawScore: getScore('startup'),
+      color: '#f97316', // Оранжевый
+      glowColor: 'rgba(249, 115, 22, 0.4)',
     },
   ];
 
   const cx = 200;
   const cy = 200;
   const maxRadius = 135;
+  const angleStep = 360 / sectors.length;
 
   const polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number) => {
     const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
@@ -150,7 +134,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Лучевые разделители секторов */}
           {sectors.map((_, idx) => {
-            const angle = idx * 45;
+            const angle = idx * angleStep;
             const target = polarToCartesian(cx, cy, maxRadius, angle);
             return (
               <line
@@ -168,8 +152,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Рисуем фоновые пустые сегменты колеса */}
           {sectors.map((sector, idx) => {
-            const startAngle = idx * 45;
-            const endAngle = startAngle + 45;
+            const startAngle = idx * angleStep;
+            const endAngle = startAngle + angleStep;
             const path = getSectorPath(maxRadius, startAngle, endAngle);
 
             return (
@@ -186,8 +170,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Рисуем заполненные сегменты с анимацией */}
           {sectors.map((sector, idx) => {
-            const startAngle = idx * 45;
-            const endAngle = startAngle + 45;
+            const startAngle = idx * angleStep;
+            const endAngle = startAngle + angleStep;
             const currentRadius = maxRadius * sector.value;
             const path = getSectorPath(currentRadius, startAngle, endAngle);
 
@@ -198,10 +182,10 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   animate={{ d: path }}
                   transition={{ type: 'spring', stiffness: 60, damping: 15 }}
                   fill={`url(#grad-${idx})`}
-                  stroke={sector.value > 0 ? sector.color : 'none'}
+                  stroke={sector.rawScore > 0 ? sector.color : 'none'}
                   strokeWidth="1.5"
                   style={{
-                    filter: sector.value > 0 ? `drop-shadow(0 0 6px ${sector.glowColor})` : 'none',
+                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 6px ${sector.glowColor})` : 'none',
                   }}
                   className="cursor-pointer"
                 />
@@ -211,7 +195,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Внешние текстовые маркеры-иконки для секторов */}
           {sectors.map((sector, idx) => {
-            const angle = idx * 45 + 22.5; // Центр сектора
+            const angle = idx * angleStep + angleStep / 2; // Центр сектора
             const labelPos = polarToCartesian(cx, cy, maxRadius + 28, angle);
             const isRightSide = labelPos.x > cx;
 
@@ -225,7 +209,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   fontSize="14"
                   fontWeight="800"
                   className={`transition duration-500 font-sans tracking-wide ${
-                    sector.value > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
+                    sector.rawScore > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
                   }`}
                 >
                   {sector.emoji} {sector.name}
@@ -235,14 +219,14 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   y={labelPos.y + 16}
                   textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
                   dominantBaseline="middle"
-                  fill={sector.value > 0 ? sector.color : undefined}
+                  fill={sector.rawScore > 0 ? sector.color : undefined}
                   fontSize="12"
                   fontWeight="bold"
                   className={`transition duration-500 font-sans ${
-                    sector.value > 0 ? 'theme-wheel-value-active' : 'theme-wheel-value-inactive'
+                    sector.rawScore > 0 ? 'theme-wheel-value-active' : 'theme-wheel-value-inactive'
                   }`}
                 >
-                  {Math.round(sector.value * 100)}%
+                  {sector.rawScore}%
                 </text>
               </g>
             );
@@ -261,8 +245,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
   return (
     <div className="flex flex-col items-center justify-center p-6 glass-panel rounded-3xl w-full h-full space-y-6">
       <div className="text-center space-y-1">
-        <h3 className="text-md font-bold font-sans text-white tracking-wide">Колесо Призвания</h3>
-        <p className="text-xs text-[#7A8A9E] font-medium">Прогресс наполнения профиля талантов</p>
+        <h3 className="text-md font-bold font-sans text-white tracking-wide">Карта Талантов</h3>
+        <p className="text-xs text-[#7A8A9E] font-medium">Живой ИИ-профиль ваших интересов</p>
       </div>
 
       <div className="relative w-full max-w-[260px] aspect-square flex items-center justify-center">
@@ -294,7 +278,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Лучевые разделители секторов */}
           {sectors.map((_, idx) => {
-            const angle = idx * 45;
+            const angle = idx * angleStep;
             const target = polarToCartesian(cx, cy, maxRadius, angle);
             return (
               <line
@@ -312,8 +296,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Рисуем фоновые пустые сегменты колеса */}
           {sectors.map((sector, idx) => {
-            const startAngle = idx * 45;
-            const endAngle = startAngle + 45;
+            const startAngle = idx * angleStep;
+            const endAngle = startAngle + angleStep;
             const path = getSectorPath(maxRadius, startAngle, endAngle);
 
             return (
@@ -330,8 +314,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Рисуем заполненные сегменты с анимацией */}
           {sectors.map((sector, idx) => {
-            const startAngle = idx * 45;
-            const endAngle = startAngle + 45;
+            const startAngle = idx * angleStep;
+            const endAngle = startAngle + angleStep;
             const currentRadius = maxRadius * sector.value;
             const path = getSectorPath(currentRadius, startAngle, endAngle);
 
@@ -342,10 +326,10 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   animate={{ d: path }}
                   transition={{ type: 'spring', stiffness: 60, damping: 15 }}
                   fill={`url(#grad-${idx})`}
-                  stroke={sector.value > 0 ? sector.color : 'none'}
+                  stroke={sector.rawScore > 0 ? sector.color : 'none'}
                   strokeWidth="1.5"
                   style={{
-                    filter: sector.value > 0 ? `drop-shadow(0 0 6px ${sector.glowColor})` : 'none',
+                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 6px ${sector.glowColor})` : 'none',
                   }}
                   className="cursor-pointer"
                 />
@@ -355,7 +339,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Внешние текстовые маркеры-иконки для секторов */}
           {sectors.map((sector, idx) => {
-            const angle = idx * 45 + 22.5; // Центр сектора
+            const angle = idx * angleStep + angleStep / 2; // Центр сектора
             const labelPos = polarToCartesian(cx, cy, maxRadius + 28, angle);
             const isRightSide = labelPos.x > cx;
 
@@ -369,7 +353,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   fontSize="20"
                   fontWeight="800"
                   className={`transition duration-500 font-sans tracking-wide ${
-                    sector.value > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
+                    sector.rawScore > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
                   }`}
                 >
                   {sector.emoji}
@@ -379,14 +363,14 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   y={labelPos.y + 18}
                   textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
                   dominantBaseline="middle"
-                  fill={sector.value > 0 ? sector.color : undefined}
+                  fill={sector.rawScore > 0 ? sector.color : undefined}
                   fontSize="10"
                   fontWeight="bold"
                   className={`transition duration-500 font-sans ${
-                    sector.value > 0 ? 'theme-wheel-value-active' : 'theme-wheel-value-inactive'
+                    sector.rawScore > 0 ? 'theme-wheel-value-active' : 'theme-wheel-value-inactive'
                   }`}
                 >
-                  {Math.round(sector.value * 100)}%
+                  {sector.rawScore}%
                 </text>
               </g>
             );
@@ -411,14 +395,14 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 <span className="text-[8px] text-[#7A8A9E] truncate leading-tight">{sector.description}</span>
               </div>
             </div>
-            <span className="font-bold text-white/80 font-sans text-[10.5px] ml-1 shrink-0" style={{ color: sector.value > 0 ? sector.color : '#4E6178' }}>
-              {Math.round(sector.value * 100)}%
+            <span className="font-bold text-white/80 font-sans text-[10.5px] ml-1 shrink-0" style={{ color: sector.rawScore > 0 ? sector.color : '#4E6178' }}>
+              {sector.rawScore}%
             </span>
           </div>
         ))}
       </div>
       <div className="text-[9px] text-[#7A8A9E]/60 italic font-sans text-center mt-1">
-        * Проценты отражают полноту извлеченных ИИ качественных данных по каждой сфере.
+        * Оценки отражают выраженность склонностей на основе ваших ответов в чате.
       </div>
     </div>
   );

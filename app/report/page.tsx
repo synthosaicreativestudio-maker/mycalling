@@ -485,7 +485,14 @@ function ReportPageContent() {
         {report.coachSection && (
           <div className="print-card">
             <h2>Анализ диалога с коучем</h2>
-            {report.coachSection.deepGoal ? (
+            {report.coachSection.dreams && report.coachSection.dreams !== 'Не указано' && (
+              <>
+                <p><strong>Мечты:</strong> {report.coachSection.dreams}</p>
+                <p><strong>Кумиры:</strong> {report.coachSection.idols}</p>
+                <p><strong>Ценности:</strong> {report.coachSection.values}</p>
+              </>
+            )}
+            {report.coachSection.deepGoal && (
               <>
                 <p><strong>Мой запрос / Цель:</strong> {report.coachSection.deepGoal}</p>
                 <p><strong>Ожидаемый результат:</strong> {report.coachSection.deepOutcome}</p>
@@ -493,12 +500,6 @@ function ReportPageContent() {
                 <p><strong>Моя идентичность:</strong> {report.coachSection.deepIdentity}</p>
                 <p><strong>План действий:</strong> {report.coachSection.deepActions}</p>
                 <p><strong>Первый шаг (2 минуты):</strong> {report.coachSection.deepFirstStep}</p>
-              </>
-            ) : (
-              <>
-                <p><strong>Мечты:</strong> {report.coachSection.dreams}</p>
-                <p><strong>Кумиры:</strong> {report.coachSection.idols}</p>
-                <p><strong>Ценности:</strong> {report.coachSection.values}</p>
               </>
             )}
           </div>

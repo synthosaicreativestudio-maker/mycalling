@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw } from 'lucide-react';
 import WheelOfVocation from './WheelOfVocation';
+import PyramidOfAlignment from './PyramidOfAlignment';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -376,7 +377,7 @@ export default function CoachPage() {
       });
       const data = await res.json();
       if (data.reply) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        setMessages(data.history || [{ role: 'assistant', content: data.reply }]);
         setStep(data.currentStep || 0);
         setExtractedData(data.extracted || {});
       }
@@ -395,21 +396,35 @@ export default function CoachPage() {
     const isDeep = extractedData.sessionMode === 'DEEP';
     let reportHtml = '';
 
+    const getField = (key: string): string => {
+      if (extractedData.expressExtracted && typeof extractedData.expressExtracted === 'object') {
+        if (extractedData.expressExtracted[key] !== undefined) {
+          return extractedData.expressExtracted[key] || '';
+        }
+      }
+      if (extractedData.deepExtracted && typeof extractedData.deepExtracted === 'object') {
+        if (extractedData.deepExtracted[key] !== undefined) {
+          return extractedData.deepExtracted[key] || '';
+        }
+      }
+      return extractedData[key] || '';
+    };
+
     if (isDeep) {
       reportHtml = `
         <div style="margin-top: 20px; font-family: sans-serif;">
           <h3 style="color: #8B5A2B;">🎯 Мой запрос / Цель:</h3>
-          <p>${extractedData.deepGoal || 'Не указано'}</p>
+          <p>${getField('deepGoal') || 'Не указано'}</p>
           <h3 style="color: #8B5A2B;">🌟 Ожидаемый результат:</h3>
-          <p>${extractedData.deepOutcome || 'Не указано'}</p>
+          <p>${getField('deepOutcome') || 'Не указано'}</p>
           <h3 style="color: #8B5A2B;">🔥 Эмоциональный отклик:</h3>
-          <p>${extractedData.deepEmotions || 'Не указано'}</p>
+          <p>${getField('deepEmotions') || 'Не указано'}</p>
           <h3 style="color: #8B5A2B;">👑 Моя идентичность:</h3>
-          <p><b>${extractedData.deepIdentity || 'Не указано'}</b></p>
+          <p><b>${getField('deepIdentity') || 'Не указано'}</b></p>
           <h3 style="color: #8B5A2B;">🚀 План действий:</h3>
-          <p style="white-space: pre-wrap;">${extractedData.deepActions || 'Не указано'}</p>
+          <p style="white-space: pre-wrap;">${getField('deepActions') || 'Не указано'}</p>
           <h3 style="color: #8B5A2B;">⚡ Первый шаг (2 минуты):</h3>
-          <p><b>${extractedData.deepFirstStep || 'Не указано'}</b></p>
+          <p><b>${getField('deepFirstStep') || 'Не указано'}</b></p>
           <br/>
           <hr/>
           <p><b>Анализ наставника Романа:</b></p>
@@ -1004,12 +1019,16 @@ export default function CoachPage() {
         </div>
       </div>
 
-      {/* Right column: Wheel of Vocation (Desktop only) */}
+      {/* Right column: Wheel of Vocation or Pyramid of Alignment (Desktop only) */}
       <div 
         className="md:col-span-5 hidden md:block h-full cursor-zoom-in relative select-none"
         onMouseEnter={() => setIsWheelHovered(true)}
       >
-        <WheelOfVocation extractedData={extractedData} />
+        {extractedData.sessionMode === 'DEEP' ? (
+          <PyramidOfAlignment extractedData={extractedData} />
+        ) : (
+          <WheelOfVocation extractedData={extractedData} />
+        )}
       </div>
     </div>
 
@@ -1023,7 +1042,7 @@ export default function CoachPage() {
         </button>
       </div>
 
-      {/* Mobile Modal for Wheel of Vocation */}
+      {/* Mobile Modal for Wheel of Vocation / Pyramid of Alignment */}
       <AnimatePresence>
         {showVocationModal && (
           <motion.div 
@@ -1045,14 +1064,18 @@ export default function CoachPage() {
                 Закрыть
               </button>
               <div className="flex-1 overflow-y-auto pt-4">
-                <WheelOfVocation extractedData={extractedData} />
+                {extractedData.sessionMode === 'DEEP' ? (
+                  <PyramidOfAlignment extractedData={extractedData} />
+                ) : (
+                  <WheelOfVocation extractedData={extractedData} />
+                )}
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Zoom overlay for Wheel of Vocation on Desktop hover */}
+      {/* Zoom overlay for Wheel of Vocation / Pyramid of Alignment on Desktop hover */}
       <AnimatePresence>
         {isWheelHovered && (
           <motion.div
@@ -1070,7 +1093,11 @@ export default function CoachPage() {
               className="w-full max-w-[760px] p-10 md:p-14 rounded-[36px] bg-[#040506]/65 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative flex flex-col items-center justify-center pointer-events-auto"
             >
               <div className="w-full max-w-[340px] aspect-square flex items-center justify-center">
-                <WheelOfVocation extractedData={extractedData} standalone />
+                {extractedData.sessionMode === 'DEEP' ? (
+                  <PyramidOfAlignment extractedData={extractedData} />
+                ) : (
+                  <WheelOfVocation extractedData={extractedData} standalone />
+                )}
               </div>
             </motion.div>
           </motion.div>
