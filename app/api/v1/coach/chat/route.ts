@@ -792,22 +792,54 @@ export async function POST(req: Request) {
 
     // Расчет шага строго поэтапно
     let currentVirtualStep = 1;
-    if (!updatedPhone) {
-      currentVirtualStep = 1; // Шаг подключения Telegram
-    } else if (!updatedPersonalInfo) {
-      currentVirtualStep = 2; // Шаг знакомства и личных данных
-    } else {
-      // Свободный диалог длится до Шага 15 (когда собрано 13 психологических полей)
-      if (psychoBlocks < 13) {
-        currentVirtualStep = Math.min(15, 3 + psychoBlocks);
-      } else {
-        currentVirtualStep = 16; // Шаг подведения итогов (Финал)
-      }
-    }
+    let isFinalStateNow = false;
 
-    const isFinalStateNow = updatedPersonalInfo && updatedPhone && (psychoBlocks >= 12);
-    if (isFinalStateNow) {
-      currentVirtualStep = 16;
+    if (isDeepMode) {
+      const hasDeepGoal = !!extractedData.deepGoal && extractedData.deepGoal.trim().length > 6;
+      const hasDeepOutcome = !!extractedData.deepOutcome && extractedData.deepOutcome.trim().length > 6;
+      const hasDeepEmotions = !!extractedData.deepEmotions && extractedData.deepEmotions.trim().length > 3;
+      const hasDeepIdentity = !!extractedData.deepIdentity && extractedData.deepIdentity.trim().length > 6;
+      const hasDeepActions = !!extractedData.deepActions && extractedData.deepActions.trim().length > 6;
+      const hasDeepFirstStep = !!extractedData.deepFirstStep && extractedData.deepFirstStep.trim().length > 6;
+
+      if (!updatedPhone) {
+        currentVirtualStep = 1;
+      } else if (!updatedPersonalInfo) {
+        currentVirtualStep = 2;
+      } else if (!hasDeepGoal) {
+        currentVirtualStep = 10;
+      } else if (!hasDeepOutcome) {
+        currentVirtualStep = 11;
+      } else if (!hasDeepEmotions) {
+        currentVirtualStep = 12;
+      } else if (!hasDeepIdentity) {
+        currentVirtualStep = 13;
+      } else if (!hasDeepActions) {
+        currentVirtualStep = 14;
+      } else if (!hasDeepFirstStep) {
+        currentVirtualStep = 15;
+      } else {
+        currentVirtualStep = 16;
+      }
+      isFinalStateNow = updatedPersonalInfo && updatedPhone && hasDeepGoal && hasDeepOutcome && hasDeepEmotions && hasDeepIdentity && hasDeepActions && hasDeepFirstStep;
+    } else {
+      if (!updatedPhone) {
+        currentVirtualStep = 1; // Шаг подключения Telegram
+      } else if (!updatedPersonalInfo) {
+        currentVirtualStep = 2; // Шаг знакомства и личных данных
+      } else {
+        // Свободный диалог длится до Шага 15 (когда собрано 13 психологических полей)
+        if (psychoBlocks < 13) {
+          currentVirtualStep = Math.min(15, 3 + psychoBlocks);
+        } else {
+          currentVirtualStep = 16; // Шаг подведения итогов (Финал)
+        }
+      }
+
+      isFinalStateNow = updatedPersonalInfo && updatedPhone && (psychoBlocks >= 12);
+      if (isFinalStateNow) {
+        currentVirtualStep = 16;
+      }
     }
 
     extractedData.currentStep = currentVirtualStep;

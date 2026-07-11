@@ -865,7 +865,35 @@ export default function CoachPage() {
 
           {/* Input area */}
           <div className="p-4 border-t border-white/5 bg-[#040506]/45 backdrop-blur-md">
-            {step > 2 && !extractedData.sessionMode ? (
+            {step === 16 ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center p-4 space-y-4"
+              >
+                <h3 className="text-lg font-bold text-white">Коуч-сессия успешно завершена!</h3>
+                <p className="text-xs text-[#7A8A9E] max-w-md mx-auto">
+                  Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+                  <button 
+                    type="button"
+                    onClick={downloadPreliminaryReport}
+                    className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#C4A484]/30 text-[#C4A484] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                  >
+                    📥 Скачать резюме (PDF)
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleNextStep}
+                    className="cta-glass h-12 px-8 text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto"
+                  >
+                    Перейти к диагностике (тестам)
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </motion.div>
+            ) : step > 2 && step < 16 && !extractedData.sessionMode ? (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -912,34 +940,6 @@ export default function CoachPage() {
                     <p className="text-[11px] text-[#C4A484]/80 leading-relaxed">
                       Интерактивная сессия по схеме «Что хочу → Действие» с проработкой эмоций, идентичности и составлением личного Манифеста целей.
                     </p>
-                  </button>
-                </div>
-              </motion.div>
-            ) : step === 16 ? (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center p-4 space-y-4"
-              >
-                <h3 className="text-lg font-bold text-white">Коуч-сессия успешно завершена!</h3>
-                <p className="text-xs text-[#7A8A9E] max-w-md mx-auto">
-                  Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
-                  <button 
-                    type="button"
-                    onClick={downloadPreliminaryReport}
-                    className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#C4A484]/30 text-[#C4A484] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
-                  >
-                    📥 Скачать резюме (PDF)
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={handleNextStep}
-                    className="cta-glass h-12 px-8 text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto"
-                  >
-                    Перейти к диагностике (тестам)
-                    <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
               </motion.div>
