@@ -97,7 +97,7 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
   return (
     <div className="flex flex-col items-center justify-center p-6 glass-panel rounded-3xl w-full h-full space-y-6">
       <div className="text-center space-y-1">
-        <h3 className="text-md font-bold font-sans text-white tracking-wide">Пирамида Реализации</h3>
+        <h3 className="text-md font-bold font-sans text-white tracking-wide">Пирамида Идентичности</h3>
         <p className="text-xs text-[#7A8A9E] font-medium">Ваш путь от «Хочу» к «Действию»</p>
       </div>
 
