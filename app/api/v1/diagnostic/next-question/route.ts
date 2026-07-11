@@ -17,12 +17,46 @@ export async function GET(request: Request) {
     }
 
     // 1. Получаем сессию из кэша
-    const sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+    let sessionDataRaw = await redisClient.get(`session:${sessionId}`);
+    let sessionData;
+
     if (!sessionDataRaw) {
-      return NextResponse.json({ error: 'Сессия не найдена или истекла' }, { status: 404 });
+      // Сессии нет в кэше. Пытаемся восстановить ее из базы данных.
+      const userId = searchParams.get('user_id');
+      let user = null;
+
+      if (userId) {
+        user = await prisma.user.findUnique({ where: { id: userId } });
+      } else {
+        user = await prisma.user.findFirst({
+          where: {
+            diagnosticAnswers: {
+              path: ['sessionId'],
+              equals: sessionId
+            }
+          }
+        });
+      }
+
+      if (user && user.diagnosticAnswers) {
+        const dbData = user.diagnosticAnswers as any;
+        sessionData = {
+          sessionId: dbData.sessionId || sessionId,
+          userId: user.id,
+          username: user.name,
+          currentQuestionIndex: dbData.currentQuestionIndex || 0,
+          answers: dbData.answers || {},
+          startedAt: new Date().toISOString()
+        };
+        // Восстанавливаем в кэше
+        await redisClient.set(`session:${sessionId}`, JSON.stringify(sessionData), 'EX', 7200);
+      } else {
+        return NextResponse.json({ error: 'Сессия не найдена или истекла' }, { status: 404 });
+      }
+    } else {
+      sessionData = JSON.parse(sessionDataRaw);
     }
 
-    const sessionData = JSON.parse(sessionDataRaw);
     const currentQuestionIndex = typeof sessionData.currentQuestionIndex === 'number' ? sessionData.currentQuestionIndex : 0;
     const answers = sessionData.answers || {};
 
@@ -271,8 +305,16 @@ export async function GET(request: Request) {
       // Кэшируем отчет в Redis
       await redisClient.set(`report:${sessionId}`, htmlReportContent, 'EX', 86400);
 
-      // Очищаем сессию из Redis
+      // Очищаем сессию из Redis и БД
       await redisClient.del(`session:${sessionId}`);
+      try {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { diagnosticAnswers: null }
+        });
+      } catch (cleanErr) {
+        console.error('Ошибка очистки сессии в БД при завершении:', cleanErr);
+      }
 
       return NextResponse.json({
         status: 'success',

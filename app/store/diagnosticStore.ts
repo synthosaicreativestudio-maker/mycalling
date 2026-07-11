@@ -108,12 +108,12 @@ export const useDiagnosticStore = create<DiagnosticState>()(
         },
 
         fetchNextQuestion: async () => {
-          const { sessionId } = get();
+          const { sessionId, userId } = get();
           if (!sessionId) return;
 
           set({ isLoading: true });
           try {
-            const res = await fetch(`/api/v1/diagnostic/next-question?session_id=${sessionId}`);
+            const res = await fetch(`/api/v1/diagnostic/next-question?session_id=${sessionId}&user_id=${userId || ''}`);
             
             if (res.status === 404) {
               // Сессия истекла на сервере. Сбрасываем локальное состояние и запускаем новую сессию.
@@ -196,6 +196,16 @@ export const useDiagnosticStore = create<DiagnosticState>()(
               const errData = await res.json();
               get().setLockdown(errData.lockdown_duration_seconds || 10);
               set({ isLoading: false });
+              return;
+            }
+
+            if (res.status === 404) {
+              // Сессия истекла/удалена на сервере. Очищаем локально и перезагружаем для рестарта.
+              console.warn('[auth] Session not found on server during submit-answer');
+              get().resetSession();
+              if (typeof window !== 'undefined') {
+                window.location.reload();
+              }
               return;
             }
 
@@ -334,6 +344,7 @@ export const useDiagnosticStore = create<DiagnosticState>()(
       name: 'moe-prizvanie-diagnostic-session',
       partialize: (state) => ({
         sessionId: state.sessionId,
+        userId: state.userId,
         studentName: state.studentName,
         studentGrade: state.studentGrade,
         offlineAnswersBuffer: state.offlineAnswersBuffer,

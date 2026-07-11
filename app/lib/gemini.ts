@@ -141,7 +141,7 @@ export async function generateJson(systemPrompt: string, prompt: string, schema:
     max_tokens: 2048
   };
 
-  const responseData = await callFreemodelRaw(requestBody, 5000); // 5 секунд лимит для быстрой JSON экстракции
+  const responseData = await callFreemodelRaw(requestBody, 25000); // 25 секунд лимит для полной генерации отчета
   const text = responseData.choices?.[0]?.message?.content;
   
   if (!text) {

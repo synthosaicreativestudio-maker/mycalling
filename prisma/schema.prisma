@@ -29,6 +29,7 @@ model User {
   phone         String?             @unique
   telegramId    String?             @unique @map("telegram_id")
   maxUserId     String?             @unique @map("max_user_id")
+  diagnosticAnswers Json?             @map("diagnostic_answers")
   role          Role                @default(STUDENT)
   createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)

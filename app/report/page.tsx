@@ -130,7 +130,18 @@ function ReportPageContent() {
           throw new Error('Не удалось загрузить отчет. Возможно, результаты еще не готовы.');
         }
         const data = await res.json();
-        setReport(data.data);
+        const rawData = data.data || {};
+        const sanitizedReport: ReportData = {
+          studentName: rawData.studentName || 'Ученик',
+          heroSummary: Array.isArray(rawData.heroSummary) ? rawData.heroSummary : (rawData.heroSummary ? [rawData.heroSummary] : []),
+          personalityTraits: Array.isArray(rawData.personalityTraits) ? rawData.personalityTraits : [],
+          riasecSummary: rawData.riasecSummary || '',
+          strengths: Array.isArray(rawData.strengths) ? rawData.strengths : [],
+          growthAreas: Array.isArray(rawData.growthAreas) ? rawData.growthAreas : [],
+          coachSection: rawData.coachSection || {},
+          professions: Array.isArray(rawData.professions) ? rawData.professions : []
+        };
+        setReport(sanitizedReport);
         setIsDemo(false);
       } catch (err: any) {
         console.error(err);

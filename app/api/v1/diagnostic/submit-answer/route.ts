@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import redisClient from '../../../../lib/redis';
+import prisma from '../../../../lib/prisma';
 
 export async function POST(request: Request) {
   try {
@@ -73,6 +74,30 @@ export async function POST(request: Request) {
     }
 
     await redisClient.set(`session:${sessionId}`, JSON.stringify(sessionData), 'EX', 7200);
+
+    // Дополнительно дублируем прогресс в базу данных для устойчивости
+    try {
+      const user = await prisma.user.findUnique({ where: { id: sessionData.userId } });
+      if (user) {
+        const dbData = (user.diagnosticAnswers as any) || {};
+        const updatedAnswers = {
+          ...(dbData.answers || {}),
+          [questionId]: value
+        };
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            diagnosticAnswers: {
+              sessionId,
+              currentQuestionIndex: sessionData.currentQuestionIndex,
+              answers: updatedAnswers
+            }
+          }
+        });
+      }
+    } catch (dbErr) {
+      console.error('Ошибка сохранения прогресса в БД при ответе:', dbErr);
+    }
 
     return NextResponse.json({
       status: 'success',

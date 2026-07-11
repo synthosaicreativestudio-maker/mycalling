@@ -30,6 +30,16 @@ const FALLBACK_REPLIES: Record<number, string> = {
 // ФУНКЦИИ ОТПРАВКИ УВЕДОМЛЕНИЙ
 // ============================
 
+function formatToTelegramHtml(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.*?)\*/g, '<b>$1</b>');
+}
+
 /** Отправить карточку лида администратору в Telegram */
 async function sendTelegramNotification(user: any, data: any) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -37,7 +47,7 @@ async function sendTelegramNotification(user: any, data: any) {
   const chatId = process.env.TELEGRAM_CHAT_ID || '148281488';
   const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
   
-  const text = `*Регистрация лида (Нейрокоуч):*
+  const rawText = `*Регистрация лида (Нейрокоуч):*
 *Имя:* ${user.name || 'Не указано'}
 *Телефон:* ${user.phone || 'Не указано'}
 *Роль:* ${user.role || 'STUDENT'}
@@ -50,6 +60,8 @@ async function sendTelegramNotification(user: any, data: any) {
 *Барьеры:* ${data.barriers || 'Не указано'}
 *Резюме коуча:* ${data.preliminaryFeedback || 'Еще не сформировано'}`;
 
+  const text = formatToTelegramHtml(rawText);
+
   try {
     await fetch(`${tgApiBase}/bot${botToken}/sendMessage`, {
       method: 'POST',
@@ -57,7 +69,7 @@ async function sendTelegramNotification(user: any, data: any) {
       body: JSON.stringify({
         chat_id: chatId,
         text: text,
-        parse_mode: 'Markdown'
+        parse_mode: 'HTML'
       })
     });
   } catch (err) {
@@ -72,7 +84,8 @@ async function sendTelegramReportToUser(user: any, data: any) {
   const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
 
   const feedback = data.preliminaryFeedback || 'Резюме ещё не сформировано';
-  const text = `*Предварительное резюме от наставника Романа*\n\n${feedback}\n\nТеперь вы можете пройти интерактивные тесты для точной диагностики на сайте:\nhttps://synthosai.ru/assessment`;
+  const rawText = `*Предварительное резюме от наставника Романа*\n\n${feedback}\n\nТеперь вы можете пройти интерактивные тесты для точной диагностики на сайте:\nhttps://synthosai.ru/assessment`;
+  const text = formatToTelegramHtml(rawText);
 
   try {
     await fetch(`${tgApiBase}/bot${botToken}/sendMessage`, {
@@ -81,7 +94,7 @@ async function sendTelegramReportToUser(user: any, data: any) {
       body: JSON.stringify({
         chat_id: user.telegramId,
         text: text,
-        parse_mode: 'Markdown',
+        parse_mode: 'HTML',
         reply_markup: {
           inline_keyboard: [
             [{ text: 'Перейти к диагностике', url: 'https://synthosai.ru/assessment' }]

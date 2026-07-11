@@ -65,6 +65,18 @@ export async function POST(request: Request) {
       7200 // Храним в кэше 2 часа
     );
 
+    // Дополнительно дублируем сессию в базу данных для устойчивости к перезапускам
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        diagnosticAnswers: {
+          sessionId,
+          currentQuestionIndex: 0,
+          answers: {}
+        }
+      }
+    });
+
     const res = NextResponse.json({
       success: true,
       data: {
