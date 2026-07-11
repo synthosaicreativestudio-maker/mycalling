@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
 import { diagnosticQuestions } from '../../../../data/questions';
@@ -310,7 +311,7 @@ export async function GET(request: Request) {
       try {
         await prisma.user.update({
           where: { id: userId },
-          data: { diagnosticAnswers: null }
+          data: { diagnosticAnswers: Prisma.DbNull }
         });
       } catch (cleanErr) {
         console.error('Ошибка очистки сессии в БД при завершении:', cleanErr);
