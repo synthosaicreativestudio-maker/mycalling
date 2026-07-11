@@ -53,11 +53,16 @@ function AuthCard() {
     setIsMobile(checkMobile());
   }, []);
 
-  // Получаем временный код авторизации
+  // Получаем временный код авторизации с привязкой к активной сессии коуча
   useEffect(() => {
     async function getLinkCode() {
       try {
-        const res = await fetch('/api/auth/link-code', { method: 'POST' });
+        const coachSessionId = typeof window !== 'undefined' ? localStorage.getItem('coachSessionId') : null;
+        const res = await fetch('/api/auth/link-code', { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ coachSessionId })
+        });
         const data = await res.json();
         if (data.code) {
           setLinkCode(data.code);
@@ -204,14 +209,6 @@ function AuthCard() {
           >
             Войти через Telegram <ExternalLink className="h-4 w-4" />
           </a>
-
-          {/* Встроенный виджет */}
-          <div className="pt-4 border-t border-white/5">
-            <p className="text-xs text-muted/60 mb-3">Или войдите через браузерный виджет:</p>
-            <div className="flex justify-center p-2 rounded-xl bg-black/10">
-              <TelegramLoginWidget botName="moyoprizvanie_bot" authUrl="https://synthosai.ru/api/auth/telegram" />
-            </div>
-          </div>
         </div>
       )}
 

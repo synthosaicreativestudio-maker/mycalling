@@ -605,10 +605,10 @@ export default function CoachPage() {
       </div>
 
       {/* Main layout container: Chat + Wheel of Vocation */}
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[660px] md:h-[75vh] relative">
+      <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-6 min-h-[660px] md:h-[75vh] relative">
         
         {/* Left column: Chat History & Input */}
-        <div className="col-span-1 md:col-span-2 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
+        <div className="col-span-1 md:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
           
           {/* Chat message history */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -777,7 +777,7 @@ export default function CoachPage() {
 
       {/* Right column: Wheel of Vocation (Desktop only) */}
       <div 
-        className="col-span-1 hidden md:block h-full cursor-zoom-in relative select-none"
+        className="md:col-span-5 hidden md:block h-full cursor-zoom-in relative select-none"
         onMouseEnter={() => setIsWheelHovered(true)}
       >
         <WheelOfVocation extractedData={extractedData} />
@@ -807,7 +807,7 @@ export default function CoachPage() {
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
-              className="bg-[#080C14] border border-white/10 rounded-3xl p-6 w-full max-w-sm flex flex-col relative max-h-[90vh]"
+              className="bg-[#080C14] border border-white/10 rounded-3xl p-6 w-full max-w-[460px] flex flex-col relative max-h-[90vh]"
             >
               <button
                 onClick={() => setShowVocationModal(false)}

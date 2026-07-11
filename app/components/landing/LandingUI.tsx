@@ -3,50 +3,50 @@ import { useState } from 'react';
 
 export function IconTimer() {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_rgba(59,130,246,0.25)]">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_var(--accent-svg-shadow)]">
       <defs>
         <linearGradient id="timerGrad" x1="8" y1="8" x2="40" y2="40">
-          <stop offset="0%" stopColor="#60A5FA" />
-          <stop offset="100%" stopColor="#3B82F6" />
+          <stop offset="0%" stopColor="var(--accent-svg-1)" />
+          <stop offset="100%" stopColor="var(--accent-svg-2)" />
         </linearGradient>
       </defs>
       <circle cx="24" cy="24" r="18" stroke="url(#timerGrad)" strokeWidth="1" strokeDasharray="4 2" />
       <circle cx="24" cy="24" r="14" stroke="url(#timerGrad)" strokeWidth="1.5" />
       <line x1="24" y1="10" x2="24" y2="38" stroke="url(#timerGrad)" strokeWidth="0.5" strokeDasharray="2 2" />
       <line x1="10" y1="24" x2="38" y2="24" stroke="url(#timerGrad)" strokeWidth="0.5" strokeDasharray="2 2" />
-      <line x1="24" y1="24" x2="24" y2="15" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="24" y1="24" x2="32" y2="20" stroke="#60A5FA" strokeWidth="1" strokeLinecap="round" />
-      <circle cx="24" cy="24" r="2.5" fill="#60A5FA" stroke="#040506" strokeWidth="1" />
+      <line x1="24" y1="24" x2="24" y2="15" stroke="var(--accent-svg-2)" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="24" y1="24" x2="32" y2="20" stroke="var(--accent-svg-1)" strokeWidth="1" strokeLinecap="round" />
+      <circle cx="24" cy="24" r="2.5" fill="var(--accent-svg-1)" stroke="var(--bg-deep)" strokeWidth="1" />
     </svg>
   );
 }
 
 export function IconScience() {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_rgba(59,130,246,0.25)]">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_var(--accent-svg-shadow)]">
       <defs>
         <linearGradient id="sciGrad" x1="8" y1="8" x2="40" y2="40">
-          <stop offset="0%" stopColor="#93C5FD" />
-          <stop offset="100%" stopColor="#3B82F6" />
+          <stop offset="0%" stopColor="var(--accent-svg-3)" />
+          <stop offset="100%" stopColor="var(--accent-svg-2)" />
         </linearGradient>
       </defs>
       <circle cx="24" cy="18" r="12" stroke="url(#sciGrad)" strokeWidth="1.2" />
       <circle cx="17" cy="30" r="12" stroke="url(#sciGrad)" strokeWidth="1.2" />
       <circle cx="31" cy="30" r="12" stroke="url(#sciGrad)" strokeWidth="1.2" />
-      <circle cx="24" cy="26" r="3" fill="#93C5FD" opacity="0.32" />
-      <circle cx="24" cy="26" r="1" fill="#3B82F6" />
+      <circle cx="24" cy="26" r="3" fill="var(--accent-svg-3)" opacity="0.32" />
+      <circle cx="24" cy="26" r="1" fill="var(--accent-svg-2)" />
     </svg>
   );
 }
 
 export function IconReport() {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_rgba(59,130,246,0.25)]">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="filter drop-shadow-[0_0_8px_var(--accent-svg-shadow)]">
       <defs>
         <linearGradient id="repGrad" x1="12" y1="12" x2="36" y2="36">
-          <stop offset="0%" stopColor="#60A5FA" />
-          <stop offset="50%" stopColor="#93C5FD" />
-          <stop offset="100%" stopColor="#3B82F6" />
+          <stop offset="0%" stopColor="var(--accent-svg-1)" />
+          <stop offset="50%" stopColor="var(--accent-svg-3)" />
+          <stop offset="100%" stopColor="var(--accent-svg-2)" />
         </linearGradient>
       </defs>
       <path d="M24 8L38 18V32L24 42L10 32V18L24 8Z" stroke="url(#repGrad)" strokeWidth="1.2" strokeDasharray="3 2" />
@@ -56,13 +56,13 @@ export function IconReport() {
       <line x1="24" y1="42" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
       <line x1="10" y1="32" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
       <line x1="10" y1="18" x2="24" y2="24" stroke="url(#repGrad)" strokeWidth="0.8" />
-      <circle cx="24" cy="8" r="2" fill="#60A5FA" />
-      <circle cx="38" cy="18" r="2" fill="#3B82F6" />
-      <circle cx="38" cy="32" r="2" fill="#93C5FD" />
-      <circle cx="24" cy="42" r="2" fill="#3B82F6" />
-      <circle cx="10" cy="32" r="2" fill="#93C5FD" />
-      <circle cx="10" cy="18" r="2" fill="#3B82F6" />
-      <circle cx="24" cy="24" r="3" fill="#040506" stroke="#3B82F6" strokeWidth="1" />
+      <circle cx="24" cy="8" r="2" fill="var(--accent-svg-1)" />
+      <circle cx="38" cy="18" r="2" fill="var(--accent-svg-2)" />
+      <circle cx="38" cy="32" r="2" fill="var(--accent-svg-3)" />
+      <circle cx="24" cy="42" r="2" fill="var(--accent-svg-2)" />
+      <circle cx="10" cy="32" r="2" fill="var(--accent-svg-3)" />
+      <circle cx="10" cy="18" r="2" fill="var(--accent-svg-2)" />
+      <circle cx="24" cy="24" r="3" fill="var(--bg-deep)" stroke="var(--accent-svg-2)" strokeWidth="1" />
     </svg>
   );
 }

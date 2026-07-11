@@ -400,18 +400,18 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
         </svg>
       </div>
 
-      {/* Список сфер с прогрессом */}
-      <div className="w-full space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+      {/* Список сфер с прогрессом в два ряда/колонки */}
+      <div className="w-full grid grid-cols-2 gap-x-4 gap-y-2.5 max-h-[220px] overflow-y-auto pr-1">
         {sectors.map((sector, idx) => (
-          <div key={idx} className="flex items-center justify-between text-xs py-1 border-b border-white/5 last:border-0">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: sector.color }} />
-              <div className="flex flex-col">
-                <span className="text-white/90 font-medium tracking-wide font-sans">{sector.name}</span>
-                <span className="text-[10px] text-[#7A8A9E]">{sector.description}</span>
+          <div key={idx} className="flex items-center justify-between text-xs py-1 border-b border-white/5">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sector.color }} />
+              <div className="flex flex-col min-w-0">
+                <span className="text-white/90 font-medium tracking-wide font-sans truncate text-[10.5px] leading-tight">{sector.name}</span>
+                <span className="text-[8px] text-[#7A8A9E] truncate leading-tight">{sector.description}</span>
               </div>
             </div>
-            <span className="font-bold text-white/80 font-sans" style={{ color: sector.value > 0 ? sector.color : '#4E6178' }}>
+            <span className="font-bold text-white/80 font-sans text-[10.5px] ml-1 shrink-0" style={{ color: sector.value > 0 ? sector.color : '#4E6178' }}>
               {Math.round(sector.value * 100)}%
             </span>
           </div>

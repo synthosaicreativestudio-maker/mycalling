@@ -29,6 +29,12 @@
   --rose-muted: #193B57;
   --border-subtle: rgba(0, 240, 255, 0.12);
   --border-hover: rgba(0, 240, 255, 0.3);
+  
+  /* Переменные для адаптивных SVG-иконок */
+  --accent-svg-1: #60A5FA;
+  --accent-svg-2: #3B82F6;
+  --accent-svg-3: #93C5FD;
+  --accent-svg-shadow: rgba(59, 130, 246, 0.25);
 }
 
 html {
@@ -376,6 +382,12 @@ a:focus-visible {
   --rose-muted: #EFEBE9;
   --border-subtle: rgba(141, 91, 76, 0.18);
   --border-hover: rgba(141, 91, 76, 0.38);
+
+  /* Переменные для адаптивных SVG-иконок в светлой теме */
+  --accent-svg-1: #A67C52;
+  --accent-svg-2: #8D5B4C;
+  --accent-svg-3: #D2B48C;
+  --accent-svg-shadow: rgba(141, 91, 76, 0.25);
 }
 
 /* Скрытие видеофона в светлой теме и показ градиента */
@@ -404,7 +416,16 @@ a:focus-visible {
   color: var(--accent-brown) !important;
 }
 [data-theme="light"] .text-\[\#60A5FA\] {
-  color: var(--accent-gold) !important;
+  color: var(--accent-brown) !important;
+}
+[data-theme="light"] .text-\[\#60A5FA\]\/70 {
+  color: rgba(141, 91, 76, 0.7) !important;
+}
+[data-theme="light"] .text-sky {
+  color: var(--accent-brown) !important;
+}
+[data-theme="light"] .text-skyMuted {
+  color: var(--text-muted) !important;
 }
 [data-theme="light"] .text-white {
   color: var(--text-primary) !important;
@@ -433,11 +454,23 @@ a:focus-visible {
 [data-theme="light"] .bg-\[\#3B82F6\]\/5 {
   background-color: rgba(141, 91, 76, 0.05) !important;
 }
+[data-theme="light"] .border-\[\#3B82F6\] {
+  border-color: var(--accent-brown) !important;
+}
 [data-theme="light"] .border-\[\#3B82F6\]\/20 {
   border-color: rgba(141, 91, 76, 0.2) !important;
 }
 [data-theme="light"] .border-\[\#3B82F6\]\/30 {
   border-color: rgba(141, 91, 76, 0.3) !important;
+}
+[data-theme="light"] .text-\[\#3B82F6\]\/40 {
+  color: rgba(141, 91, 76, 0.4) !important;
+}
+[data-theme="light"] .hover\:border-\[\#3B82F6\]\/40:hover {
+  border-color: rgba(141, 91, 76, 0.4) !important;
+}
+[data-theme="light"] .hover\:bg-\[\#3B82F6\]\/5:hover {
+  background-color: rgba(141, 91, 76, 0.05) !important;
 }
 [data-theme="light"] .bg-white\/5 {
   background-color: rgba(141, 91, 76, 0.06) !important;

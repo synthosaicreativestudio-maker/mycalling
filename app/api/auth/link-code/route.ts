@@ -6,7 +6,18 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await req.json().catch(() => ({}));
+    const { userId, coachSessionId } = await req.json().catch(() => ({}));
+    let finalUserId = userId;
+
+    if (!finalUserId && coachSessionId) {
+      const coachSession = await prisma.coachSession.findUnique({
+        where: { id: coachSessionId }
+      });
+      if (coachSession) {
+        finalUserId = coachSession.userId;
+      }
+    }
+
     const randomHex = crypto.randomBytes(8).toString('hex');
     const code = `auth_${randomHex}`;
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 минут
@@ -15,7 +26,7 @@ export async function POST(req: Request) {
       data: {
         code,
         status: 'PENDING',
-        userId: userId || null,
+        userId: finalUserId || null,
         expiresAt
       }
     });

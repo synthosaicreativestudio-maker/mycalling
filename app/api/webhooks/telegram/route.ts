@@ -288,21 +288,58 @@ export async function POST(req: Request) {
         );
 
         if (authLink) {
-          // Переносим коуч-сессию с гостевого аккаунта на реальный аккаунт пользователя
+          // Переносим коуч-сессию и результаты тестов с гостевого аккаунта на реальный аккаунт пользователя
           if (authLink.userId && authLink.userId !== user.id) {
             try {
-              // 1. Удаляем старую коуч-сессию реального пользователя, если она существует
+              // 1. Получаем гостевого пользователя
+              const guestUser = await prisma.user.findUnique({
+                where: { id: authLink.userId }
+              });
+
+              // 2. Копируем ответы на тесты
+              if (guestUser?.diagnosticAnswers) {
+                await prisma.user.update({
+                  where: { id: user.id },
+                  data: {
+                    diagnosticAnswers: guestUser.diagnosticAnswers
+                  }
+                });
+              }
+
+              // 3. Переносим коуч-сессию
               await prisma.coachSession.deleteMany({
                 where: { userId: user.id }
               });
-
-              // 2. Переносим текущую гостевую сессию на реального пользователя
               await prisma.coachSession.updateMany({
                 where: { userId: authLink.userId },
                 data: { userId: user.id }
               });
 
-              // 3. Удаляем гостевого пользователя из БД для очистки
+              // 4. Переносим результаты тестов
+              await prisma.diagnosticResult.updateMany({
+                where: { userId: authLink.userId },
+                data: { userId: user.id }
+              });
+
+              // 5. Переносим цифровой профиль (удаляем старый, чтобы избежать Unique Constraint ошибок)
+              await prisma.digitalProfile.deleteMany({
+                where: { userId: user.id }
+              });
+              await prisma.digitalProfile.updateMany({
+                where: { userId: authLink.userId },
+                data: { userId: user.id }
+              });
+
+              // 6. Переносим отчет
+              await prisma.report.deleteMany({
+                where: { userId: user.id }
+              });
+              await prisma.report.updateMany({
+                where: { userId: authLink.userId },
+                data: { userId: user.id }
+              });
+
+              // 7. Удаляем гостевого пользователя из БД для очистки
               await prisma.user.delete({
                 where: { id: authLink.userId }
               });
@@ -461,11 +498,49 @@ export async function POST(req: Request) {
           if (authLink) {
             if (authLink.userId && authLink.userId !== user.id) {
               try {
+                // 1. Получаем гостевого пользователя
+                const guestUser = await prisma.user.findUnique({
+                  where: { id: authLink.userId }
+                });
+
+                // 2. Копируем ответы на тесты
+                if (guestUser?.diagnosticAnswers) {
+                  await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                      diagnosticAnswers: guestUser.diagnosticAnswers
+                    }
+                  });
+                }
+
+                // 3. Переносим коуч-сессию
                 await prisma.coachSession.deleteMany({ where: { userId: user.id } });
                 await prisma.coachSession.updateMany({
                   where: { userId: authLink.userId },
                   data: { userId: user.id }
                 });
+
+                // 4. Переносим результаты тестов
+                await prisma.diagnosticResult.updateMany({
+                  where: { userId: authLink.userId },
+                  data: { userId: user.id }
+                });
+
+                // 5. Переносим цифровой профиль
+                await prisma.digitalProfile.deleteMany({ where: { userId: user.id } });
+                await prisma.digitalProfile.updateMany({
+                  where: { userId: authLink.userId },
+                  data: { userId: user.id }
+                });
+
+                // 6. Переносим отчет
+                await prisma.report.deleteMany({ where: { userId: user.id } });
+                await prisma.report.updateMany({
+                  where: { userId: authLink.userId },
+                  data: { userId: user.id }
+                });
+
+                // 7. Удаляем гостевого пользователя
                 await prisma.user.delete({ where: { id: authLink.userId } });
               } catch (e) {
                 console.error('Error migrating guest session in Telegram webhook (text fallback):', e);
