@@ -451,28 +451,68 @@ a:focus-visible {
 [data-theme="light"] .bg-\[\#080C14\]\/95 {
   background-color: var(--bg-surface) !important;
 }
+[data-theme="light"] .bg-\[\#080C14\]\/90 {
+  background-color: var(--bg-surface) !important;
+}
 [data-theme="light"] .bg-\[\#080C14\]\/80 {
   background-color: var(--bg-surface) !important;
 }
 [data-theme="light"] .bg-\[\#080C14\]\/70 {
   background-color: var(--bg-surface) !important;
 }
+[data-theme="light"] .bg-\[\#080C14\] {
+  background-color: var(--bg-surface) !important;
+}
 [data-theme="light"] .bg-\[\#0B1220\]\/95 {
   background-color: var(--bg-surface) !important;
+}
+[data-theme="light"] .bg-\[\#040506\]\/35 {
+  background-color: rgba(245, 239, 235, 0.4) !important;
+}
+[data-theme="light"] .bg-\[\#040506\]\/45 {
+  background-color: rgba(253, 251, 247, 0.8) !important;
+}
+[data-theme="light"] .bg-\[\#040506\]\/65 {
+  background-color: var(--bg-surface) !important;
+}
+[data-theme="light"] .bg-\[\#040508\]\/85 {
+  background-color: rgba(253, 251, 247, 0.85) !important;
+}
+[data-theme="light"] .bg-\[\#040508\] {
+  background-color: var(--bg-deep) !important;
+}
+
+/* Оверрайды произвольных (arbitrary) значений Tailwind */
+[data-theme="light"] .bg-white\/\[0\.02\] {
+  background-color: rgba(141, 91, 76, 0.05) !important;
+}
+[data-theme="light"] .bg-white\/\[0\.01\] {
+  background-color: rgba(141, 91, 76, 0.02) !important;
+}
+[data-theme="light"] .border-white\/5 {
+  border-color: rgba(141, 91, 76, 0.1) !important;
+}
+[data-theme="light"] .border-white\/20 {
+  border-color: rgba(141, 91, 76, 0.22) !important;
+}
+[data-theme="light"] .border-white\/10 {
+  border-color: rgba(141, 91, 76, 0.15) !important;
 }
 
 /* Оверрайды кнопок и чекбоксов на странице вопросов */
 [data-theme="light"] .hover\:bg-white\/5:hover {
   background-color: rgba(141, 91, 76, 0.08) !important;
 }
-[data-theme="light"] .border-white\/20 {
-  border-color: rgba(141, 91, 76, 0.25) !important;
-}
 [data-theme="light"] .bg-white\/10 {
   background-color: rgba(141, 91, 76, 0.12) !important;
 }
 
-/* Настройки контурного свечения в светлой теме */
+/* Настройки контурного свечения и панелей в светлой теме */
+[data-theme="light"] .glass-panel {
+  background: rgba(245, 239, 235, 0.85) !important;
+  border-color: rgba(141, 91, 76, 0.18) !important;
+  box-shadow: 0 16px 48px rgba(141, 91, 76, 0.04) !important;
+}
 [data-theme="light"] .glass-card {
   background: var(--bg-surface) !important;
   border-color: rgba(141, 91, 76, 0.15) !important;
@@ -495,10 +535,16 @@ a:focus-visible {
   ) !important;
 }
 
+/* CTA кнопки и активные элементы выбора */
+[data-theme="light"] .bg-\[\#3B82F6\].text-white,
+[data-theme="light"] .bg-\[\#3B82F6\] .text-white,
+[data-theme="light"] .cta-glass,
+[data-theme="light"] .cta-glass * {
+  color: #FFFFFF !important; /* Принудительно белый цвет для контраста */
+}
 [data-theme="light"] .cta-glass {
   background: rgba(141, 91, 76, 0.92) !important;
   border-color: rgba(166, 124, 82, 0.35) !important;
-  color: #FFFFFF !important; /* Белый текст на коричневой cta-кнопке */
 }
 [data-theme="light"] .cta-glass::before {
   background: conic-gradient(
@@ -516,6 +562,7 @@ a:focus-visible {
   border-color: rgba(166, 124, 82, 0.5) !important;
   box-shadow: 0 8px 24px rgba(166, 124, 82, 0.25) !important;
 }
+
 [data-theme="light"] .site-header-inner {
   background: rgba(253, 251, 247, 0.85) !important;
   border-bottom: 1px solid rgba(141, 91, 76, 0.15) !important;
