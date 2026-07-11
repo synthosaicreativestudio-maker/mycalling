@@ -12,6 +12,12 @@ export default function TelegramWebAppPage() {
 
   useEffect(() => {
     setMounted(true);
+    // Инициализируем WebApp, если SDK уже загружен
+    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
+      const webApp = (window as any).Telegram.WebApp;
+      webApp.ready();
+      webApp.expand();
+    }
   }, []);
 
   const handleShareContact = () => {
@@ -58,7 +64,7 @@ export default function TelegramWebAppPage() {
     <>
       <Script 
         src="https://telegram.org/js/telegram-web-app.js" 
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
         onLoad={() => {
           console.log('[webapp] Telegram WebApp SDK loaded successfully');
           if ((window as any).Telegram?.WebApp) {

@@ -37,18 +37,18 @@ async function sendTelegramNotification(user: any, data: any) {
   const chatId = process.env.TELEGRAM_CHAT_ID || '148281488';
   const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
   
-  const text = `🔔 *Регистрация лида (Нейрокоуч):*
-👤 *Имя:* ${user.name || 'Не указано'}
-📱 *Телефон:* ${user.phone || 'Не указано'}
-🏫 *Роль:* ${user.role || 'STUDENT'}
-🎯 *Виртуальный шаг:* ${data.currentStep || 0}
+  const text = `*Регистрация лида (Нейрокоуч):*
+*Имя:* ${user.name || 'Не указано'}
+*Телефон:* ${user.phone || 'Не указано'}
+*Роль:* ${user.role || 'STUDENT'}
+*Виртуальный шаг:* ${data.currentStep || 0}
  
-✨ *Ответы:*
-💭 *Мечты:* ${data.dreams || 'Не указано'}
-🌟 *Кумиры:* ${data.idols || 'Не указано'}
-💎 *Ценности:* ${data.values || 'Не указано'}
-🚧 *Барьеры:* ${data.barriers || 'Не указано'}
-📝 *Резюме коуча:* ${data.preliminaryFeedback || 'Еще не сформировано'}`;
+*Ответы:*
+*Мечты:* ${data.dreams || 'Не указано'}
+*Кумиры:* ${data.idols || 'Не указано'}
+*Ценности:* ${data.values || 'Не указано'}
+*Барьеры:* ${data.barriers || 'Не указано'}
+*Резюме коуча:* ${data.preliminaryFeedback || 'Еще не сформировано'}`;
 
   try {
     await fetch(`${tgApiBase}/bot${botToken}/sendMessage`, {
@@ -72,7 +72,7 @@ async function sendTelegramReportToUser(user: any, data: any) {
   const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
 
   const feedback = data.preliminaryFeedback || 'Резюме ещё не сформировано';
-  const text = `📋 *Предварительное резюме от наставника Романа*\n\n${feedback}\n\n🎯 Теперь вы можете пройти интерактивные тесты для точной диагностики на сайте:\nhttps://synthosai.ru/assessment`;
+  const text = `*Предварительное резюме от наставника Романа*\n\n${feedback}\n\nТеперь вы можете пройти интерактивные тесты для точной диагностики на сайте:\nhttps://synthosai.ru/assessment`;
 
   try {
     await fetch(`${tgApiBase}/bot${botToken}/sendMessage`, {
@@ -84,7 +84,7 @@ async function sendTelegramReportToUser(user: any, data: any) {
         parse_mode: 'Markdown',
         reply_markup: {
           inline_keyboard: [
-            [{ text: '🧪 Перейти к диагностике', url: 'https://synthosai.ru/assessment' }]
+            [{ text: 'Перейти к диагностике', url: 'https://synthosai.ru/assessment' }]
           ]
         }
       })
@@ -101,7 +101,7 @@ async function sendMaxReportToUser(user: any, data: any) {
   if (!botToken || !user.maxUserId) return;
 
   const feedback = data.preliminaryFeedback || 'Резюме ещё не сформировано';
-  const text = `📋 Предварительное резюме от наставника Романа\n\n${feedback}\n\n🎯 Теперь вы можете пройти интерактивные тесты для точной диагностики на сайте: https://synthosai.ru/assessment`;
+  const text = `Предварительное резюме от наставника Романа\n\n${feedback}\n\nТеперь вы можете пройти интерактивные тесты для точной диагностики на сайте: https://synthosai.ru/assessment`;
 
   try {
     await fetch(`https://platform-api2.max.ru/messages?user_id=${user.maxUserId}`, {
@@ -118,7 +118,7 @@ async function sendMaxReportToUser(user: any, data: any) {
             type: 'inline_keyboard',
             payload: {
               buttons: [
-                [{ type: 'link', text: '🧪 Перейти к диагностике', url: 'https://synthosai.ru/assessment' }]
+                [{ type: 'link', text: 'Перейти к диагностике', url: 'https://synthosai.ru/assessment' }]
               ]
             }
           }
