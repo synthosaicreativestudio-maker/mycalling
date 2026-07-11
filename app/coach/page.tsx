@@ -605,7 +605,7 @@ export default function CoachPage() {
       </div>
 
       {/* Main layout container: Chat + Wheel of Vocation */}
-      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 h-[60vh] relative">
+      <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 min-h-[660px] md:h-[75vh] relative">
         
         {/* Left column: Chat History & Input */}
         <div className="col-span-1 md:col-span-2 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
@@ -838,7 +838,7 @@ export default function CoachPage() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.7, opacity: 0, y: 30 }}
               transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-              className="w-full max-w-xl aspect-square p-10 rounded-[36px] bg-[#040506]/65 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative flex items-center justify-center pointer-events-auto"
+              className="w-full max-w-2xl aspect-square p-10 rounded-[36px] bg-[#040506]/65 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative flex items-center justify-center pointer-events-auto"
             >
               <WheelOfVocation extractedData={extractedData} standalone />
             </motion.div>
