@@ -11,7 +11,8 @@ import { CookieBanner } from './components/CookieBanner';
 import logger from './lib/logger';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import { ThemeToggle } from './components/ThemeToggle';
-import HeaderAuth from './components/HeaderAuth';
+import dynamic from 'next/dynamic';
+const HeaderAuth = dynamic(() => import('./components/HeaderAuth'), { ssr: false });
 
 const manrope = Manrope({
   subsets: ['latin', 'cyrillic'],
