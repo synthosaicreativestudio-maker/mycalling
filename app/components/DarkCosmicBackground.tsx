@@ -22,6 +22,18 @@ export function DarkCosmicBackground() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#A67C52]/5 blur-[100px]" />
       </div>
 
+      {/* Слой 1: Фоновое видео высокой четкости (светлая тема) */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="absolute inset-0 w-full h-full object-cover opacity-75 select-none pointer-events-none theme-light-only"
+      >
+        <source src="/assets/videos/background-video-light.mp4" type="video/mp4" />
+      </video>
+
       {/* Слой 1: Фоновое видео высокой четкости (темная тема) */}
       <video
         autoPlay
