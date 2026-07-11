@@ -15,24 +15,31 @@ export function DarkCosmicBackground() {
 
   return (
     <div className="fixed inset-0 -z-10 h-full w-full overflow-hidden bg-[#040506] print:hidden">
-      {/* Слой 1: Фоновое видео высокой четкости */}
+      {/* Слой светлой темы: теплый градиент латте с мягкими размытыми кругами */}
+      <div className="absolute inset-0 pointer-events-none transition-opacity duration-500 opacity-0 theme-light-only bg-gradient-to-tr from-[#F5EFEB] via-[#FDFBF7] to-[#EADCD3]">
+        {/* Нежные размытые кофейные пятна */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#8D5B4C]/5 blur-[80px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#A67C52]/5 blur-[100px]" />
+      </div>
+
+      {/* Слой 1: Фоновое видео высокой четкости (темная тема) */}
       <video
         autoPlay
         loop
         muted
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover opacity-90 select-none pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover opacity-90 select-none pointer-events-none theme-dark-only"
       >
         <source src="/assets/videos/background-video.mp4" type="video/mp4" />
       </video>
 
-      {/* Слой 2: Полупрозрачное затемнение для читаемости контента */}
-      <div className="absolute inset-0 bg-[#040506]/40 pointer-events-none" />
+      {/* Слой 2: Полупрозрачное затемнение для читаемости контента (темная тема) */}
+      <div className="absolute inset-0 bg-[#040506]/40 pointer-events-none theme-dark-only" />
 
-      {/* Слой 3: Виньетирование по краям экрана */}
+      {/* Слой 3: Виньетирование по краям экрана (темная тема) */}
       <div 
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none theme-dark-only"
         style={{
           background: 'radial-gradient(circle, transparent 40%, rgba(4, 5, 6, 0.6) 100%)',
         }}

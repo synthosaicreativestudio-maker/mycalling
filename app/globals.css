@@ -352,3 +352,182 @@ a:focus-visible {
   animation: particle-drift var(--drift-dur, 10s) ease-in-out infinite alternate;
 }
 
+/* ==========================================================================
+   СВЕТЛАЯ КОФЕЙНАЯ ТЕМА (КАПУЧИНО / ЛАТТЕ)
+   ========================================================================== */
+
+[data-theme="light"] {
+  color-scheme: light;
+  --accent-brown: #8D5B4C; /* капучино/латте primary коричневый */
+  --accent-gold: #A67C52; /* карамельный золотой */
+  --accent-glow: rgba(141, 91, 76, 0.1);
+  --beige-light: #FDFBF7; /* нежный молочный латте */
+  --beige-medium: #F5EFEB; /* капучино крем */
+  --beige-dark: #EADCD3; /* насыщенный латте */
+  --brown-light: #D2B48C; /* светлый ореховый */
+  --brown-dark: #3E2723; /* кофейное зерно */
+  --bg-deep: #FDFBF7;
+  --bg-surface: rgba(245, 239, 235, 0.85);
+  --text-primary: #3E2723; /* глубокий кофейный */
+  --text-muted: #6D4C41; /* средний коричневый */
+  --sky-soft: #8D5B4C;
+  --sky-muted: #D7CCC8;
+  --rose-soft: #A67C52;
+  --rose-muted: #EFEBE9;
+  --border-subtle: rgba(141, 91, 76, 0.18);
+  --border-hover: rgba(141, 91, 76, 0.38);
+}
+
+/* Скрытие видеофона в светлой теме и показ градиента */
+.theme-light-only {
+  display: none !important;
+}
+[data-theme="light"] .theme-dark-only {
+  display: none !important;
+}
+[data-theme="light"] .theme-light-only {
+  display: block !important;
+  opacity: 1 !important;
+}
+
+/* Оверрайды для жестко захардкоженных утилит Tailwind в светлой теме */
+[data-theme="light"] .text-\[\#7A8A9E\] {
+  color: var(--text-muted) !important;
+}
+[data-theme="light"] .text-\[\#E8ECF0\] {
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .text-\[\#566679\] {
+  color: var(--text-muted) !important;
+}
+[data-theme="light"] .text-\[\#3B82F6\] {
+  color: var(--accent-brown) !important;
+}
+[data-theme="light"] .text-\[\#60A5FA\] {
+  color: var(--accent-gold) !important;
+}
+[data-theme="light"] .text-white {
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .text-slate-400 {
+  color: var(--text-muted) !important;
+}
+[data-theme="light"] .text-slate-300 {
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .hover\:text-white:hover {
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .bg-\[\#3B82F6\] {
+  background-color: var(--accent-brown) !important;
+}
+[data-theme="light"] .bg-\[\#3B82F6\]\/10 {
+  background-color: rgba(141, 91, 76, 0.1) !important;
+}
+[data-theme="light"] .bg-\[\#3B82F6\]\/5 {
+  background-color: rgba(141, 91, 76, 0.05) !important;
+}
+[data-theme="light"] .border-\[\#3B82F6\]\/20 {
+  border-color: rgba(141, 91, 76, 0.2) !important;
+}
+[data-theme="light"] .border-\[\#3B82F6\]\/30 {
+  border-color: rgba(141, 91, 76, 0.3) !important;
+}
+[data-theme="light"] .bg-white\/5 {
+  background-color: rgba(141, 91, 76, 0.06) !important;
+}
+[data-theme="light"] .border-white\/10 {
+  border-color: rgba(141, 91, 76, 0.15) !important;
+}
+[data-theme="light"] .bg-black\/40 {
+  background-color: rgba(245, 239, 235, 0.5) !important;
+}
+[data-theme="light"] .bg-\[\#040506\]\/85 {
+  background-color: rgba(253, 251, 247, 0.85) !important;
+}
+[data-theme="light"] .bg-\#040506 {
+  background-color: var(--bg-deep) !important;
+}
+[data-theme="light"] .bg-\[\#080C14\]\/95 {
+  background-color: var(--bg-surface) !important;
+}
+[data-theme="light"] .bg-\[\#080C14\]\/80 {
+  background-color: var(--bg-surface) !important;
+}
+[data-theme="light"] .bg-\[\#080C14\]\/70 {
+  background-color: var(--bg-surface) !important;
+}
+[data-theme="light"] .bg-\[\#0B1220\]\/95 {
+  background-color: var(--bg-surface) !important;
+}
+
+/* Оверрайды кнопок и чекбоксов на странице вопросов */
+[data-theme="light"] .hover\:bg-white\/5:hover {
+  background-color: rgba(141, 91, 76, 0.08) !important;
+}
+[data-theme="light"] .border-white\/20 {
+  border-color: rgba(141, 91, 76, 0.25) !important;
+}
+[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(141, 91, 76, 0.12) !important;
+}
+
+/* Настройки контурного свечения в светлой теме */
+[data-theme="light"] .glass-card {
+  background: var(--bg-surface) !important;
+  border-color: rgba(141, 91, 76, 0.15) !important;
+  box-shadow: 0 10px 30px rgba(141, 91, 76, 0.04) !important;
+}
+[data-theme="light"] .glass-card:hover {
+  background: rgba(234, 220, 211, 0.9) !important;
+  border-color: rgba(141, 91, 76, 0.3) !important;
+  box-shadow: 0 12px 40px rgba(141, 91, 76, 0.08) !important;
+}
+[data-theme="light"] .glass-card::before {
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 50%,
+    rgba(141, 91, 76, 0.25) 70%,
+    rgba(166, 124, 82, 0.6) 82%,
+    rgba(255, 255, 255, 0.85) 86%,
+    rgba(166, 124, 82, 0.6) 90%,
+    transparent 100%
+  ) !important;
+}
+
+[data-theme="light"] .cta-glass {
+  background: rgba(141, 91, 76, 0.92) !important;
+  border-color: rgba(166, 124, 82, 0.35) !important;
+  color: #FFFFFF !important; /* Белый текст на коричневой cta-кнопке */
+}
+[data-theme="light"] .cta-glass::before {
+  background: conic-gradient(
+    from var(--border-angle),
+    transparent 50%,
+    rgba(141, 91, 76, 0.25) 70%,
+    rgba(166, 124, 82, 0.6) 82%,
+    rgba(255, 255, 255, 0.85) 86%,
+    rgba(166, 124, 82, 0.6) 90%,
+    transparent 100%
+  ) !important;
+}
+[data-theme="light"] .cta-glass:hover {
+  background: rgba(109, 76, 65, 0.96) !important;
+  border-color: rgba(166, 124, 82, 0.5) !important;
+  box-shadow: 0 8px 24px rgba(166, 124, 82, 0.25) !important;
+}
+[data-theme="light"] .site-header-inner {
+  background: rgba(253, 251, 247, 0.85) !important;
+  border-bottom: 1px solid rgba(141, 91, 76, 0.15) !important;
+  box-shadow: 0 4px 20px rgba(141, 91, 76, 0.05) !important;
+}
+[data-theme="light"] .input-shell {
+  background: rgba(245, 239, 235, 0.7) !important;
+  border-color: rgba(141, 91, 76, 0.25) !important;
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .input-shell:focus-within {
+  border-color: var(--accent-brown) !important;
+  box-shadow: 0 0 0 4px rgba(141, 91, 76, 0.15) !important;
+}
+

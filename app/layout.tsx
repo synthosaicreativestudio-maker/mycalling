@@ -10,6 +10,7 @@ import { ExitIntentPopup } from './components/ExitIntentPopup';
 import { CookieBanner } from './components/CookieBanner';
 import logger from './lib/logger';
 import { LazyMotion, domAnimation } from 'framer-motion';
+import { ThemeToggle } from './components/ThemeToggle';
 
 const manrope = Manrope({
   subsets: ['latin', 'cyrillic'],
@@ -69,7 +70,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" className={`${manrope.variable} ${prata.variable} ${marckScript.variable}`}>
       <head>
-
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                  } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                  }
+                } catch (e) {}
+              })();
+            `
+          }}
+        />
       </head>
       <body className="relative min-h-screen bg-transparent text-[#E8ECF0]">
         <LazyMotion features={domAnimation}>
@@ -117,6 +133,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     >
                       Личный кабинет
                     </Link>
+                    <ThemeToggle />
                   </div>
                 </div>
               </div>
