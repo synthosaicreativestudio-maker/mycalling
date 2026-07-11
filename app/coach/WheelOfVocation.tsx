@@ -30,6 +30,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
   const sectors = [
     {
       name: 'Интересы & Хобби',
+      emoji: '🎨',
       description: 'Любимые дела и школьные предметы',
       value: (hasHobbies ? 0.5 : 0) + (hasSchoolSubjects ? 0.5 : 0),
       color: '#38bdf8', // Голубой
@@ -37,6 +38,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     },
     {
       name: 'Мечты & Образ будущего',
+      emoji: '🚀',
       description: 'Карьерные мечты и авторитеты',
       value: (hasDreams ? 0.5 : 0) + (hasIdols ? 0.5 : 0),
       color: '#a855f7', // Фиолетовый
@@ -44,6 +46,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     },
     {
       name: 'Семейное влияние',
+      emoji: '👨‍👩‍👧',
       description: 'Отношения и мнение родителей',
       value: hasParents ? 1.0 : 0,
       color: '#ec4899', // Розовый
@@ -51,6 +54,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     },
     {
       name: 'Барьеры & Страхи',
+      emoji: '🛡️',
       description: 'Что тревожит в выборе',
       value: hasFears ? 1.0 : 0,
       color: '#f97316', // Оранжевый
@@ -58,6 +62,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     },
     {
       name: 'Опыт & Проекты',
+      emoji: '💼',
       description: 'Практические пробы и кружки',
       value: hasExperience ? 1.0 : 0,
       color: '#10b981', // Зеленый
@@ -65,6 +70,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     },
     {
       name: 'Формат & Мышление',
+      emoji: '💡',
       description: 'Среда работы и тип ума',
       value: (hasWorkFormat ? 0.5 : 0) + (hasThinkingType ? 0.5 : 0),
       color: '#3b82f6', // Синий
@@ -72,6 +78,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     },
     {
       name: 'Мотивация & Энергия',
+      emoji: '⚡',
       description: 'Что заряжает и мерило успеха',
       value: (hasSuccessMeasure ? 0.5 : 0) + (hasEnergySources ? 0.5 : 0),
       color: '#eab308', // Золотой
@@ -79,6 +86,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     },
     {
       name: 'Ценности & Роли',
+      emoji: '🤝',
       description: 'Командный стиль и принципы',
       value: (hasTeamRole ? 0.33 : 0) + (hasAutonomyStyle ? 0.33 : 0) + ((hasValues || hasDecisionStyle) ? 0.34 : 0),
       color: '#84cc16', // Салатовый
@@ -220,7 +228,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                     sector.value > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
                   }`}
                 >
-                  {sector.name}
+                  {sector.emoji} {sector.name}
                 </text>
                 <text
                   x={labelPos.x}
@@ -358,17 +366,17 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   y={labelPos.y}
                   textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
                   dominantBaseline="middle"
-                  fontSize="12"
+                  fontSize="20"
                   fontWeight="800"
                   className={`transition duration-500 font-sans tracking-wide ${
                     sector.value > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
                   }`}
                 >
-                  {sector.name}
+                  {sector.emoji}
                 </text>
                 <text
                   x={labelPos.x}
-                  y={labelPos.y + 14}
+                  y={labelPos.y + 18}
                   textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
                   dominantBaseline="middle"
                   fill={sector.value > 0 ? sector.color : undefined}

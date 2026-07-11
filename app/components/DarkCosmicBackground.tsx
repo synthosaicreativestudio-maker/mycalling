@@ -29,13 +29,10 @@ export function DarkCosmicBackground() {
         muted
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover opacity-30 select-none pointer-events-none theme-light-only"
+        className="absolute inset-0 w-full h-full object-cover opacity-90 select-none pointer-events-none theme-light-only"
       >
         <source src="/assets/videos/background-video-light.mp4" type="video/mp4" />
       </video>
-
-      {/* Ослабляющий и выравнивающий контраст слой для светлой темы */}
-      <div className="absolute inset-0 bg-[#FDFBF7]/45 pointer-events-none theme-light-only" />
 
       {/* Слой 1: Фоновое видео высокой четкости (темная тема) */}
       <video
