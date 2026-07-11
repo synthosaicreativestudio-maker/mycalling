@@ -578,3 +578,32 @@ a:focus-visible {
   box-shadow: 0 0 0 4px rgba(141, 91, 76, 0.15) !important;
 }
 
+/* Стили текстовых меток на Колесе Призвания */
+.theme-wheel-label-active {
+  fill: #E8ECF0;
+}
+.theme-wheel-label-inactive {
+  fill: #4E6178;
+}
+.theme-wheel-value-active {
+  /* Оставляем оригинальный цвет fill, переданный в SVG */
+}
+.theme-wheel-value-inactive {
+  fill: #2E3A4D;
+}
+
+[data-theme="light"] .theme-wheel-label-active {
+  fill: #3E2723 !important;
+}
+[data-theme="light"] .theme-wheel-label-inactive {
+  fill: #8D5B4C !important;
+  opacity: 0.65;
+}
+[data-theme="light"] .theme-wheel-value-active {
+  fill: #A67C52 !important;
+}
+[data-theme="light"] .theme-wheel-value-inactive {
+  fill: #8D5B4C !important;
+  opacity: 0.5;
+}
+

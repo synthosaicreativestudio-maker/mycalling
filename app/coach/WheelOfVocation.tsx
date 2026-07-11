@@ -133,9 +133,10 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
               cy={cy}
               r={maxRadius * scale}
               fill="none"
-              stroke="rgba(255,255,255,0.03)"
+              stroke="var(--border-subtle)"
               strokeWidth="1"
               strokeDasharray={scale === 1.0 ? 'none' : '4 4'}
+              className="opacity-40"
             />
           ))}
 
@@ -150,8 +151,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 y1={cy}
                 x2={target.x}
                 y2={target.y}
-                stroke="rgba(255, 255, 255, 0.05)"
+                stroke="var(--border-subtle)"
                 strokeWidth="1.5"
+                className="opacity-50"
               />
             );
           })}
@@ -167,9 +169,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 key={`bg-${idx}`}
                 d={path}
                 fill="rgba(255, 255, 255, 0.01)"
-                stroke="rgba(255, 255, 255, 0.03)"
+                stroke="var(--border-subtle)"
                 strokeWidth="1"
-                className="transition duration-500 hover:fill-white/[0.02] cursor-pointer"
+                className="transition duration-500 hover:fill-white/[0.02] cursor-pointer opacity-30"
               />
             );
           })}
@@ -202,7 +204,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
           {/* Внешние текстовые маркеры-иконки для секторов */}
           {sectors.map((sector, idx) => {
             const angle = idx * 45 + 22.5; // Центр сектора
-            const labelPos = polarToCartesian(cx, cy, maxRadius + 24, angle);
+            const labelPos = polarToCartesian(cx, cy, maxRadius + 28, angle);
             const isRightSide = labelPos.x > cx;
 
             return (
@@ -212,22 +214,25 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   y={labelPos.y}
                   textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
                   dominantBaseline="middle"
-                  fill={sector.value > 0 ? '#E8ECF0' : '#4E6178'}
-                  fontSize="12"
-                  fontWeight="bold"
-                  className="transition duration-500 font-sans tracking-wide"
+                  fontSize="14"
+                  fontWeight="800"
+                  className={`transition duration-500 font-sans tracking-wide ${
+                    sector.value > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
+                  }`}
                 >
                   {sector.name}
                 </text>
                 <text
                   x={labelPos.x}
-                  y={labelPos.y + 13}
+                  y={labelPos.y + 16}
                   textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
                   dominantBaseline="middle"
-                  fill={sector.value > 0 ? sector.color : '#2E3A4D'}
-                  fontSize="10"
-                  fontWeight="medium"
-                  className="transition duration-500 font-sans"
+                  fill={sector.value > 0 ? sector.color : undefined}
+                  fontSize="12"
+                  fontWeight="bold"
+                  className={`transition duration-500 font-sans ${
+                    sector.value > 0 ? 'theme-wheel-value-active' : 'theme-wheel-value-inactive'
+                  }`}
                 >
                   {Math.round(sector.value * 100)}%
                 </text>
@@ -236,7 +241,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
           })}
 
           {/* Центральный декоративный элемент с иконкой */}
-          <circle cx={cx} cy={cy} r="18" fill="#040506" stroke="rgba(255,255,255,0.08)" strokeWidth="2" />
+          <circle cx={cx} cy={cy} r="18" fill="var(--bg-deep)" stroke="var(--border-subtle)" strokeWidth="2" />
           <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fill="#3b82f6" fontSize="12" fontWeight="bold">
             🎯
           </text>
