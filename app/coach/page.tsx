@@ -314,12 +314,111 @@ export default function CoachPage() {
     router.push('/assessment');
   };
 
+  const handleSendDirect = async (text: string) => {
+    if (loading || isTyping) return;
+    setMessages(prev => [...prev, { role: 'user', content: text }]);
+    setIsTyping(true);
+    setInput('');
+    try {
+      const chatRes = await fetch('/api/v1/coach/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, sessionId })
+      });
+      const chatData = await chatRes.json();
+      if (chatData.reply) {
+        setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+        let currentText = '';
+        let index = 0;
+        const interval = setInterval(() => {
+          if (index < chatData.reply.length) {
+            currentText += chatData.reply[index];
+            setMessages(prev => {
+              const updated = [...prev];
+              if (updated.length > 0 && updated[updated.length - 1].role === 'assistant') {
+                updated[updated.length - 1] = { role: 'assistant', content: currentText };
+              }
+              return updated;
+            });
+            index++;
+          } else {
+            clearInterval(interval);
+            setIsTyping(false);
+            if (chatData.currentStep !== undefined) {
+              setStep(chatData.currentStep);
+              if (chatData.phoneConfirmed !== undefined) {
+                setPhoneConfirmed(chatData.phoneConfirmed);
+              }
+              setExtractedData(chatData.extracted || {});
+            }
+          }
+        }, 15);
+      } else {
+        setIsTyping(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setIsTyping(false);
+    }
+  };
+
+  const handleSelectMode = async (mode: 'EXPRESS' | 'DEEP') => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/v1/coach/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: mode === 'DEEP' ? 'Начать глубокий коучинг' : 'Продолжить сессию коуча',
+          sessionId,
+          sessionMode: mode
+        })
+      });
+      const data = await res.json();
+      if (data.reply) {
+        setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+        setStep(data.currentStep || 0);
+        setExtractedData(data.extracted || {});
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const downloadPreliminaryReport = () => {
     const lastCoachMessage = [...messages].reverse().find(m => m.role === 'assistant');
     if (!lastCoachMessage) return;
 
     const studentName = typeof window !== 'undefined' ? localStorage.getItem('studentName') || 'Гость' : 'Гость';
-    const reportText = lastCoachMessage.content;
+    const isDeep = extractedData.sessionMode === 'DEEP';
+    let reportHtml = '';
+
+    if (isDeep) {
+      reportHtml = `
+        <div style="margin-top: 20px; font-family: sans-serif;">
+          <h3 style="color: #8B5A2B;">🎯 Мой запрос / Цель:</h3>
+          <p>${extractedData.deepGoal || 'Не указано'}</p>
+          <h3 style="color: #8B5A2B;">🌟 Ожидаемый результат:</h3>
+          <p>${extractedData.deepOutcome || 'Не указано'}</p>
+          <h3 style="color: #8B5A2B;">🔥 Эмоциональный отклик:</h3>
+          <p>${extractedData.deepEmotions || 'Не указано'}</p>
+          <h3 style="color: #8B5A2B;">👑 Моя идентичность:</h3>
+          <p><b>${extractedData.deepIdentity || 'Не указано'}</b></p>
+          <h3 style="color: #8B5A2B;">🚀 План действий:</h3>
+          <p style="white-space: pre-wrap;">${extractedData.deepActions || 'Не указано'}</p>
+          <h3 style="color: #8B5A2B;">⚡ Первый шаг (2 минуты):</h3>
+          <p><b>${extractedData.deepFirstStep || 'Не указано'}</b></p>
+          <br/>
+          <hr/>
+          <p><b>Анализ наставника Романа:</b></p>
+          <p>${lastCoachMessage.content}</p>
+        </div>
+      `;
+    } else {
+      reportHtml = `<div class="content">${lastCoachMessage.content}</div>`;
+    }
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -327,7 +426,7 @@ export default function CoachPage() {
     printWindow.document.write(`
       <html>
       <head>
-        <title>Предварительное резюме - МоёПризвание</title>
+        <title>Коучинговый Манифест - МоёПризвание</title>
         <style>
           body {
             font-family: 'Segoe UI', system-ui, sans-serif;
@@ -343,18 +442,18 @@ export default function CoachPage() {
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 4px 30px rgba(0,0,0,0.03);
-            border: 2px solid #3B82F6;
+            border: 2px solid #8B5A2B;
           }
           .header {
             text-align: center;
-            border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+            border-bottom: 2px solid rgba(139, 90, 43, 0.2);
             padding-bottom: 20px;
             margin-bottom: 30px;
           }
           .logo {
             font-size: 24px;
             font-weight: bold;
-            color: #3B82F6;
+            color: #8B5A2B;
           }
           .title {
             font-size: 20px;
@@ -365,10 +464,6 @@ export default function CoachPage() {
             font-size: 14px;
             color: #666;
             margin-top: 5px;
-          }
-          .content {
-            font-size: 16px;
-            white-space: pre-wrap;
           }
           .footer {
             text-align: center;
@@ -384,10 +479,10 @@ export default function CoachPage() {
         <div class="container">
           <div class="header">
             <div class="logo">🌳 МоёПризвание</div>
-            <div class="title">Предварительное резюме наставника Романа</div>
+            <div class="title">${isDeep ? 'Коучинговый Манифест Целей' : 'Предварительное резюме наставника Романа'}</div>
             <div class="meta">Для: ${studentName} | Дата: ${new Date().toLocaleDateString('ru-RU')}</div>
           </div>
-          <div class="content">${reportText}</div>
+          ${reportHtml}
           <div class="footer">
             © 2026 МоёПризвание. Все права защищены.
           </div>
@@ -610,6 +705,51 @@ export default function CoachPage() {
         {/* Left column: Chat History & Input */}
         <div className="col-span-1 md:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
           
+          {/* Horizontal Stepper for DEEP mode */}
+          {extractedData.sessionMode === 'DEEP' && step >= 10 && step <= 16 && (
+            <div className="px-6 py-4 border-b border-white/5 bg-[#080c14]/40 flex flex-col gap-2">
+              <div className="flex items-center justify-between text-[11px] font-sans font-bold text-[#C4A484]">
+                <span>Глубокий коучинг Романа</span>
+                <span>Шаг {step === 16 ? 7 : step - 9} из 7</span>
+              </div>
+              <div className="flex items-center justify-between gap-1.5">
+                {[
+                  { step: 10, label: 'Хочу' },
+                  { step: 11, label: 'Результат' },
+                  { step: 12, label: 'Эмоции' },
+                  { step: 13, label: 'Кто Я' },
+                  { step: 14, label: 'План' },
+                  { step: 15, label: 'Действие' },
+                  { step: 16, label: 'Финал' }
+                ].map((s, idx) => {
+                  const isActive = step === s.step;
+                  const isCompleted = step > s.step;
+                  return (
+                    <div key={s.step} className="flex-1 flex flex-col items-center gap-1 relative">
+                      <div className="w-full flex items-center justify-center relative">
+                        {idx > 0 && (
+                          <div className={`absolute right-[50%] left-[-50%] top-[4px] h-[2px] transition-all duration-300 ${
+                            isCompleted ? 'bg-[#EAB308]' : 'bg-white/10'
+                          }`} />
+                        )}
+                        <div className={`h-2.5 w-2.5 rounded-full z-10 transition-all duration-300 ${
+                          isActive 
+                            ? 'bg-[#EAB308] ring-4 ring-[#EAB308]/20 scale-125' 
+                            : (isCompleted ? 'bg-[#EAB308]' : 'bg-white/20')
+                        }`} />
+                      </div>
+                      <span className={`text-[9px] font-bold font-sans transition-colors duration-300 ${
+                        isActive ? 'text-[#EAB308]' : 'text-slate-500'
+                      }`}>
+                        {s.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Chat message history */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.map((msg, idx) => {
@@ -725,7 +865,57 @@ export default function CoachPage() {
 
           {/* Input area */}
           <div className="p-4 border-t border-white/5 bg-[#040506]/45 backdrop-blur-md">
-            {step === 16 ? (
+            {step > 2 && !extractedData.sessionMode ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 rounded-2xl bg-gradient-to-br from-[#1b1510]/95 to-[#0e0a07]/95 border border-[#C4A484]/20 shadow-2xl space-y-4"
+              >
+                <div className="text-center space-y-2">
+                  <h3 className="text-md font-bold text-[#EAD5C3] font-sans">Выберите формат коуч-сессии</h3>
+                  <p className="text-xs text-[#C4A484]/80 max-w-md mx-auto">
+                    Вы завершили регистрацию. Какое исследование талантов вам ближе?
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Экспресс-режим */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectMode('EXPRESS')}
+                    disabled={loading}
+                    className="p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition text-left space-y-2 group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] transition">Экспресс-формат</span>
+                      <span className="text-[10px] text-[#7A8A9E] px-2 py-0.5 rounded bg-white/5">10-15 мин</span>
+                    </div>
+                    <p className="text-[11px] text-[#7A8A9E] leading-relaxed">
+                      Быстрый опросник по увлечениям, интересам и целям для моментального получения рекомендаций.
+                    </p>
+                  </button>
+
+                  {/* Глубокий режим */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectMode('DEEP')}
+                    disabled={loading}
+                    className="p-4 rounded-xl border border-[#C4A484]/30 bg-[#C4A484]/5 hover:bg-[#C4A484]/10 transition text-left space-y-2 group relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 bg-[#EAB308]/20 text-[#EAB308] text-[8px] font-extrabold px-1.5 py-0.5 rounded-bl uppercase tracking-wider">
+                      Рекомендуем
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#EAD5C3] group-hover:text-[#EAB308] transition">Глубокий коучинг</span>
+                      <span className="text-[10px] text-[#C4A484] px-2 py-0.5 rounded bg-[#C4A484]/15">6 шагов</span>
+                    </div>
+                    <p className="text-[11px] text-[#C4A484]/80 leading-relaxed">
+                      Интерактивная сессия по схеме «Что хочу → Действие» с проработкой эмоций, идентичности и составлением личного Манифеста целей.
+                    </p>
+                  </button>
+                </div>
+              </motion.div>
+            ) : step === 16 ? (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -739,7 +929,7 @@ export default function CoachPage() {
                   <button 
                     type="button"
                     onClick={downloadPreliminaryReport}
-                    className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#3B82F6]/30 text-[#3B82F6] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                    className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#C4A484]/30 text-[#C4A484] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
                   >
                     📥 Скачать резюме (PDF)
                   </button>
@@ -754,23 +944,62 @@ export default function CoachPage() {
                 </div>
               </motion.div>
             ) : (
-              <form onSubmit={handleSend} className="flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  disabled={loading || isTyping}
-                  placeholder="Напишите ответ..."
-                  className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#3B82F6]/30 text-white placeholder:text-[#7A8A9E]"
-                />
-                <button
-                  type="submit"
-                  disabled={!input.trim() || loading || isTyping}
-                  className="h-12 w-12 rounded-xl bg-[#3B82F6] text-white flex items-center justify-center hover:bg-[#2563EB] transition disabled:opacity-50"
-                >
-                  <Send className="h-5 w-5" />
-                </button>
-              </form>
+              <div className="space-y-3">
+                {/* Интерактивные кнопки выбора эмоции на шаге 12 */}
+                {step === 12 && !isTyping && (
+                  <div className="flex flex-wrap gap-2 py-1">
+                    {['Вдохновение', 'Гордость', 'Азарт', 'Интерес', 'Радость'].map(em => (
+                      <button
+                        key={em}
+                        type="button"
+                        onClick={() => handleSendDirect(em)}
+                        className="px-3.5 py-2 rounded-xl bg-[#EAB308]/10 hover:bg-[#EAB308]/20 border border-[#EAB308]/30 text-[#EAB308] text-xs font-bold transition"
+                      >
+                        {em}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Интерактивные кнопки первого шага на шаге 15 */}
+                {step === 15 && !isTyping && (
+                  <div className="flex flex-wrap gap-2 py-1">
+                    {[
+                      'Зарегистрироваться на курс',
+                      'Сохранить полезную ссылку',
+                      'Изучить сайт вуза',
+                      'Подписаться на профильный канал'
+                    ].map(act => (
+                      <button
+                        key={act}
+                        type="button"
+                        onClick={() => handleSendDirect(act)}
+                        className="px-3 py-2 rounded-xl bg-[#C4A484]/15 hover:bg-[#C4A484]/25 border border-[#C4A484]/30 text-[#EAD5C3] text-xs font-bold transition"
+                      >
+                        {act}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <form onSubmit={handleSend} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    disabled={loading || isTyping}
+                    placeholder="Напишите ответ..."
+                    className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#C4A484]/30 text-white placeholder:text-[#7A8A9E]"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || loading || isTyping}
+                    className="h-12 w-12 rounded-xl bg-[var(--accent-svg-1)] text-white flex items-center justify-center hover:opacity-90 transition disabled:opacity-50"
+                  >
+                    <Send className="h-5 w-5" />
+                  </button>
+                </form>
+              </div>
             )}
         </div>
       </div>

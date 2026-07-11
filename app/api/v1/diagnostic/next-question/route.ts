@@ -152,19 +152,31 @@ export async function GET(request: Request) {
         where: { userId }
       });
       const coachExtracted = coachSession ? (coachSession.extractedData as Record<string, any>) : {};
+      const isDeepMode = coachExtracted.sessionMode === 'DEEP';
 
       // Сборка цифрового профиля
+      const coachData = isDeepMode ? {
+        sessionMode: 'DEEP',
+        deepGoal: coachExtracted.deepGoal || 'Не указано',
+        deepOutcome: coachExtracted.deepOutcome || 'Не указано',
+        deepEmotions: coachExtracted.deepEmotions || 'Не указано',
+        deepIdentity: coachExtracted.deepIdentity || 'Не указано',
+        deepActions: coachExtracted.deepActions || 'Не указано',
+        deepFirstStep: coachExtracted.deepFirstStep || 'Не указано'
+      } : {
+        sessionMode: 'EXPRESS',
+        dreams: coachExtracted.dreams || 'Не указано',
+        idols: coachExtracted.idols || 'Не указано',
+        values: coachExtracted.values || 'Не указано',
+        barriers: coachExtracted.barriers || 'Не указано'
+      };
+
       const summaryProfile = {
         riasec: finalRiasec,
         bigFive: finalBigFive,
         icar: correctIcarAnswers,
         procrastination: procrastinationScore,
-        coachData: {
-          dreams: coachExtracted.dreams || 'Не указано',
-          idols: coachExtracted.idols || 'Не указано',
-          values: coachExtracted.values || 'Не указано',
-          barriers: coachExtracted.barriers || 'Не указано'
-        }
+        coachData
       };
 
       await prisma.digitalProfile.create({
@@ -178,6 +190,13 @@ export async function GET(request: Request) {
       const apiKey = env.PROXYAPI_KEY;
       const apiUrl = env.PROXYAPI_URL;
 
+      let coachDataPrompt = '';
+      if (isDeepMode) {
+        coachDataPrompt = `Глубокий коучинг: Цель - ${coachData.deepGoal}, Ожидаемый результат - ${coachData.deepOutcome}, Эмоции - ${coachData.deepEmotions}, Идентичность - ${coachData.deepIdentity}, Шаги - ${coachData.deepActions}, Первый двухминутный шаг - ${coachData.deepFirstStep}`;
+      } else {
+        coachDataPrompt = `Экспресс-коучинг: Мечты - ${coachData.dreams}, Кумиры - ${coachData.idols}, Ценности - ${coachData.values}, Барьеры - ${coachData.barriers}`;
+      }
+
       const systemPrompt = `Вы — ведущий мировой эксперт в профориентации подростков и возрастной психологии.
 Ваша задача — проанализировать результаты диагностики (RIASEC, Big Five, логический тест, прокрастинация) и качественные данные от коуча, чтобы составить подробный, вдохновляющий отчет.
 
@@ -186,13 +205,13 @@ export async function GET(request: Request) {
 - Профиль личности (Big Five): ${JSON.stringify(finalBigFive)}
 - Логика (ICAR): ${correctIcarAnswers} из 3 правильных ответов
 - Прокрастинация (Лэй): ${procrastinationScore} баллов (шкала 4-20)
-- Качественные данные коуча: Мечты: ${summaryProfile.coachData.dreams}, Кумиры: ${summaryProfile.coachData.idols}, Ценности: ${summaryProfile.coachData.values}, Барьеры: ${summaryProfile.coachData.barriers}
+- Качественные данные коуча: ${coachDataPrompt}
 
 Правила формирования отчета:
 1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
 2. Проанализируйте Big Five черты.
 3. Опишите сильные стороны и зоны развития с учетом прокрастинации (если балл прокрастинации выше 12, дайте совет, как с этим справляться) и логических задач.
-4. Раздел кумиров и мечт: явно укажите с пометкой "Источник: диалог с нейрокоучем" их качественный анализ.
+4. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем".
 5. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
 6. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
 
@@ -212,9 +231,15 @@ export async function GET(request: Request) {
   "strengths": ["Сильная сторона 1", "Сильная сторона 2"],
   "growthAreas": ["Зона развития 1", "Зона развития 2"],
   "coachSection": {
-    "dreams": "Анализ мечт",
-    "idols": "Анализ кумиров",
-    "values": "Анализ ценностей"
+    "dreams": "Анализ мечт (для Экспресс, или пустая строка если DEEP)",
+    "idols": "Анализ кумиров (для Экспресс, или пустая строка если DEEP)",
+    "values": "Анализ ценностей (для Экспресс, или пустая строка если DEEP)",
+    "deepGoal": "Цель (для Глубокого)",
+    "deepOutcome": "Результат (для Глубокого)",
+    "deepEmotions": "Эмоции (для Глубокого)",
+    "deepIdentity": "Идентичность (для Глубокого)",
+    "deepActions": "План действий (для Глубокого)",
+    "deepFirstStep": "Первый шаг (для Глубокого)"
   },
   "professions": [
     {
@@ -259,9 +284,14 @@ export async function GET(request: Request) {
             properties: {
               dreams: { type: "STRING" },
               idols: { type: "STRING" },
-              values: { type: "STRING" }
-            },
-            required: ["dreams", "idols", "values"]
+              values: { type: "STRING" },
+              deepGoal: { type: "STRING" },
+              deepOutcome: { type: "STRING" },
+              deepEmotions: { type: "STRING" },
+              deepIdentity: { type: "STRING" },
+              deepActions: { type: "STRING" },
+              deepFirstStep: { type: "STRING" }
+            }
           },
           professions: {
             type: "ARRAY",

@@ -47,7 +47,27 @@ async function sendTelegramNotification(user: any, data: any) {
   const chatId = process.env.TELEGRAM_CHAT_ID || '148281488';
   const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
   
-  const rawText = `*Регистрация лида (Нейрокоуч):*
+  const isDeep = data.sessionMode === 'DEEP';
+  let rawText = '';
+  
+  if (isDeep) {
+    rawText = `*Глубокий коучинг (Нейрокоуч):*
+*Имя:* ${user.name || 'Не указано'}
+*Телефон:* ${user.phone || 'Не указано'}
+*Роль:* ${user.role || 'STUDENT'}
+*Виртуальный шаг:* ${data.currentStep || 0}
+ 
+*Результаты сессии:*
+*🎯 Цель (Что хочу):* ${data.deepGoal || 'Не указано'}
+*🌟 Результат:* ${data.deepOutcome || 'Не указано'}
+*🔥 Эмоции:* ${data.deepEmotions || 'Не указано'}
+*👑 Идентичность:* ${data.deepIdentity || 'Не указано'}
+*🚀 План & KPI:* ${data.deepActions || 'Не указано'}
+*⚡ Первый шаг:* ${data.deepFirstStep || 'Не указано'}
+ 
+*Резюме коуча:* ${data.preliminaryFeedback || 'Еще не сформировано'}`;
+  } else {
+    rawText = `*Регистрация лида (Нейрокоуч):*
 *Имя:* ${user.name || 'Не указано'}
 *Телефон:* ${user.phone || 'Не указано'}
 *Роль:* ${user.role || 'STUDENT'}
@@ -59,6 +79,7 @@ async function sendTelegramNotification(user: any, data: any) {
 *Ценности:* ${data.values || 'Не указано'}
 *Барьеры:* ${data.barriers || 'Не указано'}
 *Резюме коуча:* ${data.preliminaryFeedback || 'Еще не сформировано'}`;
+  }
 
   const text = formatToTelegramHtml(rawText);
 
@@ -83,8 +104,21 @@ async function sendTelegramReportToUser(user: any, data: any) {
   if (!botToken || !user.telegramId) return;
   const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
 
+  const isDeep = data.sessionMode === 'DEEP';
   const feedback = data.preliminaryFeedback || 'Резюме ещё не сформировано';
-  const rawText = `*Предварительное резюме от наставника Романа*\n\n${feedback}\n\nТеперь вы можете пройти интерактивные тесты для точной диагностики на сайте:\nhttps://synthosai.ru/assessment`;
+  let rawText = '';
+  
+  if (isDeep) {
+    rawText = `*Манифест целей от наставника Романа*\n\n` +
+      `*🎯 Твоя цель:* ${data.deepGoal || 'Не указано'}\n` +
+      `*👑 Твоя идентичность:* ${data.deepIdentity || 'Не указано'}\n` +
+      `*⚡ Первый шаг:* ${data.deepFirstStep || 'Не указано'}\n\n` +
+      `*Анализ наставника:*\n${feedback}\n\n` +
+      `Теперь ты можешь пройти интерактивные тесты для полной профориентации:\nhttps://synthosai.ru/assessment`;
+  } else {
+    rawText = `*Предварительное резюме от наставника Романа*\n\n${feedback}\n\nТеперь вы можете пройти интерактивные тесты для точной диагностики на сайте:\nhttps://synthosai.ru/assessment`;
+  }
+  
   const text = formatToTelegramHtml(rawText);
 
   try {
@@ -183,7 +217,7 @@ async function sendMaxIdSync(user: any, data: any) {
 
 export async function POST(req: Request) {
   try {
-    const { message, sessionId, fromLoginError, linkCode } = await req.json();
+    const { message, sessionId, fromLoginError, linkCode, sessionMode } = await req.json();
 
     if (!message) {
       return NextResponse.json({ error: 'Сообщение пользователя не передано' }, { status: 400 });
@@ -293,112 +327,141 @@ export async function POST(req: Request) {
         data: {
           userId: user.id,
           transcript: [],
-          extractedData: { currentStep: 0 },
+          extractedData: { currentStep: 0, sessionMode: sessionMode || 'EXPRESS' },
           status: 'IN_PROGRESS'
         },
         include: { user: true }
       });
     } else {
       userId = coachSession.userId;
+      // Если режим явно передан и еще не зафиксирован в сессии, обновляем его
+      const currentExtracted = (coachSession.extractedData as Record<string, any>) || {};
+      if (sessionMode && currentExtracted.sessionMode !== sessionMode) {
+        currentExtracted.sessionMode = sessionMode;
+        coachSession = await prisma.coachSession.update({
+          where: { id: coachSession.id },
+          data: { extractedData: currentExtracted },
+          include: { user: true }
+        });
+      }
     }
 
     let transcript = coachSession.transcript as any[] || [];
     let extractedData = (coachSession.extractedData as Record<string, any>) || {};
 
+    const isDeepMode = extractedData.sessionMode === 'DEEP';
+
     // Вычисляем, какие блоки информации уже собраны
     const hasPhone = !!coachSession.user.phone || !!extractedData.phone;
     const hasPersonalInfo = !!extractedData.fullName && (!!extractedData.age || !!extractedData.grade) && !!extractedData.city;
-    const hasHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
-    const hasSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
-    const hasDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
-    const hasIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
-    const hasParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
-    const hasFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
-    const hasExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
-    const hasWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
-    const hasThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
-    const hasSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
-    const hasEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
-    const hasTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
-    const hasAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
-    const hasValues = !!extractedData.values && extractedData.values.trim().length > 6;
-    const hasDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
-
-    // Считаем прогресс по содержательным блокам
-    let blocksCompleted = 0;
-    if (hasPersonalInfo) blocksCompleted++;
-    if (hasPhone) blocksCompleted++;
-    if (hasHobbies) blocksCompleted++;
-    if (hasSchoolSubjects) blocksCompleted++;
-    if (hasDreams) blocksCompleted++;
-    if (hasIdols) blocksCompleted++;
-    if (hasParents) blocksCompleted++;
-    if (hasFears) blocksCompleted++;
-    if (hasExperience) blocksCompleted++;
-    if (hasWorkFormat) blocksCompleted++;
-    if (hasThinkingType) blocksCompleted++;
-    if (hasSuccessMeasure) blocksCompleted++;
-    if (hasEnergySources) blocksCompleted++;
-    if (hasTeamRole) blocksCompleted++;
-    if (hasAutonomyStyle) blocksCompleted++;
-    if (hasValues) blocksCompleted++;
-    if (hasDecisionStyle) blocksCompleted++;
-
-    // Вычисляем виртуальный шаг до экстракции
-    let currentStepBefore = 1;
-    if (!hasPhone) {
-      currentStepBefore = 1; // Подключение Telegram
-    } else if (!hasPersonalInfo) {
-      currentStepBefore = 2; // Сбор личных данных
-    } else {
-      let psychoBlocksBefore = 0;
-      if (hasHobbies) psychoBlocksBefore++;
-      if (hasSchoolSubjects) psychoBlocksBefore++;
-      if (hasDreams) psychoBlocksBefore++;
-      if (hasIdols) psychoBlocksBefore++;
-      if (hasParents) psychoBlocksBefore++;
-      if (hasFears) psychoBlocksBefore++;
-      if (hasExperience) psychoBlocksBefore++;
-      if (hasWorkFormat) psychoBlocksBefore++;
-      if (hasThinkingType) psychoBlocksBefore++;
-      if (hasSuccessMeasure) psychoBlocksBefore++;
-      if (hasEnergySources) psychoBlocksBefore++;
-      if (hasTeamRole) psychoBlocksBefore++;
-      if (hasAutonomyStyle) psychoBlocksBefore++;
-      if (hasValues) psychoBlocksBefore++;
-      if (hasDecisionStyle) psychoBlocksBefore++;
-      
-      // Свободный диалог длится до Шага 15 (когда собрано 13 психологических полей)
-      if (psychoBlocksBefore < 13) {
-        currentStepBefore = Math.min(15, 3 + psychoBlocksBefore);
-      } else {
-        currentStepBefore = 16; // Шаг подведения итогов (Финал)
-      }
-    }
-
-    // Все содержательные психологические блоки должны быть собраны (или хотя бы 12 из 15 для стабильности)
-    let psychoBlocksCount = 0;
-    if (hasHobbies) psychoBlocksCount++;
-    if (hasSchoolSubjects) psychoBlocksCount++;
-    if (hasDreams) psychoBlocksCount++;
-    if (hasIdols) psychoBlocksCount++;
-    if (hasParents) psychoBlocksCount++;
-    if (hasFears) psychoBlocksCount++;
-    if (hasExperience) psychoBlocksCount++;
-    if (hasWorkFormat) psychoBlocksCount++;
-    if (hasThinkingType) psychoBlocksCount++;
-    if (hasSuccessMeasure) psychoBlocksCount++;
-    if (hasEnergySources) psychoBlocksCount++;
-    if (hasTeamRole) psychoBlocksCount++;
-    if (hasAutonomyStyle) psychoBlocksCount++;
-    if (hasValues) psychoBlocksCount++;
-    if (hasDecisionStyle) psychoBlocksCount++;
-
-    const allPsychologyCollected = hasPersonalInfo && (psychoBlocksCount >= 12);
     
-    // Сессия считается готовой к финалу, если собран необходимый объем данных
-    const isFinalStep = allPsychologyCollected;
-    const nextStep = !hasPhone ? 1 : (!hasPersonalInfo ? 2 : (isFinalStep ? 16 : Math.min(15, 3 + psychoBlocksCount)));
+    // Вычисляем шаг до экстракции
+    let currentStepBefore = 1;
+    let nextStep = 1;
+
+    if (isDeepMode) {
+      const hasDeepGoal = !!extractedData.deepGoal && extractedData.deepGoal.trim().length > 6;
+      const hasDeepOutcome = !!extractedData.deepOutcome && extractedData.deepOutcome.trim().length > 6;
+      const hasDeepEmotions = !!extractedData.deepEmotions && extractedData.deepEmotions.trim().length > 3;
+      const hasDeepIdentity = !!extractedData.deepIdentity && extractedData.deepIdentity.trim().length > 6;
+      const hasDeepActions = !!extractedData.deepActions && extractedData.deepActions.trim().length > 6;
+      const hasDeepFirstStep = !!extractedData.deepFirstStep && extractedData.deepFirstStep.trim().length > 6;
+
+      if (!hasPhone) {
+        currentStepBefore = 1;
+        nextStep = 1;
+      } else if (!hasPersonalInfo) {
+        currentStepBefore = 2;
+        nextStep = 2;
+      } else if (!hasDeepGoal) {
+        currentStepBefore = 10;
+        nextStep = 10;
+      } else if (!hasDeepOutcome) {
+        currentStepBefore = 11;
+        nextStep = 11;
+      } else if (!hasDeepEmotions) {
+        currentStepBefore = 12;
+        nextStep = 12;
+      } else if (!hasDeepIdentity) {
+        currentStepBefore = 13;
+        nextStep = 13;
+      } else if (!hasDeepActions) {
+        currentStepBefore = 14;
+        nextStep = 14;
+      } else if (!hasDeepFirstStep) {
+        currentStepBefore = 15;
+        nextStep = 15;
+      } else {
+        currentStepBefore = 16;
+        nextStep = 16;
+      }
+    } else {
+      const hasHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
+      const hasSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
+      const hasDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
+      const hasIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
+      const hasParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
+      const hasFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
+      const hasExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
+      const hasWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
+      const hasThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
+      const hasSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
+      const hasEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
+      const hasTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
+      const hasAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
+      const hasValues = !!extractedData.values && extractedData.values.trim().length > 6;
+      const hasDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
+
+      if (!hasPhone) {
+        currentStepBefore = 1;
+      } else if (!hasPersonalInfo) {
+        currentStepBefore = 2;
+      } else {
+        let psychoBlocksBefore = 0;
+        if (hasHobbies) psychoBlocksBefore++;
+        if (hasSchoolSubjects) psychoBlocksBefore++;
+        if (hasDreams) psychoBlocksBefore++;
+        if (hasIdols) psychoBlocksBefore++;
+        if (hasParents) psychoBlocksBefore++;
+        if (hasFears) psychoBlocksBefore++;
+        if (hasExperience) psychoBlocksBefore++;
+        if (hasWorkFormat) psychoBlocksBefore++;
+        if (hasThinkingType) psychoBlocksBefore++;
+        if (hasSuccessMeasure) psychoBlocksBefore++;
+        if (hasEnergySources) psychoBlocksBefore++;
+        if (hasTeamRole) psychoBlocksBefore++;
+        if (hasAutonomyStyle) psychoBlocksBefore++;
+        if (hasValues) psychoBlocksBefore++;
+        if (hasDecisionStyle) psychoBlocksBefore++;
+        
+        if (psychoBlocksBefore < 13) {
+          currentStepBefore = Math.min(15, 3 + psychoBlocksBefore);
+        } else {
+          currentStepBefore = 16;
+        }
+      }
+
+      let psychoBlocksCount = 0;
+      if (hasHobbies) psychoBlocksCount++;
+      if (hasSchoolSubjects) psychoBlocksCount++;
+      if (hasDreams) psychoBlocksCount++;
+      if (hasIdols) psychoBlocksCount++;
+      if (hasParents) psychoBlocksCount++;
+      if (hasFears) psychoBlocksCount++;
+      if (hasExperience) psychoBlocksCount++;
+      if (hasWorkFormat) psychoBlocksCount++;
+      if (hasThinkingType) psychoBlocksCount++;
+      if (hasSuccessMeasure) psychoBlocksCount++;
+      if (hasEnergySources) psychoBlocksCount++;
+      if (hasTeamRole) psychoBlocksCount++;
+      if (hasAutonomyStyle) psychoBlocksCount++;
+      if (hasValues) psychoBlocksCount++;
+      if (hasDecisionStyle) psychoBlocksCount++;
+
+      const allPsychologyCollected = hasPersonalInfo && (psychoBlocksCount >= 12);
+      const isFinalStep = allPsychologyCollected;
+      nextStep = !hasPhone ? 1 : (!hasPersonalInfo ? 2 : (isFinalStep ? 16 : Math.min(15, 3 + psychoBlocksCount)));
+    }
 
     // Защита от зависания шагов (когда ИИ-экстрактор не может надежно извлечь данные)
     let finalNextStep = nextStep;
@@ -408,33 +471,78 @@ export async function POST(req: Request) {
       const lastStep = extractedData.lastStep || 0;
       let stepAttempts = extractedData.stepAttempts || 0;
 
-      if (nextStep === lastStep && nextStep >= 3 && nextStep <= 15) {
+      if (nextStep === lastStep) {
         stepAttempts++;
-        if (stepAttempts >= 2) {
-          const psychoFields = [
-            { key: 'hobbies', has: hasHobbies },
-            { key: 'schoolSubjects', has: hasSchoolSubjects },
-            { key: 'dreams', has: hasDreams },
-            { key: 'idols', has: hasIdols },
-            { key: 'parents', has: hasParents },
-            { key: 'fears', has: hasFears },
-            { key: 'experience', has: hasExperience },
-            { key: 'workFormat', has: hasWorkFormat },
-            { key: 'thinkingType', has: hasThinkingType },
-            { key: 'successMeasure', has: hasSuccessMeasure },
-            { key: 'energySources', has: hasEnergySources },
-            { key: 'teamRole', has: hasTeamRole },
-            { key: 'autonomyStyle', has: hasAutonomyStyle },
-            { key: 'values', has: hasValues },
-            { key: 'decisionStyle', has: hasDecisionStyle }
-          ];
-          const firstEmpty = psychoFields.find(f => !f.has);
-          if (firstEmpty) {
-            extractedData[firstEmpty.key] = "Продолжено наставником";
-            psychoBlocksCount++;
-            const isFinalStepUpdated = hasPersonalInfo && (psychoBlocksCount >= 12);
-            finalNextStep = isFinalStepUpdated ? 16 : Math.min(15, 3 + psychoBlocksCount);
+        if (!isDeepMode && nextStep >= 3 && nextStep <= 15) {
+          if (stepAttempts >= 2) {
+            const hasHobbies = !!extractedData.hobbies && extractedData.hobbies.trim().length > 6;
+            const hasSchoolSubjects = !!extractedData.schoolSubjects && extractedData.schoolSubjects.trim().length > 6;
+            const hasDreams = !!extractedData.dreams && extractedData.dreams.trim().length > 6;
+            const hasIdols = !!extractedData.idols && extractedData.idols.trim().length > 6;
+            const hasParents = !!extractedData.parents && extractedData.parents.trim().length > 6;
+            const hasFears = !!extractedData.fears && extractedData.fears.trim().length > 6;
+            const hasExperience = !!extractedData.experience && extractedData.experience.trim().length > 6;
+            const hasWorkFormat = !!extractedData.workFormat && extractedData.workFormat.trim().length > 6;
+            const hasThinkingType = !!extractedData.thinkingType && extractedData.thinkingType.trim().length > 6;
+            const hasSuccessMeasure = !!extractedData.successMeasure && extractedData.successMeasure.trim().length > 6;
+            const hasEnergySources = !!extractedData.energySources && extractedData.energySources.trim().length > 6;
+            const hasTeamRole = !!extractedData.teamRole && extractedData.teamRole.trim().length > 6;
+            const hasAutonomyStyle = !!extractedData.autonomyStyle && extractedData.autonomyStyle.trim().length > 6;
+            const hasValues = !!extractedData.values && extractedData.values.trim().length > 6;
+            const hasDecisionStyle = !!extractedData.decisionStyle && extractedData.decisionStyle.trim().length > 6;
+
+            const psychoFields = [
+              { key: 'hobbies', has: hasHobbies },
+              { key: 'schoolSubjects', has: hasSchoolSubjects },
+              { key: 'dreams', has: hasDreams },
+              { key: 'idols', has: hasIdols },
+              { key: 'parents', has: hasParents },
+              { key: 'fears', has: hasFears },
+              { key: 'experience', has: hasExperience },
+              { key: 'workFormat', has: hasWorkFormat },
+              { key: 'thinkingType', has: hasThinkingType },
+              { key: 'successMeasure', has: hasSuccessMeasure },
+              { key: 'energySources', has: hasEnergySources },
+              { key: 'teamRole', has: hasTeamRole },
+              { key: 'autonomyStyle', has: hasAutonomyStyle },
+              { key: 'values', has: hasValues },
+              { key: 'decisionStyle', has: hasDecisionStyle }
+            ];
+            const firstEmpty = psychoFields.find(f => !f.has);
+            if (firstEmpty) {
+              extractedData[firstEmpty.key] = "Продолжено наставником";
+              let psychoBlocksCount = 0;
+              psychoFields.forEach(f => {
+                if (f.key === firstEmpty.key || f.has) psychoBlocksCount++;
+              });
+              const isFinalStepUpdated = hasPersonalInfo && (psychoBlocksCount >= 12);
+              finalNextStep = isFinalStepUpdated ? 16 : Math.min(15, 3 + psychoBlocksCount);
+            }
+            stepAttempts = 0;
           }
+        } else if (isDeepMode && nextStep >= 10 && nextStep <= 15) {
+          if (stepAttempts >= 2) {
+            const deepFields = [
+              { key: 'deepGoal', step: 10, val: 'Сформулировано наставником' },
+              { key: 'deepOutcome', step: 11, val: 'Образ результата принят' },
+              { key: 'deepEmotions', step: 12, val: 'Вдохновение и радость' },
+              { key: 'deepIdentity', step: 13, val: 'Человек, идущий к цели' },
+              { key: 'deepActions', step: 14, val: 'План действий составлен' },
+              { key: 'deepFirstStep', step: 15, val: 'Первый шаг запланирован' }
+            ];
+            const currentField = deepFields.find(f => f.step === nextStep);
+            if (currentField) {
+              extractedData[currentField.key] = currentField.val;
+              if (nextStep === 10) finalNextStep = 11;
+              else if (nextStep === 11) finalNextStep = 12;
+              else if (nextStep === 12) finalNextStep = 13;
+              else if (nextStep === 13) finalNextStep = 14;
+              else if (nextStep === 14) finalNextStep = 15;
+              else if (nextStep === 15) finalNextStep = 16;
+            }
+            stepAttempts = 0;
+          }
+        } else {
           stepAttempts = 0;
         }
       } else {
@@ -466,6 +574,8 @@ export async function POST(req: Request) {
       let greeting = FALLBACK_REPLIES[0];
       if (fromLoginError) {
         greeting = 'Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник. Я вижу, ты хотел зайти в Личный кабинет, но для этого нужно сначала пройти нашу короткую сессию. Не переживай — это не скучный тест, а увлекательное исследование твоих талантов. Отвечай максимально подробно, честно и развернуто — так я смогу точнее всего составить карту твоих талантов. Готов начать?';
+      } else if (isDeepMode && hasPersonalInfo && hasPhone) {
+        greeting = 'Отличный выбор! Мы начинаем Глубокий самокоучинг по методологии «Что хочу → Действие». Наш путь состоит из 6 важных шагов: мы найдем твое истинное желание, оцифруем образ результата, подключим эмоции, сформулируем твою идентичность («Кто я?»), составим план с KPI и зафиксируем первый шаг. \n\nДавай начнем: Что именно ты хочешь изменить, достичь или в чем реализоваться в плане будущей профессии?';
       }
       transcript.push({ role: 'assistant', content: greeting, timestamp: new Date().toISOString() });
       
@@ -473,7 +583,7 @@ export async function POST(req: Request) {
         where: { id: coachSession.id },
         data: { 
           transcript, 
-          extractedData: { ...extractedData, currentStep: 0 },
+          extractedData: { ...extractedData, currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 10 : 0 },
           status: 'IN_PROGRESS'
         }
       });
@@ -482,7 +592,7 @@ export async function POST(req: Request) {
         reply: greeting,
         sessionId: coachSession.id,
         userId: coachSession.userId,
-        currentStep: 0,
+        currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 10 : 0,
         phoneConfirmed: hasPhone,
         sessionStatus: 'IN_PROGRESS',
         extracted: extractedData
@@ -534,7 +644,7 @@ export async function POST(req: Request) {
         properties.grade = { type: "STRING" };
         properties.city = { type: "STRING" };
         fieldsToExtract += ", fullName, age, grade, city";
-      } else if (currentStepBefore >= 3 && currentStepBefore <= 15) {
+      } else if (!isDeepMode && currentStepBefore >= 3 && currentStepBefore <= 15) {
         properties.hobbies = { type: "STRING" };
         properties.schoolSubjects = { type: "STRING" };
         properties.dreams = { type: "STRING" };
@@ -552,16 +662,37 @@ export async function POST(req: Request) {
         properties.decisionStyle = { type: "STRING" };
         fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle";
         
-        // Дополнительно позволяем обновлять личные данные
         properties.fullName = { type: "STRING" };
         properties.age = { type: "INTEGER" };
         properties.grade = { type: "STRING" };
         properties.city = { type: "STRING" };
         fieldsToExtract += ", fullName, age, grade, city";
+      } else if (isDeepMode && currentStepBefore >= 10 && currentStepBefore <= 15) {
+        if (currentStepBefore === 10) {
+          properties.deepGoal = { type: "STRING" };
+          fieldsToExtract += ", deepGoal";
+        } else if (currentStepBefore === 11) {
+          properties.deepOutcome = { type: "STRING" };
+          fieldsToExtract += ", deepOutcome";
+        } else if (currentStepBefore === 12) {
+          properties.deepEmotions = { type: "STRING" };
+          fieldsToExtract += ", deepEmotions";
+        } else if (currentStepBefore === 13) {
+          properties.deepIdentity = { type: "STRING" };
+          fieldsToExtract += ", deepIdentity";
+        } else if (currentStepBefore === 14) {
+          properties.deepActions = { type: "STRING" };
+          fieldsToExtract += ", deepActions";
+        } else if (currentStepBefore === 15) {
+          properties.deepFirstStep = { type: "STRING" };
+          fieldsToExtract += ", deepFirstStep";
+        }
       }
 
       const extractionPrompt = `Ты — анализатор текста. Проанализируй сообщение пользователя в контексте диалога профориентации. Извлеки данные в формате JSON (без markdown).
 Последнее сообщение пользователя: "${message}"
+Текущий шаг диалога: ${currentStepBefore} (где 10=Что хочу/Цель, 11=Результат/Образ, 12=Эмоции, 13=Идентичность, 14=Действия/Навыки/KPI, 15=Первый шаг).
+Для shouldAdvanceStep: установи true, если пользователь дал осмысленный ответ по сути текущего шага. Если пользователь уклоняется от ответа или задает встречный вопрос, установи false.
 Извлекай: ${fieldsToExtract}`;
 
       const extractionSchema = {
@@ -606,6 +737,14 @@ export async function POST(req: Request) {
       if (parsedData.autonomyStyle) extractedData.autonomyStyle = (extractedData.autonomyStyle ? extractedData.autonomyStyle + '; ' : '') + parsedData.autonomyStyle;
       if (parsedData.values) extractedData.values = (extractedData.values ? extractedData.values + '; ' : '') + parsedData.values;
       if (parsedData.decisionStyle) extractedData.decisionStyle = (extractedData.decisionStyle ? extractedData.decisionStyle + '; ' : '') + parsedData.decisionStyle;
+      
+      // Глубокий коучинг
+      if (parsedData.deepGoal) extractedData.deepGoal = parsedData.deepGoal;
+      if (parsedData.deepOutcome) extractedData.deepOutcome = parsedData.deepOutcome;
+      if (parsedData.deepEmotions) extractedData.deepEmotions = parsedData.deepEmotions;
+      if (parsedData.deepIdentity) extractedData.deepIdentity = parsedData.deepIdentity;
+      if (parsedData.deepActions) extractedData.deepActions = parsedData.deepActions;
+      if (parsedData.deepFirstStep) extractedData.deepFirstStep = parsedData.deepFirstStep;
     }
 
     const updatedPhone = hasPhone || !!parsedData.phone;
@@ -806,7 +945,19 @@ export async function POST(req: Request) {
 
     let systemPrompt = "";
     if (isFinalStateNow) {
-      systemPrompt = `Ты — Роман, поддерживающий, мудрый коуч и наставник профориентационной платформы «МоёПризвание».
+      if (isDeepMode) {
+        systemPrompt = `Ты — Роман, поддерживающий, мудрый коуч и наставник профориентационной платформы «МоёПризвание».
+Все шаги глубокой коуч-сессии («Что хочу → Результат → Образ → Эмоции → Идентичность → Действие») успешно пройдены!
+
+Твоя единственная задача на этом финальном шаге:
+1. Выдать глубокое, вдохновляющее и теплое резюме проделанной работы (4-5 предложений), начав со слов: «Слушай, я проанализировал наш диалог...».
+2. Сделать упор на его цель ("${extractedData.deepGoal || ''}"), образ результата ("${extractedData.deepOutcome || ''}"), его новую идентичность ("${extractedData.deepIdentity || ''}") и его первый двухминутный шаг ("${extractedData.deepFirstStep || ''}").
+3. На основе его ответов определи его ведущий архетип по Юнгу (Пирсон-Марр): например, Творец (созидание), Искатель (свобода и открытия), Мудрец (поиск истины), Герой (преодоление преград), Правитель (лидерство) или Заботливый (помощь другим). Назови этот архетип и объясни подростку его суперсилу.
+4. Объясни, что первичный профиль успешно сформирован, и предложи скачать отчет в формате PDF прямо в чате.
+5. Пригласи пройти интерактивные тесты для закрепления картины талантов.
+НИКАКИХ новых вопросов в конце не задавай. Ты завершаешь сессию.`;
+      } else {
+        systemPrompt = `Ты — Роман, поддерживающий, мудрый коуч и наставник профориентационной платформы «МоёПризвание».
 Все необходимые качественные данные о подростке успешно собраны.
 
 Твоя единственная задача на этом финальном шаге:
@@ -816,6 +967,7 @@ export async function POST(req: Request) {
 4. Объясни, что первичный профиль успешно сформирован, и предложи скачать отчет в формате PDF прямо в чате.
 5. Пригласи подростка пройти короткие интерактивные тесты на платформе, чтобы дополнить картину его талантов.
 НИКАКИХ новых вопросов в конце не задавай. Ты завершаешь сессию.`;
+      }
     } else if (currentVirtualStep === 2) {
       systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
 Твоя цель на текущем этапе диалога — познакомимся с подростком и собрать его личные данные: имя, сколько лет/класс и город проживания.
@@ -835,6 +987,61 @@ ${collectedFields.length > 0 ? collectedFields.join('\n') : '- Пока ниче
 - Категорически запрещено использовать фальшивые междометия («О!», «Ого!», «Ооо», «Ага», «Ух ты!») и шаблонные наигранные восторги («Очень отзывается», «Круто!», «Супер!», «Интересный выбор»). Говори просто, спокойно, естественно, как нормальный взрослый друг. Не сюсюкайся и не пытайся искусственно «косить под тинейджера».
 - Длина твоих реплик: до 3 предложений. Твоя речь должна быть живой, человечной, дружелюбной и понятной современному подростку.
 - Категорически запрещено использовать слова «ИИ», «алгоритм», «бот», «робот». Ты — коуч Роман.`;
+    } else if (isDeepMode) {
+      if (finalNextStep === 10) {
+        systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
+Мы находимся на Шаге 1 коуч-схемы: «Что я хочу? (Запрос/Цель)».
+Твоя цель: помочь подростку сформулировать его истинное желание, цель или запрос в профориентации.
+
+Инструкция:
+1. Спроси подростка о его целях, мечтах или о том, в чем он хочет реализоваться.
+2. Примени технику «5 почему» (задай вопрос «Почему ты этого хочешь?» или «Что самого ценного принесет тебе эта цель?», чтобы докопаться до глубинной мотивации).
+3. Задавай строго один вопрос за раз, будь краток (до 3 предложений), пиши тепло, эмпатично, спокойно и естественно. Никаких восторженных восклицаний.`;
+      } else if (finalNextStep === 11) {
+        systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
+Мы находимся на Шаге 2 коуч-схемы: «Какой наилучший результат? (Образ)».
+Твоя цель: перевести абстрактное «хочу» в детальный образ наилучшего исхода.
+
+Инструкция:
+1. Предложи подростку сделать визуализацию «Идеальный день» или ответь на «Чудо-вопрос» (например: «Представь свой рабочий день через 2-3 года, когда цель достигнута. Что ты видишь вокруг? Кто рядом с тобой? С чего начинается твое утро?»).
+2. Попроси описать 3-5 конкретных деталей этого образа.
+3. Будь краток (до 3 предложений), пиши тепло и поддерживающе.`;
+      } else if (finalNextStep === 12) {
+        systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
+Мы находимся на Шаге 3 коуч-схемы: «Какие эмоции? (Эмоциональный отклик)».
+Твоя цель: соединить созданный образ результата с телесной эмоцией собеседника.
+
+Инструкция:
+1. Спроси: «Что ты чувствуешь в теле, когда представляешь этот идеальный результат? Какая это эмоция?».
+2. Помоги ему назвать точную эмоцию по колесу Плутчика (вдохновение, азарт, гордость, радость, интерес).
+3. Будь краток (до 3 предложений), пиши тепло и эмпатично.`;
+      } else if (finalNextStep === 13) {
+        systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
+Мы находимся на Шаге 4 коуч-схемы: «Кто я? (Идентичность)».
+Твоя цель: помочь подростку совершить сдвиг на уровень идентичности по Дилтсу.
+
+Инструкция:
+1. Помоги составить Манифест Идентичности. Спроси: «Кто тот человек, у которого этот результат — обычное дело? Заверши фразу: "Я — человек, который..."».
+2. Подскажи ролевые модели, если подростку сложно определиться.
+3. Будь краток (до 3 предложений).`;
+      } else if (finalNextStep === 14) {
+        systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
+Мы находимся на Шаге 5 коуч-схемы: «Как достигну? (Действия, KPI, Навыки)».
+Твоя цель: перевести идентичность в план действий на 90 дней.
+
+Инструкция:
+1. Помоги подростку декомпозировать цель: «Какие 3 ключевых действия тебе нужно регулярно совершать? Какие 2 навыка нужно прокачать? Как мы измерим прогресс (KPI)?».
+2. Будь краток, структурируй беседу, задавай один вопрос за раз.`;
+      } else if (finalNextStep === 15) {
+        systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
+Мы находимся на Шаге 6 коуч-схемы: «С чего начать? (Первый шаг)».
+Твоя цель: зафиксировать первое микро-действие.
+
+Инструкция:
+1. Используй «Правило 2 минут»: предложи найти одно простое действие, которое можно сделать уже сегодня или завтра (например, сохранить ссылку, подписаться на профильный канал, изучить сайт вуза).
+2. Спроси: «Готов сделать этот первый шаг прямо сейчас?».
+3. Будь краток (до 3 предложений).`;
+      }
     } else {
       systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
 Твоя цель — провести глубокую, качественную и профессиональную коуч-сессию с подростком, чтобы составить его первичный психологический и профориентационный портрет.

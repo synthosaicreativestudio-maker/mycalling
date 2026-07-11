@@ -28,6 +28,12 @@ type ReportData = {
     dreams?: string;
     idols?: string;
     values?: string;
+    deepGoal?: string;
+    deepOutcome?: string;
+    deepEmotions?: string;
+    deepIdentity?: string;
+    deepActions?: string;
+    deepFirstStep?: string;
   };
   professions: Profession[];
 };
@@ -311,26 +317,67 @@ function ReportPageContent() {
                   {report.coachSection && (
                     <div className="glass-card rounded-[28px] p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <Brain className="h-5 w-5 text-[#3B82F6]" />
-                        <h2 className="text-lg font-bold text-white">Качественный анализ диалога (Нейрокоуч)</h2>
+                        <Brain className="h-5 w-5 text-[var(--accent-svg-1)]" />
+                        <h2 className="text-lg font-bold text-white">
+                          {report.coachSection.deepGoal ? 'Коучинговый Манифест целей и Идентичности' : 'Качественный анализ диалога (Нейрокоуч)'}
+                        </h2>
                       </div>
                       <div className="space-y-4">
+                        {/* Экспресс-коучинг */}
                         {report.coachSection.dreams && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-1">Мечты и устремления</h4>
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">Мечты и устремления</h4>
                             <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.dreams}</p>
                           </div>
                         )}
                         {report.coachSection.idols && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-1">Ролевые модели и кумиры</h4>
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">Ролевые модели и кумиры</h4>
                             <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.idols}</p>
                           </div>
                         )}
                         {report.coachSection.values && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-1">Ключевые ценности</h4>
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">Ключевые ценности</h4>
                             <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.values}</p>
+                          </div>
+                        )}
+
+                        {/* Глубокий коучинг */}
+                        {report.coachSection.deepGoal && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">🎯 Мой запрос / Цель</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.deepGoal}</p>
+                          </div>
+                        )}
+                        {report.coachSection.deepOutcome && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">🌟 Ожидаемый результат</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.deepOutcome}</p>
+                          </div>
+                        )}
+                        {report.coachSection.deepEmotions && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">🔥 Эмоциональный отклик</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.deepEmotions}</p>
+                          </div>
+                        )}
+                        {report.coachSection.deepIdentity && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">👑 Моя идентичность</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed font-bold italic">{report.coachSection.deepIdentity}</p>
+                          </div>
+                        )}
+                        {report.coachSection.deepActions && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">🚀 План действий и навыки</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed whitespace-pre-wrap">{report.coachSection.deepActions}</p>
+                          </div>
+                        )}
+                        {report.coachSection.deepFirstStep && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">⚡ Первый шаг за 2 минуты</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed font-bold">{report.coachSection.deepFirstStep}</p>
                           </div>
                         )}
                       </div>
@@ -438,9 +485,22 @@ function ReportPageContent() {
         {report.coachSection && (
           <div className="print-card">
             <h2>Анализ диалога с коучем</h2>
-            <p><strong>Мечты:</strong> {report.coachSection.dreams}</p>
-            <p><strong>Кумиры:</strong> {report.coachSection.idols}</p>
-            <p><strong>Ценности:</strong> {report.coachSection.values}</p>
+            {report.coachSection.deepGoal ? (
+              <>
+                <p><strong>Мой запрос / Цель:</strong> {report.coachSection.deepGoal}</p>
+                <p><strong>Ожидаемый результат:</strong> {report.coachSection.deepOutcome}</p>
+                <p><strong>Эмоциональный отклик:</strong> {report.coachSection.deepEmotions}</p>
+                <p><strong>Моя идентичность:</strong> {report.coachSection.deepIdentity}</p>
+                <p><strong>План действий:</strong> {report.coachSection.deepActions}</p>
+                <p><strong>Первый шаг (2 минуты):</strong> {report.coachSection.deepFirstStep}</p>
+              </>
+            ) : (
+              <>
+                <p><strong>Мечты:</strong> {report.coachSection.dreams}</p>
+                <p><strong>Кумиры:</strong> {report.coachSection.idols}</p>
+                <p><strong>Ценности:</strong> {report.coachSection.values}</p>
+              </>
+            )}
           </div>
         )}
 

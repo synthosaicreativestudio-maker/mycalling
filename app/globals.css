@@ -478,6 +478,30 @@ a:focus-visible {
 [data-theme="light"] .border-white\/10 {
   border-color: rgba(141, 91, 76, 0.15) !important;
 }
+[data-theme="light"] .border-\[\#C4A484\]\/20 {
+  border-color: rgba(166, 124, 82, 0.2) !important;
+}
+[data-theme="light"] .border-\[\#C4A484\]\/30 {
+  border-color: rgba(166, 124, 82, 0.3) !important;
+}
+[data-theme="light"] .bg-\[\#C4A484\]\/5 {
+  background-color: rgba(166, 124, 82, 0.05) !important;
+}
+[data-theme="light"] .bg-\[\#C4A484\]\/10 {
+  background-color: rgba(166, 124, 82, 0.1) !important;
+}
+[data-theme="light"] .bg-\[\#C4A484\]\/15 {
+  background-color: rgba(166, 124, 82, 0.15) !important;
+}
+[data-theme="light"] .bg-\[\#C4A484\]\/25 {
+  background-color: rgba(166, 124, 82, 0.25) !important;
+}
+[data-theme="light"] .text-\[\#C4A484\] {
+  color: var(--accent-gold) !important;
+}
+[data-theme="light"] .text-\[\#EAD5C3\] {
+  color: var(--text-primary) !important;
+}
 [data-theme="light"] .bg-black\/40 {
   background-color: rgba(245, 239, 235, 0.5) !important;
 }
