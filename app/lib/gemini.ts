@@ -2,7 +2,10 @@
 import https from 'https';
 
 // Используем рабочий API-ключ от Freemodel.dev (из .env или хардкод как резерв)
-const FREEMODEL_API_KEY = process.env.PROXYAPI_KEY || "fe_oa_6ec0280fc09c7fefefe7daf77633e730cec2de86201cedd0";
+const rawKey = process.env.PROXYAPI_KEY || "fe_oa_6ec0280fc09c7fefefe7daf77633e730cec2de86201cedd0";
+const FREEMODEL_API_KEY = rawKey === "fe_oa_8241bb58e1c68cff538eb3076ac734b4de235309d7832f5c"
+  ? "fe_oa_6ec0280fc09c7fefefe7daf77633e730cec2de86201cedd0"
+  : rawKey;
 const FREEMODEL_URL = "/v1/chat/completions";
 
 // Используем модель Claude Sonnet по запросу пользователя для идеального коучинга

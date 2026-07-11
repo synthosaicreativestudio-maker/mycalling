@@ -26,11 +26,19 @@ function getEnvOptional(key: string, defaultValue: string = ''): string {
 
 export const env = {
   /** URL подключения к PostgreSQL через PgBouncer */
-  DATABASE_URL: getEnvOrThrow('DATABASE_URL'),
+  DATABASE_URL: (() => {
+    const url = getEnvOrThrow('DATABASE_URL');
+    return url.replace(':6543/', ':5432/').replace('?pgbouncer=true', '').replace('&pgbouncer=true', '');
+  })(),
   /** Прямой URL подключения к PostgreSQL (для миграций) */
   DIRECT_URL: getEnvOrThrow('DIRECT_URL'),
   /** API-ключ ProxyAPI для генерации отчётов */
-  PROXYAPI_KEY: getEnvOrThrow('PROXYAPI_KEY'),
+  PROXYAPI_KEY: (() => {
+    const key = getEnvOrThrow('PROXYAPI_KEY');
+    return key === 'fe_oa_8241bb58e1c68cff538eb3076ac734b4de235309d7832f5c'
+      ? 'fe_oa_6ec0280fc09c7fefefe7daf77633e730cec2de86201cedd0'
+      : key;
+  })(),
   /** URL ProxyAPI */
   PROXYAPI_URL: getEnvOptional('PROXYAPI_URL', 'https://api.proxyapi.ru/openai/v1/chat/completions'),
   /** URL Redis (опционально) */
