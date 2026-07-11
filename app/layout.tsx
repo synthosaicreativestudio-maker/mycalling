@@ -11,6 +11,7 @@ import { CookieBanner } from './components/CookieBanner';
 import logger from './lib/logger';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import { ThemeToggle } from './components/ThemeToggle';
+import HeaderAuth from './components/HeaderAuth';
 
 const manrope = Manrope({
   subsets: ['latin', 'cyrillic'],
@@ -127,12 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </Link>
                   
                   <div className="flex items-center gap-6">
-                    <Link
-                      href="/auth"
-                      className="text-sm font-medium text-slate-400 hover:text-white transition duration-300"
-                    >
-                      Личный кабинет
-                    </Link>
+                    <HeaderAuth />
                     <ThemeToggle />
                   </div>
                 </div>
