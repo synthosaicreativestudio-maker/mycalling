@@ -114,6 +114,15 @@ export async function GET(request: Request) {
       // Сохраняем по одной записи DiagnosticResult для каждого теста в БД
       const userId = sessionData.userId;
 
+      // Сначала очищаем старые результаты диагностик для этого пользователя
+      try {
+        await prisma.diagnosticResult.deleteMany({
+          where: { userId }
+        });
+      } catch (delErr) {
+        console.error('Ошибка очистки старых результатов тестов:', delErr);
+      }
+
       await prisma.diagnosticResult.createMany({
         data: [
           {
@@ -179,10 +188,15 @@ export async function GET(request: Request) {
         coachData
       };
 
-      await prisma.digitalProfile.create({
-        data: {
+      // Безопасный upsert цифрового профиля
+      await prisma.digitalProfile.upsert({
+        where: { userId },
+        create: {
           userId,
-          summary: summaryProfile
+          summary: summaryProfile as any
+        },
+        update: {
+          summary: summaryProfile as any
         }
       });
 
@@ -325,10 +339,14 @@ export async function GET(request: Request) {
         console.error('Gemini report generation failed in next-question, using empty JSON:', err);
       }
 
-      // Сохраняем отчет в БД
-      await prisma.report.create({
-        data: {
+      // Безопасный upsert отчета в БД
+      await prisma.report.upsert({
+        where: { userId },
+        create: {
           userId,
+          htmlContent: htmlReportContent
+        },
+        update: {
           htmlContent: htmlReportContent
         }
       });

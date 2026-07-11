@@ -144,9 +144,15 @@ export const useDiagnosticStore = create<DiagnosticState>()(
                 isOffline: false,
               });
             }
-          } catch (e) {
+          } catch (e: any) {
             console.error('Ошибка загрузки вопроса:', e);
-            set({ isOffline: true, isLoading: false });
+            const isNetworkError = e instanceof TypeError || e.message?.includes('Failed to fetch') || e.message?.includes('network');
+            if (isNetworkError) {
+              set({ isOffline: true, isLoading: false });
+            } else {
+              set({ isLoading: false });
+              alert('Ошибка на сервере при обработке ответа. Пожалуйста, попробуйте обновить страницу.');
+            }
           }
         },
 
@@ -213,17 +219,23 @@ export const useDiagnosticStore = create<DiagnosticState>()(
 
             // Запрашиваем следующий вопрос
             await get().fetchNextQuestion();
-          } catch (err) {
-            console.warn('Обнаружен обрыв сети во время отправки ответа, переходим в автономный режим:', err);
-            // Сохраняем в оффлайн-буфер
-            set({
-              isOffline: true,
-              offlineAnswersBuffer: [...offlineAnswersBuffer, answerPayload],
-              isLoading: false,
-            });
+          } catch (err: any) {
+            console.warn('Ошибка при отправке ответа:', err);
+            const isNetworkError = err instanceof TypeError || err.message?.includes('Failed to fetch') || err.message?.includes('network');
+            if (isNetworkError) {
+              // Сохраняем в оффлайн-буфер
+              set({
+                isOffline: true,
+                offlineAnswersBuffer: [...offlineAnswersBuffer, answerPayload],
+                isLoading: false,
+              });
 
-            // Запускаем фоновую синхронизацию
-            get().syncOfflineAnswers();
+              // Запускаем фоновую синхронизацию
+              get().syncOfflineAnswers();
+            } else {
+              set({ isLoading: false });
+              alert('Ошибка сервера при отправке ответа. Пожалуйста, попробуйте обновить страницу.');
+            }
           }
         },
 
