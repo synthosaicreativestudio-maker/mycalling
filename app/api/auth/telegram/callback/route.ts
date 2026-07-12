@@ -31,21 +31,8 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/auth?error=expired_session', request.url));
     }
 
-    // Проверяем статус коуч-сессии пользователя
-    let redirectPath = '/coach'; // По умолчанию — на коуч-сессию
-    const coachSession = await prisma.coachSession.findUnique({
-      where: { userId: session.userId }
-    });
-    if (coachSession && coachSession.status === 'COMPLETED') {
-      redirectPath = '/assessment'; // Если сессия завершена — на диагностику
-      
-      const diagnosticResult = await prisma.diagnosticResult.findFirst({
-        where: { userId: session.userId }
-      });
-      if (diagnosticResult) {
-        redirectPath = '/report'; // Если и тесты завершены — в личный кабинет
-      }
-    }
+    // После авторизации всегда перенаправляем в личный кабинет (ЛК / report)
+    const redirectPath = '/report';
 
     console.log('[auth] Callback redirection target:', { userId: session.userId, redirectPath });
 

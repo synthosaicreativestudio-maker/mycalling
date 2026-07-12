@@ -103,7 +103,7 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
         <p className="text-xs text-[#7A8A9E] font-medium">Ваш путь от «Хочу» к «Действию»</p>
       </div>
 
-      <div className="relative w-full max-w-[260px] aspect-square flex items-center justify-center">
+      <div className="relative w-full max-w-[320px] aspect-square flex items-center justify-center">
         <svg width="100%" height="100%" viewBox="0 0 400 350" className="overflow-visible select-none">
           <defs>
             {levels.map((lvl) => (
@@ -167,7 +167,10 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       </div>
 
       {/* Информационная панель деталей уровня */}
-      <div className="w-full min-h-[90px] p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col justify-center">
+      <div 
+        className="w-full min-h-[110px] max-h-[180px] overflow-y-auto p-4 rounded-2xl bg-white/[0.02] border flex flex-col justify-center transition-all duration-300"
+        style={{ borderColor: activeLevel ? `${activeLevel.color}33` : 'rgba(255,255,255,0.05)' }}
+      >
         <AnimatePresence mode="wait">
           {activeLevel ? (
             <motion.div

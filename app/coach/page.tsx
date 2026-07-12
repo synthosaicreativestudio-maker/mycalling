@@ -3,9 +3,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw } from 'lucide-react';
+import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw, ArrowLeft } from 'lucide-react';
 import WheelOfVocation from './WheelOfVocation';
 import PyramidOfAlignment from './PyramidOfAlignment';
+import { authClient } from '../lib/auth-client';
+import Link from 'next/link';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -48,6 +50,8 @@ export default function CoachPage() {
   const [extractedData, setExtractedData] = useState<Record<string, any>>({});
   const [showVocationModal, setShowVocationModal] = useState(false);
   const [isWheelHovered, setIsWheelHovered] = useState(false);
+  const { data: session } = authClient.useSession();
+  const isAuthenticated = !!session?.user;
   
   const [isMobile, setIsMobile] = useState(false);
   
@@ -106,9 +110,8 @@ export default function CoachPage() {
     checkAuthAndProgress();
   }, [router]);
 
-  // Поллинг подтверждения телефона/авторизации через ботов
   useEffect(() => {
-    if (!linkCode || phoneConfirmed || !sessionId) return;
+    if (!linkCode || isAuthenticated || !sessionId) return;
 
     let isSubscribed = true;
     let intervalId: NodeJS.Timeout | null = null;
@@ -177,7 +180,7 @@ export default function CoachPage() {
       if (intervalId) clearInterval(intervalId);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [linkCode, phoneConfirmed, sessionId]);
+  }, [linkCode, isAuthenticated, sessionId]);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -702,6 +705,24 @@ export default function CoachPage() {
             </div>
           </div>
           
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-sans font-medium text-white/70 hover:text-white transition duration-200 border border-white/10"
+            title="Вернуться на главную"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>На главную</span>
+          </Link>
+          
+          <Link
+            href="/assessment"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-sans font-medium text-white/70 hover:text-white transition duration-200 border border-white/10"
+            title="Перейти к тестам"
+          >
+            <Compass className="h-3.5 w-3.5" />
+            <span>К тестам</span>
+          </Link>
+
           <button
             onClick={handleResetSession}
             disabled={loading}
@@ -960,42 +981,6 @@ export default function CoachPage() {
               </motion.div>
             ) : (
               <div className="space-y-3">
-                {/* Интерактивные кнопки выбора эмоции на шаге 12 */}
-                {step === 12 && !isTyping && (
-                  <div className="flex flex-wrap gap-2 py-1">
-                    {['Вдохновение', 'Гордость', 'Азарт', 'Интерес', 'Радость'].map(em => (
-                      <button
-                        key={em}
-                        type="button"
-                        onClick={() => handleSendDirect(em)}
-                        className="px-3.5 py-2 rounded-xl bg-[#EAB308]/10 hover:bg-[#EAB308]/20 border border-[#EAB308]/30 text-[#EAB308] text-xs font-bold transition"
-                      >
-                        {em}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Интерактивные кнопки первого шага на шаге 15 */}
-                {step === 15 && !isTyping && (
-                  <div className="flex flex-wrap gap-2 py-1">
-                    {[
-                      'Зарегистрироваться на курс',
-                      'Сохранить полезную ссылку',
-                      'Изучить сайт вуза',
-                      'Подписаться на профильный канал'
-                    ].map(act => (
-                      <button
-                        key={act}
-                        type="button"
-                        onClick={() => handleSendDirect(act)}
-                        className="px-3 py-2 rounded-xl bg-[#C4A484]/15 hover:bg-[#C4A484]/25 border border-[#C4A484]/30 text-[#EAD5C3] text-xs font-bold transition"
-                      >
-                        {act}
-                      </button>
-                    ))}
-                  </div>
-                )}
 
                 <form onSubmit={handleSend} className="flex gap-2">
                   <input

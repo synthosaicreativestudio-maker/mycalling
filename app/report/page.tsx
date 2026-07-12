@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Brain, Compass, Sparkles, Award, RefreshCw, AlertCircle, ArrowLeft, Download, Loader2, ShieldCheck, Clock } from 'lucide-react';
+import { Brain, Compass, Sparkles, Award, RefreshCw, AlertCircle, ArrowLeft, Download, Loader2, ShieldCheck, Clock, LogOut, CheckCircle2, Lock, ChevronRight, Phone, Send, User } from 'lucide-react';
+import { authClient } from '../lib/auth-client';
 
 type Trait = {
   name: string;
@@ -91,6 +92,26 @@ function ReportPageContent() {
   const [activeTab, setActiveTab] = useState<'talents' | 'career' | 'parent'>('talents');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<{ coachCompleted: boolean; testCompleted: boolean; sessionId: string | null } | null>(null);
+  const { data: session } = authClient.useSession();
+
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.push('/');
+            router.refresh();
+          }
+        }
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const checkProgressAndLoad = async () => {
@@ -113,13 +134,14 @@ function ReportPageContent() {
             return;
           }
 
-          if (!progressData.coachCompleted) {
-            router.push('/coach');
-            return;
-          }
+          setProgress({
+            coachCompleted: progressData.coachCompleted,
+            testCompleted: progressData.testCompleted,
+            sessionId: progressData.sessionId
+          });
 
-          if (!progressData.testCompleted) {
-            router.push('/assessment');
+          if (!progressData.coachCompleted || !progressData.testCompleted) {
+            setIsLoading(false);
             return;
           }
 
@@ -197,6 +219,196 @@ function ReportPageContent() {
               На главную
             </Link>
           </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (progress && (!progress.coachCompleted || !progress.testCompleted)) {
+    const userName = session?.user?.name || 'Пользователь';
+    const userPhone = (session?.user as any)?.phone || 'Телефон не указан';
+    
+    // Вычисляем процент прогресса
+    let totalProgress = 0;
+    if (progress.coachCompleted) totalProgress += 50;
+    if (progress.testCompleted) totalProgress += 50;
+
+    return (
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
+        <div className="rounded-[32px] glass-card p-8 md:p-10 border border-white/5 bg-[#040506]/35 backdrop-blur-xl relative overflow-hidden space-y-8">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#3B82F6]/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#C4A484]/5 rounded-full blur-[100px] pointer-events-none" />
+
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white font-sans flex items-center justify-center gap-2">
+              <User className="h-7 w-7 text-[#3B82F6]" />
+              Личный кабинет
+            </h1>
+            <p className="text-sm text-[#7A8A9E]">Управляйте вашим профилем и прогрессом диагностики</p>
+          </div>
+
+          {/* Profile info */}
+          <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="space-y-1">
+              <div className="text-xs text-[#7A8A9E] font-medium font-sans">Вы вошли как:</div>
+              <div className="text-sm font-bold text-white font-sans">{userName}</div>
+              <div className="text-xs text-[#7A8A9E] flex items-center gap-1">
+                <Phone className="h-3 w-3 shrink-0" /> {userPhone}
+              </div>
+            </div>
+            
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-xs font-bold text-red-400 rounded-xl border border-red-500/20 transition duration-200 self-stretch md:self-auto justify-center"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Выйти из аккаунта
+            </button>
+          </div>
+
+          {/* Progress bar */}
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-xs font-bold font-sans">
+              <span className="text-[#7A8A9E]">Ваш прогресс диагностики</span>
+              <span className="text-[#3B82F6]">{totalProgress}%</span>
+            </div>
+            <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[#3B82F6] to-[#C4A484] transition-all duration-500" 
+                style={{ width: `${totalProgress}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Step Cards */}
+          <div className="space-y-4">
+            
+            {/* Step 1: Coach Session */}
+            <div className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${
+              progress.coachCompleted 
+                ? 'bg-green-500/5 border-green-500/20' 
+                : 'bg-yellow-500/5 border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.03)]'
+            }`}>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                    progress.coachCompleted 
+                      ? 'bg-green-500/15 text-green-400' 
+                      : 'bg-yellow-500/15 text-yellow-400 animate-pulse'
+                  }`}>
+                    Этап 1: Коуч-сессия
+                  </span>
+                  {progress.coachCompleted && <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />}
+                </div>
+                <h3 className="text-sm font-bold text-white font-sans">Диалог с наставником Романом</h3>
+                <p className="text-xs text-[#7A8A9E] leading-relaxed">
+                  Персональный интерактивный чат по методологиям CLEAR и WOOP для выявления ваших целей, сильных качеств и эмоций.
+                </p>
+              </div>
+              
+              <Link
+                href="/coach"
+                className={`flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 self-stretch md:self-auto shrink-0 ${
+                  progress.coachCompleted
+                    ? 'bg-white/5 hover:bg-white/10 text-white/90 border border-white/10'
+                    : 'bg-[#EAB308] hover:bg-[#d9a407] text-[#080C14] shadow-[0_4px_20px_rgba(234,179,8,0.25)]'
+                }`}
+              >
+                <span>{progress.coachCompleted ? 'Войти в чат' : 'Продолжить сессию'}</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            {/* Step 2: Tests */}
+            <div className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${
+              progress.testCompleted 
+                ? 'bg-green-500/5 border-green-500/20' 
+                : (progress.coachCompleted 
+                    ? 'bg-[#3B82F6]/5 border-[#3B82F6]/20 shadow-[0_0_15px_rgba(59,130,246,0.03)]' 
+                    : 'bg-white/[0.01] border-white/5 opacity-50'
+                  )
+            }`}>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                    progress.testCompleted 
+                      ? 'bg-green-500/15 text-green-400' 
+                      : (progress.coachCompleted 
+                          ? 'bg-[#3B82F6]/15 text-[#3B82F6] animate-pulse' 
+                          : 'bg-white/5 text-slate-500'
+                        )
+                  }`}>
+                    Этап 2: Тестирование
+                  </span>
+                  {progress.testCompleted && <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />}
+                </div>
+                <h3 className="text-sm font-bold text-white font-sans">Интерактивные опросники способностей</h3>
+                <p className="text-xs text-[#7A8A9E] leading-relaxed">
+                  Определение вашего типа мышления (RIASEC), командных ролей, ценностей и ведущих интересов по интерактивной шкале.
+                </p>
+              </div>
+              
+              {!progress.coachCompleted ? (
+                <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed self-stretch md:self-auto shrink-0">
+                  <Lock className="h-3.5 w-3.5" />
+                  <span>Заблокировано</span>
+                </div>
+              ) : (
+                <Link
+                  href="/assessment"
+                  className={`flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 self-stretch md:self-auto shrink-0 ${
+                    progress.testCompleted
+                      ? 'bg-white/5 hover:bg-white/10 text-white/90 border border-white/10'
+                      : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-[0_4px_20px_rgba(59,130,246,0.25)]'
+                  }`}
+                >
+                  <span>{progress.testCompleted ? 'Перейти к тестам' : 'Начать тесты'}</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
+            </div>
+
+            {/* Step 3: Final Report */}
+            <div className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${
+              progress.coachCompleted && progress.testCompleted 
+                ? 'bg-gradient-to-br from-[#C4A484]/15 to-[#3B82F6]/5 border-[#C4A484]/30 shadow-[0_8px_30px_rgba(0,0,0,0.5)]' 
+                : 'bg-white/[0.01] border-white/5 opacity-50'
+            }`}>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                    (progress.coachCompleted && progress.testCompleted)
+                      ? 'bg-[#C4A484]/20 text-[#EAD5C3]'
+                      : 'bg-white/5 text-slate-500'
+                  }`}>
+                    Этап 3: Результат
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-white font-sans">Итоговый ИИ-отчёт и Карта Призвания</h3>
+                <p className="text-xs text-[#7A8A9E] leading-relaxed">
+                  Полная расшифровка вашего психологического портрета, 3 рекомендуемые ИИ профессии и советы по развитию сильных сторон.
+                </p>
+              </div>
+              
+              {!(progress.coachCompleted && progress.testCompleted) ? (
+                <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed self-stretch md:self-auto shrink-0">
+                  <Lock className="h-3.5 w-3.5" />
+                  <span>Заблокировано</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => window.location.reload()}
+                  className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-[#C4A484] hover:bg-[#b09071] text-[#080C14] shadow-[0_4px_20px_rgba(196,164,132,0.25)] transition duration-300 self-stretch md:self-auto shrink-0"
+                >
+                  <span>Открыть отчёт</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+          </div>
+
         </div>
       </main>
     );
