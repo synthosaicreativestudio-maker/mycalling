@@ -11,6 +11,7 @@ interface WheelOfVocationProps {
 export default function WheelOfVocation({ extractedData, standalone = false }: WheelOfVocationProps) {
   // Безопасное извлечение оценок талантов
   const getScore = (key: string): number => {
+    if (!extractedData || typeof extractedData !== 'object') return 0;
     let scoresObj = extractedData.expressExtracted?.talentScores || extractedData.talentScores;
     if (scoresObj && typeof scoresObj === 'object') {
       const val = scoresObj[key];

@@ -13,7 +13,9 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
 
   // Безопасное извлечение глубоких данных
   const getField = (key: string): string => {
-    return extractedData.deepExtracted?.[key] || extractedData[key] || '';
+    if (!extractedData || typeof extractedData !== 'object') return '';
+    const val = extractedData.deepExtracted?.[key] ?? extractedData[key] ?? '';
+    return typeof val === 'string' ? val : String(val ?? '');
   };
 
   const levels = [

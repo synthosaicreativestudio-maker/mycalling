@@ -209,7 +209,7 @@ export default function CoachPage() {
         });
         const data = await res.json();
         // Позволяем пользователю просматривать результаты завершенной сессии без редиректа
-        if (data.history && data.history.length > 0) {
+        if (Array.isArray(data.history) && data.history.length > 0) {
           setMessages(data.history);
           setSessionId(data.sessionId);
           setUserId(data.userId || null);
@@ -377,7 +377,7 @@ export default function CoachPage() {
       });
       const data = await res.json();
       if (data.reply) {
-        setMessages(data.history || [{ role: 'assistant', content: data.reply }]);
+        setMessages(Array.isArray(data.history) ? data.history : [{ role: 'assistant', content: data.reply }]);
         setStep(data.currentStep || 0);
         setExtractedData(data.extracted || {});
       }
