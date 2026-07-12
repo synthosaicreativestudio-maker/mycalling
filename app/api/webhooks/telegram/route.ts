@@ -50,8 +50,8 @@ export async function POST(req: Request) {
               where: { id: authLink.id },
               data: { telegramId: String(tgUserId) }
             });
-            // Динамически настраиваем кнопку меню чата на запуск WebApp для привязки контакта
-            await setTelegramMenuButton(botToken, chat_id, startParam);
+            // Сбрасываем кнопку меню чата на дефолтную (не используем WebApp)
+            await resetTelegramMenuButton(botToken, chat_id);
           }
         }
 
@@ -141,20 +141,18 @@ export async function POST(req: Request) {
         // Используем ReplyKeyboardMarkup с input_field_placeholder
         // для максимальной заметности кнопки
         // ═══════════════════════════════════════════════════════════════
-        const inlineKeyboard = startParam ? {
-          inline_keyboard: [
-            [{
-              text: '📱 Войти и привязать профиль',
-              web_app: {
-                url: `https://synthosai.ru/auth/telegram-webapp?code=${startParam}`
-              }
-            }]
-          ]
-        } : undefined;
+        const replyKeyboard = {
+          keyboard: [
+            [{ text: '📱 Поделиться контактом', request_contact: true }]
+          ],
+          resize_keyboard: true,
+          one_time_keyboard: false,
+          is_persistent: true
+        };
 
         await sendTelegramMessage(botToken, chat_id, 
-          '👋 Привет! Я — официальный бот платформы «МоёПризвание».\n\nЧтобы привязать ваш профиль, нажмите кнопку 👇 «📱 Войти и привязать профиль» прямо в этом сообщении, либо воспользуйтесь синей кнопкой в левом углу поля ввода.\n\nИли **просто напишите ваш номер телефона сообщением в ответ** (например: 89991234567). Это абсолютно безопасно.',
-          inlineKeyboard
+          '👋 Привет! Я — официальный бот платформы «МоёПризвание».\n\nЧтобы войти и привязать ваш профиль, нажмите кнопку 👇 «📱 Поделиться контактом» на клавиатуре внизу.\n\nИли **просто напишите ваш номер телефона сообщением в ответ** (например: 89991234567). Это абсолютно безопасно.\n\n🌐 Наш сайт: https://synthosai.ru/',
+          replyKeyboard
         );
         return NextResponse.json({ ok: true });
       }
@@ -364,6 +362,9 @@ export async function POST(req: Request) {
             }
           });
 
+          // Сначала удаляем клавиатуру с кнопкой "Поделиться контактом"
+          await sendTelegramMessage(botToken, chat_id, 'Вход выполнен!', { remove_keyboard: true });
+
           // Шаг 2: Подтверждение с inline-кнопкой
           await sendTelegramMessage(botToken, chat_id, 
             `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nВы вошли на компьютере — можете вернуться к браузеру! Или нажмите кнопку ниже, чтобы войти с мобильного:`,
@@ -374,6 +375,9 @@ export async function POST(req: Request) {
             }
           );
         } else {
+          // Удаляем клавиатуру
+          await sendTelegramMessage(botToken, chat_id, 'Вход выполнен!', { remove_keyboard: true });
+
           await sendTelegramMessage(botToken, chat_id, 
             `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nНажмите кнопку ниже, чтобы перейти на платформу:`,
             {
@@ -556,6 +560,9 @@ export async function POST(req: Request) {
               }
             });
 
+            // Сначала удаляем клавиатуру с кнопкой "Поделиться контактом"
+            await sendTelegramMessage(botToken, chat_id, 'Вход выполнен!', { remove_keyboard: true });
+
             await sendTelegramMessage(botToken, chat_id, 
               `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nВы вошли на компьютере — можете вернуться к браузеру! Или нажмите кнопку ниже, чтобы войти с мобильного:`,
               {
@@ -565,6 +572,9 @@ export async function POST(req: Request) {
               }
             );
           } else {
+            // Удаляем клавиатуру
+            await sendTelegramMessage(botToken, chat_id, 'Вход выполнен!', { remove_keyboard: true });
+
             await sendTelegramMessage(botToken, chat_id, 
               `🎉 Профиль успешно подключен!\n\nИмя: ${user.name}\nТелефон: +${normalizedPhone}\n\nНажмите кнопку ниже, чтобы перейти на платформу:`,
               {
