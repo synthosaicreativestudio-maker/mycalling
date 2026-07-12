@@ -247,10 +247,10 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     <div className="flex flex-col items-center justify-center p-6 glass-panel rounded-3xl w-full h-full space-y-6">
       <div className="text-center space-y-1">
         <h3 className="text-md font-bold font-sans text-white tracking-wide">Карта Талантов</h3>
-        <p className="text-xs text-[#7A8A9E] font-medium">Живой ИИ-профиль ваших интересов</p>
+        <p className="text-xs text-[#7A8A9E] font-medium">Живой профиль ваших интересов</p>
       </div>
 
-      <div className="relative w-full max-w-[260px] aspect-square flex items-center justify-center">
+      <div className="relative w-full max-w-[340px] aspect-square flex items-center justify-center">
         <svg width="100%" height="100%" viewBox="0 0 400 400" className="overflow-visible">
           <defs>
             {sectors.map((sector, idx) => (
