@@ -436,12 +436,12 @@ export async function POST(req: Request) {
     let nextStep = 1;
 
     if (isDeepMode) {
-      const hasDeepGoal = getStrLen(extractedData.deepExtracted?.deepGoal) > 6;
-      const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 6;
-      const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 3;
-      const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 6;
-      const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 6;
-      const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 6;
+      const hasDeepGoal = getStrLen(extractedData.deepExtracted?.deepGoal) > 1;
+      const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 1;
+      const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 1;
+      const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 1;
+      const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 1;
+      const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1;
 
       if (!hasPhone) {
         currentStepBefore = 1;
@@ -609,7 +609,8 @@ export async function POST(req: Request) {
             ];
             const currentField = deepFields.find(f => f.step === nextStep);
             if (currentField) {
-              extractedData[currentField.key] = currentField.val;
+              if (!extractedData.deepExtracted) extractedData.deepExtracted = {};
+              extractedData.deepExtracted[currentField.key] = currentField.val;
               if (nextStep === 10) finalNextStep = 11;
               else if (nextStep === 11) finalNextStep = 12;
               else if (nextStep === 12) finalNextStep = 13;
@@ -932,12 +933,12 @@ export async function POST(req: Request) {
     let isFinalStateNow = false;
 
     if (isDeepMode) {
-      const hasDeepGoal = getStrLen(extractedData.deepExtracted?.deepGoal) > 6;
-      const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 6;
-      const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 3;
-      const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 6;
-      const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 6;
-      const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 6;
+      const hasDeepGoal = getStrLen(extractedData.deepExtracted?.deepGoal) > 1;
+      const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 1;
+      const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 1;
+      const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 1;
+      const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 1;
+      const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1;
 
       if (!updatedPhone) {
         currentVirtualStep = 1;
