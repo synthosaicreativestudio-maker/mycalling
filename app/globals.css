@@ -670,3 +670,22 @@ a:focus-visible {
   opacity: 0.5;
 }
 
+/* Переопределения для градиентов, теней и ховеров в светлой теме для полного исключения голубых свечений/оттенков */
+[data-theme="light"] .from-\[\#3B82F6\] {
+  --tw-gradient-from: var(--accent-brown) !important;
+  --tw-gradient-to: rgba(141, 91, 76, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+[data-theme="light"] .shadow-\[0_4px_20px_rgba\(59\,130\,246\,0\.25\)\] {
+  box-shadow: 0 4px 20px rgba(141, 91, 76, 0.25) !important;
+}
+[data-theme="light"] .shadow-\[0_0_15px_rgba\(59\,130\,246\,0\.03\)\] {
+  box-shadow: 0 0 15px rgba(141, 91, 76, 0.03) !important;
+}
+[data-theme="light"] .hover\:bg-\[\#2563EB\]:hover {
+  background-color: #6D4C41 !important;
+}
+[data-theme="light"] .text-\[\#3B82F6\] {
+  color: var(--accent-brown) !important;
+}
+

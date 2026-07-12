@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface PyramidOfAlignmentProps {
@@ -10,6 +10,20 @@ interface PyramidOfAlignmentProps {
 export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignmentProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const t = document.documentElement.getAttribute('data-theme') || 'dark';
+    setTheme(t as any);
+    
+    const observer = new MutationObserver(() => {
+      const updatedTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      setTheme(updatedTheme as any);
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Безопасное извлечение глубоких данных
   const getField = (key: string): string => {
@@ -74,8 +88,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       emoji: '🌟',
       description: 'Детальная визуализация успеха',
       val: getField('deepOutcome'),
-      color: '#3b82f6', // Синий
-      glowColor: 'rgba(59, 130, 246, 0.4)',
+      color: theme === 'light' ? '#A67C52' : '#3b82f6', // Золотой в светлой теме, Синий в темной
+      glowColor: theme === 'light' ? 'rgba(166, 124, 82, 0.4)' : 'rgba(59, 130, 246, 0.4)',
       points: '94,224 306,224 328,264 72,264',
       textPos: { x: 200, y: 246 }
     },
@@ -86,8 +100,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       emoji: '🎯',
       description: 'Ваша главная цель самореализации',
       val: getField('deepGoal'),
-      color: '#38bdf8', // Голубой
-      glowColor: 'rgba(56, 189, 248, 0.4)',
+      color: theme === 'light' ? '#8D5B4C' : '#38bdf8', // Кофейный в светлой теме, Голубой в темной
+      glowColor: theme === 'light' ? 'rgba(141, 91, 76, 0.4)' : 'rgba(56, 189, 248, 0.4)',
       points: '68,270 332,270 354,310 46,310', // Основание
       textPos: { x: 200, y: 292 }
     }
