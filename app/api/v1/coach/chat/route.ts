@@ -264,6 +264,16 @@ export async function POST(req: Request) {
     }
 
     if (authenticatedUserId) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: authenticatedUserId }
+      });
+      if (dbUser && dbUser.mergedInto) {
+        console.log(`[coach/chat] Resolving chat session user ${authenticatedUserId} -> merged target ${dbUser.mergedInto}`);
+        authenticatedUserId = dbUser.mergedInto;
+      }
+    }
+
+    if (authenticatedUserId) {
       userId = authenticatedUserId;
       
       // Ищем текущую гостевую сессию, переданную с клиента
@@ -305,17 +315,18 @@ export async function POST(req: Request) {
           });
         }
 
-        // Удаляем временного гостя из БД
+        // Помечаем гостевого пользователя как объединенного (soft merge)
         try {
-          await prisma.user.delete({
-            where: { id: guestSession.userId }
+          await prisma.user.update({
+            where: { id: guestSession.userId },
+            data: { mergedInto: userId }
           });
         } catch (e) {
-          console.error('Failed to clean up guest user during merge:', e);
+          console.error('Failed to update guest user status during merge:', e);
         }
       } else {
-        // Если гостевая сессия не нуждается в слиянии, просто берем сессию вошедшего пользователя
-        coachSession = await prisma.coachSession.findUnique({
+        // Если гостевая сессия не нуждается в слиянии, просто берем её (если она есть) или ищем по userId
+        coachSession = guestSession || await prisma.coachSession.findUnique({
           where: { userId },
           include: { user: true }
         });

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     const randomHex = crypto.randomBytes(8).toString('hex');
     const code = `auth_${randomHex}`;
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 минут
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 минут
 
     const authLink = await prisma.authLink.create({
       data: {

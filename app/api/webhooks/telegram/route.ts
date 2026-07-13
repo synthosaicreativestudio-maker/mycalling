@@ -96,7 +96,18 @@ export async function POST(req: Request) {
               }
             });
 
-            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+            // Генерируем одноразовый exchange token (для мобильного перехода из бота)
+            const exchangeToken = crypto.randomBytes(32).toString('hex');
+            const exchangeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
+            await prisma.authExchangeToken.create({
+              data: {
+                token: exchangeToken,
+                userId: existingUser.id,
+                expiresAt: exchangeExpiresAt
+              }
+            });
+
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
 
             await sendTelegramMessage(botToken, chat_id, 
               `👋 С возвращением, ${existingUser.name || existingUser.fullName || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Ваш профиль привязан — можете вернуться к браузеру, всё готово!\n\nИли нажмите кнопку ниже, чтобы войти прямо с телефона:`,
@@ -121,7 +132,18 @@ export async function POST(req: Request) {
               }
             });
 
-            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+            // Генерируем одноразовый exchange token (для мобильного перехода из бота)
+            const exchangeToken = crypto.randomBytes(32).toString('hex');
+            const exchangeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
+            await prisma.authExchangeToken.create({
+              data: {
+                token: exchangeToken,
+                userId: existingUser.id,
+                expiresAt: exchangeExpiresAt
+              }
+            });
+
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
 
             await sendTelegramMessage(botToken, chat_id,
               `👋 С возвращением, ${existingUser.name || existingUser.fullName || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Нажмите кнопку ниже, чтобы перейти в Личный кабинет:`,
@@ -263,7 +285,7 @@ export async function POST(req: Request) {
           });
         }
         
-        // Генерируем токен сессии Better Auth
+        // Генерируем токен сессии Better Auth (для десктопного поллинга)
         const sessionToken = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
@@ -275,8 +297,19 @@ export async function POST(req: Request) {
             expiresAt: expiresAt
           }
         });
+
+        // Генерируем одноразовый exchange token (для мобильного перехода из бота)
+        const exchangeToken = crypto.randomBytes(32).toString('hex');
+        const exchangeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
+        await prisma.authExchangeToken.create({
+          data: {
+            token: exchangeToken,
+            userId: user.id,
+            expiresAt: exchangeExpiresAt
+          }
+        });
         
-        const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+        const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
 
         // Убираем ReplyKeyboard и отправляем подтверждение с inline-кнопкой
         // Шаг 1: Убираем клавиатуру
@@ -337,9 +370,10 @@ export async function POST(req: Request) {
                 data: { userId: user.id }
               });
 
-              // 7. Удаляем гостевого пользователя из БД для очистки
-              await prisma.user.delete({
-                where: { id: authLink.userId }
+              // 7. Помечаем гостевого пользователя как объединенного (soft merge)
+              await prisma.user.update({
+                where: { id: authLink.userId },
+                data: { mergedInto: user.id }
               });
             } catch (e) {
               console.error('Error migrating guest session in Telegram webhook:', e);
@@ -492,7 +526,18 @@ export async function POST(req: Request) {
             }
           });
 
-          const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+          // Генерация одноразового токена обмена (exchange token)
+          const exchangeToken = crypto.randomBytes(32).toString('hex');
+          const exchangeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
+          await prisma.authExchangeToken.create({
+            data: {
+              token: exchangeToken,
+              userId: user.id,
+              expiresAt: exchangeExpiresAt
+            }
+          });
+
+          const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
 
           await sendTelegramMessage(botToken, chat_id,
             `✅ Контакт получен! Подключаю ваш профиль...`,
@@ -544,8 +589,11 @@ export async function POST(req: Request) {
                   data: { userId: user.id }
                 });
 
-                // 7. Удаляем гостевого пользователя
-                await prisma.user.delete({ where: { id: authLink.userId } });
+                // 7. Помечаем гостевого пользователя как объединенного (soft merge)
+                await prisma.user.update({
+                  where: { id: authLink.userId },
+                  data: { mergedInto: user.id }
+                });
               } catch (e) {
                 console.error('Error migrating guest session in Telegram webhook (text fallback):', e);
               }

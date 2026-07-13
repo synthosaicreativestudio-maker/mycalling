@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import prisma from '../../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -8,33 +9,83 @@ export async function GET(request: Request) {
   const isJson = searchParams.get('format') === 'json';
   try {
     const token = searchParams.get('token');
+    const exchangeToken = searchParams.get('exchange_token');
 
-    console.log('[auth] Callback received request for token:', token ? '***' : null, { isJson });
+    console.log('[auth] Callback received request:', { hasToken: !!token, hasExchangeToken: !!exchangeToken, isJson });
 
-    if (!token) {
-      console.warn('[auth] Callback missing token');
+    let finalSessionToken = '';
+    let finalExpiresAt: Date;
+    let userId = '';
+
+    if (exchangeToken) {
+      // 1. Проверяем одноразовый токен обмена
+      const tokenRecord = await prisma.authExchangeToken.findFirst({
+        where: {
+          token: exchangeToken,
+          used: false,
+          expiresAt: { gt: new Date() }
+        }
+      });
+
+      if (!tokenRecord) {
+        console.warn('[auth] Callback exchange token invalid, used or expired');
+        if (isJson) {
+          return NextResponse.json({ error: 'expired_session' }, { status: 400 });
+        }
+        return NextResponse.redirect(new URL('/auth?error=expired_session', request.url));
+      }
+
+      // Помечаем токен как использованный
+      await prisma.authExchangeToken.update({
+        where: { id: tokenRecord.id },
+        data: { used: true }
+      });
+
+      // Генерируем реальную Better Auth сессию
+      const sessionToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7); // 7 дней
+
+      const newSession = await prisma.session.create({
+        data: {
+          token: sessionToken,
+          userId: tokenRecord.userId,
+          expiresAt: expiresAt
+        }
+      });
+
+      finalSessionToken = sessionToken;
+      finalExpiresAt = expiresAt;
+      userId = tokenRecord.userId;
+    } else if (token) {
+      // 2. Стандартный путь по токену сессии (для поллинга)
+      const session = await prisma.session.findUnique({
+        where: { token }
+      });
+
+      if (!session || session.expiresAt < new Date()) {
+        console.warn('[auth] Callback session not found or expired:', { exists: !!session });
+        if (isJson) {
+          return NextResponse.json({ error: 'expired_session' }, { status: 400 });
+        }
+        return NextResponse.redirect(new URL('/auth?error=expired_session', request.url));
+      }
+
+      finalSessionToken = token;
+      finalExpiresAt = session.expiresAt;
+      userId = session.userId;
+    } else {
+      console.warn('[auth] Callback missing both token and exchange_token');
       if (isJson) {
         return NextResponse.json({ error: 'missing_token' }, { status: 400 });
       }
       return NextResponse.redirect(new URL('/auth?error=missing_token', request.url));
     }
 
-    const session = await prisma.session.findUnique({
-      where: { token }
-    });
-
-    if (!session || session.expiresAt < new Date()) {
-      console.warn('[auth] Callback session not found or expired:', { exists: !!session });
-      if (isJson) {
-        return NextResponse.json({ error: 'expired_session' }, { status: 400 });
-      }
-      return NextResponse.redirect(new URL('/auth?error=expired_session', request.url));
-    }
-
     // После авторизации всегда перенаправляем в личный кабинет (ЛК / report)
     const redirectPath = '/report';
 
-    console.log('[auth] Callback redirection target:', { userId: session.userId, redirectPath });
+    console.log('[auth] Callback redirection target:', { userId, redirectPath });
 
     let response: NextResponse;
     
@@ -71,11 +122,11 @@ export async function GET(request: Request) {
     console.log('[auth] Callback setting both HTTP and HTTPS session cookies for max compatibility');
 
     const cookieOptions = {
-      value: token,
+      value: finalSessionToken,
       httpOnly: true,
       sameSite: 'lax' as const,
       path: '/',
-      expires: session.expiresAt
+      expires: finalExpiresAt
     };
 
     // 1. Стандартная кука (используется на localhost)

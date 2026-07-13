@@ -31,6 +31,7 @@ model User {
   maxUserId     String?             @unique @map("max_user_id")
   diagnosticAnswers Json?             @map("diagnostic_answers")
   role          Role                @default(STUDENT)
+  mergedInto    String?             @map("merged_into") @db.VarChar(100)
   createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -159,3 +160,13 @@ model AuthLink {
   @@map("auth_links")
 }
 
+model AuthExchangeToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token     String   @unique
+  userId    String   @map("user_id") @db.Uuid
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("auth_exchange_tokens")
+}

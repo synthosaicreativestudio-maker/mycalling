@@ -447,9 +447,10 @@ export async function POST(req: Request) {
                 data: { userId: user.id }
               });
 
-              // 7. Удаляем гостевого пользователя
-              await prisma.user.delete({
-                where: { id: authLink.userId }
+              // 7. Помечаем гостевого пользователя как объединенного (soft merge)
+              await prisma.user.update({
+                where: { id: authLink.userId },
+                data: { mergedInto: user.id }
               });
             } catch (e) {
               console.error('Error migrating guest session in MAX webhook:', e);

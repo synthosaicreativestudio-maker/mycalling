@@ -15,7 +15,16 @@ export async function GET() {
       return NextResponse.json({ authenticated: false });
     }
     
-    const userId = session.user.id;
+    let userId = session.user.id;
+
+    // Проверяем, не был ли этот пользователь объединен с другим (soft merge)
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+    if (dbUser && dbUser.mergedInto) {
+      console.log(`[auth/progress] User ${userId} was merged into ${dbUser.mergedInto}, resolving progress for new user`);
+      userId = dbUser.mergedInto;
+    }
 
     const coachSession = await prisma.coachSession.findUnique({
       where: { userId }
