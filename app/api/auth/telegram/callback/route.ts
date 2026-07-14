@@ -6,13 +6,15 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Создаёт подписанное значение куки в формате better-call:
- *   `${value}.${base64(HMAC-SHA256(value, secret))}`
- * Длина подписи — 44 символа (стандартный base64 с =).
+ *   `encodeURIComponent(${value}.${base64(HMAC-SHA256(value, secret))})`
+ * 
+ * Совместимо с better-call/dist/crypto.mjs — signCookieValue
  */
-async function makeSignedCookieValue(value: string, secret: string): Promise<string> {
+async function signCookieValue(value: string, secret: string): Promise<string> {
+  const secretBuf = new TextEncoder().encode(secret);
   const key = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(secret),
+    secretBuf,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
@@ -22,8 +24,40 @@ async function makeSignedCookieValue(value: string, secret: string): Promise<str
     key,
     new TextEncoder().encode(value)
   );
-  const base64sig = Buffer.from(signature).toString('base64'); // 44 chars, ends with =
-  return `${value}.${base64sig}`;
+  // btoa(String.fromCharCode(...bytes)) — то же самое что в better-call
+  const base64sig = btoa(String.fromCharCode(...new Uint8Array(signature)));
+  const signed = `${value}.${base64sig}`;
+  return signed;
+}
+
+/**
+ * Формирует raw Set-Cookie строку, совместимую с better-call _serialize.
+ * Значение уже должно быть готово к вставке (signed + NOT url-encoded дважды).
+ */
+function buildSetCookieHeader(
+  name: string,
+  signedValue: string,
+  options: {
+    secure?: boolean;
+    httpOnly?: boolean;
+    sameSite?: string;
+    path?: string;
+    expires?: Date;
+  }
+): string {
+  // Значение уже подписано. Для совместимости с better-call НЕ кодируем повторно.
+  // better-call уже делает encodeURIComponent внутри signCookieValue,
+  // но мы воспроизводим тот же формат вручную.
+  const encodedValue = encodeURIComponent(signedValue);
+  let cookie = `${name}=${encodedValue}`;
+  
+  if (options.path) cookie += `; Path=${options.path}`;
+  if (options.expires) cookie += `; Expires=${options.expires.toUTCString()}`;
+  if (options.httpOnly) cookie += '; HttpOnly';
+  if (options.secure) cookie += '; Secure';
+  if (options.sameSite) cookie += `; SameSite=${options.sameSite}`;
+  
+  return cookie;
 }
 
 export async function GET(request: Request) {
@@ -57,13 +91,11 @@ export async function GET(request: Request) {
         return NextResponse.redirect(new URL('/auth?error=expired_session', request.url));
       }
 
-      // Помечаем токен как использованный
       await prisma.authExchangeToken.update({
         where: { id: tokenRecord.id },
         data: { used: true }
       });
 
-      // Генерируем реальную Better Auth сессию
       const sessionToken = crypto.randomBytes(32).toString('hex');
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
@@ -80,7 +112,7 @@ export async function GET(request: Request) {
       finalExpiresAt = expiresAt;
       userId = tokenRecord.userId;
     } else if (token) {
-      // 2. Стандартный путь по токену сессии (для поллинга с десктопа)
+      // 2. Стандартный путь по токену сессии
       const session = await prisma.session.findUnique({
         where: { token }
       });
@@ -104,26 +136,31 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/auth?error=missing_token', request.url));
     }
 
-    // После авторизации перенаправляем в личный кабинет
     const redirectPath = '/report';
     console.log('[auth] Callback redirection target:', { userId, redirectPath });
 
-    // Получаем секрет Better Auth (ОБЯЗАТЕЛЬНО должен быть в env!)
+    // Получаем секрет Better Auth
     const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
     if (!betterAuthSecret) {
-      console.error('[auth] BETTER_AUTH_SECRET is not set! Cannot create signed session cookie.');
+      console.error('[auth] BETTER_AUTH_SECRET is not set!');
       return NextResponse.redirect(new URL('/auth?error=config_error', request.url));
     }
 
-    // Создаём подписанное значение куки по формату better-call
-    const signedToken = await makeSignedCookieValue(finalSessionToken, betterAuthSecret);
+    // Подписываем токен по тому же алгоритму что better-call
+    const signedToken = await signCookieValue(finalSessionToken, betterAuthSecret);
+    
+    console.log('[auth] Signed cookie created:', {
+      tokenLength: finalSessionToken.length,
+      signedLength: signedToken.length,
+      signedPreview: signedToken.substring(0, 20) + '...',
+      hasDot: signedToken.includes('.'),
+    });
 
     let response: NextResponse;
 
     if (isJson) {
       response = NextResponse.json({ success: true, redirectPath });
     } else {
-      // HTML с автоматическим редиректом (200 OK, чтобы куки не потерялись)
       const html = `
         <!DOCTYPE html>
         <html>
@@ -145,28 +182,35 @@ export async function GET(request: Request) {
       });
     }
 
-    console.log('[auth] Setting signed session cookie for Better Auth compatibility');
-
-    const cookieBase = {
-      value: signedToken,
+    // Ставим куки через raw Set-Cookie header, чтобы избежать двойного encodeURIComponent
+    // которое происходит при response.cookies.set()
+    const cookieOptions = {
       httpOnly: true,
-      sameSite: 'lax' as const,
+      sameSite: 'Lax',
       path: '/',
       expires: finalExpiresAt,
     };
 
-    // Кука Better Auth (основная, читается getSignedCookie)
-    response.cookies.set({
-      name: 'better-auth.session_token',
-      secure: true,
-      ...cookieBase,
-    });
+    // Основная кука Better Auth (без prefix = default cookie key)
+    const mainCookie = buildSetCookieHeader(
+      'better-auth.session_token',
+      signedToken,
+      { ...cookieOptions, secure: false }
+    );
 
-    // Дублируем без secure — для надёжности на разных прокси
-    response.cookies.set({
-      name: 'better-auth.session_token',
-      secure: false,
-      ...cookieBase,
+    // Secure-версия куки (для HTTPS)
+    const secureCookie = buildSetCookieHeader(
+      'better-auth.session_token',
+      signedToken,
+      { ...cookieOptions, secure: true }
+    );
+
+    response.headers.append('Set-Cookie', mainCookie);
+    response.headers.append('Set-Cookie', secureCookie);
+
+    console.log('[auth] Set-Cookie headers appended:', {
+      mainCookiePreview: mainCookie.substring(0, 80) + '...',
+      secureCookiePreview: secureCookie.substring(0, 80) + '...',
     });
 
     return response;

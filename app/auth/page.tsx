@@ -131,7 +131,7 @@ function AuthCard() {
 
   const tgPayload = linkCode || '';
 
-  const telegramAppLink = `tg://resolve?domain=moyoprizvanie_bot${tgPayload ? `&start=${encodeURIComponent(tgPayload)}` : ''}`;
+  const telegramAppLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${encodeURIComponent(tgPayload)}` : ''}`;
   const maxIdLink = `https://max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
 
   // Динамические QR-коды

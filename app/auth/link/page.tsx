@@ -72,7 +72,7 @@ function LinkCard() {
   }
 
   const isTelegram = provider === 'telegram';
-  const telegramAppLink = `tg://resolve?domain=moyoprizvanie_bot&start=${encodeURIComponent(code)}`;
+  const telegramAppLink = `https://t.me/moyoprizvanie_bot?start=${encodeURIComponent(code)}`;
   const qrLink = isTelegram
     ? telegramAppLink
     : `https://max.ru/maxid_bot?start=${code}`;
