@@ -242,7 +242,7 @@ export default function CoachPage() {
   // Скролл вниз при добавлении сообщений
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [messages, isTyping, extractedData.sessionMode]);
 
   // Выход на главную по кнопке Escape
   useEffect(() => {
@@ -894,6 +894,65 @@ export default function CoachPage() {
               );
             })}
 
+            {step > 2 && step < 16 && !extractedData.sessionMode && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex gap-3 max-w-[90%] mr-auto"
+              >
+                <div className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold bg-[#3B82F6]/10 text-[#3B82F6]">
+                  <Brain className="h-4 w-4" />
+                </div>
+                <div className="p-5 rounded-2xl text-sm leading-relaxed bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm space-y-4 max-w-xl">
+                  <div className="space-y-1">
+                    <p className="font-bold text-[#EAD5C3] text-sm flex items-center gap-1.5">
+                      <span>🎯</span> Выберите формат исследования талантов:
+                    </p>
+                    <p className="text-xs text-[#C4A484]/90">
+                      Регистрация успешно завершена! Какое исследование талантов вам ближе?
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Экспресс-режим */}
+                    <button
+                      type="button"
+                      onClick={() => handleSelectMode('EXPRESS')}
+                      disabled={loading}
+                      className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition text-left space-y-1.5 group relative"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-white group-hover:text-[#3B82F6] transition">Экспресс-формат</span>
+                        <span className="text-[9px] text-[#7A8A9E] px-1.5 py-0.5 rounded bg-white/5">10-15 мин</span>
+                      </div>
+                      <p className="text-[10px] text-[#7A8A9E] leading-normal">
+                        Быстрый опросник по увлечениям, интересам и целям для моментального получения рекомендаций.
+                      </p>
+                    </button>
+
+                    {/* Глубокий режим */}
+                    <button
+                      type="button"
+                      onClick={() => handleSelectMode('DEEP')}
+                      disabled={loading}
+                      className="p-3.5 rounded-xl border border-[#C4A484]/30 bg-[#C4A484]/5 hover:bg-[#C4A484]/15 transition text-left space-y-1.5 group relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 bg-[#EAB308]/20 text-[#EAB308] text-[8px] font-extrabold px-1.5 py-0.5 rounded-bl uppercase tracking-wider">
+                        Рекомендуем
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-[#EAD5C3] group-hover:text-[#EAB308] transition">Глубокий коучинг</span>
+                        <span className="text-[9px] text-[#C4A484] px-1.5 py-0.5 rounded bg-[#C4A484]/15">6 шагов</span>
+                      </div>
+                      <p className="text-[10px] text-[#C4A484]/85 leading-normal">
+                        Интерактивная сессия по схеме «Что хочу → Действие» с проработкой эмоций, идентичности и составлением личного Манифеста целей.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             {isTyping && (
               <div className="flex gap-3 max-w-[80%] mr-auto">
                 <div className="h-8 w-8 rounded-full bg-[#3B82F6]/10 text-[#3B82F6] flex items-center justify-center">
@@ -941,55 +1000,9 @@ export default function CoachPage() {
                 </div>
               </motion.div>
             ) : step > 2 && step < 16 && !extractedData.sessionMode ? (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-6 rounded-2xl bg-gradient-to-br from-[#1b1510]/95 to-[#0e0a07]/95 border border-[#C4A484]/20 shadow-2xl space-y-4"
-              >
-                <div className="text-center space-y-2">
-                  <h3 className="text-md font-bold text-[#EAD5C3] font-sans">Выберите формат коуч-сессии</h3>
-                  <p className="text-xs text-[#C4A484]/80 max-w-md mx-auto">
-                    Вы завершили регистрацию. Какое исследование талантов вам ближе?
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Экспресс-режим */}
-                  <button
-                    type="button"
-                    onClick={() => handleSelectMode('EXPRESS')}
-                    disabled={loading}
-                    className="p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition text-left space-y-2 group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] transition">Экспресс-формат</span>
-                      <span className="text-[10px] text-[#7A8A9E] px-2 py-0.5 rounded bg-white/5">10-15 мин</span>
-                    </div>
-                    <p className="text-[11px] text-[#7A8A9E] leading-relaxed">
-                      Быстрый опросник по увлечениям, интересам и целям для моментального получения рекомендаций.
-                    </p>
-                  </button>
-
-                  {/* Глубокий режим */}
-                  <button
-                    type="button"
-                    onClick={() => handleSelectMode('DEEP')}
-                    disabled={loading}
-                    className="p-4 rounded-xl border border-[#C4A484]/30 bg-[#C4A484]/5 hover:bg-[#C4A484]/10 transition text-left space-y-2 group relative overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 bg-[#EAB308]/20 text-[#EAB308] text-[8px] font-extrabold px-1.5 py-0.5 rounded-bl uppercase tracking-wider">
-                      Рекомендуем
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#EAD5C3] group-hover:text-[#EAB308] transition">Глубокий коучинг</span>
-                      <span className="text-[10px] text-[#C4A484] px-2 py-0.5 rounded bg-[#C4A484]/15">6 шагов</span>
-                    </div>
-                    <p className="text-[11px] text-[#C4A484]/80 leading-relaxed">
-                      Интерактивная сессия по схеме «Что хочу → Действие» с проработкой эмоций, идентичности и составлением личного Манифеста целей.
-                    </p>
-                  </button>
-                </div>
-              </motion.div>
+              <div className="text-center py-4 text-xs text-[#C4A484]/80 bg-[#C4A484]/5 border border-[#C4A484]/15 rounded-xl animate-pulse">
+                👇 Выберите формат исследования талантов выше в чате 🎯
+              </div>
             ) : (
               <div className="space-y-3">
 

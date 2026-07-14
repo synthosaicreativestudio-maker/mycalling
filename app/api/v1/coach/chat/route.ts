@@ -6,8 +6,25 @@ import prisma from '../../../../lib/prisma';
 import { auth } from '../../../../lib/auth';
 import { generateText, generateJson } from '../../../../lib/gemini';
 
+const NAME_STOP_WORDS = new Set([
+  'привет', 'прив', 'хай', 'хелло', 'здравствуйте', 'здрасте', 'даров', 'салют',
+  'здарова', 'здорово', 'добрый', 'доброе', 'вечер', 'утро', 'день', 'ку', 'йо',
+  'да', 'нет', 'ага', 'угу', 'ок', 'окей', 'ладно', 'хорошо', 'давай', 'готов',
+  'готова', 'поехали', 'начнём', 'начнем', 'старт', 'го', 'лет', 'класс', 'город'
+]);
+
+function isValidName(name: string): boolean {
+  if (!name || name.trim().length < 2) return false;
+  const lower = name.trim().toLowerCase();
+  if (NAME_STOP_WORDS.has(lower)) return false;
+  // Отфильтровать фразы-приветствия: «привет да», «хай готов» и т.д.
+  const words = lower.split(/\s+/);
+  if (words.every(w => NAME_STOP_WORDS.has(w))) return false;
+  return true;
+}
+
 const FALLBACK_REPLIES: Record<number, string> = {
-  0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы провем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Чтобы я смог составить максимально точный профиль, отвечай, пожалуйста, подробно и честно. Готов начать?",
+  0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы проведём увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Чтобы я смог составить максимально точный профиль, отвечай, пожалуйста, подробно и честно. Готов начать?",
   1: "Отлично! Давай сначала познакомимся. Как мне к тебе обращаться? Напиши свое имя. 😊",
   2: "Приятно познакомиться! Теперь давай подключим удобный канал связи ниже (Telegram или MAX ID), чтобы результаты не потерялись, и мы могли продолжить в любой момент! 😉",
   3: "Расскажи, чем ты любишь заниматься в свободное время? Какое у тебя хобби, или от какого дела ты по-настоящему кайфуешь и теряешь счет времени?",
@@ -912,7 +929,12 @@ export async function POST(req: Request) {
       const cleanMessage = message.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?\s]/g, "");
       if (cleanMessage.length < 2) parsedData.shouldAdvanceStep = false;
 
-      if (parsedData.fullName) extractedData.fullName = parsedData.fullName;
+      if (parsedData.fullName && isValidName(parsedData.fullName)) {
+        extractedData.fullName = parsedData.fullName;
+      } else if (parsedData.fullName && !isValidName(parsedData.fullName)) {
+        // Стоп-слово вместо имени — не продвигаем шаг
+        parsedData.shouldAdvanceStep = false;
+      }
       if (parsedData.age) extractedData.age = parsedData.age;
       if (parsedData.grade) extractedData.grade = parsedData.grade;
       if (parsedData.city) extractedData.city = parsedData.city;
@@ -1287,8 +1309,12 @@ export async function POST(req: Request) {
 ${!hasPhone ? 'Твоя цель на текущем этапе диалога — предложить подключить канал связи.' : 'Твоя цель на текущем этапе диалога — собрать по одному недостающие личные данные собеседника.'}
 
 Веди живой, спокойный, эмпатичный диалог на равных:
-1. Естественно и без лишних эмоций реагируй на ответы подростка.
-2. Задай вопрос о недостающих данных, но только о первом по списку! Не спрашивай всё сразу. Нам нужно получить ответ именно на указанный ниже вопрос.
+1. ОБЯЗАТЕЛЬНО начни свой ответ с короткой, тёплой и искренней реакции на предыдущий ответ подростка (1 предложение). Примеры:
+   - Если подросток назвал возраст: «Классный возраст — всё впереди!» или «15 лет — самое время исследовать свои таланты!»
+   - Если назвал класс: «8 класс — отличное время, чтобы разобраться в себе!»
+   - Если назвал город: «Тюмень — крутой город! Слышал, там классная энергетика.» или «Москва — город возможностей!»
+   Реакция должна быть уникальной и привязанной к конкретному ответу, НЕ шаблонной.
+2. После реакции задай вопрос о недостающих данных, но только о первом по списку! Не спрашивай всё сразу.
 Недостающие данные:
 ${missingFields.join('\n')}
 
@@ -1401,7 +1427,7 @@ ${missingFields.join('\n')}
     let replyContent = '';
     
     // Использовать ли ИИ-генерацию на текущем шаге
-    const useAI = (currentVirtualStep >= 3 && currentVirtualStep <= 15) || currentVirtualStep === 16;
+    const useAI = (currentVirtualStep >= 2 && currentVirtualStep <= 15 && hasPhone) || (currentVirtualStep >= 3 && currentVirtualStep <= 15) || currentVirtualStep === 16;
 
     if (!useAI) {
       if (currentVirtualStep === 0) {
@@ -1412,22 +1438,9 @@ ${missingFields.join('\n')}
         if (!hasPhone) {
           replyContent = FALLBACK_REPLIES[2];
         } else {
-          const name = extractedData.fullName || 'друг';
-          if (!hasAge) {
-            const isReset = transcript.length === 0;
-            const prefix = isReset ? "Давай начнем заново! 😉 " : "Спасибо за выбор канала! 😉 ";
-            replyContent = `${prefix}${name}, сколько тебе лет?`;
-          } else if (!hasGrade) {
-            if (extractedData.age && extractedData.age > 18) {
-              replyContent = "Ты уже закончил школу или учишься в вузе/работаешь? Расскажи подробнее.";
-            } else {
-              replyContent = "В каком классе ты учишься?";
-            }
-          } else if (!hasCity) {
-            replyContent = "И из какого ты города?";
-          } else {
-            replyContent = "Отлично, все данные собраны! 😉";
-          }
+          // AI-генерация включена (useAI = true для step 2 + hasPhone)
+          // Fallback не нужен — пойдёт в ветку else (AI)
+          replyContent = '';
         }
       }
     } else {
