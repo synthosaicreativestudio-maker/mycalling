@@ -40,10 +40,12 @@ function LinkCard() {
           clearInterval(interval);
           setStatus('COMPLETED');
 
-          // Если есть токен сессии, выполняем автоматический вход (для мобильного устройства)
+          // Если есть токен сессии, выполняем автоматический вход
+          // ВАЖНО: используем window.location.href (не router.push) для полной
+          // браузерной навигации — только так куки Better Auth надёжно записываются
           if (data.sessionToken) {
             setTimeout(() => {
-              router.push(`/api/auth/telegram/callback?token=${data.sessionToken}`);
+              window.location.href = `/api/auth/telegram/callback?token=${data.sessionToken}`;
             }, 1500);
           }
         } else if (data.status === 'EXPIRED') {
