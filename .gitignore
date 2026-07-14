@@ -16,3 +16,5 @@ public/assets/logos/segments/
 public/assets/tree/view_tree.html
 public/assets/tree_test/
 тз для svg входа/
+.vercel
+.env*
