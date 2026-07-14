@@ -131,11 +131,12 @@ function AuthCard() {
 
   const tgPayload = linkCode || '';
 
-  const telegramAppLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${encodeURIComponent(tgPayload)}` : ''}`;
+  const telegramAppLink = `tg://resolve?domain=moyoprizvanie_bot${tgPayload ? `&start=${encodeURIComponent(tgPayload)}` : ''}`;
+  const telegramWebLink = `https://telegram.me/moyoprizvanie_bot${tgPayload ? `?start=${encodeURIComponent(tgPayload)}` : ''}`;
   const maxIdLink = `https://max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
 
   // Динамические QR-коды
-  const qrTelegramLink = telegramAppLink;
+  const qrTelegramLink = telegramWebLink; // telegram.me реже блокируется для QR-кодов
   const qrMaxIdLink = maxIdLink;
 
   return (
@@ -200,13 +201,25 @@ function AuthCard() {
             <QRCodeSVG value={qrTelegramLink} size={180} fgColor="#349ed9" level="H" includeMargin={true} />
           </div>
 
-          {/* Ссылка */}
-          <a
-            href={telegramAppLink}
-            className="w-full h-[56px] inline-flex items-center justify-center gap-2.5 rounded-2xl bg-[#349ed9] text-base font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_30px_rgba(52,158,217,0.25)]"
-          >
-            Войти через Telegram <ExternalLink className="h-4 w-4" />
-          </a>
+          <div className="space-y-3">
+            <a
+              href={telegramAppLink}
+              className="w-full h-[56px] inline-flex items-center justify-center gap-2.5 rounded-2xl bg-[#349ed9] text-base font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_30px_rgba(52,158,217,0.25)]"
+            >
+              Войти через Telegram <ExternalLink className="h-4 w-4" />
+            </a>
+            <p className="text-xs text-muted/65 leading-relaxed">
+              Если приложение не открылось,{' '}
+              <a 
+                href={telegramWebLink} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-[#349ed9] hover:underline font-bold"
+              >
+                откройте веб-версию
+              </a>
+            </p>
+          </div>
         </div>
       )}
 

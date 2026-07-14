@@ -792,7 +792,7 @@ export default function CoachPage() {
               const isCoach = msg.role === 'assistant';
               const tgPayload = linkCode || '';
 
-              const telegramBotLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+              const telegramBotLink = `https://telegram.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
               const maxIdLink = `https://max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
 
               return (

@@ -72,9 +72,10 @@ function LinkCard() {
   }
 
   const isTelegram = provider === 'telegram';
-  const telegramAppLink = `https://t.me/moyoprizvanie_bot?start=${encodeURIComponent(code)}`;
+  const telegramAppLink = `tg://resolve?domain=moyoprizvanie_bot&start=${encodeURIComponent(code)}`;
+  const telegramWebLink = `https://telegram.me/moyoprizvanie_bot?start=${encodeURIComponent(code)}`;
   const qrLink = isTelegram
-    ? telegramAppLink
+    ? telegramWebLink
     : `https://max.ru/maxid_bot?start=${code}`;
 
   const maxIdLink = `https://max.ru/maxid_bot?start=${code}`;
@@ -113,17 +114,30 @@ function LinkCard() {
           </div>
 
           {/* Кнопка открытия */}
-          <a
-            href={isTelegram ? telegramAppLink : maxIdLink}
-            target={isTelegram ? undefined : '_blank'}
-            rel={isTelegram ? undefined : 'noopener noreferrer'}
-            className={`w-full h-[54px] inline-flex items-center justify-center gap-2.5 rounded-2xl text-sm font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-lg ${isTelegram
-                ? 'bg-[#349ed9] hover:bg-[#2d8bc0] shadow-[#349ed9]/25'
-                : 'bg-[#8b5cf6] hover:bg-[#7c4df2] shadow-[#8b5cf6]/25'
-              }`}
-          >
-            Открыть чат-бот <ExternalLink className="h-4 w-4" />
-          </a>
+          <div className="w-full space-y-3">
+            <a
+              href={isTelegram ? telegramAppLink : maxIdLink}
+              className={`w-full h-[54px] inline-flex items-center justify-center gap-2.5 rounded-2xl text-sm font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-lg ${isTelegram
+                  ? 'bg-[#349ed9] hover:bg-[#2d8bc0] shadow-[#349ed9]/25'
+                  : 'bg-[#8b5cf6] hover:bg-[#7c4df2] shadow-[#8b5cf6]/25'
+                }`}
+            >
+              Открыть чат-бот <ExternalLink className="h-4 w-4" />
+            </a>
+            {isTelegram && (
+              <p className="text-xs text-[#7A8A9E] leading-relaxed">
+                Если приложение не открылось,{' '}
+                <a 
+                  href={telegramWebLink} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-[#349ed9] hover:underline font-bold"
+                >
+                  откройте веб-версию
+                </a>
+              </p>
+            )}
+          </div>
 
           {/* Поллинг индикатор */}
           <div className="flex items-center justify-center gap-2 text-xs text-[#7A8A9E] pt-2 border-t border-white/5">
