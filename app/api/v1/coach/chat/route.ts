@@ -7,9 +7,9 @@ import { auth } from '../../../../lib/auth';
 import { generateText, generateJson } from '../../../../lib/gemini';
 
 const FALLBACK_REPLIES: Record<number, string> = {
-  0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы проведем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Чтобы я смог составить максимально точный профиль, отвечай, пожалуйста, подробно и честно. Готов начать?",
-  1: "Отлично! Давай сначала подключим удобный канал связи ниже (Telegram или MAX ID), чтобы результаты не потерялись, и мы могли продолжить в любой момент! 😉",
-  2: "Супер! Теперь давай познакомимся поближе. Помни про подробные ответы — пиши развернуто. Напиши, пожалуйста, как тебя зовут, в каком классе ты учишься, сколько тебе лет и из какого ты города?",
+  0: "Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник на платформе «МоёПризвание». Сегодня мы провем увлекательное исследование твоих талантов, сильных сторон и интересов. Это не скучный экзамен, а дружеский диалог. Чтобы я смог составить максимально точный профиль, отвечай, пожалуйста, подробно и честно. Готов начать?",
+  1: "Отлично! Давай сначала познакомимся. Как мне к тебе обращаться? Напиши свое имя. 😊",
+  2: "Приятно познакомиться! Теперь давай подключим удобный канал связи ниже (Telegram или MAX ID), чтобы результаты не потерялись, и мы могли продолжить в любой момент! 😉",
   3: "Расскажи, чем ты любишь заниматься в свободное время? Какое у тебя хобби, или от какого дела ты по-настоящему кайфуешь и теряешь счет времени?",
   4: "Здорово! А давай заглянем в школу: какие предметы тебе даются легче всего и вызывают хоть какой-то интерес, а от каких хочется выть?",
   5: "Давай теперь помечтаем: если убрать вообще все ограничения, кем бы ты хотел быть через 10 лет?",
@@ -439,8 +439,12 @@ export async function POST(req: Request) {
     transcript = isDeepMode ? deepTranscript : expressTranscript;
 
     // Вычисляем, какие блоки информации уже собраны
+    const hasName = !!extractedData.fullName && extractedData.fullName !== 'Гость';
     const hasPhone = !!coachSession.user.phone || !!extractedData.phone;
-    const hasPersonalInfo = !!extractedData.fullName && (!!extractedData.age || !!extractedData.grade) && !!extractedData.city;
+    const hasAge = !!extractedData.age;
+    const hasGrade = !!extractedData.grade;
+    const hasCity = !!extractedData.city;
+    const hasPersonalInfo = hasName && hasAge && hasGrade && hasCity;
     
     // Вычисляем шаг до экстракции
     let currentStepBefore = 1;
@@ -454,9 +458,12 @@ export async function POST(req: Request) {
       const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 1;
       const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1;
 
-      if (!hasPhone) {
+      if (!hasName) {
         currentStepBefore = 1;
         nextStep = 1;
+      } else if (!hasPhone) {
+        currentStepBefore = 2;
+        nextStep = 2;
       } else if (!hasPersonalInfo) {
         currentStepBefore = 2;
         nextStep = 2;
@@ -499,10 +506,15 @@ export async function POST(req: Request) {
       const hasValues = getStrLen(extractedData.expressExtracted?.values) > 6;
       const hasDecisionStyle = getStrLen(extractedData.expressExtracted?.decisionStyle) > 6;
 
-      if (!hasPhone) {
+      if (!hasName) {
         currentStepBefore = 1;
+        nextStep = 1;
+      } else if (!hasPhone) {
+        currentStepBefore = 2;
+        nextStep = 2;
       } else if (!hasPersonalInfo) {
         currentStepBefore = 2;
+        nextStep = 2;
       } else {
         let psychoBlocksBefore = 0;
         if (hasHobbies) psychoBlocksBefore++;
@@ -547,7 +559,7 @@ export async function POST(req: Request) {
 
       const allPsychologyCollected = hasPersonalInfo && (psychoBlocksCount >= 12);
       const isFinalStep = allPsychologyCollected;
-      nextStep = !hasPhone ? 1 : (!hasPersonalInfo ? 2 : (isFinalStep ? 16 : Math.min(15, 3 + psychoBlocksCount)));
+      nextStep = !hasName ? 1 : (!hasPhone ? 2 : (!hasPersonalInfo ? 2 : (isFinalStep ? 16 : Math.min(15, 3 + psychoBlocksCount))));
     }
 
     // Защита от зависания шагов (когда ИИ-экстрактор не может надежно извлечь данные)
@@ -648,15 +660,16 @@ export async function POST(req: Request) {
 
     if (isInitMessage && transcript.length > 0) {
       // ПРОВЕРКА: Если канал связи только что подключили (hasPhone === true),
-      // но в истории последнее сообщение — это предложение подключить канал (step === 1),
-      // то мы автоматически добавляем приветствие шага 2 в историю.
-      const hasStep1Message = transcript.some(m => m.role === 'assistant' && (m.content.includes('канал связи') || m.content.includes('Telegram или MAX ID')));
-      const hasStep2Message = transcript.some(m => m.role === 'assistant' && m.content.includes('познакомимся поближе'));
+      // но в истории последнее сообщение — это предложение подключить канал (step === 2 и !hasPhone),
+      // то мы автоматически добавляем в историю благодарность и первый вопрос (Возраст).
+      const hasStep2Message = transcript.some(m => m.role === 'assistant' && (m.content.includes('канал связи') || m.content.includes('Telegram или MAX ID')));
+      const hasAgeMessage = transcript.some(m => m.role === 'assistant' && (m.content.includes('сколько тебе лет') || m.content.includes('Сколько тебе лет')));
 
-      if (hasPhone && hasStep1Message && !hasStep2Message) {
-        console.log('[coach/chat] Auto-transitioning to step 2 after phone confirmation on init');
+      if (hasPhone && hasStep2Message && !hasAgeMessage) {
+        console.log('[coach/chat] Auto-transitioning to Age question after phone confirmation on init');
         
-        const transitionText = "Спасибо за выбор канала! 😉\n\n" + FALLBACK_REPLIES[2];
+        const name = extractedData.fullName || 'друг';
+        const transitionText = `Спасибо за выбор канала! 😉\n\n${name}, сколько тебе лет?`;
         const nextMsg = { role: 'assistant', content: transitionText, timestamp: new Date().toISOString() };
         
         expressTranscript.push(nextMsg);
@@ -767,7 +780,7 @@ export async function POST(req: Request) {
       }
     } else if (!isInitMessage) {
       // Для работы fallbackExtract
-      const prevHasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1;
+      const prevHasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1 && extractedData.fullName !== 'Гость';
       const prevHasAgeOrGrade = !!extractedData.age || !!extractedData.grade;
       const prevHasCity = !!extractedData.city && extractedData.city.trim().length > 1;
 
@@ -776,7 +789,10 @@ export async function POST(req: Request) {
       };
       let fieldsToExtract = "shouldAdvanceStep(boolean)";
 
-      if (currentStepBefore === 2) {
+      if (currentStepBefore === 1) {
+        properties.fullName = { type: "STRING" };
+        fieldsToExtract += ", fullName";
+      } else if (currentStepBefore === 2) {
         properties.fullName = { type: "STRING" };
         properties.age = { type: "INTEGER" };
         properties.grade = { type: "STRING" };
@@ -933,12 +949,13 @@ export async function POST(req: Request) {
     const updatedPhone = hasPhone || !!parsedData.phone;
     
     // Проверяем заполненность отдельных полей личных данных
-    const hasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1;
-    const hasAgeOrGrade = !!extractedData.age || !!extractedData.grade;
-    const hasCity = !!extractedData.city && extractedData.city.trim().length > 1;
+    const updatedName = !!extractedData.fullName && extractedData.fullName.trim().length > 1 && extractedData.fullName !== 'Гость';
+    const updatedAge = !!extractedData.age;
+    const updatedGrade = !!extractedData.grade;
+    const updatedCity = !!extractedData.city && extractedData.city.trim().length > 1;
     
-    // Личные данные считаются полностью собранными, если есть имя, возраст/класс и город
-    const updatedPersonalInfo = hasName && hasAgeOrGrade && hasCity;
+    // Личные данные считаются полностью собранными, если есть имя, возраст, класс и город
+    const updatedPersonalInfo = updatedName && updatedAge && updatedGrade && updatedCity;
     const updatedDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
     const updatedIdols = getStrLen(extractedData.expressExtracted?.idols) > 6;
     const updatedParents = getStrLen(extractedData.expressExtracted?.parents) > 6;
@@ -985,8 +1002,10 @@ export async function POST(req: Request) {
       const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 1;
       const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1;
 
-      if (!updatedPhone) {
+      if (!updatedName) {
         currentVirtualStep = 1;
+      } else if (!updatedPhone) {
+        currentVirtualStep = 2;
       } else if (!updatedPersonalInfo) {
         currentVirtualStep = 2;
       } else if (!hasDeepGoal) {
@@ -1006,10 +1025,12 @@ export async function POST(req: Request) {
       }
       isFinalStateNow = updatedPersonalInfo && updatedPhone && hasDeepGoal && hasDeepOutcome && hasDeepEmotions && hasDeepIdentity && hasDeepActions && hasDeepFirstStep;
     } else {
-      if (!updatedPhone) {
-        currentVirtualStep = 1; // Шаг подключения Telegram
+      if (!updatedName) {
+        currentVirtualStep = 1; // Шаг знакомства (Имя)
+      } else if (!updatedPhone) {
+        currentVirtualStep = 2; // Шаг подключения Telegram
       } else if (!updatedPersonalInfo) {
-        currentVirtualStep = 2; // Шаг знакомства и личных данных
+        currentVirtualStep = 2; // Шаг сбора возраста, класса, города
       } else {
         // Свободный диалог длится до Шага 15 (когда собрано 13 психологических полей)
         if (psychoBlocks < 13) {
@@ -1104,9 +1125,17 @@ export async function POST(req: Request) {
 
     // Заполняем недостающие поля СТРОГО на основе текущего шага
     if (currentVirtualStep === 1) {
+      missingFields.push("- Имя собеседника. Спроси, как его зовут (как к нему обращаться). Сделай это вежливо и дружелюбно.");
+    } else if (currentVirtualStep === 2 && !hasPhone) {
       missingFields.push("- Подключение канала связи (Telegram или MAX ID). Предложи подростку выбрать удобный канал связи ниже (подключить Telegram или указать свой MAX ID), чтобы результаты не потерялись, и мы могли продолжить.");
-    } else if (currentVirtualStep === 2) {
-      missingFields.push("- Личные данные (Имя, возраст, город проживания). Спроси об этом мягко в рамках знакомства. Нам критически важно узнать это в самом начале.");
+    } else if (currentVirtualStep === 2 && hasPhone) {
+      if (!hasAge) {
+        missingFields.push("- Возраст. Спроси: «сколько тебе лет?» (мягко и прямо).");
+      } else if (!hasGrade) {
+        missingFields.push("- Класс. Спроси, в каком классе он учится.");
+      } else if (!hasCity) {
+        missingFields.push("- Город. Спроси, из какого он города.");
+      }
     } else {
       // Шаг сбора психологии
       if (!updatedHobbies) {
@@ -1183,24 +1212,40 @@ export async function POST(req: Request) {
 5. Пригласи подростка пройти короткие интерактивные тесты на платформе, чтобы дополнить картину его талантов.
 НИКАКИХ новых вопросов в конце не задавай. Ты завершаешь сессию.`;
       }
-    } else if (currentVirtualStep === 2) {
+    } else if (currentVirtualStep === 1) {
       systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
-Твоя цель на текущем этапе диалога — познакомимся с подростком и собрать его личные данные: имя, сколько лет/класс и город проживания.
+Твоя цель на текущем этапе диалога — узнать имя подростка (как к нему обращаться).
 
 Веди живой, спокойный, эмпатичный диалог на равных:
-1. Естественно и без лишних эмоций реагируй на ответы подростка. Если он назвал свой город, просто прими это к сведению или спокойно отметь какой-то факт без визгов вроде «О, классный город!». Если он назвал свой класс, поддержи его зрело, без наигранного воодушевления.
-2. Спроси о недостающих данных, но делай это мягко и непринужденно. Ты можешь использовать как открытые, так и закрытые или уточняющие вопросы (например, спросить конкретно: "Ты учишься в 8 классе, верно?" или "А из какого ты города?"), чтобы подростку было комфортно отвечать.
+1. Поздоровайся и мягко спроси, как зовут подростка.
+2. Будь предельно лаконичен (1-2 предложения).
+
+Критически важные правила общения:
+- Задавай строго ОДИН простой вопрос за раз.
+- Категорически запрещено использовать фальшивые междометия («О!», «Ого!», «Ооо», «Ага», «Ух ты!») и шаблонные наигранные восторги.
+- Категорически запрещено использовать слова «ИИ», «алгоритм», «бот», «робот». Ты — коуч Роман.`;
+    } else if (currentVirtualStep === 2) {
+      systemPrompt = `Ты — Роман, мудрый, поддерживающий коуч и наставник подростков на платформе «МоёПризвание».
+${!hasPhone ? 'Твоя цель на текущем этапе диалога — предложить подключить канал связи.' : 'Твоя цель на текущем этапе диалога — собрать по одному недостающие личные данные собеседника.'}
+
+Веди живой, спокойный, эмпатичный диалог на равных:
+1. Естественно и без лишних эмоций реагируй на ответы подростка.
+2. Задай вопрос о недостающих данных, но только о первом по списку! Не спрашивай всё сразу. Нам нужно получить ответ именно на указанный ниже вопрос.
 Недостающие данные:
 ${missingFields.join('\n')}
 
 Уже известная информация о собеседнике:
-${collectedFields.length > 0 ? collectedFields.join('\n') : '- Пока ничего не известно.'}
+- Имя: ${extractedData.fullName || 'Не указано'}
+- Телефон/Telegram: ${hasPhone ? 'Подключен' : 'Не подключен'}
+- Возраст: ${extractedData.age ? `${extractedData.age} лет` : 'Не указан'}
+- Класс: ${extractedData.grade || 'Не указан'}
+- Город: ${extractedData.city || 'Не указан'}
 
 Критически важные правила общения:
 - Каждое твое сообщение ОБЯЗАТЕЛЬНО должно заканчиваться конкретным, простым, вовлекающим открытым вопросом или понятным призывом к действию (подталкиванием вперед), чтобы собеседнику было абсолютно ясно, о чем писать дальше. Не оставляй диалог зависшим.
 - Задавай строго ОДИН простой вопрос за раз. Не перегружай подростка.
-- Категорически запрещено использовать фальшивые междометия («О!», «Ого!», «Ооо», «Ага», «Ух ты!») и шаблонные наигранные восторги («Очень отзывается», «Круто!», «Супер!», «Интересный выбор»). Говори просто, спокойно, естественно, как нормальный взрослый друг. Не сюсюкайся и не пытайся искусственно «косить под тинейджера».
-- Длина твоих реплик: до 3 предложений. Твоя речь должна быть живой, человечной, дружелюбной и понятной современному подростку.
+- Категорически запрещено использовать фальшивые междометия («О!», «Ого!», «Ооо», «Ага», «Ух ты!») и шаблонные наигранные восторги. Говори просто, спокойно, естественно, как нормальный взрослый друг.
+- Длина твоих реплик: до 3 предложений.
 - Категорически запрещено использовать слова «ИИ», «алгоритм», «бот», «робот». Ты — коуч Роман.`;
     } else if (isDeepMode) {
       if (finalNextStep === 10) {
@@ -1443,9 +1488,9 @@ function fallbackExtract(
         }
       }
     }
-
+  } else if (currentStep === 2) {
     // 2. Извлечение возраста и класса
-    if (hasName && !hasAgeOrGrade) {
+    if (!hasAgeOrGrade) {
       const ageMatch = cleanMsg.match(/(\d+)\s*(?:лет|года|год)/i) || cleanMsg.match(/(?:мне|я)\s+(\d+)/i) || cleanMsg.match(/\b(1[0-9])\b/);
       if (ageMatch) {
         result.age = parseInt(ageMatch[1]);
@@ -1458,7 +1503,7 @@ function fallbackExtract(
     }
 
     // 3. Извлечение города
-    if (hasName && hasAgeOrGrade && !hasCity) {
+    if (!hasCity) {
       const cityMatch = cleanMsg.match(/(?:из|город|живу в)\s+([А-ЯЁа-яёA-Za-z\-]+)/i);
       if (cityMatch && cityMatch[1]) {
         result.city = cityMatch[1].charAt(0).toUpperCase() + cityMatch[1].slice(1).toLowerCase();

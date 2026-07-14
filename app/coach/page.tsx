@@ -16,8 +16,8 @@ interface Message {
 
 const STEP_NAMES: Record<number, string> = {
   0: 'Знакомство и контракт',
-  1: 'Подключение канала связи',
-  2: 'Сбор личных данных',
+  1: 'Знакомство (Имя)',
+  2: 'Подключение канала связи',
   3: 'Увлечения и хобби',
   4: 'Школа и предметы',
   5: 'Мечты и цели (WOOP)',
@@ -837,7 +837,7 @@ export default function CoachPage() {
                       </div>
                     )}
 
-                    {isCoach && step === 1 && !phoneConfirmed && idx === messages.length - 1 && (
+                    {isCoach && step === 2 && !phoneConfirmed && idx === messages.length - 1 && (
                       <div className="mt-4 p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/15 space-y-3">
                         <p className="text-xs font-bold text-[#3B82F6] flex items-center gap-1.5">
                           <span>📲</span> Подключите удобный канал связи для получения отчета:
