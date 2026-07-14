@@ -131,11 +131,11 @@ function AuthCard() {
 
   const tgPayload = linkCode || '';
 
-  const telegramBotLink = `https://t.me/moyoprizvanie_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
+  const telegramAppLink = `tg://resolve?domain=moyoprizvanie_bot${tgPayload ? `&start=${encodeURIComponent(tgPayload)}` : ''}`;
   const maxIdLink = `https://max.ru/maxid_bot${tgPayload ? `?start=${tgPayload}` : ''}`;
 
   // Динамические QR-коды
-  const qrTelegramLink = telegramBotLink;
+  const qrTelegramLink = telegramAppLink;
   const qrMaxIdLink = maxIdLink;
 
   return (
@@ -202,9 +202,7 @@ function AuthCard() {
 
           {/* Ссылка */}
           <a
-            href={telegramBotLink}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={telegramAppLink}
             className="w-full h-[56px] inline-flex items-center justify-center gap-2.5 rounded-2xl bg-[#349ed9] text-base font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_30px_rgba(52,158,217,0.25)]"
           >
             Войти через Telegram <ExternalLink className="h-4 w-4" />

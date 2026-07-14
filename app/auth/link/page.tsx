@@ -70,11 +70,11 @@ function LinkCard() {
   }
 
   const isTelegram = provider === 'telegram';
+  const telegramAppLink = `tg://resolve?domain=moyoprizvanie_bot&start=${encodeURIComponent(code)}`;
   const qrLink = isTelegram
-    ? `https://t.me/moyoprizvanie_bot?start=${code}`
+    ? telegramAppLink
     : `https://max.ru/maxid_bot?start=${code}`;
 
-  const telegramBotLink = `https://t.me/moyoprizvanie_bot?start=${code}`;
   const maxIdLink = `https://max.ru/maxid_bot?start=${code}`;
 
   return (
@@ -112,9 +112,9 @@ function LinkCard() {
 
           {/* Кнопка открытия */}
           <a
-            href={isTelegram ? telegramBotLink : maxIdLink}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={isTelegram ? telegramAppLink : maxIdLink}
+            target={isTelegram ? undefined : '_blank'}
+            rel={isTelegram ? undefined : 'noopener noreferrer'}
             className={`w-full h-[54px] inline-flex items-center justify-center gap-2.5 rounded-2xl text-sm font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-lg ${isTelegram
                 ? 'bg-[#349ed9] hover:bg-[#2d8bc0] shadow-[#349ed9]/25'
                 : 'bg-[#8b5cf6] hover:bg-[#7c4df2] shadow-[#8b5cf6]/25'
