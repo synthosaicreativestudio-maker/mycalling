@@ -683,7 +683,7 @@ export default function CoachPage() {
       )}
 
       {/* progress top panel */}
-      <div className="w-full max-w-3xl mb-6 glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="w-full max-w-7xl mb-6 glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center text-[#3B82F6]">
             <Brain className="h-5 w-5 animate-pulse" />
@@ -707,29 +707,20 @@ export default function CoachPage() {
           
           <Link
             href="/"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-sans font-medium text-white/70 hover:text-white transition duration-200 border border-white/10"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-sans font-semibold text-white/70 hover:text-white transition duration-200 border border-white/10 whitespace-nowrap min-w-[120px]"
             title="Вернуться на главную"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
+            <ArrowLeft className="h-4 w-4" />
             <span>На главную</span>
-          </Link>
-          
-          <Link
-            href="/assessment"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-sans font-medium text-white/70 hover:text-white transition duration-200 border border-white/10"
-            title="Перейти к тестам"
-          >
-            <Compass className="h-3.5 w-3.5" />
-            <span>К тестам</span>
           </Link>
 
           <button
             onClick={handleResetSession}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-sans font-medium text-white/70 hover:text-white transition duration-200 border border-white/10"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-sans font-semibold text-white/70 hover:text-white transition duration-200 border border-white/10 whitespace-nowrap min-w-[100px]"
             title="Начать заново"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
+            <RotateCcw className="h-4 w-4" />
             <span>Заново</span>
           </button>
         </div>

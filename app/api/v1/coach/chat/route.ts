@@ -356,7 +356,7 @@ export async function POST(req: Request) {
         data: {
           userId: user.id,
           transcript: [],
-          extractedData: { currentStep: 0, sessionMode: sessionMode || 'EXPRESS' },
+          extractedData: { currentStep: 0, sessionMode: sessionMode || null },
           status: 'IN_PROGRESS'
         },
         include: { user: true }
