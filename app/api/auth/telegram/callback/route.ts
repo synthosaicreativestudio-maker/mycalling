@@ -4,6 +4,28 @@ import prisma from '../../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Создаёт подписанное значение куки в формате better-call:
+ *   `${value}.${base64(HMAC-SHA256(value, secret))}`
+ * Длина подписи — 44 символа (стандартный base64 с =).
+ */
+async function makeSignedCookieValue(value: string, secret: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(value)
+  );
+  const base64sig = Buffer.from(signature).toString('base64'); // 44 chars, ends with =
+  return `${value}.${base64sig}`;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const isJson = searchParams.get('format') === 'json';
@@ -44,9 +66,9 @@ export async function GET(request: Request) {
       // Генерируем реальную Better Auth сессию
       const sessionToken = crypto.randomBytes(32).toString('hex');
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7); // 7 дней
+      expiresAt.setDate(expiresAt.getDate() + 7);
 
-      const newSession = await prisma.session.create({
+      await prisma.session.create({
         data: {
           token: sessionToken,
           userId: tokenRecord.userId,
@@ -58,7 +80,7 @@ export async function GET(request: Request) {
       finalExpiresAt = expiresAt;
       userId = tokenRecord.userId;
     } else if (token) {
-      // 2. Стандартный путь по токену сессии (для поллинга)
+      // 2. Стандартный путь по токену сессии (для поллинга с десктопа)
       const session = await prisma.session.findUnique({
         where: { token }
       });
@@ -82,18 +104,26 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/auth?error=missing_token', request.url));
     }
 
-    // После авторизации всегда перенаправляем в личный кабинет (ЛК / report)
+    // После авторизации перенаправляем в личный кабинет
     const redirectPath = '/report';
-
     console.log('[auth] Callback redirection target:', { userId, redirectPath });
 
+    // Получаем секрет Better Auth (ОБЯЗАТЕЛЬНО должен быть в env!)
+    const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
+    if (!betterAuthSecret) {
+      console.error('[auth] BETTER_AUTH_SECRET is not set! Cannot create signed session cookie.');
+      return NextResponse.redirect(new URL('/auth?error=config_error', request.url));
+    }
+
+    // Создаём подписанное значение куки по формату better-call
+    const signedToken = await makeSignedCookieValue(finalSessionToken, betterAuthSecret);
+
     let response: NextResponse;
-    
+
     if (isJson) {
       response = NextResponse.json({ success: true, redirectPath });
     } else {
-      // Чтобы избежать удаления кук в Next.js при HTTP-редиректе 307/302, 
-      // отдаем HTML 200 OK с автоматическим JS-перенаправлением
+      // HTML с автоматическим редиректом (200 OK, чтобы куки не потерялись)
       const html = `
         <!DOCTYPE html>
         <html>
@@ -114,33 +144,29 @@ export async function GET(request: Request) {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       });
     }
-    
-    // Устанавливаем куки сессии Better Auth для обоих протоколов (http и https)
-    // для гарантированной работы за прокси-серверами продакшна
-    const isHttps = request.url.startsWith('https:');
-    
-    console.log('[auth] Callback setting both HTTP and HTTPS session cookies for max compatibility');
 
-    const cookieOptions = {
-      value: finalSessionToken,
+    console.log('[auth] Setting signed session cookie for Better Auth compatibility');
+
+    const cookieBase = {
+      value: signedToken,
       httpOnly: true,
       sameSite: 'lax' as const,
       path: '/',
-      expires: finalExpiresAt
+      expires: finalExpiresAt,
     };
 
-    // 1. Стандартная кука (используется на localhost)
+    // Кука Better Auth (основная, читается getSignedCookie)
+    response.cookies.set({
+      name: 'better-auth.session_token',
+      secure: true,
+      ...cookieBase,
+    });
+
+    // Дублируем без secure — для надёжности на разных прокси
     response.cookies.set({
       name: 'better-auth.session_token',
       secure: false,
-      ...cookieOptions
-    });
-
-    // 2. Защищенная кука (используется на продакшне https)
-    response.cookies.set({
-      name: '__secure-better-auth.session_token',
-      secure: true,
-      ...cookieOptions
+      ...cookieBase,
     });
 
     return response;
