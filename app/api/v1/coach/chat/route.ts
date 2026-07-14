@@ -807,7 +807,8 @@ export async function POST(req: Request) {
     } else if (!isInitMessage) {
       // Для работы fallbackExtract
       const prevHasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1 && extractedData.fullName !== 'Гость';
-      const prevHasAgeOrGrade = !!extractedData.age || !!extractedData.grade;
+      const prevHasAge = !!extractedData.age;
+      const prevHasGrade = !!extractedData.grade;
       const prevHasCity = !!extractedData.city && extractedData.city.trim().length > 1;
 
       let properties: Record<string, any> = {
@@ -900,7 +901,7 @@ export async function POST(req: Request) {
         console.warn('Extraction failed, using fallback:', err);
       }
 
-      const fallbackData = fallbackExtract(message, currentStepBefore, prevHasName, prevHasAgeOrGrade, prevHasCity);
+      const fallbackData = fallbackExtract(message, currentStepBefore, prevHasName, prevHasAge, prevHasGrade, prevHasCity);
       parsedData = {
         ...fallbackData,
         ...parsedData
@@ -1504,7 +1505,8 @@ function fallbackExtract(
   message: string, 
   currentStep: number, 
   hasName: boolean, 
-  hasAgeOrGrade: boolean, 
+  hasAge: boolean, 
+  hasGrade: boolean, 
   hasCity: boolean
 ): Record<string, any> {
   const result: Record<string, any> = { shouldAdvanceStep: true };
@@ -1527,20 +1529,32 @@ function fallbackExtract(
       }
     }
   } else if (currentStep === 2) {
-    // 2. Извлечение возраста и класса
-    if (!hasAgeOrGrade) {
+    // 2. Извлечение возраста
+    if (!hasAge) {
       const ageMatch = cleanMsg.match(/(\d+)\s*(?:лет|года|год)/i) || cleanMsg.match(/(?:мне|я)\s+(\d+)/i) || cleanMsg.match(/\b(1[0-9])\b/);
       if (ageMatch) {
         result.age = parseInt(ageMatch[1]);
       }
+    }
 
+    // 3. Извлечение класса / работы
+    if (!hasGrade) {
       const gradeMatch = cleanMsg.match(/(\d+)\s*(?:класс|классе)/i) || cleanMsg.match(/\b([1-9]|1[0-1])\b/);
       if (gradeMatch) {
         result.grade = gradeMatch[1] + " класс";
+      } else {
+        const lowerMsg = cleanMsg.toLowerCase();
+        if (lowerMsg.includes("работаю") || lowerMsg.includes("работа") || lowerMsg.includes("офис")) {
+          result.grade = "Работаю";
+        } else if (lowerMsg.includes("закончил") || lowerMsg.includes("окончил") || lowerMsg.includes("выпустился")) {
+          result.grade = "Закончил школу";
+        } else if (lowerMsg.includes("вуз") || lowerMsg.includes("учусь в") || lowerMsg.includes("институт") || lowerMsg.includes("университет") || lowerMsg.includes("колледж")) {
+          result.grade = "Студент";
+        }
       }
     }
 
-    // 3. Извлечение города
+    // 4. Извлечение города
     if (!hasCity) {
       const cityMatch = cleanMsg.match(/(?:из|город|живу в)\s+([А-ЯЁа-яёA-Za-z\-]+)/i);
       if (cityMatch && cityMatch[1]) {
