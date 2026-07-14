@@ -182,8 +182,9 @@ export async function GET(request: Request) {
       });
     }
 
-    // Ставим куки через raw Set-Cookie header, чтобы избежать двойного encodeURIComponent
-    // которое происходит при response.cookies.set()
+    // Better Auth при HTTPS baseURL ищет куку с именем __Secure-better-auth.session_token
+    // (см. SECURE_COOKIE_PREFIX в better-auth/dist/cookies/cookie-utils.mjs)
+    // __Secure- prefix требует флаг secure: true
     const cookieOptions = {
       httpOnly: true,
       sameSite: 'Lax',
@@ -191,26 +192,26 @@ export async function GET(request: Request) {
       expires: finalExpiresAt,
     };
 
-    // Основная кука Better Auth (без prefix = default cookie key)
-    const mainCookie = buildSetCookieHeader(
+    const secureCookie = buildSetCookieHeader(
+      '__Secure-better-auth.session_token',
+      signedToken,
+      { ...cookieOptions, secure: true }
+    );
+
+    // Также ставим без __Secure- prefix на случай localhost/HTTP
+    const fallbackCookie = buildSetCookieHeader(
       'better-auth.session_token',
       signedToken,
       { ...cookieOptions, secure: false }
     );
 
-    // Secure-версия куки (для HTTPS)
-    const secureCookie = buildSetCookieHeader(
-      'better-auth.session_token',
-      signedToken,
-      { ...cookieOptions, secure: true }
-    );
-
-    response.headers.append('Set-Cookie', mainCookie);
     response.headers.append('Set-Cookie', secureCookie);
+    response.headers.append('Set-Cookie', fallbackCookie);
 
     console.log('[auth] Set-Cookie headers appended:', {
-      mainCookiePreview: mainCookie.substring(0, 80) + '...',
-      secureCookiePreview: secureCookie.substring(0, 80) + '...',
+      secureCookieName: '__Secure-better-auth.session_token',
+      fallbackCookieName: 'better-auth.session_token',
+      signedTokenLength: signedToken.length,
     });
 
     return response;
