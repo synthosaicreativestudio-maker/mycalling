@@ -444,7 +444,7 @@ export async function POST(req: Request) {
         age: extractedData.age,
         grade: extractedData.grade,
         city: extractedData.city,
-        sessionMode: extractedData.sessionMode || 'EXPRESS',
+        sessionMode: extractedData.sessionMode || null,
         currentStep: extractedData.currentStep,
         lastStep: extractedData.lastStep,
         stepAttempts: extractedData.stepAttempts,
@@ -1213,6 +1213,37 @@ export async function POST(req: Request) {
     }
 
     const isRefusalOrEmpty = !parsedData.shouldAdvanceStep;
+
+    // ============================================================
+    // ПЕРЕХВАТ: Если регистрация завершена, но sessionMode ещё не выбран,
+    // НЕ генерируем AI-ответ — даём фронтенду показать окно выбора формата.
+    // ============================================================
+    if (!extractedData.sessionMode && hasPersonalInfo && hasPhone && currentVirtualStep > 2) {
+      // Сохраняем текущее состояние в БД
+      const finalDbTranscript = {
+        EXPRESS: expressTranscript,
+        DEEP: deepTranscript
+      };
+      await prisma.coachSession.update({
+        where: { id: coachSession.id },
+        data: {
+          transcript: finalDbTranscript,
+          extractedData,
+          status: 'IN_PROGRESS'
+        }
+      });
+
+      return NextResponse.json({
+        sessionId: coachSession.id,
+        userId: coachSession.userId,
+        currentStep: currentVirtualStep,
+        phoneConfirmed: hasPhone,
+        sessionStatus: 'IN_PROGRESS',
+        extracted: extractedData,
+        history: expressTranscript,
+        awaitSessionModeSelection: true
+      });
+    }
 
     let systemPrompt = "";
     if (isFinalStateNow) {

@@ -305,6 +305,16 @@ export default function CoachPage() {
             }
           }
         }, 15); // Скорость печати
+      } else if (chatData.awaitSessionModeSelection) {
+        // Бэкенд ждёт выбора формата — обновляем состояние без ответа бота
+        setIsTyping(false);
+        if (chatData.currentStep !== undefined) {
+          setStep(chatData.currentStep);
+        }
+        if (chatData.phoneConfirmed !== undefined) {
+          setPhoneConfirmed(chatData.phoneConfirmed);
+        }
+        setExtractedData(chatData.extracted || {});
       } else {
         setIsTyping(false);
       }
@@ -357,6 +367,15 @@ export default function CoachPage() {
             }
           }
         }, 15);
+      } else if (chatData.awaitSessionModeSelection) {
+        setIsTyping(false);
+        if (chatData.currentStep !== undefined) {
+          setStep(chatData.currentStep);
+        }
+        if (chatData.phoneConfirmed !== undefined) {
+          setPhoneConfirmed(chatData.phoneConfirmed);
+        }
+        setExtractedData(chatData.extracted || {});
       } else {
         setIsTyping(false);
       }
