@@ -989,7 +989,7 @@ export default function CoachPage() {
                     onChange={e => setInput(e.target.value)}
                     disabled={loading || isTyping}
                     placeholder="Напишите ответ..."
-                    className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#C4A484]/30 text-white placeholder:text-[#7A8A9E]"
+                    className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#C4A484]/30 text-white placeholder:text-[#7A8A9E] chat-input"
                   />
                   <button
                     type="submit"

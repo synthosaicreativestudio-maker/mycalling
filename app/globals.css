@@ -291,6 +291,21 @@ a:focus-visible {
   border-radius: 4px;
 }
 
+/* Светлая тема: убираем голубой outline, используем коричневый */
+[data-theme="light"] :focus-visible {
+  outline: 2px solid rgba(141, 91, 76, 0.6) !important;
+  outline-offset: 2px;
+}
+[data-theme="light"] button:focus-visible,
+[data-theme="light"] a:focus-visible,
+[data-theme="light"] input:focus-visible,
+[data-theme="light"] textarea:focus-visible {
+  outline: 2px solid rgba(141, 91, 76, 0.6) !important;
+  outline-offset: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px rgba(141, 91, 76, 0.12) !important;
+}
+
 /* ─── Новые анимации логотипа и Brand Scene ─── */
 @keyframes petal-sweep {
   0%, 15% {
@@ -689,3 +704,17 @@ a:focus-visible {
   color: var(--accent-brown) !important;
 }
 
+/* Светлая тема: стили чат-инпута в coach/page */
+[data-theme="light"] input.chat-input {
+  background: rgba(245, 239, 235, 0.85) !important;
+  border-color: rgba(141, 91, 76, 0.25) !important;
+  color: #3E2723 !important;
+}
+[data-theme="light"] input.chat-input::placeholder {
+  color: rgba(141, 91, 76, 0.5) !important;
+}
+[data-theme="light"] input.chat-input:focus {
+  border-color: rgba(141, 91, 76, 0.6) !important;
+  box-shadow: 0 0 0 4px rgba(141, 91, 76, 0.12) !important;
+  outline: none !important;
+}
