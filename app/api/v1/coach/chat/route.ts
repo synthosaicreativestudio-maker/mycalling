@@ -465,12 +465,12 @@ export async function POST(req: Request) {
     transcript = isDeepMode ? deepTranscript : expressTranscript;
 
     // Вычисляем, какие блоки информации уже собраны
-    const hasName = !!extractedData.fullName && extractedData.fullName !== 'Гость';
-    const hasPhone = !!coachSession.user.phone || !!extractedData.phone;
-    const hasAge = !!extractedData.age;
-    const hasGrade = !!extractedData.grade;
-    const hasCity = !!extractedData.city;
-    const hasPersonalInfo = hasName && hasAge && hasGrade && hasCity;
+    let hasName = !!extractedData.fullName && extractedData.fullName !== 'Гость';
+    let hasPhone = !!coachSession.user.phone || !!extractedData.phone;
+    let hasAge = !!extractedData.age;
+    let hasGrade = !!extractedData.grade;
+    let hasCity = !!extractedData.city;
+    let hasPersonalInfo = hasName && hasAge && hasGrade && hasCity;
     
     // Вычисляем шаг до экстракции
     let currentStepBefore = 1;
@@ -973,16 +973,16 @@ export async function POST(req: Request) {
       if (parsedData.deepFirstStep) extractedData.deepExtracted.deepFirstStep = parsedData.deepFirstStep;
     }
 
-    const updatedPhone = hasPhone || !!parsedData.phone;
+    hasPhone = hasPhone || !!parsedData.phone;
     
-    // Проверяем заполненность отдельных полей личных данных
-    const updatedName = !!extractedData.fullName && extractedData.fullName.trim().length > 1 && extractedData.fullName !== 'Гость';
-    const updatedAge = !!extractedData.age;
-    const updatedGrade = !!extractedData.grade;
-    const updatedCity = !!extractedData.city && extractedData.city.trim().length > 1;
+    // Проверяем заполненность отдельных полей личных данных в реальном времени
+    hasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1 && extractedData.fullName !== 'Гость';
+    hasAge = !!extractedData.age;
+    hasGrade = !!extractedData.grade;
+    hasCity = !!extractedData.city && extractedData.city.trim().length > 1;
     
     // Личные данные считаются полностью собранными, если есть имя, возраст, класс и город
-    const updatedPersonalInfo = updatedName && updatedAge && updatedGrade && updatedCity;
+    hasPersonalInfo = hasName && hasAge && hasGrade && hasCity;
     const updatedDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
     const updatedIdols = getStrLen(extractedData.expressExtracted?.idols) > 6;
     const updatedParents = getStrLen(extractedData.expressExtracted?.parents) > 6;
@@ -1029,11 +1029,11 @@ export async function POST(req: Request) {
       const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 1;
       const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1;
 
-      if (!updatedName) {
+      if (!hasName) {
         currentVirtualStep = 1;
-      } else if (!updatedPhone) {
+      } else if (!hasPhone) {
         currentVirtualStep = 2;
-      } else if (!updatedPersonalInfo) {
+      } else if (!hasPersonalInfo) {
         currentVirtualStep = 2;
       } else if (!hasDeepGoal) {
         currentVirtualStep = 10;
@@ -1050,13 +1050,13 @@ export async function POST(req: Request) {
       } else {
         currentVirtualStep = 16;
       }
-      isFinalStateNow = updatedPersonalInfo && updatedPhone && hasDeepGoal && hasDeepOutcome && hasDeepEmotions && hasDeepIdentity && hasDeepActions && hasDeepFirstStep;
+      isFinalStateNow = hasPersonalInfo && hasPhone && hasDeepGoal && hasDeepOutcome && hasDeepEmotions && hasDeepIdentity && hasDeepActions && hasDeepFirstStep;
     } else {
-      if (!updatedName) {
+      if (!hasName) {
         currentVirtualStep = 1; // Шаг знакомства (Имя)
-      } else if (!updatedPhone) {
+      } else if (!hasPhone) {
         currentVirtualStep = 2; // Шаг подключения Telegram
-      } else if (!updatedPersonalInfo) {
+      } else if (!hasPersonalInfo) {
         currentVirtualStep = 2; // Шаг сбора возраста, класса, города
       } else {
         // Свободный диалог длится до Шага 15 (когда собрано 13 психологических полей)
@@ -1067,7 +1067,7 @@ export async function POST(req: Request) {
         }
       }
 
-      isFinalStateNow = updatedPersonalInfo && updatedPhone && (psychoBlocks >= 12);
+      isFinalStateNow = hasPersonalInfo && hasPhone && (psychoBlocks >= 12);
       if (isFinalStateNow) {
         currentVirtualStep = 16;
       }
@@ -1098,10 +1098,10 @@ export async function POST(req: Request) {
     const missingFields = [];
 
     // Заполняем собранные поля
-    if (updatedPersonalInfo) {
+    if (hasPersonalInfo) {
       collectedFields.push(`- Личные данные: Имя — ${extractedData.fullName || ''}, возраст/класс — ${extractedData.age || ''}, город — ${extractedData.city || ''}`);
     }
-    if (updatedPhone) {
+    if (hasPhone) {
       collectedFields.push(`- Канал связи: Telegram/телефон подключен и подтвержден.`);
     }
     if (updatedHobbies) {
@@ -1486,7 +1486,7 @@ ${missingFields.join('\n')}
       reply: replyContent,
       sessionId: coachSession.id,
       currentStep: currentVirtualStep,
-      phoneConfirmed: updatedPhone,
+      phoneConfirmed: hasPhone,
       sessionStatus: status,
       extracted: extractedData,
       history: isDeepMode ? deepTranscript : expressTranscript
