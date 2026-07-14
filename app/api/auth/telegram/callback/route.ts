@@ -136,8 +136,22 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/auth?error=missing_token', request.url));
     }
 
-    const redirectPath = '/report';
-    console.log('[auth] Callback redirection target:', { userId, redirectPath });
+    // Проверяем прогресс пользователя для динамического редиректа
+    const coachSession = await prisma.coachSession.findFirst({
+      where: { userId }
+    });
+    const diagnosticResult = await prisma.diagnosticResult.findFirst({
+      where: { userId }
+    });
+
+    let redirectPath = '/report';
+    if (!coachSession || coachSession.status !== 'COMPLETED') {
+      redirectPath = '/coach';
+    } else if (!diagnosticResult) {
+      redirectPath = '/assessment';
+    }
+
+    console.log('[auth] Callback redirection target:', { userId, redirectPath, coachCompleted: coachSession?.status === 'COMPLETED', testCompleted: !!diagnosticResult });
 
     // Получаем секрет Better Auth
     const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
