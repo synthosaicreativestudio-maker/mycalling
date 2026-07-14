@@ -647,6 +647,40 @@ export async function POST(req: Request) {
     extractedData.currentStep = finalNextStep;
 
     if (isInitMessage && transcript.length > 0) {
+      // ПРОВЕРКА: Если канал связи только что подключили (hasPhone === true),
+      // но в истории последнее сообщение — это предложение подключить канал (step === 1),
+      // то мы автоматически добавляем приветствие шага 2 в историю.
+      const hasStep1Message = transcript.some(m => m.role === 'assistant' && (m.content.includes('канал связи') || m.content.includes('Telegram или MAX ID')));
+      const hasStep2Message = transcript.some(m => m.role === 'assistant' && m.content.includes('познакомимся поближе'));
+
+      if (hasPhone && hasStep1Message && !hasStep2Message) {
+        console.log('[coach/chat] Auto-transitioning to step 2 after phone confirmation on init');
+        
+        const transitionText = "Спасибо за выбор канала! 😉\n\n" + FALLBACK_REPLIES[2];
+        const nextMsg = { role: 'assistant', content: transitionText, timestamp: new Date().toISOString() };
+        
+        expressTranscript.push(nextMsg);
+        if (isDeepMode) {
+          deepTranscript.push(nextMsg);
+        }
+        
+        extractedData.currentStep = 2;
+        extractedData.lastStep = 2;
+        extractedData.stepAttempts = 0;
+        
+        await prisma.coachSession.update({
+          where: { id: coachSession.id },
+          data: {
+            transcript: { EXPRESS: expressTranscript, DEEP: deepTranscript },
+            extractedData: extractedData
+          }
+        });
+        
+        transcript = isDeepMode ? deepTranscript : expressTranscript;
+        finalNextStep = 2;
+        nextStep = 2;
+      }
+
       return NextResponse.json({
         history: isDeepMode ? deepTranscript : expressTranscript,
         sessionId: coachSession.id,
