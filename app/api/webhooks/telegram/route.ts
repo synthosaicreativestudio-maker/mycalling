@@ -96,18 +96,7 @@ export async function POST(req: Request) {
               }
             });
 
-            // Генерируем одноразовый exchange token (для мобильного перехода из бота)
-            const exchangeToken = crypto.randomBytes(32).toString('hex');
-            const exchangeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
-            await prisma.authExchangeToken.create({
-              data: {
-                token: exchangeToken,
-                userId: existingUser.id,
-                expiresAt: exchangeExpiresAt
-              }
-            });
-
-            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
 
             await sendTelegramMessage(botToken, chat_id, 
               `👋 С возвращением, ${existingUser.name || existingUser.fullName || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Ваш профиль привязан — можете вернуться к браузеру, всё готово!\n\nИли нажмите кнопку ниже, чтобы войти прямо с телефона:`,
@@ -132,18 +121,7 @@ export async function POST(req: Request) {
               }
             });
 
-            // Генерируем одноразовый exchange token (для мобильного перехода из бота)
-            const exchangeToken = crypto.randomBytes(32).toString('hex');
-            const exchangeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
-            await prisma.authExchangeToken.create({
-              data: {
-                token: exchangeToken,
-                userId: existingUser.id,
-                expiresAt: exchangeExpiresAt
-              }
-            });
-
-            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
+            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
 
             await sendTelegramMessage(botToken, chat_id,
               `👋 С возвращением, ${existingUser.name || existingUser.fullName || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Нажмите кнопку ниже, чтобы перейти в Личный кабинет:`,
@@ -298,18 +276,7 @@ export async function POST(req: Request) {
           }
         });
 
-        // Генерируем одноразовый exchange token (для мобильного перехода из бота)
-        const exchangeToken = crypto.randomBytes(32).toString('hex');
-        const exchangeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
-        await prisma.authExchangeToken.create({
-          data: {
-            token: exchangeToken,
-            userId: user.id,
-            expiresAt: exchangeExpiresAt
-          }
-        });
-        
-        const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
+        const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
 
         // Убираем ReplyKeyboard и отправляем подтверждение с inline-кнопкой
         // Шаг 1: Убираем клавиатуру
@@ -526,18 +493,7 @@ export async function POST(req: Request) {
             }
           });
 
-          // Генерация одноразового токена обмена (exchange token)
-          const exchangeToken = crypto.randomBytes(32).toString('hex');
-          const exchangeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
-          await prisma.authExchangeToken.create({
-            data: {
-              token: exchangeToken,
-              userId: user.id,
-              expiresAt: exchangeExpiresAt
-            }
-          });
-
-          const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
+          const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
 
           await sendTelegramMessage(botToken, chat_id,
             `✅ Контакт получен! Подключаю ваш профиль...`,
