@@ -537,7 +537,8 @@ export default function CoachPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           message: 'Начать сессию с коучем',
-          sessionId: null
+          sessionId: null,
+          reset: true
         })
       });
       const data = await res.json();

@@ -231,7 +231,7 @@ async function sendMaxIdSync(user: any, data: any) {
 
 export async function POST(req: Request) {
   try {
-    const { message, sessionId, fromLoginError, linkCode, sessionMode } = await req.json();
+    const { message, sessionId, fromLoginError, linkCode, sessionMode, reset } = await req.json();
 
     if (!message) {
       return NextResponse.json({ error: 'Сообщение пользователя не передано' }, { status: 400 });
@@ -328,6 +328,32 @@ export async function POST(req: Request) {
         // Если гостевая сессия не нуждается в слиянии, просто берем её (если она есть) или ищем по userId
         coachSession = guestSession || await prisma.coachSession.findUnique({
           where: { userId },
+          include: { user: true }
+        });
+      }
+
+      // ЕСЛИ ЗАПРОШЕН СБРОС (reset === true)
+      if (reset && coachSession) {
+        console.log(`[coach/chat] Resetting session ${coachSession.id} for user ${userId}`);
+        const userPhone = coachSession.user.phone || null;
+        const userName = coachSession.user.name && coachSession.user.name !== 'Гость' ? coachSession.user.name : null;
+        
+        coachSession = await prisma.coachSession.update({
+          where: { id: coachSession.id },
+          data: {
+            transcript: { EXPRESS: [], DEEP: [] },
+            extractedData: {
+              currentStep: userName ? 2 : 1,
+              fullName: userName || 'Гость',
+              phone: userPhone,
+              age: null,
+              grade: null,
+              city: null,
+              sessionMode: null
+            },
+            status: 'IN_PROGRESS',
+            completedAt: null
+          },
           include: { user: true }
         });
       }
@@ -1356,7 +1382,9 @@ ${missingFields.join('\n')}
         } else {
           const name = extractedData.fullName || 'друг';
           if (!hasAge) {
-            replyContent = `Спасибо за выбор канала! 😉 ${name}, сколько тебе лет?`;
+            const isReset = transcript.length === 0;
+            const prefix = isReset ? "Давай начнем заново! 😉 " : "Спасибо за выбор канала! 😉 ";
+            replyContent = `${prefix}${name}, сколько тебе лет?`;
           } else if (!hasGrade) {
             if (extractedData.age && extractedData.age > 18) {
               replyContent = "Ты уже закончил школу или учишься в вузе/работаешь? Расскажи подробнее.";
