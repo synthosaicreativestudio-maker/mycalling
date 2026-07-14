@@ -1343,29 +1343,39 @@ ${missingFields.join('\n')}
     let replyContent = '';
     
     // Использовать ли ИИ-генерацию на текущем шаге
-    const useAI = (currentVirtualStep === 2 && !isInitMessage) || (currentVirtualStep >= 3 && currentVirtualStep <= 15) || currentVirtualStep === 16;
+    const useAI = (currentVirtualStep >= 3 && currentVirtualStep <= 15) || currentVirtualStep === 16;
 
     if (!useAI) {
       if (currentVirtualStep === 0) {
         replyContent = FALLBACK_REPLIES[0];
       } else if (currentVirtualStep === 1) {
         replyContent = FALLBACK_REPLIES[1];
+      } else if (currentVirtualStep === 2) {
+        if (!hasPhone) {
+          replyContent = FALLBACK_REPLIES[2];
+        } else {
+          const name = extractedData.fullName || 'друг';
+          if (!hasAge) {
+            replyContent = `Спасибо за выбор канала! 😉 ${name}, сколько тебе лет?`;
+          } else if (!hasGrade) {
+            if (extractedData.age && extractedData.age > 18) {
+              replyContent = "Ты уже закончил школу или учишься в вузе/работаешь? Расскажи подробнее.";
+            } else {
+              replyContent = "В каком классе ты учишься?";
+            }
+          } else if (!hasCity) {
+            replyContent = "И из какого ты города?";
+          } else {
+            replyContent = "Отлично, все данные собраны! 😉";
+          }
+        }
       }
     } else {
       try {
         replyContent = await generateText(systemPrompt, transcript, 0.7);
       } catch (err) {
         console.warn('AI chat generation failed, using fallback:', err);
-        // Резервный пошаговый сбор личных данных или стандартные реплики
-        if (currentVirtualStep === 2) {
-          if (!hasPersonalInfo) {
-            replyContent = "Супер! Давай сначала познакомимся. Как тебя зовут, в каком ты классе, сколько лет и из какого ты города?";
-          } else {
-            replyContent = FALLBACK_REPLIES[2];
-          }
-        } else {
-          replyContent = FALLBACK_REPLIES[currentVirtualStep] || 'Давай продолжим наш диалог!';
-        }
+        replyContent = FALLBACK_REPLIES[currentVirtualStep] || 'Давай продолжим наш диалог!';
       }
     }
 
