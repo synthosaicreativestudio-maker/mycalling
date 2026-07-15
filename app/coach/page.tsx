@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw, ArrowLeft, Activity } from 'lucide-react';
+import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw, ArrowLeft, Activity, Maximize2, X } from 'lucide-react';
 import WheelOfVocation from './WheelOfVocation';
 import PyramidOfAlignment from './PyramidOfAlignment';
 import { authClient } from '../lib/auth-client';
@@ -240,7 +240,8 @@ export default function CoachPage() {
           body: JSON.stringify({ 
             message: 'Начать сессию с коучем',
             sessionId: savedSessionId,
-            fromLoginError: isFromLogin
+            fromLoginError: isFromLogin,
+            reset: shouldReset
           })
         });
         const data = await res.json();
@@ -1066,12 +1067,11 @@ export default function CoachPage() {
 
       {/* Right column: Wheel of Vocation or Pyramid of Alignment (Desktop only) */}
       <div 
-        className="lg:col-span-5 hidden lg:block h-full cursor-zoom-in relative select-none"
-        onMouseEnter={() => setIsWheelHovered(true)}
+        className="lg:col-span-5 hidden lg:block h-full relative select-none"
       >
-        {/* Tabs for switching visualisations in DEEP mode */}
-        {extractedData.sessionMode === 'DEEP' && (
-          <div className="absolute top-4 left-4 right-4 z-20 flex gap-2 p-1.5 rounded-2xl bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 shadow-inner">
+        {/* Tabs and Zoom-in buttons for desktop */}
+        {extractedData.sessionMode === 'DEEP' ? (
+          <div className="absolute top-4 left-4 right-4 z-20 flex gap-2 p-1.5 rounded-2xl bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 shadow-inner items-center">
             <button
               onClick={() => setActiveTab('wheel')}
               className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
@@ -1094,10 +1094,30 @@ export default function CoachPage() {
               <Activity className="h-4 w-4" />
               Пирамида целей
             </button>
+            <button
+              onClick={() => setIsWheelHovered(true)}
+              title="Развернуть на весь экран"
+              className="h-9 w-9 shrink-0 flex items-center justify-center text-[#7A8A9E] hover:text-white hover:bg-white/5 rounded-xl border border-white/5 ml-1 transition"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="absolute top-4 right-4 z-20">
+            <button
+              onClick={() => setIsWheelHovered(true)}
+              title="Развернуть на весь экран"
+              className="h-10 w-10 flex items-center justify-center text-[#7A8A9E] hover:text-white bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 hover:border-white/10 rounded-2xl transition shadow-lg"
+            >
+              <Maximize2 className="h-5 w-5" />
+            </button>
           </div>
         )}
         
-        <div className={`w-full h-full flex items-center justify-center ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}>
+        <div 
+          onClick={() => setIsWheelHovered(true)}
+          className={`w-full h-full flex items-center justify-center cursor-zoom-in ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}
+        >
           {extractedData.sessionMode === 'DEEP' ? (
             activeTab === 'pyramid' ? (
               <PyramidOfAlignment extractedData={extractedData} />
@@ -1183,24 +1203,33 @@ export default function CoachPage() {
         )}
       </AnimatePresence>
 
-      {/* Zoom overlay for Wheel of Vocation / Pyramid of Alignment on Desktop hover */}
+      {/* Zoom overlay for Wheel of Vocation / Pyramid of Alignment on Desktop click */}
       <AnimatePresence>
         {isWheelHovered && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onMouseLeave={() => setIsWheelHovered(false)}
+            onClick={() => setIsWheelHovered(false)}
             className="fixed inset-0 z-50 bg-[#040508]/85 backdrop-blur-xl flex items-center justify-center cursor-zoom-out"
           >
             <motion.div
               initial={{ scale: 0.7, opacity: 0, y: 30 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.7, opacity: 0, y: 30 }}
+              onClick={(e) => e.stopPropagation()}
               transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-              className="w-full max-w-[760px] p-10 md:p-14 rounded-[36px] bg-[#040506]/65 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative flex flex-col items-center justify-center pointer-events-auto"
+              className="w-full max-w-[680px] p-10 md:p-14 rounded-[36px] bg-[#080C14] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.95)] relative flex flex-col items-center justify-center pointer-events-auto"
             >
-              <div className="w-full max-w-[340px] aspect-square flex items-center justify-center">
+              <button
+                onClick={() => setIsWheelHovered(false)}
+                title="Закрыть"
+                className="absolute top-6 right-6 h-10 w-10 flex items-center justify-center text-[#7A8A9E] hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              
+              <div className="w-full max-w-[480px] aspect-square flex items-center justify-center">
                 {extractedData.sessionMode === 'DEEP' ? (
                   activeTab === 'pyramid' ? (
                     <PyramidOfAlignment extractedData={extractedData} />

@@ -366,7 +366,40 @@ export async function POST(req: Request) {
               age: null,
               grade: null,
               city: null,
-              sessionMode: null
+              sessionMode: null,
+              expressExtracted: {
+                hobbies: "",
+                schoolSubjects: "",
+                dreams: "",
+                idols: "",
+                parents: "",
+                fears: "",
+                experience: "",
+                workFormat: "",
+                thinkingType: "",
+                successMeasure: "",
+                energySources: "",
+                teamRole: "",
+                autonomyStyle: "",
+                values: "",
+                decisionStyle: "",
+                talentScores: {
+                  creative: 0,
+                  tech: 0,
+                  analytical: 0,
+                  social: 0,
+                  organizational: 0,
+                  startup: 0
+                }
+              },
+              deepExtracted: {
+                deepGoal: "",
+                deepOutcome: "",
+                deepEmotions: "",
+                deepIdentity: "",
+                deepActions: "",
+                deepFirstStep: ""
+              }
             },
             status: 'IN_PROGRESS',
             completedAt: null
@@ -891,12 +924,12 @@ export async function POST(req: Request) {
         properties.talentScores = {
           type: "OBJECT",
           properties: {
-            creative: { type: "INTEGER", description: "Оценка склонности к творчеству (дизайн, тексты, искусство) от 0 до 100" },
-            tech: { type: "INTEGER", description: "Оценка склонности к технологиям (практические технологии, программирование, инженерия, работа с механизмами, прикладные навыки, спорт, природа) от 0 до 100" },
-            analytical: { type: "INTEGER", description: "Оценка склонности к аналитике (логика, формулы, исследования) от 0 до 100" },
-            social: { type: "INTEGER", description: "Оценка склонности к коммуникации (помощь людям, преподавание, социальное взаимодействие, забота, медицина, исключая продажи) от 0 до 100" },
-            organizational: { type: "INTEGER", description: "Оценка склонности к организации (систематизация, базы данных, учет, финансы, структурирование данных, порядок и правила) от 0 до 100" },
-            startup: { type: "INTEGER", description: "Оценка склонности к лидерству (предпринимательство, запуск проектов, лидерство, управление людьми, влияние и продажи) от 0 до 100" }
+            creative: { type: "INTEGER", description: "Оценка склонности к творчеству от 0 до 100. Если подросток НЕ упоминал хобби/предметы про творчество, верни строго 0 (НЕ пиши 50 по умолчанию)." },
+            tech: { type: "INTEGER", description: "Оценка склонности к технологиям и программированию от 0 до 100. Если в тексте нет про механизмы/код/спорт, верни строго 0 (НЕ пиши 50 по умолчанию)." },
+            analytical: { type: "INTEGER", description: "Оценка склонности к аналитике (формулы, исследования) от 0 до 100. Если нет про логику/исследования, верни строго 0 (НЕ пиши 50 по умолчанию)." },
+            social: { type: "INTEGER", description: "Оценка склонности к коммуникации и помощи людям от 0 до 100. Если нет про заботу/общение, верни строго 0 (НЕ пиши 50 по умолчанию)." },
+            organizational: { type: "INTEGER", description: "Оценка склонности к организации (порядок, финансы) от 0 до 100. Если нет про списки/порядок, верни строго 0 (НЕ пиши 50 по умолчанию)." },
+            startup: { type: "INTEGER", description: "Оценка склонности к лидерству и продажам от 0 до 100. Если нет про лидерство/управление, верни строго 0 (НЕ пиши 50 по умолчанию)." }
           }
         };
         fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle, talentScores (scores 0-100 reflecting the user's vocational areas)";
@@ -940,7 +973,7 @@ ${dialogHistory}
 Последнее сообщение пользователя: "${message}"
 Текущий шаг диалога: ${currentStepBefore} (где шаги 3-15 — сбор склонностей/интересов, а 16=Что хочу/Цель, 17=Результат/Образ, 18=Эмоции, 19=Идентичность, 20=Действия/Навыки/KPI, 21=Первый шаг).
 Для shouldAdvanceStep: установи true, если пользователь дал осмысленный ответ по сути текущего шага. Если пользователь уклоняется от ответа или задает встречный вопрос, установи false.
-Если анализируется Экспресс-коучинг или первая фаза Глубокого коучинга (шаги 3..15), в поле talentScores оцени склонности пользователя по 6 шкалам (от 0 до 100) на основе всего диалога и его увлечений, хобби, школьных предметов, отношения к задачам и т.д.
+Если анализируется Экспресс-коучинг или первая фаза Глубокого коучинга (шаги 3..15), в поле talentScores оцени склонности пользователя по 6 шкалам (от 0 до 100). ВНИМАНИЕ: Если в диалоге еще НЕТ информации по какой-либо шкале (пользователь не говорил про хобби, спорт, программирование и т.д.), возвращай для нее строго 0. Категорически запрещено ставить 50 или средние значения по умолчанию.
 Извлекай: ${fieldsToExtract}`;
 
       const extractionSchema = {

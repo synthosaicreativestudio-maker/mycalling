@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Palette, Cpu, Microscope, Users, ClipboardList, Rocket } from 'lucide-react';
 
 interface WheelOfVocationProps {
   extractedData: Record<string, any>;
@@ -25,6 +26,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     {
       name: 'Креатив & Искусство',
       emoji: '🎨',
+      icon: Palette,
       description: 'Творчество, дизайн, тексты',
       value: Math.max(0.15, getScore('creative') / 100), // Минимальный радиус 15% для красоты
       rawScore: getScore('creative'),
@@ -34,6 +36,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     {
       name: 'Технологии & Код',
       emoji: '💻',
+      icon: Cpu,
       description: 'Программирование, инженерия',
       value: Math.max(0.15, getScore('tech') / 100),
       rawScore: getScore('tech'),
@@ -43,6 +46,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     {
       name: 'Наука & Аналитика',
       emoji: '🔬',
+      icon: Microscope,
       description: 'Логика, формулы, исследования',
       value: Math.max(0.15, getScore('analytical') / 100),
       rawScore: getScore('analytical'),
@@ -52,6 +56,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     {
       name: 'Коммуникация & Люди',
       emoji: '🗣️',
+      icon: Users,
       description: 'Общение, продажи, обучение',
       value: Math.max(0.15, getScore('social') / 100),
       rawScore: getScore('social'),
@@ -61,6 +66,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     {
       name: 'Организация & Системы',
       emoji: '📊',
+      icon: ClipboardList,
       description: 'Менеджмент, процессы, порядок',
       value: Math.max(0.15, getScore('organizational') / 100),
       rawScore: getScore('organizational'),
@@ -70,6 +76,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     {
       name: 'Стартап & Лидерство',
       emoji: '🚀',
+      icon: Rocket,
       description: 'Предпринимательство, проекты',
       value: Math.max(0.15, getScore('startup') / 100),
       rawScore: getScore('startup'),
@@ -217,31 +224,50 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
             );
           })}
 
-          {/* Внешние текстовые маркеры-иконки для секторов */}
+          {/* Внешние текстовые маркеры-иконки для секторов (standalone) */}
           {sectors.map((sector, idx) => {
-            const angle = idx * angleStep + angleStep / 2; // Центр сектора
-            const labelPos = polarToCartesian(cx, cy, maxRadius + 28, angle);
+            const angle = idx * angleStep + angleStep / 2;
+            const labelPos = polarToCartesian(cx, cy, maxRadius + 38, angle);
             const isRightSide = labelPos.x > cx;
+            const IconComponent = sector.icon;
 
             return (
               <g key={`label-${idx}`} className="select-none">
+                <foreignObject
+                  x={isRightSide ? labelPos.x : labelPos.x - 30}
+                  y={labelPos.y - 15}
+                  width="30"
+                  height="30"
+                >
+                  <div 
+                    className="flex items-center justify-center w-full h-full rounded-xl transition-all duration-300"
+                    style={{
+                      color: sector.rawScore > 0 ? sector.color : 'rgba(122, 138, 158, 0.4)',
+                      filter: sector.rawScore > 0 ? `drop-shadow(0 0 6px ${sector.glowColor})` : 'none',
+                    }}
+                  >
+                    <IconComponent className="h-6 w-6 stroke-[2.2]" />
+                  </div>
+                </foreignObject>
+
                 <text
-                  x={labelPos.x}
-                  y={labelPos.y}
-                  textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
+                  x={isRightSide ? labelPos.x + 36 : labelPos.x - 36}
+                  y={labelPos.y - 6}
+                  textAnchor={isRightSide ? 'start' : 'end'}
                   dominantBaseline="middle"
-                  fontSize="14"
+                  fontSize="13"
                   fontWeight="800"
                   className={`transition duration-500 font-sans tracking-wide ${
                     sector.rawScore > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
                   }`}
                 >
-                  {sector.emoji} {sector.name}
+                  {sector.name}
                 </text>
+
                 <text
-                  x={labelPos.x}
-                  y={labelPos.y + 16}
-                  textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
+                  x={isRightSide ? labelPos.x + 36 : labelPos.x - 36}
+                  y={labelPos.y + 10}
+                  textAnchor={isRightSide ? 'start' : 'end'}
                   dominantBaseline="middle"
                   fill={sector.rawScore > 0 ? sector.color : undefined}
                   fontSize="12"
@@ -363,36 +389,44 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
           {/* Внешние текстовые маркеры-иконки для секторов */}
           {sectors.map((sector, idx) => {
-            const angle = idx * angleStep + angleStep / 2; // Центр сектора
-            const labelPos = polarToCartesian(cx, cy, maxRadius + 28, angle);
-            const isRightSide = labelPos.x > cx;
+            const angle = idx * angleStep + angleStep / 2;
+            const iconPos = polarToCartesian(cx, cy, maxRadius + 24, angle);
+            const valuePos = polarToCartesian(cx, cy, maxRadius + 44, angle);
+            const IconComponent = sector.icon;
 
             return (
               <g key={`label-${idx}`} className="select-none">
-                <text
-                  x={labelPos.x}
-                  y={labelPos.y}
-                  textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
-                  dominantBaseline="middle"
-                  fontSize="20"
-                  fontWeight="800"
-                  className={`transition duration-500 font-sans tracking-wide ${
-                    sector.rawScore > 0 ? 'theme-wheel-label-active' : 'theme-wheel-label-inactive'
-                  }`}
+                <foreignObject
+                  x={iconPos.x - 14}
+                  y={iconPos.y - 14}
+                  width="28"
+                  height="28"
                 >
-                  {sector.emoji}
-                </text>
+                  <div 
+                    className="flex items-center justify-center w-full h-full rounded-lg transition-all duration-300"
+                    style={{
+                      color: sector.rawScore > 0 ? sector.color : 'rgba(122, 138, 158, 0.4)',
+                      filter: sector.rawScore > 0 ? `drop-shadow(0 0 5px ${sector.glowColor})` : 'none',
+                    }}
+                  >
+                    <IconComponent className="h-5 w-5 stroke-[2.5]" />
+                  </div>
+                </foreignObject>
+                
                 <text
-                  x={labelPos.x}
-                  y={labelPos.y + 18}
-                  textAnchor={Math.abs(labelPos.x - cx) < 10 ? 'middle' : (isRightSide ? 'start' : 'end')}
+                  x={valuePos.x}
+                  y={valuePos.y}
+                  textAnchor="middle"
                   dominantBaseline="middle"
                   fill={sector.rawScore > 0 ? sector.color : undefined}
-                  fontSize="10"
+                  fontSize="11"
                   fontWeight="bold"
                   className={`transition duration-500 font-sans ${
                     sector.rawScore > 0 ? 'theme-wheel-value-active' : 'theme-wheel-value-inactive'
                   }`}
+                  style={{
+                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 4px ${sector.glowColor})` : 'none',
+                  }}
                 >
                   {sector.rawScore}%
                 </text>
