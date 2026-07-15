@@ -14,6 +14,7 @@ export interface QuestionData {
   question_text: string;
   visual_asset_url: string;
   ui_layout_type: string;
+  narrative_theme?: string;
   available_answers: Array<{ label: string; value: number }>;
 }
 

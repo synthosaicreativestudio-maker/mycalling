@@ -468,11 +468,10 @@ export async function POST(req: Request) {
         preliminaryFeedback: extractedData.preliminaryFeedback,
         avatarUrl: extractedData.avatarUrl,
         
-        expressStep: extractedData.sessionMode === 'DEEP' ? 2 : extractedData.currentStep,
-        expressStatus: coachSession.status === 'COMPLETED' && extractedData.sessionMode !== 'DEEP' ? 'COMPLETED' : 'IN_PROGRESS',
+        expressStep: extractedData.sessionMode === 'DEEP' ? (extractedData.currentStep > 15 ? 15 : Math.max(2, extractedData.currentStep)) : extractedData.currentStep,
+        expressStatus: (coachSession.status === 'COMPLETED' || (extractedData.sessionMode === 'DEEP' && extractedData.currentStep > 15)) ? 'COMPLETED' : 'IN_PROGRESS',
         expressExtracted,
-        
-        deepStep: extractedData.sessionMode === 'DEEP' ? extractedData.currentStep : 10,
+        deepStep: extractedData.sessionMode === 'DEEP' ? extractedData.currentStep : 16,
         deepStatus: coachSession.status === 'COMPLETED' && extractedData.sessionMode === 'DEEP' ? 'COMPLETED' : 'IN_PROGRESS',
         deepExtracted
       };
@@ -493,6 +492,41 @@ export async function POST(req: Request) {
     let currentStepBefore = 1;
     let nextStep = 1;
 
+    const hasHobbies = getStrLen(extractedData.expressExtracted?.hobbies) > 6;
+    const hasSchoolSubjects = getStrLen(extractedData.expressExtracted?.schoolSubjects) > 6;
+    const hasDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
+    const hasIdols = getStrLen(extractedData.expressExtracted?.idols) > 6;
+    const hasParents = getStrLen(extractedData.expressExtracted?.parents) > 6;
+    const hasFears = getStrLen(extractedData.expressExtracted?.fears) > 6;
+    const hasExperience = getStrLen(extractedData.expressExtracted?.experience) > 6;
+    const hasWorkFormat = getStrLen(extractedData.expressExtracted?.workFormat) > 6;
+    const hasThinkingType = getStrLen(extractedData.expressExtracted?.thinkingType) > 6;
+    const hasSuccessMeasure = getStrLen(extractedData.expressExtracted?.successMeasure) > 6;
+    const hasEnergySources = getStrLen(extractedData.expressExtracted?.energySources) > 6;
+    const hasTeamRole = getStrLen(extractedData.expressExtracted?.teamRole) > 6;
+    const hasAutonomyStyle = getStrLen(extractedData.expressExtracted?.autonomyStyle) > 6;
+    const hasValues = getStrLen(extractedData.expressExtracted?.values) > 6;
+    const hasDecisionStyle = getStrLen(extractedData.expressExtracted?.decisionStyle) > 6;
+
+    let psychoBlocksCount = 0;
+    if (hasHobbies) psychoBlocksCount++;
+    if (hasSchoolSubjects) psychoBlocksCount++;
+    if (hasDreams) psychoBlocksCount++;
+    if (hasIdols) psychoBlocksCount++;
+    if (hasParents) psychoBlocksCount++;
+    if (hasFears) psychoBlocksCount++;
+    if (hasExperience) psychoBlocksCount++;
+    if (hasWorkFormat) psychoBlocksCount++;
+    if (hasThinkingType) psychoBlocksCount++;
+    if (hasSuccessMeasure) psychoBlocksCount++;
+    if (hasEnergySources) psychoBlocksCount++;
+    if (hasTeamRole) psychoBlocksCount++;
+    if (hasAutonomyStyle) psychoBlocksCount++;
+    if (hasValues) psychoBlocksCount++;
+    if (hasDecisionStyle) psychoBlocksCount++;
+
+    const allPsychologyCollected = hasPersonalInfo && (psychoBlocksCount >= 12);
+
     if (isDeepMode) {
       const hasDeepGoal = getStrLen(extractedData.deepExtracted?.deepGoal) > 1;
       const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 1;
@@ -510,45 +544,58 @@ export async function POST(req: Request) {
       } else if (!hasPersonalInfo) {
         currentStepBefore = 2;
         nextStep = 2;
+      } else if (!allPsychologyCollected) {
+        let psychoBlocksBefore = 0;
+        if (hasHobbies) psychoBlocksBefore++;
+        if (hasSchoolSubjects) psychoBlocksBefore++;
+        if (hasDreams) psychoBlocksBefore++;
+        if (hasIdols) psychoBlocksBefore++;
+        if (hasParents) psychoBlocksBefore++;
+        if (hasFears) psychoBlocksBefore++;
+        if (hasExperience) psychoBlocksBefore++;
+        if (hasWorkFormat) psychoBlocksBefore++;
+        if (hasThinkingType) psychoBlocksBefore++;
+        if (hasSuccessMeasure) psychoBlocksBefore++;
+        if (hasEnergySources) psychoBlocksBefore++;
+        if (hasTeamRole) psychoBlocksBefore++;
+        if (hasAutonomyStyle) psychoBlocksBefore++;
+        if (hasValues) psychoBlocksBefore++;
+        if (hasDecisionStyle) psychoBlocksBefore++;
+
+        if (psychoBlocksBefore < 13) {
+          currentStepBefore = Math.min(15, 3 + psychoBlocksBefore);
+        } else {
+          currentStepBefore = 16;
+        }
+        
+        nextStep = Math.min(15, 3 + psychoBlocksCount);
+        if (psychoBlocksCount >= 12) {
+          // Если собрано достаточно для финала экспресса, в глубоком переходим к Пирамиде (шаг 16)
+          nextStep = 16;
+        }
       } else if (!hasDeepGoal) {
-        currentStepBefore = 10;
-        nextStep = 10;
-      } else if (!hasDeepOutcome) {
-        currentStepBefore = 11;
-        nextStep = 11;
-      } else if (!hasDeepEmotions) {
-        currentStepBefore = 12;
-        nextStep = 12;
-      } else if (!hasDeepIdentity) {
-        currentStepBefore = 13;
-        nextStep = 13;
-      } else if (!hasDeepActions) {
-        currentStepBefore = 14;
-        nextStep = 14;
-      } else if (!hasDeepFirstStep) {
-        currentStepBefore = 15;
-        nextStep = 15;
-      } else {
         currentStepBefore = 16;
         nextStep = 16;
+      } else if (!hasDeepOutcome) {
+        currentStepBefore = 17;
+        nextStep = 17;
+      } else if (!hasDeepEmotions) {
+        currentStepBefore = 18;
+        nextStep = 18;
+      } else if (!hasDeepIdentity) {
+        currentStepBefore = 19;
+        nextStep = 19;
+      } else if (!hasDeepActions) {
+        currentStepBefore = 20;
+        nextStep = 20;
+      } else if (!hasDeepFirstStep) {
+        currentStepBefore = 21;
+        nextStep = 21;
+      } else {
+        currentStepBefore = 22;
+        nextStep = 22;
       }
     } else {
-      const hasHobbies = getStrLen(extractedData.expressExtracted?.hobbies) > 6;
-      const hasSchoolSubjects = getStrLen(extractedData.expressExtracted?.schoolSubjects) > 6;
-      const hasDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
-      const hasIdols = getStrLen(extractedData.expressExtracted?.idols) > 6;
-      const hasParents = getStrLen(extractedData.expressExtracted?.parents) > 6;
-      const hasFears = getStrLen(extractedData.expressExtracted?.fears) > 6;
-      const hasExperience = getStrLen(extractedData.expressExtracted?.experience) > 6;
-      const hasWorkFormat = getStrLen(extractedData.expressExtracted?.workFormat) > 6;
-      const hasThinkingType = getStrLen(extractedData.expressExtracted?.thinkingType) > 6;
-      const hasSuccessMeasure = getStrLen(extractedData.expressExtracted?.successMeasure) > 6;
-      const hasEnergySources = getStrLen(extractedData.expressExtracted?.energySources) > 6;
-      const hasTeamRole = getStrLen(extractedData.expressExtracted?.teamRole) > 6;
-      const hasAutonomyStyle = getStrLen(extractedData.expressExtracted?.autonomyStyle) > 6;
-      const hasValues = getStrLen(extractedData.expressExtracted?.values) > 6;
-      const hasDecisionStyle = getStrLen(extractedData.expressExtracted?.decisionStyle) > 6;
-
       if (!hasName) {
         currentStepBefore = 1;
         nextStep = 1;
@@ -583,24 +630,6 @@ export async function POST(req: Request) {
         }
       }
 
-      let psychoBlocksCount = 0;
-      if (hasHobbies) psychoBlocksCount++;
-      if (hasSchoolSubjects) psychoBlocksCount++;
-      if (hasDreams) psychoBlocksCount++;
-      if (hasIdols) psychoBlocksCount++;
-      if (hasParents) psychoBlocksCount++;
-      if (hasFears) psychoBlocksCount++;
-      if (hasExperience) psychoBlocksCount++;
-      if (hasWorkFormat) psychoBlocksCount++;
-      if (hasThinkingType) psychoBlocksCount++;
-      if (hasSuccessMeasure) psychoBlocksCount++;
-      if (hasEnergySources) psychoBlocksCount++;
-      if (hasTeamRole) psychoBlocksCount++;
-      if (hasAutonomyStyle) psychoBlocksCount++;
-      if (hasValues) psychoBlocksCount++;
-      if (hasDecisionStyle) psychoBlocksCount++;
-
-      const allPsychologyCollected = hasPersonalInfo && (psychoBlocksCount >= 12);
       const isFinalStep = allPsychologyCollected;
       nextStep = !hasName ? 1 : (!hasPhone ? 2 : (!hasPersonalInfo ? 2 : (isFinalStep ? 16 : Math.min(15, 3 + psychoBlocksCount))));
     }
@@ -615,8 +644,8 @@ export async function POST(req: Request) {
 
       if (nextStep === lastStep) {
         stepAttempts++;
-        if (!isDeepMode && nextStep >= 3 && nextStep <= 15) {
-          if (stepAttempts >= 2) {
+        if (nextStep >= 3 && nextStep <= 15) {
+          if (stepAttempts >= 3) {
             const hasHobbies = getStrLen(extractedData.expressExtracted?.hobbies) > 6;
             const hasSchoolSubjects = getStrLen(extractedData.expressExtracted?.schoolSubjects) > 6;
             const hasDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
@@ -659,30 +688,30 @@ export async function POST(req: Request) {
                 if (f.key === firstEmpty.key || f.has) psychoBlocksCount++;
               });
               const isFinalStepUpdated = hasPersonalInfo && (psychoBlocksCount >= 12);
-              finalNextStep = isFinalStepUpdated ? 16 : Math.min(15, 3 + psychoBlocksCount);
+              finalNextStep = isFinalStepUpdated ? (isDeepMode ? 16 : 16) : Math.min(15, 3 + psychoBlocksCount);
             }
             stepAttempts = 0;
           }
-        } else if (isDeepMode && nextStep >= 10 && nextStep <= 15) {
-          if (stepAttempts >= 2) {
+        } else if (isDeepMode && nextStep >= 16 && nextStep <= 21) {
+          if (stepAttempts >= 3) {
             const deepFields = [
-              { key: 'deepGoal', step: 10, val: 'Сформулировано наставником' },
-              { key: 'deepOutcome', step: 11, val: 'Образ результата принят' },
-              { key: 'deepEmotions', step: 12, val: 'Вдохновение и радость' },
-              { key: 'deepIdentity', step: 13, val: 'Человек, идущий к цели' },
-              { key: 'deepActions', step: 14, val: 'План действий составлен' },
-              { key: 'deepFirstStep', step: 15, val: 'Первый шаг запланирован' }
+              { key: 'deepGoal', step: 16, val: 'Сформулировано наставником' },
+              { key: 'deepOutcome', step: 17, val: 'Образ результата принят' },
+              { key: 'deepEmotions', step: 18, val: 'Вдохновение и радость' },
+              { key: 'deepIdentity', step: 19, val: 'Человек, идущий к цели' },
+              { key: 'deepActions', step: 20, val: 'План действий составлен' },
+              { key: 'deepFirstStep', step: 21, val: 'Первый шаг запланирован' }
             ];
             const currentField = deepFields.find(f => f.step === nextStep);
             if (currentField) {
               if (!extractedData.deepExtracted) extractedData.deepExtracted = {};
               extractedData.deepExtracted[currentField.key] = currentField.val;
-              if (nextStep === 10) finalNextStep = 11;
-              else if (nextStep === 11) finalNextStep = 12;
-              else if (nextStep === 12) finalNextStep = 13;
-              else if (nextStep === 13) finalNextStep = 14;
-              else if (nextStep === 14) finalNextStep = 15;
-              else if (nextStep === 15) finalNextStep = 16;
+              if (nextStep === 16) finalNextStep = 17;
+              else if (nextStep === 17) finalNextStep = 18;
+              else if (nextStep === 18) finalNextStep = 19;
+              else if (nextStep === 19) finalNextStep = 20;
+              else if (nextStep === 20) finalNextStep = 21;
+              else if (nextStep === 21) finalNextStep = 22;
             }
             stepAttempts = 0;
           }
@@ -842,7 +871,7 @@ export async function POST(req: Request) {
         properties.grade = { type: "STRING" };
         properties.city = { type: "STRING" };
         fieldsToExtract += ", fullName, age, grade, city";
-      } else if (!isDeepMode && currentStepBefore >= 3 && currentStepBefore <= 15) {
+      } else if (currentStepBefore >= 3 && currentStepBefore <= 15) {
         properties.hobbies = { type: "STRING" };
         properties.schoolSubjects = { type: "STRING" };
         properties.dreams = { type: "STRING" };
@@ -863,11 +892,11 @@ export async function POST(req: Request) {
           type: "OBJECT",
           properties: {
             creative: { type: "INTEGER", description: "Оценка склонности к творчеству (дизайн, тексты, искусство) от 0 до 100" },
-            tech: { type: "INTEGER", description: "Оценка склонности к технологиям (код, роботы, инженерия) от 0 до 100" },
+            tech: { type: "INTEGER", description: "Оценка склонности к технологиям (практические технологии, программирование, инженерия, работа с механизмами, прикладные навыки, спорт, природа) от 0 до 100" },
             analytical: { type: "INTEGER", description: "Оценка склонности к аналитике (логика, формулы, исследования) от 0 до 100" },
-            social: { type: "INTEGER", description: "Оценка склонности к коммуникации (общение, обучение, продажи) от 0 до 100" },
-            organizational: { type: "INTEGER", description: "Оценка склонности к организации (менеджмент, процессы, порядок) от 0 до 100" },
-            startup: { type: "INTEGER", description: "Оценка склонности к лидерству (предпринимательство, проекты) от 0 до 100" }
+            social: { type: "INTEGER", description: "Оценка склонности к коммуникации (помощь людям, преподавание, социальное взаимодействие, забота, медицина, исключая продажи) от 0 до 100" },
+            organizational: { type: "INTEGER", description: "Оценка склонности к организации (систематизация, базы данных, учет, финансы, структурирование данных, порядок и правила) от 0 до 100" },
+            startup: { type: "INTEGER", description: "Оценка склонности к лидерству (предпринимательство, запуск проектов, лидерство, управление людьми, влияние и продажи) от 0 до 100" }
           }
         };
         fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle, talentScores (scores 0-100 reflecting the user's vocational areas)";
@@ -877,33 +906,41 @@ export async function POST(req: Request) {
         properties.grade = { type: "STRING" };
         properties.city = { type: "STRING" };
         fieldsToExtract += ", fullName, age, grade, city";
-      } else if (isDeepMode && currentStepBefore >= 10 && currentStepBefore <= 15) {
-        if (currentStepBefore === 10) {
+      } else if (isDeepMode && currentStepBefore >= 16 && currentStepBefore <= 21) {
+        if (currentStepBefore === 16) {
           properties.deepGoal = { type: "STRING" };
           fieldsToExtract += ", deepGoal";
-        } else if (currentStepBefore === 11) {
+        } else if (currentStepBefore === 17) {
           properties.deepOutcome = { type: "STRING" };
           fieldsToExtract += ", deepOutcome";
-        } else if (currentStepBefore === 12) {
+        } else if (currentStepBefore === 18) {
           properties.deepEmotions = { type: "STRING" };
           fieldsToExtract += ", deepEmotions";
-        } else if (currentStepBefore === 13) {
+        } else if (currentStepBefore === 19) {
           properties.deepIdentity = { type: "STRING" };
           fieldsToExtract += ", deepIdentity";
-        } else if (currentStepBefore === 14) {
+        } else if (currentStepBefore === 20) {
           properties.deepActions = { type: "STRING" };
           fieldsToExtract += ", deepActions";
-        } else if (currentStepBefore === 15) {
+        } else if (currentStepBefore === 21) {
           properties.deepFirstStep = { type: "STRING" };
           fieldsToExtract += ", deepFirstStep";
         }
       }
 
+      const contextMessages = transcript.slice(-9, -1);
+      const dialogHistory = contextMessages.length > 0
+        ? contextMessages.map(m => `${m.role === 'user' ? 'Пользователь' : 'Коуч Роман'}: ${m.content}`).join('\n')
+        : '- Нет предыдущих сообщений.';
+
       const extractionPrompt = `Ты — анализатор текста. Проанализируй сообщение пользователя в контексте диалога профориентации. Извлеки данные в формате JSON (без markdown).
+Предыдущий диалог (контекст):
+${dialogHistory}
+
 Последнее сообщение пользователя: "${message}"
-Текущий шаг диалога: ${currentStepBefore} (где 10=Что хочу/Цель, 11=Результат/Образ, 12=Эмоции, 13=Идентичность, 14=Действия/Навыки/KPI, 15=Первый шаг).
+Текущий шаг диалога: ${currentStepBefore} (где шаги 3-15 — сбор склонностей/интересов, а 16=Что хочу/Цель, 17=Результат/Образ, 18=Эмоции, 19=Идентичность, 20=Действия/Навыки/KPI, 21=Первый шаг).
 Для shouldAdvanceStep: установи true, если пользователь дал осмысленный ответ по сути текущего шага. Если пользователь уклоняется от ответа или задает встречный вопрос, установи false.
-Если анализируется Экспресс-коучинг (шаги 3..15), в поле talentScores оцени склонности пользователя по 6 шкалам (от 0 до 100) на основе всего диалога и его увлечений, хобби, школьных предметов, отношения к задачам и т.д.
+Если анализируется Экспресс-коучинг или первая фаза Глубокого коучинга (шаги 3..15), в поле talentScores оцени склонности пользователя по 6 шкалам (от 0 до 100) на основе всего диалога и его увлечений, хобби, школьных предметов, отношения к задачам и т.д.
 Извлекай: ${fieldsToExtract}`;
 
       const extractionSchema = {
@@ -1427,7 +1464,7 @@ ${missingFields.join('\n')}
     let replyContent = '';
     
     // Использовать ли ИИ-генерацию на текущем шаге
-    const useAI = (currentVirtualStep >= 2 && currentVirtualStep <= 15 && hasPhone) || (currentVirtualStep >= 3 && currentVirtualStep <= 15) || currentVirtualStep === 16;
+    const useAI = (currentVirtualStep >= 2 && currentVirtualStep <= 21 && hasPhone) || (currentVirtualStep >= 3 && currentVirtualStep <= 21) || currentVirtualStep === 22 || currentVirtualStep === 16;
 
     if (!useAI) {
       if (currentVirtualStep === 0) {
@@ -1463,6 +1500,27 @@ ${missingFields.join('\n')}
       status = 'COMPLETED';
       completedAt = new Date();
       extractedData.preliminaryFeedback = replyContent;
+
+      // 1.3. Внедряем автоопределение narrativeTheme на основе talentScores
+      let narrativeTheme = 'CREATIVE';
+      try {
+        const scores = extractedData.talentScores || {};
+        const maxScoreKey = Object.entries(scores).reduce(
+          (max, [key, val]) => (Number(val) > max.val ? { key, val: Number(val) } : max),
+          { key: 'creative', val: -1 }
+        ).key;
+
+        if (maxScoreKey === 'tech' || maxScoreKey === 'analytical') {
+          narrativeTheme = 'SPACE';
+        } else if (maxScoreKey === 'startup' || maxScoreKey === 'organizational') {
+          narrativeTheme = 'BUSINESS';
+        } else {
+          narrativeTheme = 'CREATIVE';
+        }
+      } catch (err) {
+        console.warn('Failed to calculate narrativeTheme, using fallback CREATIVE:', err);
+      }
+      extractedData.narrativeTheme = narrativeTheme;
 
       // Генерируем промпт для аватара на основе отчета
       try {

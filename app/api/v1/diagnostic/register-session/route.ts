@@ -48,6 +48,20 @@ export async function POST(request: Request) {
     // 3. Генерируем новый UUID для сессии диагностики
     const sessionId = crypto.randomUUID();
 
+    // Считываем тему из коуч-сессии
+    let narrativeTheme = 'CREATIVE';
+    if (coachSessionId) {
+      const coachSession = await prisma.coachSession.findUnique({
+        where: { id: coachSessionId }
+      });
+      if (coachSession && coachSession.extractedData) {
+        const ext = coachSession.extractedData as Record<string, any>;
+        if (ext.narrativeTheme) {
+          narrativeTheme = ext.narrativeTheme;
+        }
+      }
+    }
+
     // 4. Записываем состояние сессии в Redis кэш
     const sessionData = {
       sessionId,
@@ -55,6 +69,7 @@ export async function POST(request: Request) {
       username,
       currentQuestionIndex: 0,
       answers: {},
+      narrativeTheme,
       startedAt: new Date().toISOString()
     };
 

@@ -2,7 +2,79 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Brain, Compass, Sparkles, Loader2, ArrowLeft, WifiOff, RefreshCw, Clock } from 'lucide-react';
+import { Brain, Compass, Sparkles, Loader2, ArrowLeft, WifiOff, RefreshCw, Clock, ShieldAlert, KeyRound, Award, ThumbsUp, ThumbsDown } from 'lucide-react';
+
+const themeStyles: Record<string, {
+  bgClass: string;
+  glowClass: string;
+  title: string;
+  subtitle: string;
+  badgeColor: string;
+  cardActiveBorder: string;
+  accentColor: string;
+}> = {
+  SPACE: {
+    bgClass: 'from-[#02050c] via-[#081121] to-[#02050c]',
+    glowClass: 'shadow-[0_0_50px_rgba(59,130,246,0.12)] border-[#3B82F6]/20',
+    title: 'Космическая Одиссея',
+    subtitle: 'Исследование вашего потенциала',
+    badgeColor: 'border-blue-500/20 bg-blue-500/5 text-[#60A5FA]',
+    cardActiveBorder: 'border-[#3B82F6] bg-[#3B82F6]/10 text-white shadow-sm',
+    accentColor: '#3B82F6'
+  },
+  CREATIVE: {
+    bgClass: 'from-[#0a0510] via-[#160a22] to-[#0a0510]',
+    glowClass: 'shadow-[0_0_50px_rgba(236,72,153,0.12)] border-pink-500/20',
+    title: 'Креативная Вселенная',
+    subtitle: 'Созидание вашей траектории',
+    badgeColor: 'border-pink-500/20 bg-pink-500/5 text-pink-400',
+    cardActiveBorder: 'border-pink-500 bg-pink-500/10 text-white shadow-sm',
+    accentColor: '#EC4899'
+  },
+  BUSINESS: {
+    bgClass: 'from-[#050a0b] via-[#0a1b15] to-[#050a0b]',
+    glowClass: 'shadow-[0_0_50px_rgba(34,197,94,0.12)] border-green-500/20',
+    title: 'Киберпанк-Стартап',
+    subtitle: 'Запуск вашего проекта',
+    badgeColor: 'border-green-500/20 bg-green-500/5 text-green-400',
+    cardActiveBorder: 'border-green-500 bg-green-500/10 text-white shadow-sm',
+    accentColor: '#22C55E'
+  }
+};
+
+const getAdaptiveQuestionText = (qId: string, baseText: string, theme: string) => {
+  if (theme === 'SPACE') {
+    if (qId.startsWith('riasec-r')) return `🛠️ [Ремонт гипердвигателя] ${baseText}`;
+    if (qId.startsWith('riasec-i')) return `🔬 [Научный скан сектора] ${baseText}`;
+    if (qId.startsWith('riasec-a')) return `🎨 [Проектирование купола базы] ${baseText}`;
+    if (qId.startsWith('riasec-s')) return `👥 [Инструктаж нового экипажа] ${baseText}`;
+    if (qId.startsWith('riasec-e')) return `👑 [Принятие командования] ${baseText}`;
+    if (qId.startsWith('riasec-c')) return `📊 [Систематизация логов полета] ${baseText}`;
+    if (qId.startsWith('bfi-')) return `🌌 [Бортовой журнал] ${baseText}`;
+    if (qId.startsWith('lay-')) return `⏳ [Ресурсы жизнеобеспечения] ${baseText}`;
+  }
+  if (theme === 'CREATIVE') {
+    if (qId.startsWith('riasec-r')) return `🎨 [Арт-инсталляция своими руками] ${baseText}`;
+    if (qId.startsWith('riasec-i')) return `🔮 [Поиск скрытых смыслов] ${baseText}`;
+    if (qId.startsWith('riasec-a')) return `🎭 [Свободный творческий полет] ${baseText}`;
+    if (qId.startsWith('riasec-s')) return `🤝 [Организация комьюнити] ${baseText}`;
+    if (qId.startsWith('riasec-e')) return `📢 [Презентация манифеста] ${baseText}`;
+    if (qId.startsWith('riasec-c')) return `📐 [Сетка и пропорции холста] ${baseText}`;
+    if (qId.startsWith('bfi-')) return `✨ [Внутренний мир] ${baseText}`;
+    if (qId.startsWith('lay-')) return `🌸 [Муза и Вдохновение] ${baseText}`;
+  }
+  if (theme === 'BUSINESS') {
+    if (qId.startsWith('riasec-r')) return `⚙️ [Производственная линия] ${baseText}`;
+    if (qId.startsWith('riasec-i')) return `📈 [Анализ конкурентов] ${baseText}`;
+    if (qId.startsWith('riasec-a')) return `💡 [Разработка креативного бренда] ${baseText}`;
+    if (qId.startsWith('riasec-s')) return `🤝 [Переговоры о партнерстве] ${baseText}`;
+    if (qId.startsWith('riasec-e')) return `🚀 [Запуск нового продукта] ${baseText}`;
+    if (qId.startsWith('riasec-c')) return `📊 [Финмодель и учет бюджета] ${baseText}`;
+    if (qId.startsWith('bfi-')) return `💼 [Корпоративная культура] ${baseText}`;
+    if (qId.startsWith('lay-')) return `🎯 [Дедлайн и спринты] ${baseText}`;
+  }
+  return baseText;
+};
 import { useDiagnosticStore } from '../store/diagnosticStore';
 
 const blockIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -180,8 +252,14 @@ export default function AssessmentPage() {
   // Рассчитываем текущий номер вопроса (всего 29 вопросов)
   const currentQuestionNumber = Math.round((currentQuestion.progress_percent / 100) * 29) + 1;
 
+  const narrativeTheme = (currentQuestion as any).narrative_theme || 'CREATIVE';
+  const currentStyle = themeStyles[narrativeTheme] || themeStyles.CREATIVE;
+
   return (
-    <main className="mx-auto h-[calc(100dvh-90px)] max-w-7xl px-4 py-4 lg:px-8 relative z-10 pt-20 flex flex-col justify-between overflow-hidden">
+    <main className={`mx-auto h-[calc(100dvh-90px)] max-w-7xl px-4 py-4 lg:px-8 relative z-10 pt-20 flex flex-col justify-between overflow-hidden transition-all duration-700 bg-gradient-to-b ${currentStyle.bgClass}`}>
+      {/* Мягкие размытые круги под выбранную тему */}
+      <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-[120px] pointer-events-none opacity-20 transition-all duration-700" style={{ backgroundColor: currentStyle.accentColor }} />
+      <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-[120px] pointer-events-none opacity-10 transition-all duration-700" style={{ backgroundColor: currentStyle.accentColor }} />
       
       {/* Плашка оффлайн-режима */}
       {store.isOffline && (
@@ -210,14 +288,14 @@ export default function AssessmentPage() {
         {/* Боковая панель прогресса */}
         <aside className="glass-panel rounded-[24px] p-4 lg:p-5 flex flex-col justify-between overflow-y-auto min-h-0 lg:max-h-full space-y-4">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.25em] text-[#3B82F6] font-bold">
-              Интерактивная диагностика
+            <span className="text-[10px] uppercase tracking-[0.25em] font-bold transition-all duration-500" style={{ color: currentStyle.accentColor }}>
+              {currentStyle.title}
             </span>
             <h1 className="text-xl font-bold text-white mt-1.5 leading-tight font-sans">
-              Диагностика потенциала
+              {currentStyle.subtitle}
             </h1>
             <p className="mt-1 text-xs text-[#7A8A9E] leading-relaxed">
-              Отвечайте искренне. Здесь нет правильных или неправильных ответов.
+              Вы продвигаетесь по игровому сценарию. Отвечайте искренне для точного совпадения!
             </p>
           </div>
 
@@ -293,72 +371,166 @@ export default function AssessmentPage() {
           <div className="space-y-4 flex-1 flex flex-col justify-between relative z-10 min-h-0">
             <div>
               <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#3B82F6] font-sans">
+                <div className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider font-sans transition-all duration-500`} style={{ borderColor: `${currentStyle.accentColor}40`, backgroundColor: `${currentStyle.accentColor}08`, color: currentStyle.accentColor }}>
                   <Icon className="h-3 w-3" />
                   {blockNames[currentQuestion.test_type]}
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-[1fr_100px] items-center mt-4">
-                <div className="space-y-2">
+              <div className="mt-4">
+                <div className="space-y-3">
                   <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-white leading-snug font-sans">
-                    {currentQuestion.question_text}
+                    {getAdaptiveQuestionText(currentQuestion.question_id, currentQuestion.question_text, narrativeTheme)}
                   </h2>
                   <p className="text-[11px] text-[#7A8A9E] leading-relaxed">
-                    Выбери вариант ответа ниже или нажми клавишу 1-5 на клавиатуре.
+                    {currentQuestion.test_type === 'riasec'
+                      ? 'Определи свое отношение к этому занятию. Выбери одну из интерактивных карточек ниже.'
+                      : currentQuestion.test_type === 'icar'
+                        ? 'Взломай код: проанализируй логическую задачу и введи правильный ответ на кодовой панели.'
+                        : 'Прочитай жизненную ситуацию и выбери стратегию поведения, наиболее близкую тебе.'}
                   </p>
                 </div>
-                
-                {/* Иллюстрация (Fallback) */}
-                <div className="relative w-full h-[90px] rounded-xl border border-white/5 bg-white/[0.02] overflow-hidden flex items-center justify-center shrink-0">
-                  {!imgError ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img 
-                      src={currentQuestion.visual_asset_url} 
-                      alt="Визуализация вопроса" 
-                      className="object-cover w-full h-full opacity-70"
-                      onError={() => setImgError(true)}
-                    />
-                  ) : (
-                    <div className="text-[#3B82F6]/40 flex flex-col items-center justify-center gap-1.5">
-                      <Brain className="h-8 w-8 animate-pulse text-[#3B82F6]" />
-                      <span className="text-[9px] uppercase tracking-wider font-semibold font-sans">Диагностика</span>
-                    </div>
-                  )}
-                </div>
               </div>
 
-              {/* Варианты Ликерта */}
-              <div className="grid gap-2 mt-4">
-                {currentQuestion.available_answers.map((ans) => {
-                  const active = lastSelectedValue === ans.value;
-                  const borderActive = 'border-[#3B82F6] bg-[#3B82F6]/10 text-white shadow-sm';
-                  const borderNormal = 'border-white/10 bg-white/[0.02] text-[#E8ECF0] hover:border-[#3B82F6]/40 hover:bg-[#3B82F6]/5';
+              {/* ─── НОВЫЙ ИНТЕРАКТИВНЫЙ ИНТЕРФЕЙС ВОПРОСОВ ─── */}
 
-                  return (
-                    <button
-                      key={ans.value}
-                      type="button"
-                      onClick={() => handleChooseAnswer(ans.value)}
-                      disabled={store.isLoading || isWaitingForNext}
-                      className={`flex items-center gap-3 rounded-xl border py-2.5 px-4 text-left transition duration-200 ${
-                        active ? borderActive : borderNormal
-                      }`}
-                    >
-                      <div
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-xs font-bold transition ${
-                          active 
-                            ? 'border-[#3B82F6] bg-[#3B82F6] text-white' 
-                            : 'border-white/10 text-[#7A8A9E]'
+              {/* 1. ФОРМАТ: ВИЗУАЛЬНЫЙ ВЫБОР ИЗ ДВУХ (для RIASEC) */}
+              {currentQuestion.test_type === 'riasec' && (
+                <div className="grid gap-4 md:grid-cols-2 mt-6">
+                  {/* Карточка 1: НРАВИТСЯ (5 баллов) */}
+                  <button
+                    type="button"
+                    onClick={() => handleChooseAnswer(5)}
+                    disabled={store.isLoading || isWaitingForNext}
+                    className={`group relative flex flex-col items-center justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/[0.01] p-6 text-center transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/[0.02] hover:shadow-[0_8px_30px_rgba(16,185,129,0.05)] h-[220px]`}
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-[40px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex flex-col items-center space-y-4 flex-1 justify-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition duration-300 shadow-inner">
+                        <ThumbsUp className="h-8 w-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition">Да, это моё</h3>
+                        <p className="text-xs text-[#7A8A9E]">Мне нравится заниматься подобными делами, это меня заряжает</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Карточка 2: НЕ НРАВИТСЯ (1 балл) */}
+                  <button
+                    type="button"
+                    onClick={() => handleChooseAnswer(1)}
+                    disabled={store.isLoading || isWaitingForNext}
+                    className={`group relative flex flex-col items-center justify-between overflow-hidden rounded-3xl border border-white/10 bg-white/[0.01] p-6 text-center transition-all duration-300 hover:border-rose-500/40 hover:bg-rose-500/[0.02] hover:shadow-[0_8px_30px_rgba(244,63,94,0.05)] h-[220px]`}
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-[40px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="flex flex-col items-center space-y-4 flex-1 justify-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 group-hover:scale-110 group-hover:bg-rose-500 group-hover:text-white transition duration-300 shadow-inner">
+                        <ThumbsDown className="h-8 w-8" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-base font-bold text-white group-hover:text-rose-300 transition">Нет, не привлекает</h3>
+                        <p className="text-xs text-[#7A8A9E]">Я бы предпочел избежать подобных задач в работе</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
+
+              {/* 2. ФОРМАТ: ЛОГИЧЕСКИЙ ВЗЛОМ (для ICAR) */}
+              {currentQuestion.test_type === 'icar' && (
+                <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr] mt-6">
+                  {/* Графический экран головоломки */}
+                  <div className="relative rounded-3xl border border-white/5 bg-[#040506]/40 p-4 flex flex-col items-center justify-center h-[260px] overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+                    {!imgError ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img 
+                        src={currentQuestion.visual_asset_url} 
+                        alt="Экран шифратора" 
+                        className="object-contain w-full h-full opacity-90 rounded-2xl group-hover:scale-102 transition duration-500"
+                        onError={() => setImgError(true)}
+                      />
+                    ) : (
+                      <div className="text-slate-500 flex flex-col items-center justify-center gap-3">
+                        <ShieldAlert className="h-12 w-12 text-[#EAB308] animate-pulse" />
+                        <span className="text-[10px] uppercase tracking-widest font-bold font-sans text-[#EAB308]">Шифр заблокирован</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Клавиатура сейфа */}
+                  <div className="rounded-3xl border border-white/5 bg-[#080C14]/60 p-5 flex flex-col justify-between space-y-4">
+                    <div className="flex items-center gap-2 border-b border-white/5 pb-2.5">
+                      <KeyRound className="h-4 w-4 text-[#EAB308]" />
+                      <span className="text-[10px] font-bold text-[#EAB308] uppercase tracking-wider">Панель ввода кода</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 flex-1">
+                      {currentQuestion.available_answers.map((ans) => {
+                        const active = lastSelectedValue === ans.value;
+                        return (
+                          <button
+                            key={ans.value}
+                            type="button"
+                            onClick={() => handleChooseAnswer(ans.value)}
+                            disabled={store.isLoading || isWaitingForNext}
+                            className={`flex flex-col items-center justify-center rounded-2xl border text-center transition-all duration-300 h-[60px] ${
+                              active
+                                ? 'border-[#EAB308] bg-[#EAB308]/15 text-[#EAB308] shadow-[0_0_15px_rgba(234,179,8,0.15)] font-black scale-98'
+                                : 'border-white/5 bg-white/[0.01] hover:border-white/20 hover:bg-white/5 text-white/90'
+                            }`}
+                          >
+                            <span className="text-[9px] text-[#7A8A9E] uppercase tracking-wider font-bold">Вариант</span>
+                            <span className="text-sm font-sans font-bold">{ans.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. ФОРМАТ: СИТУАЦИОННЫЕ КЕЙСЫ (для Big Five и Прокрастинации) */}
+              {currentQuestion.test_type !== 'riasec' && currentQuestion.test_type !== 'icar' && (
+                <div className="grid gap-2 mt-5 max-w-2xl mx-auto">
+                  {currentQuestion.available_answers.map((ans) => {
+                    const active = lastSelectedValue === ans.value;
+                    
+                    // Рассчитываем цвет ободка на основе темы
+                    const borderActive = `text-white scale-99 border-2`;
+                    const borderNormal = 'border-white/5 bg-white/[0.01] hover:bg-white/[0.03] text-white/80';
+
+                    return (
+                      <button
+                        key={ans.value}
+                        type="button"
+                        onClick={() => handleChooseAnswer(ans.value)}
+                        disabled={store.isLoading || isWaitingForNext}
+                        style={active ? { borderColor: currentStyle.accentColor, backgroundColor: `${currentStyle.accentColor}10` } : {}}
+                        className={`flex items-center gap-4 rounded-2xl border py-3 px-5 text-left transition duration-200 ${
+                          active ? borderActive : borderNormal
                         }`}
                       >
-                        {ans.value}
-                      </div>
-                      <span className="text-xs md:text-sm font-semibold">{ans.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+                        <div
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border text-xs font-bold transition duration-300`}
+                          style={active ? { backgroundColor: currentStyle.accentColor, borderColor: currentStyle.accentColor, color: 'white' } : { borderColor: 'rgba(255,255,255,0.1)', color: '#7A8A9E' }}
+                        >
+                          {ans.value}
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="text-xs md:text-sm font-bold block">{ans.label}</span>
+                          <span className="text-[10px] text-[#7A8A9E] block">
+                            {ans.value === 5 ? 'Полностью согласен с этим утверждением' : 
+                             ans.value === 4 ? 'Скорее согласен' : 
+                             ans.value === 3 ? 'Отношусь нейтрально' : 
+                             ans.value === 2 ? 'Скорее не согласен' : 'Категорически не согласен'}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Панель навигации */}

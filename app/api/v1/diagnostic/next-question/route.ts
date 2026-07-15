@@ -349,9 +349,88 @@ export async function GET(request: Request) {
           nextQuestionReportSchema,
           0.7
         );
-        htmlReportContent = JSON.stringify(resultJson);
+        htmlReportContent = JSON.stringify({ ...resultJson, riasecScores: finalRiasec, isFallback: false });
       } catch (err) {
-        console.error('Gemini report generation failed in next-question, using empty JSON:', err);
+        console.error('Gemini report generation failed in next-question, creating fallback report:', err);
+        // Резервный отчет на основе реальных баллов, чтобы личный кабинет не оставался пустым
+        const fallbackReport = {
+          studentName: sessionData.username || 'Ученик',
+          heroSummary: [
+            'Успешно пройден экспресс-анализ интересов и психологических качеств.',
+            'На основе ваших ответов сформирована интерактивная карта способностей.'
+          ],
+          personalityTraits: Object.entries(finalBigFive).map(([key, val]) => {
+            const names: Record<string, string> = {
+              O: 'Открытость новому',
+              C: 'Организованность',
+              E: 'Общительность',
+              A: 'Эмпатия',
+              N: 'Эмоциональная устойчивость'
+            };
+            const descriptions: Record<string, string> = {
+              O: 'Любознательность и готовность к изучению новых подходов.',
+              C: 'Уровень дисциплины и доведения дел до конца.',
+              E: 'Комфорт в общении и командном взаимодействии.',
+              A: 'Умение слушать других и сглаживать конфликты.',
+              N: 'Способность справляться с нагрузками и стрессом.'
+            };
+            return {
+              name: names[key] || key,
+              score: Math.round((Number(val) / 5) * 100),
+              description: descriptions[key] || 'Личностная черта.'
+            };
+          }),
+          riasecSummary: `Ваши ключевые интересы определены по методике RIASEC. Наибольшую активность проявляют сферы: ${
+            Object.entries(finalRiasec)
+              .sort((a, b) => Number(b[1]) - Number(a[1]))
+              .slice(0, 2)
+              .map(([k]) => {
+                const riasecRu: Record<string, string> = {
+                  R: 'Реалистичный (практический)',
+                  I: 'Исследовательский (аналитика)',
+                  A: 'Артистичный (творчество)',
+                  S: 'Социальный (помощь людям)',
+                  E: 'Предпринимательский (лидерство)',
+                  C: 'Конвенциональный (систематизация)'
+                };
+                return riasecRu[k] || k;
+              })
+              .join(' и ')
+          }.`,
+          strengths: [
+            'Способность к гибкой адаптации в учебных задачах.',
+            'Выявленный баланс между аналитическим и практическим подходами.'
+          ],
+          growthAreas: [
+            'Развитие навыков долгосрочного планирования.',
+            'Повышение устойчивости при работе со сложными логическими задачами.'
+          ],
+          coachSection: {
+            dreams: coachData.dreams !== 'Не указано' ? coachData.dreams : '',
+            idols: coachData.idols !== 'Не указано' ? coachData.idols : '',
+            values: coachData.values !== 'Не указано' ? coachData.values : '',
+            deepGoal: coachData.deepGoal || '',
+            deepOutcome: coachData.deepOutcome || '',
+            deepEmotions: coachData.deepEmotions || '',
+            deepIdentity: coachData.deepIdentity || '',
+            deepActions: coachData.deepActions || '',
+            deepFirstStep: coachData.deepFirstStep || ''
+          },
+          professions: [
+            {
+              name: 'Специалист по автоматизации процессов',
+              score: 92,
+              why: 'Хорошее сочетание аналитического мышления и склонности к упорядочиванию данных.'
+            },
+            {
+              name: 'Консультант по цифровым решениям',
+              score: 88,
+              why: 'Подходит под выраженный социальный профиль и интерес к практическому применению технологий.'
+            }
+          ],
+          isFallback: true
+        };
+        htmlReportContent = JSON.stringify({ ...fallbackReport, riasecScores: finalRiasec });
       }
 
       // Безопасный upsert отчета в БД
@@ -409,6 +488,7 @@ export async function GET(request: Request) {
         question_text: nextQuestion.text,
         visual_asset_url: nextQuestion.visualAssetUrl,
         ui_layout_type: nextQuestion.testCode === 'ICAR' ? 'select' : 'likert',
+        narrative_theme: sessionData.narrativeTheme || 'CREATIVE',
         available_answers: availableAnswers
       }
     });

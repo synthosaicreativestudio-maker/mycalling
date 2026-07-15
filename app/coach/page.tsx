@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw, ArrowLeft } from 'lucide-react';
+import { Send, Loader2, ArrowRight, User, Brain, MessageSquare, Compass, Shield, Award, Fingerprint, RotateCcw, ArrowLeft, Activity } from 'lucide-react';
 import WheelOfVocation from './WheelOfVocation';
 import PyramidOfAlignment from './PyramidOfAlignment';
 import { authClient } from '../lib/auth-client';
@@ -31,7 +31,29 @@ const STEP_NAMES: Record<number, string> = {
   13: 'Источники энергии',
   14: 'Командная роль',
   15: 'Ценности и автономия',
-  16: 'Подведение итогов наставника'
+  16: 'Глубинная цель (Запрос)',
+  17: 'Желаемый результат',
+  18: 'Эмоциональный отклик',
+  19: 'Новая идентичность',
+  20: 'План действий',
+  21: 'Первый микро-шаг',
+  22: 'Подведение итогов наставника'
+};
+
+const getStepName = (step: number, isDeep: boolean) => {
+  if (!isDeep) {
+    if (step === 16) return 'Подведение итогов наставника';
+    return STEP_NAMES[step] || 'Знакомство';
+  } else {
+    if (step === 16) return 'Глубинная цель (Запрос)';
+    if (step === 17) return 'Желаемый результат';
+    if (step === 18) return 'Эмоциональный отклик';
+    if (step === 19) return 'Новая идентичность';
+    if (step === 20) return 'План действий';
+    if (step === 21) return 'Первый микро-шаг';
+    if (step === 22) return 'Подведение итогов наставника';
+    return STEP_NAMES[step] || 'Знакомство';
+  }
 };
 
 export default function CoachPage() {
@@ -50,6 +72,17 @@ export default function CoachPage() {
   const [extractedData, setExtractedData] = useState<Record<string, any>>({});
   const [showVocationModal, setShowVocationModal] = useState(false);
   const [isWheelHovered, setIsWheelHovered] = useState(false);
+  const [activeTab, setActiveTab] = useState<'wheel' | 'pyramid'>('wheel');
+
+  useEffect(() => {
+    if (extractedData.sessionMode === 'DEEP') {
+      if (step >= 16 && step <= 21) {
+        setActiveTab('pyramid');
+      } else if (step === 22) {
+        setActiveTab('wheel');
+      }
+    }
+  }, [step, extractedData.sessionMode]);
   const { data: session } = authClient.useSession();
   const isAuthenticated = !!session?.user;
   
@@ -689,7 +722,10 @@ export default function CoachPage() {
     );
   };
 
-  const progressPercent = Math.round((step / 16) * 100);
+  const isDeep = extractedData.sessionMode === 'DEEP';
+  const maxSteps = isDeep ? 22 : 16;
+  const isFinalStep = step === maxSteps;
+  const progressPercent = Math.round((step / maxSteps) * 100);
 
   return (
     <main className="min-h-screen pt-28 pb-12 flex flex-col items-center justify-center px-4 relative z-10">
@@ -710,7 +746,7 @@ export default function CoachPage() {
           </div>
           <div>
             <h2 className="text-sm font-bold font-sans text-white">
-              Шаг {step} из 16: {STEP_NAMES[step] || 'Знакомство'}
+              Шаг {step} из {maxSteps}: {getStepName(step, isDeep)}
             </h2>
           </div>
         </div>
@@ -753,21 +789,21 @@ export default function CoachPage() {
         <div className="col-span-1 md:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
           
           {/* Horizontal Stepper for DEEP mode */}
-          {extractedData.sessionMode === 'DEEP' && step >= 10 && step <= 16 && (
+          {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 22 && (
             <div className="px-6 py-4 border-b border-white/5 bg-[#080c14]/40 flex flex-col gap-2">
               <div className="flex items-center justify-between text-[11px] font-sans font-bold text-[#C4A484]">
                 <span>Глубокий коучинг Романа</span>
-                <span>Шаг {step === 16 ? 7 : step - 9} из 7</span>
+                <span>Шаг {step === 22 ? 7 : step - 15} из 7</span>
               </div>
               <div className="flex items-center justify-between gap-1.5">
                 {[
-                  { step: 10, label: 'Хочу' },
-                  { step: 11, label: 'Результат' },
-                  { step: 12, label: 'Эмоции' },
-                  { step: 13, label: 'Кто Я' },
-                  { step: 14, label: 'План' },
-                  { step: 15, label: 'Действие' },
-                  { step: 16, label: 'Финал' }
+                  { step: 16, label: 'Хочу' },
+                  { step: 17, label: 'Результат' },
+                  { step: 18, label: 'Эмоции' },
+                  { step: 19, label: 'Кто Я' },
+                  { step: 20, label: 'План' },
+                  { step: 21, label: 'Действие' },
+                  { step: 22, label: 'Финал' }
                 ].map((s, idx) => {
                   const isActive = step === s.step;
                   const isCompleted = step > s.step;
@@ -820,13 +856,13 @@ export default function CoachPage() {
                   </div>
                   <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
                     isCoach 
-                      ? (step === 16 && idx === messages.length - 1
+                      ? (isFinalStep && idx === messages.length - 1
                           ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
                           : 'bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm'
                         )
                       : 'bg-[#3B82F6]/25 text-[#E8ECF0] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
                   }`}>
-                    {isCoach && step === 16 && idx === messages.length - 1 && (
+                    {isCoach && isFinalStep && idx === messages.length - 1 && (
                       <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] mb-2">
                         <span>✨</span> Резюме наставника Романа
                       </div>
@@ -834,7 +870,7 @@ export default function CoachPage() {
                     {renderFormattedContent(msg.content)}
 
                     {/* Вывод ИИ-аватара на шаге 16 */}
-                    {isCoach && step === 16 && idx === messages.length - 1 && extractedData.avatarUrl && (
+                    {isCoach && isFinalStep && idx === messages.length - 1 && extractedData.avatarUrl && (
                       <div className="mt-4 mb-4 flex flex-col items-center gap-3">
                         <div className="relative w-64 h-64 rounded-2xl overflow-hidden border border-[#3B82F6]/30 shadow-2xl bg-black/40">
                           <img 
@@ -894,7 +930,7 @@ export default function CoachPage() {
               );
             })}
 
-            {step > 2 && step < 16 && !extractedData.sessionMode && (
+            {step > 2 && !isFinalStep && step < maxSteps && !extractedData.sessionMode && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -971,7 +1007,7 @@ export default function CoachPage() {
 
           {/* Input area */}
           <div className="p-4 border-t border-white/5 bg-[#040506]/45 backdrop-blur-md">
-            {step === 16 ? (
+            {isFinalStep ? (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -999,7 +1035,7 @@ export default function CoachPage() {
                   </button>
                 </div>
               </motion.div>
-            ) : step > 2 && step < 16 && !extractedData.sessionMode ? (
+            ) : step > 2 && !isFinalStep && step < maxSteps && !extractedData.sessionMode ? (
               <div className="text-center py-4 text-xs text-[#C4A484]/80 bg-[#C4A484]/5 border border-[#C4A484]/15 rounded-xl animate-pulse">
                 👇 Выберите формат исследования талантов выше в чате 🎯
               </div>
@@ -1033,11 +1069,45 @@ export default function CoachPage() {
         className="md:col-span-5 hidden md:block h-full cursor-zoom-in relative select-none"
         onMouseEnter={() => setIsWheelHovered(true)}
       >
-        {extractedData.sessionMode === 'DEEP' ? (
-          <PyramidOfAlignment extractedData={extractedData} />
-        ) : (
-          <WheelOfVocation extractedData={extractedData} />
+        {/* Tabs for switching visualisations in DEEP mode */}
+        {extractedData.sessionMode === 'DEEP' && (
+          <div className="absolute top-4 left-4 right-4 z-20 flex gap-2 p-1.5 rounded-2xl bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 shadow-inner">
+            <button
+              onClick={() => setActiveTab('wheel')}
+              className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                activeTab === 'wheel'
+                  ? 'bg-[#3B82F6] text-white shadow-lg shadow-[#3B82F6]/30 border border-white/10'
+                  : 'text-[#7A8A9E] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Compass className="h-4 w-4" />
+              Колесо талантов
+            </button>
+            <button
+              onClick={() => setActiveTab('pyramid')}
+              className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                activeTab === 'pyramid'
+                  ? 'bg-[#EAB308] text-white shadow-lg shadow-[#EAB308]/30 border border-white/10'
+                  : 'text-[#7A8A9E] hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Activity className="h-4 w-4" />
+              Пирамида целей
+            </button>
+          </div>
         )}
+        
+        <div className={`w-full h-full flex items-center justify-center ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}>
+          {extractedData.sessionMode === 'DEEP' ? (
+            activeTab === 'pyramid' ? (
+              <PyramidOfAlignment extractedData={extractedData} />
+            ) : (
+              <WheelOfVocation extractedData={extractedData} />
+            )
+          ) : (
+            <WheelOfVocation extractedData={extractedData} />
+          )}
+        </div>
       </div>
     </div>
 
@@ -1073,8 +1143,37 @@ export default function CoachPage() {
                 Закрыть
               </button>
               <div className="flex-1 overflow-y-auto pt-4">
+                {extractedData.sessionMode === 'DEEP' && (
+                  <div className="flex gap-2 p-1 rounded-2xl bg-[#090D1A]/80 border border-white/5 mb-4">
+                    <button
+                      onClick={() => setActiveTab('wheel')}
+                      className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
+                        activeTab === 'wheel'
+                          ? 'bg-[#3B82F6] text-white shadow-sm'
+                          : 'text-[#7A8A9E] hover:text-white'
+                      }`}
+                    >
+                      Колесо талантов
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('pyramid')}
+                      className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
+                        activeTab === 'pyramid'
+                          ? 'bg-[#EAB308] text-white shadow-sm'
+                          : 'text-[#7A8A9E] hover:text-white'
+                      }`}
+                    >
+                      Пирамида целей
+                    </button>
+                  </div>
+                )}
+                
                 {extractedData.sessionMode === 'DEEP' ? (
-                  <PyramidOfAlignment extractedData={extractedData} />
+                  activeTab === 'pyramid' ? (
+                    <PyramidOfAlignment extractedData={extractedData} />
+                  ) : (
+                    <WheelOfVocation extractedData={extractedData} />
+                  )
                 ) : (
                   <WheelOfVocation extractedData={extractedData} />
                 )}
@@ -1103,7 +1202,11 @@ export default function CoachPage() {
             >
               <div className="w-full max-w-[340px] aspect-square flex items-center justify-center">
                 {extractedData.sessionMode === 'DEEP' ? (
-                  <PyramidOfAlignment extractedData={extractedData} />
+                  activeTab === 'pyramid' ? (
+                    <PyramidOfAlignment extractedData={extractedData} />
+                  ) : (
+                    <WheelOfVocation extractedData={extractedData} standalone />
+                  )
                 ) : (
                   <WheelOfVocation extractedData={extractedData} standalone />
                 )}
