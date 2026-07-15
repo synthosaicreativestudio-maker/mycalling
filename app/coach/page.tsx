@@ -978,7 +978,7 @@ export default function CoachPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold text-[#EAD5C3] group-hover:text-[#EAB308] transition">Глубокий коучинг</span>
-                        <span className="text-[9px] text-[#C4A484] px-1.5 py-0.5 rounded bg-[#C4A484]/15">6 шагов</span>
+                        <span className="text-[9px] text-[#C4A484] px-1.5 py-0.5 rounded bg-[#C4A484]/15">22 шага</span>
                       </div>
                       <p className="text-[10px] text-[#C4A484]/85 leading-normal">
                         Интерактивная сессия по схеме «Что хочу → Действие» с проработкой эмоций, идентичности и составлением личного Манифеста целей.
