@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Brain, Compass, Sparkles, Award, RefreshCw, AlertCircle, ArrowLeft, Download, Loader2, ShieldCheck, Clock, LogOut, CheckCircle2, Lock, ChevronRight, Phone, Send, User } from 'lucide-react';
 import { authClient } from '../lib/auth-client';
+import { motion } from 'framer-motion';
 
 type Trait = {
   name: string;
@@ -438,8 +439,34 @@ function ReportPageContent() {
     return (
       <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] glass-card p-8 md:p-10 border border-white/5 bg-[#040506]/35 backdrop-blur-xl relative overflow-hidden space-y-8">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#3B82F6]/5 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#C4A484]/5 rounded-full blur-[100px] pointer-events-none" />
+          <motion.div 
+            animate={{
+              scale: [1, 1.25, 1],
+              opacity: [0.25, 0.45, 0.25],
+              x: [0, 20, 0],
+              y: [0, -10, 0],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute top-0 right-0 w-72 h-72 bg-[#3B82F6]/10 rounded-full blur-[100px] pointer-events-none" 
+          />
+          <motion.div 
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
+              x: [0, -15, 0],
+              y: [0, 15, 0],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute bottom-0 left-0 w-72 h-72 bg-[#C4A484]/8 rounded-full blur-[100px] pointer-events-none" 
+          />
 
           {/* Header */}
           <div className="text-center space-y-2">
@@ -483,21 +510,42 @@ function ReportPageContent() {
             </div>
           </div>
 
-          {/* Step Cards */}
-          <div className="space-y-4">
+          {/* Step Cards with premium animations and brand colors */}
+          <div className="space-y-5">
             
             {/* Step 1: Coach Session */}
-            <div className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${
-              progress.coachCompleted 
-                ? 'bg-green-500/5 border-green-500/20' 
-                : 'bg-yellow-500/5 border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.03)]'
-            }`}>
-              <div className="space-y-1.5 flex-1">
+            <motion.div 
+              whileHover={{ 
+                y: -3, 
+                borderColor: progress.coachCompleted ? 'rgba(34, 197, 94, 0.4)' : 'rgba(196, 164, 132, 0.4)',
+                boxShadow: progress.coachCompleted 
+                  ? '0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(34, 197, 94, 0.08)'
+                  : '0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(196, 164, 132, 0.15)'
+              }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden ${
+                progress.coachCompleted 
+                  ? 'bg-green-500/5 border-green-500/20' 
+                  : 'bg-[#C4A484]/5 border-[#C4A484]/20 shadow-[0_0_15px_rgba(196,164,132,0.03)]'
+              }`}
+            >
+              {/* Мягкий анимированный блик позади активного шага */}
+              {!progress.coachCompleted && (
+                <motion.div 
+                  animate={{
+                    opacity: [0.15, 0.35, 0.15],
+                    scale: [0.9, 1.1, 0.9]
+                  }}
+                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-[#C4A484]/10 blur-3xl pointer-events-none"
+                />
+              )}
+              <div className="space-y-1.5 flex-1 relative z-10">
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                  <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
                     progress.coachCompleted 
                       ? 'bg-green-500/15 text-green-400' 
-                      : 'bg-yellow-500/15 text-yellow-400 animate-pulse'
+                      : 'bg-[#C4A484]/15 text-[#C4A484] animate-pulse'
                   }`}>
                     Этап 1: Коуч-сессия
                   </span>
@@ -509,31 +557,76 @@ function ReportPageContent() {
                 </p>
               </div>
               
-              <Link
-                href="/coach"
-                className={`flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 self-stretch md:self-auto shrink-0 ${
-                  progress.coachCompleted
-                    ? 'bg-white/5 hover:bg-white/10 text-white/90 border border-white/10'
-                    : 'bg-[#EAB308] hover:bg-[#d9a407] text-[#080C14] shadow-[0_4px_20px_rgba(234,179,8,0.25)]'
-                }`}
-              >
-                <span>{progress.coachCompleted ? 'Войти в чат' : 'Продолжить сессию'}</span>
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
+              <div className="relative z-10 self-stretch md:self-auto shrink-0">
+                {progress.coachCompleted ? (
+                  <Link
+                    href="/coach"
+                    className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 bg-white/5 hover:bg-white/10 text-white/90 border border-white/10"
+                  >
+                    <span>Войти в чат</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                ) : (
+                  <motion.div
+                    animate={{
+                      boxShadow: [
+                        '0 0 12px rgba(196, 164, 132, 0.2)',
+                        '0 0 24px rgba(196, 164, 132, 0.45)',
+                        '0 0 12px rgba(196, 164, 132, 0.2)',
+                      ],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 3,
+                      ease: 'easeInOut',
+                    }}
+                    className="rounded-xl overflow-hidden"
+                  >
+                    <Link
+                      href="/coach"
+                      className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[#C4A484] hover:bg-[#b09071] text-[#080C14] text-xs font-bold font-sans transition duration-300"
+                    >
+                      <span>Продолжить сессию</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
 
             {/* Step 2: Tests */}
-            <div className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${
-              progress.testCompleted 
-                ? 'bg-green-500/5 border-green-500/20' 
-                : (progress.coachCompleted 
-                    ? 'bg-[#3B82F6]/5 border-[#3B82F6]/20 shadow-[0_0_15px_rgba(59,130,246,0.03)]' 
-                    : 'bg-white/[0.01] border-white/5 opacity-50'
-                  )
-            }`}>
-              <div className="space-y-1.5 flex-1">
+            <motion.div 
+              whileHover={progress.coachCompleted ? { 
+                y: -3, 
+                borderColor: progress.testCompleted ? 'rgba(34, 197, 94, 0.4)' : 'rgba(59, 130, 246, 0.4)',
+                boxShadow: progress.testCompleted 
+                  ? '0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(34, 197, 94, 0.08)'
+                  : '0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.15)'
+              } : {}}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden ${
+                progress.testCompleted 
+                  ? 'bg-green-500/5 border-green-500/20' 
+                  : (progress.coachCompleted 
+                      ? 'bg-[#3B82F6]/5 border-[#3B82F6]/20 shadow-[0_0_15px_rgba(59,130,246,0.03)]' 
+                      : 'bg-white/[0.01] border-white/5 opacity-50'
+                    )
+              }`}
+            >
+              {/* Мягкий анимированный блик позади активного шага */}
+              {progress.coachCompleted && !progress.testCompleted && (
+                <motion.div 
+                  animate={{
+                    opacity: [0.15, 0.35, 0.15],
+                    scale: [0.9, 1.1, 0.9]
+                  }}
+                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-[#3B82F6]/10 blur-3xl pointer-events-none"
+                />
+              )}
+              <div className="space-y-1.5 flex-1 relative z-10">
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                  <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
                     progress.testCompleted 
                       ? 'bg-green-500/15 text-green-400' 
                       : (progress.coachCompleted 
@@ -551,37 +644,78 @@ function ReportPageContent() {
                 </p>
               </div>
               
-              {!progress.coachCompleted ? (
-                <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed self-stretch md:self-auto shrink-0">
-                  <Lock className="h-3.5 w-3.5" />
-                  <span>Заблокировано</span>
-                </div>
-              ) : (
-                <Link
-                  href="/assessment"
-                  className={`flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 self-stretch md:self-auto shrink-0 ${
-                    progress.testCompleted
-                      ? 'bg-white/5 hover:bg-white/10 text-white/90 border border-white/10'
-                      : 'bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-[0_4px_20px_rgba(59,130,246,0.25)]'
-                  }`}
-                >
-                  <span>{progress.testCompleted ? 'Перейти к тестам' : 'Начать тесты'}</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
-              )}
-            </div>
+              <div className="relative z-10 self-stretch md:self-auto shrink-0">
+                {!progress.coachCompleted ? (
+                  <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed">
+                    <Lock className="h-3.5 w-3.5" />
+                    <span>Заблокировано</span>
+                  </div>
+                ) : progress.testCompleted ? (
+                  <Link
+                    href="/assessment"
+                    className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 bg-white/5 hover:bg-white/10 text-white/90 border border-white/10"
+                  >
+                    <span>Перейти к тестам</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                ) : (
+                  <motion.div
+                    animate={{
+                      boxShadow: [
+                        '0 0 12px rgba(59, 130, 246, 0.2)',
+                        '0 0 24px rgba(59, 130, 246, 0.45)',
+                        '0 0 12px rgba(59, 130, 246, 0.2)',
+                      ],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 3,
+                      ease: 'easeInOut',
+                    }}
+                    className="rounded-xl overflow-hidden"
+                  >
+                    <Link
+                      href="/assessment"
+                      className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold font-sans transition duration-300"
+                    >
+                      <span>Начать тесты</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
 
             {/* Step 3: Final Report */}
-            <div className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${
-              progress.coachCompleted && progress.testCompleted 
-                ? 'bg-gradient-to-br from-[#C4A484]/15 to-[#3B82F6]/5 border-[#C4A484]/30 shadow-[0_8px_30px_rgba(0,0,0,0.5)]' 
-                : 'bg-white/[0.01] border-white/5 opacity-50'
-            }`}>
-              <div className="space-y-1.5 flex-1">
+            <motion.div 
+              whileHover={(progress.coachCompleted && progress.testCompleted) ? { 
+                y: -3, 
+                borderColor: 'rgba(196, 164, 132, 0.5)',
+                boxShadow: '0 15px 40px rgba(0, 0, 0, 0.65), 0 0 25px rgba(196, 164, 132, 0.2)'
+              } : {}}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden ${
+                progress.coachCompleted && progress.testCompleted 
+                  ? 'bg-gradient-to-br from-[#C4A484]/15 to-[#3B82F6]/5 border-[#C4A484]/30 shadow-[0_8px_30px_rgba(0,0,0,0.5)]' 
+                  : 'bg-white/[0.01] border-white/5 opacity-50'
+              }`}
+            >
+              {/* Мягкий анимированный блик позади активного шага */}
+              {progress.coachCompleted && progress.testCompleted && (
+                <motion.div 
+                  animate={{
+                    opacity: [0.2, 0.45, 0.2],
+                    scale: [0.95, 1.15, 0.95]
+                  }}
+                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-[#C4A484]/15 blur-3xl pointer-events-none"
+                />
+              )}
+              <div className="space-y-1.5 flex-1 relative z-10">
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                  <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
                     (progress.coachCompleted && progress.testCompleted)
-                      ? 'bg-[#C4A484]/20 text-[#EAD5C3]'
+                      ? 'bg-[#C4A484]/20 text-[#EAD5C3] animate-pulse'
                       : 'bg-white/5 text-slate-500'
                   }`}>
                     Этап 3: Результат
@@ -593,21 +727,39 @@ function ReportPageContent() {
                 </p>
               </div>
               
-              {!(progress.coachCompleted && progress.testCompleted) ? (
-                <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed self-stretch md:self-auto shrink-0">
-                  <Lock className="h-3.5 w-3.5" />
-                  <span>Заблокировано</span>
-                </div>
-              ) : (
-                <button
-                  onClick={() => window.location.reload()}
-                  className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-[#C4A484] hover:bg-[#b09071] text-[#080C14] shadow-[0_4px_20px_rgba(196,164,132,0.25)] transition duration-300 self-stretch md:self-auto shrink-0"
-                >
-                  <span>Открыть отчёт</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
+              <div className="relative z-10 self-stretch md:self-auto shrink-0">
+                {!(progress.coachCompleted && progress.testCompleted) ? (
+                  <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed">
+                    <Lock className="h-3.5 w-3.5" />
+                    <span>Заблокировано</span>
+                  </div>
+                ) : (
+                  <motion.div
+                    animate={{
+                      boxShadow: [
+                        '0 0 12px rgba(196, 164, 132, 0.2)',
+                        '0 0 24px rgba(196, 164, 132, 0.45)',
+                        '0 0 12px rgba(196, 164, 132, 0.2)',
+                      ],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 3,
+                      ease: 'easeInOut',
+                    }}
+                    className="rounded-xl overflow-hidden"
+                  >
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[#C4A484] hover:bg-[#b09071] text-[#080C14] text-xs font-bold font-sans transition duration-300 w-full"
+                    >
+                      <span>Открыть отчёт</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
 
           </div>
 

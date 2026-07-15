@@ -580,6 +580,32 @@ a:focus-visible {
   border-color: rgba(141, 91, 76, 0.15) !important;
 }
 
+/* Контрастные бейджи в светлой теме для этапов кабинета */
+[data-theme="light"] .bg-\[\#C4A484\]\/15 {
+  background-color: rgba(141, 91, 76, 0.12) !important;
+}
+[data-theme="light"] .text-\[\#C4A484\] {
+  color: #8D5B4C !important;
+}
+[data-theme="light"] .bg-\[\#3B82F6\]\/15 {
+  background-color: rgba(37, 99, 235, 0.1) !important;
+}
+[data-theme="light"] .text-\[\#3B82F6\] {
+  color: #1e3a8a !important;
+}
+[data-theme="light"] .bg-\[\#C4A484\]\/20 {
+  background-color: rgba(141, 91, 76, 0.15) !important;
+}
+[data-theme="light"] .text-\[\#EAD5C3\] {
+  color: #3E2723 !important;
+}
+[data-theme="light"] .bg-green-500\/15 {
+  background-color: rgba(22, 163, 74, 0.1) !important;
+}
+[data-theme="light"] .text-green-400 {
+  color: #15803d !important;
+}
+
 /* Оверрайды кнопок и чекбоксов на странице вопросов */
 [data-theme="light"] .hover\:bg-white\/5:hover {
   background-color: rgba(141, 91, 76, 0.08) !important;
