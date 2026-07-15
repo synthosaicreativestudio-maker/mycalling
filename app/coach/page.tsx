@@ -783,10 +783,10 @@ export default function CoachPage() {
       </div>
 
       {/* Main layout container: Chat + Wheel of Vocation */}
-      <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-6 min-h-[660px] md:h-[75vh] relative">
+      <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[660px] lg:h-[75vh] relative">
         
         {/* Left column: Chat History & Input */}
-        <div className="col-span-1 md:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
+        <div className="col-span-1 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
           
           {/* Horizontal Stepper for DEEP mode */}
           {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 22 && (
@@ -1066,7 +1066,7 @@ export default function CoachPage() {
 
       {/* Right column: Wheel of Vocation or Pyramid of Alignment (Desktop only) */}
       <div 
-        className="md:col-span-5 hidden md:block h-full cursor-zoom-in relative select-none"
+        className="lg:col-span-5 hidden lg:block h-full cursor-zoom-in relative select-none"
         onMouseEnter={() => setIsWheelHovered(true)}
       >
         {/* Tabs for switching visualisations in DEEP mode */}
@@ -1112,12 +1112,12 @@ export default function CoachPage() {
     </div>
 
       {/* Floating button for mobile view of Wheel Of Vocation */}
-      <div className="md:hidden fixed bottom-24 right-6 z-40">
+      <div className="lg:hidden fixed bottom-24 right-6 z-40">
         <button
           onClick={() => setShowVocationModal(true)}
-          className="h-12 w-12 rounded-full bg-[#3B82F6] text-white flex items-center justify-center shadow-lg shadow-[#3B82F6]/30 border border-white/10 hover:bg-[#2563EB] transition"
+          className="h-12 w-12 rounded-full bg-[#3B82F6] text-white flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)] border border-[#3B82F6]/30 hover:bg-[#2563EB] transition active:scale-95 duration-200"
         >
-          <Compass className="h-6 w-6 animate-pulse" />
+          <Compass className="h-6 w-6 animate-[spin_10s_linear_infinite]" />
         </button>
       </div>
 
@@ -1128,7 +1128,7 @@ export default function CoachPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:hidden"
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:hidden"
           >
             <motion.div 
               initial={{ scale: 0.95, y: 15 }}

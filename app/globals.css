@@ -538,6 +538,9 @@ a:focus-visible {
 [data-theme="light"] .bg-\[\#080C14\]\/70 {
   background-color: var(--bg-surface) !important;
 }
+[data-theme="light"] .bg-\[\#080C14\]\/40 {
+  background-color: rgba(245, 239, 235, 0.6) !important;
+}
 [data-theme="light"] .bg-\[\#080C14\] {
   background-color: var(--bg-surface) !important;
 }
