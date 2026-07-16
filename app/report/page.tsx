@@ -167,10 +167,40 @@ function ReportPageContent() {
         }
         const data = await res.json();
         const rawData = data.data || {};
+        const sanitizeTraitName = (name: string): string => {
+          const map: Record<string, string> = {
+            'C_bigfive': 'Организованность и дисциплина',
+            'E_bigfive': 'Общительность и энергетика',
+            'A_bigfive': 'Эмпатия и отзывчивость',
+            'O_bigfive': 'Открытость новому',
+            'N_bigfive': 'Эмоциональная устойчивость',
+            'Openness': 'Открытость новому',
+            'Conscientiousness': 'Организованность и дисциплина',
+            'Extraversion': 'Общительность и энергетика',
+            'Agreeableness': 'Эмпатия и отзывчивость',
+            'Stability': 'Эмоциональная устойчивость',
+            'O': 'Открытость новому',
+            'C': 'Организованность и дисциплина',
+            'E': 'Общительность и энергетика',
+            'A': 'Эмпатия и отзывчивость',
+            'N': 'Эмоциональная устойчивость',
+          };
+          return map[name.trim()] || name;
+        };
+
+        const rawTraits = Array.isArray(rawData.personalityTraits) ? rawData.personalityTraits : [];
+        const sanitizedTraits = rawTraits.map((t: any) => ({
+          name: sanitizeTraitName(t.name || ''),
+          score: typeof t.score === 'number' ? t.score : 50,
+          description: t.description && t.description !== 'Личностная черта.' 
+            ? t.description 
+            : 'Характеризует индивидуальные особенности поведения и мышления.'
+        }));
+
         const sanitizedReport: ReportData = {
           studentName: rawData.studentName || 'Ученик',
           heroSummary: Array.isArray(rawData.heroSummary) ? rawData.heroSummary : (rawData.heroSummary ? [rawData.heroSummary] : []),
-          personalityTraits: Array.isArray(rawData.personalityTraits) ? rawData.personalityTraits : [],
+          personalityTraits: sanitizedTraits,
           riasecSummary: rawData.riasecSummary || '',
           riasecScores: rawData.riasecScores || {},
           strengths: Array.isArray(rawData.strengths) ? rawData.strengths : [],
@@ -363,69 +393,83 @@ function ReportPageContent() {
                   {report.coachSection && (
                     <div className="glass-card rounded-[28px] p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <Brain className="h-5 w-5 text-[var(--accent-svg-1)]" />
+                        <Brain className="h-5 w-5 text-[#3B82F6] theme-accent-text" />
                         <h2 className="text-lg font-bold text-white">
                           {report.coachSection.deepGoal ? 'Коучинговый Манифест целей и Идентичности' : 'Качественный анализ диалога (Нейрокоуч)'}
                         </h2>
                       </div>
                       <div className="space-y-4">
-                        {/* Экспресс-коучинг */}
-                        {report.coachSection.dreams && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">Мечты и устремления</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.dreams}</p>
-                          </div>
-                        )}
-                        {report.coachSection.idols && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">Ролевые модели и кумиры</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.idols}</p>
-                          </div>
-                        )}
-                        {report.coachSection.values && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">Ключевые ценности</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.values}</p>
-                          </div>
-                        )}
+                        {/* Хелпер очистки повторов */}
+                        {(() => {
+                          const clean = (val?: string) => {
+                            if (!val) return '';
+                            const parts = val.split(/;|\n|,/).map(p => p.trim()).filter(Boolean);
+                            const unique = Array.from(new Set(parts));
+                            return unique.join(' · ');
+                          };
 
-                        {/* Глубокий коучинг */}
-                        {report.coachSection.deepGoal && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">🎯 Мой запрос / Цель</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.deepGoal}</p>
-                          </div>
-                        )}
-                        {report.coachSection.deepOutcome && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">🌟 Ожидаемый результат</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.deepOutcome}</p>
-                          </div>
-                        )}
-                        {report.coachSection.deepEmotions && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">🔥 Эмоциональный отклик</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed">{report.coachSection.deepEmotions}</p>
-                          </div>
-                        )}
-                        {report.coachSection.deepIdentity && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">👑 Моя идентичность</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed font-bold italic">{report.coachSection.deepIdentity}</p>
-                          </div>
-                        )}
-                        {report.coachSection.deepActions && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">🚀 План действий и навыки</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed whitespace-pre-wrap">{report.coachSection.deepActions}</p>
-                          </div>
-                        )}
-                        {report.coachSection.deepFirstStep && (
-                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-svg-1)] mb-1">⚡ Первый шаг за 2 минуты</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed font-bold">{report.coachSection.deepFirstStep}</p>
-                          </div>
-                        )}
+                          return (
+                            <>
+                              {/* Экспресс-коучинг */}
+                              {report.coachSection?.dreams && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Мечты и устремления</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.dreams)}</p>
+                                </div>
+                              )}
+                              {report.coachSection?.idols && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Ролевые модели и кумиры</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.idols)}</p>
+                                </div>
+                              )}
+                              {report.coachSection?.values && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Ключевые ценности</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.values)}</p>
+                                </div>
+                              )}
+
+                              {/* Глубокий коучинг */}
+                              {report.coachSection?.deepGoal && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🎯 Мой запрос / Цель</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.deepGoal)}</p>
+                                </div>
+                              )}
+                              {report.coachSection?.deepOutcome && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🌟 Ожидаемый результат</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.deepOutcome)}</p>
+                                </div>
+                              )}
+                              {report.coachSection?.deepEmotions && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🔥 Эмоциональный отклик</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.deepEmotions)}</p>
+                                </div>
+                              )}
+                              {report.coachSection?.deepIdentity && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">👑 Моя идентичность</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold italic">{clean(report.coachSection.deepIdentity)}</p>
+                                </div>
+                              )}
+                              {report.coachSection?.deepActions && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🚀 План действий и навыки</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text whitespace-pre-wrap font-medium">{clean(report.coachSection.deepActions)}</p>
+                                </div>
+                              )}
+                              {report.coachSection?.deepFirstStep && (
+                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">⚡ Первый шаг за 2 минуты</h4>
+                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold">{clean(report.coachSection.deepFirstStep)}</p>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}

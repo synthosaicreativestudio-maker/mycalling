@@ -809,8 +809,41 @@ a:focus-visible {
     box-shadow: 0 0 15px var(--cta-glow-color);
   }
   50% {
-    box-shadow: 0 0 32px var(--cta-glow-color-active);
+    box-shadow: 0 0 25px var(--cta-glow-color-active);
   }
+}
+.cta-glow-pulse {
+  animation: ctaGlowPulse 3s infinite ease-in-out;
+}
+
+/* Стили осей и подписей Радара RIASEC (RadarChart) в Тёмной и Светлой темах */
+.theme-radar-label {
+  fill: #7A8A9E;
+}
+.theme-subcard-title {
+  color: #3B82F6;
+}
+.theme-subcard-text {
+  color: #7A8A9E;
+}
+
+[data-theme="light"] .theme-radar-label {
+  fill: #3E2723 !important;
+  font-weight: 800 !important;
+}
+[data-theme="light"] .theme-radar-grid {
+  stroke: rgba(93, 64, 55, 0.28) !important;
+  opacity: 1 !important;
+}
+[data-theme="light"] .theme-subcard {
+  background-color: rgba(141, 91, 76, 0.05) !important;
+  border-color: rgba(141, 91, 76, 0.15) !important;
+}
+[data-theme="light"] .theme-subcard-title {
+  color: #8D5B4C !important;
+}
+[data-theme="light"] .theme-subcard-text {
+  color: #3E2723 !important;
 }
 
 .cta-glow-wrapper {

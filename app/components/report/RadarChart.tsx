@@ -44,10 +44,12 @@ export default function RadarChart({ scores }: RadarChartProps) {
   const gridLevels = [20, 40, 60, 80, 100];
 
   return (
-    <div className="flex flex-col items-center justify-center p-5 border border-white/5 bg-[#040506]/40 rounded-[24px]">
-      <h3 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] mb-4 font-sans">Свечение способностей (RIASEC)</h3>
-      <div className="relative w-[280px] h-[280px]">
-        <svg viewBox="0 0 280 280" className="w-full h-full">
+    <div className="glass-card rounded-[28px] p-6 flex flex-col items-center justify-center relative overflow-hidden">
+      <h3 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-accent-text mb-4 font-sans text-center">
+        Свечение способностей (RIASEC)
+      </h3>
+      <div className="relative w-[280px] h-[280px] flex items-center justify-center">
+        <svg viewBox="0 0 280 280" className="w-full h-full overflow-visible">
           {gridLevels.map((lvl) => {
             const gridPoints = axes.map((_, i) => {
               const { x, y } = getCoordinates(i, lvl);
@@ -58,8 +60,9 @@ export default function RadarChart({ scores }: RadarChartProps) {
                 key={lvl}
                 points={gridPoints}
                 fill="none"
-                stroke="rgba(255, 255, 255, 0.05)"
+                stroke="var(--border-subtle)"
                 strokeWidth="1"
+                className="opacity-40 theme-radar-grid"
               />
             );
           })}
@@ -73,8 +76,9 @@ export default function RadarChart({ scores }: RadarChartProps) {
                 y1={cy}
                 x2={outer.x}
                 y2={outer.y}
-                stroke="rgba(255, 255, 255, 0.08)"
+                stroke="var(--border-subtle)"
                 strokeWidth="1"
+                className="opacity-50 theme-radar-grid"
               />
             );
           })}
@@ -88,7 +92,7 @@ export default function RadarChart({ scores }: RadarChartProps) {
                 y={labelPos.y}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                className="text-[9px] font-sans font-bold fill-[#7A8A9E]"
+                className="text-[10px] font-sans font-extrabold theme-radar-label select-none transition-colors duration-300"
               >
                 {ax.label}
               </text>
@@ -97,10 +101,10 @@ export default function RadarChart({ scores }: RadarChartProps) {
 
           <polygon
             points={points}
-            fill="rgba(59, 130, 246, 0.15)"
-            stroke="#3B82F6"
-            strokeWidth="2"
-            className="drop-shadow-[0_0_15px_rgba(59,130,246,0.4)]"
+            fill="var(--accent-glow)"
+            stroke="var(--accent-brown)"
+            strokeWidth="2.5"
+            className="theme-radar-polygon transition-all duration-500"
           />
 
           {axes.map((ax, i) => {
@@ -110,8 +114,11 @@ export default function RadarChart({ scores }: RadarChartProps) {
                 key={ax.key}
                 cx={pt.x}
                 cy={pt.y}
-                r="3.5"
-                className="fill-[#3B82F6] stroke-white stroke-1"
+                r="4"
+                fill="var(--accent-brown)"
+                stroke="#FFFFFF"
+                strokeWidth="1.5"
+                className="theme-radar-dot transition-all duration-500"
               />
             );
           })}
