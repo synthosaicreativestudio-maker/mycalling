@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     siteName: 'МоёПризвание',
     images: [
       {
-        url: '/assets/logos/logo-with-text.png',
+        url: '/assets/images/telegram-preview.jpg',
         width: 1200,
         height: 630,
         alt: 'МоёПризвание — диагностика талантов',
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'МоёПризвание — диагностика талантов',
     description: 'Глубокая диагностика талантов за 25 минут. Понятный отчёт для всей семьи.',
-    images: ['/assets/logos/logo-with-text.png'],
+    images: ['/assets/images/telegram-preview.jpg'],
   },
 };
 
