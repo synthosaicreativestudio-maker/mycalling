@@ -15,9 +15,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN is not configured' }, { status: 400 });
   }
   const webhookUrl = `https://synthosai.ru/api/webhooks/telegram`;
+  const secretToken = process.env.TELEGRAM_WEBHOOK_SECRET || '';
   
   try {
-    const res = await fetch(`${TG_API_BASE}/bot${botToken}/setWebhook?url=${encodeURIComponent(webhookUrl)}`);
+    const params = new URLSearchParams({ url: webhookUrl });
+    if (secretToken) params.set('secret_token', secretToken);
+    const res = await fetch(`${TG_API_BASE}/bot${botToken}/setWebhook?${params.toString()}`);
     const data = await res.json();
     return NextResponse.json({ webhook_setup: data });
   } catch (err: any) {
@@ -27,6 +30,16 @@ export async function GET(request: Request) {
 
 export async function POST(req: Request) {
   try {
+    // Верификация подлинности запроса от Telegram
+    const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const receivedToken = req.headers.get('X-Telegram-Bot-Api-Secret-Token');
+      if (receivedToken !== webhookSecret) {
+        console.warn('[telegram] Webhook rejected: invalid secret_token');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     if (!modulesConfig.enableTelegram) {
       return NextResponse.json({ status: 'ignored', reason: 'Telegram module is disabled' }, { status: 200 });
     }

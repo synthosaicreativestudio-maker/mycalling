@@ -1,3 +1,4 @@
+import 'server-only';
 // Модуль интеграции с ИИ через Freemodel.dev API с сохранением сигнатур Gemini хелперов.
 import https from 'https';
 import { env } from './env';

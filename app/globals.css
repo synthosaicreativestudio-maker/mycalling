@@ -423,12 +423,12 @@ a:focus-visible {
   --accent-svg-shadow: rgba(141, 91, 76, 0.25);
 
   /* RIASEC переменные для светлой темы капучино */
-  --riasec-creative: #C58F82; /* карамельно-розовый */
-  --riasec-tech: #5D7A9E; /* приглушенный джинсовый */
-  --riasec-analytical: #7C6C8D; /* сливовый капучино */
-  --riasec-social: #B89B6C; /* мягкий ореховый */
-  --riasec-organizational: #5E8C73; /* шалфейный зеленый */
-  --riasec-startup: #A3684B; /* терракотовый */
+  --riasec-creative: #B85042; /* глубокий терракотово-коралловый */
+  --riasec-tech: #2B5B84; /* глубокий индиго-джинсовый */
+  --riasec-analytical: #6B4E71; /* насыщенный сливовый */
+  --riasec-social: #9E7437; /* тёплый медово-ореховый */
+  --riasec-organizational: #386B52; /* глубокий шалфейно-зеленый */
+  --riasec-startup: #A85128; /* насыщенный терракотовый */
   --riasec-outcome: #A67C52; /* карамельный золотой */
   --riasec-goal: #8D5B4C; /* капучино-коричневый */
 }
@@ -745,18 +745,28 @@ a:focus-visible {
 }
 
 [data-theme="light"] .theme-wheel-label-active {
-  fill: #3E2723 !important;
+  fill: #2C1A14 !important;
+  font-weight: 800 !important;
 }
 [data-theme="light"] .theme-wheel-label-inactive {
-  fill: #8D5B4C !important;
-  opacity: 0.65;
+  fill: #5D4037 !important;
+  opacity: 0.88 !important;
 }
 [data-theme="light"] .theme-wheel-value-active {
-  fill: #A67C52 !important;
+  fill: #8D5B4C !important;
 }
 [data-theme="light"] .theme-wheel-value-inactive {
-  fill: #8D5B4C !important;
-  opacity: 0.5;
+  fill: #6D4C41 !important;
+  opacity: 0.78 !important;
+}
+[data-theme="light"] .theme-wheel-grid-line {
+  stroke: rgba(93, 64, 55, 0.28) !important;
+  opacity: 1 !important;
+}
+[data-theme="light"] .theme-wheel-bg-sector {
+  fill: rgba(141, 91, 76, 0.04) !important;
+  stroke: rgba(93, 64, 55, 0.22) !important;
+  opacity: 1 !important;
 }
 
 /* Переопределения для градиентов, теней и ховеров в светлой теме для полного исключения голубых свечений/оттенков */

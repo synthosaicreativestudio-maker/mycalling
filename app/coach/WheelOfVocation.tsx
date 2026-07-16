@@ -159,7 +159,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
               stroke="var(--border-subtle)"
               strokeWidth="1"
               strokeDasharray={scale === 1.0 ? 'none' : '4 4'}
-              className="opacity-40"
+              className="opacity-40 theme-wheel-grid-line"
             />
           ))}
 
@@ -176,7 +176,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 y2={target.y}
                 stroke="var(--border-subtle)"
                 strokeWidth="1.5"
-                className="opacity-50"
+                className="opacity-50 theme-wheel-grid-line"
               />
             );
           })}
@@ -194,7 +194,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 fill="rgba(255, 255, 255, 0.01)"
                 stroke="var(--border-subtle)"
                 strokeWidth="1"
-                className="transition duration-500 hover:fill-white/[0.02] cursor-pointer opacity-30"
+                className="transition duration-500 hover:fill-white/[0.02] cursor-pointer opacity-30 theme-wheel-bg-sector"
               />
             );
           })}
@@ -322,7 +322,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
               stroke="var(--border-subtle)"
               strokeWidth="1"
               strokeDasharray={scale === 1.0 ? 'none' : '4 4'}
-              className="opacity-40"
+              className="opacity-40 theme-wheel-grid-line"
             />
           ))}
 
@@ -339,7 +339,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 y2={target.y}
                 stroke="var(--border-subtle)"
                 strokeWidth="1.5"
-                className="opacity-50"
+                className="opacity-50 theme-wheel-grid-line"
               />
             );
           })}
@@ -357,7 +357,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 fill="rgba(255, 255, 255, 0.01)"
                 stroke="var(--border-subtle)"
                 strokeWidth="1"
-                className="transition duration-500 hover:fill-white/[0.02] cursor-pointer opacity-30"
+                className="transition duration-500 hover:fill-white/[0.02] cursor-pointer opacity-30 theme-wheel-bg-sector"
               />
             );
           })}
