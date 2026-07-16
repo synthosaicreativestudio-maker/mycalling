@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '../../../lib/prisma';
+import { modulesConfig } from '../../../config/modules';
 
 const TG_API_BASE = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
 
 export async function GET(request: Request) {
+  if (!modulesConfig.enableTelegram) {
+    return NextResponse.json({ error: 'Telegram module is disabled' }, { status: 503 });
+  }
+
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
     return NextResponse.json({ error: 'TELEGRAM_BOT_TOKEN is not configured' }, { status: 400 });
@@ -22,6 +27,10 @@ export async function GET(request: Request) {
 
 export async function POST(req: Request) {
   try {
+    if (!modulesConfig.enableTelegram) {
+      return NextResponse.json({ status: 'ignored', reason: 'Telegram module is disabled' }, { status: 200 });
+    }
+
     const body = await req.json();
     
     if (body.message) {

@@ -5,6 +5,7 @@ import { headers } from 'next/headers';
 import prisma from '../../../../lib/prisma';
 import { auth } from '../../../../lib/auth';
 import { generateText, generateJson } from '../../../../lib/gemini';
+import { modulesConfig } from '../../../../config/modules';
 
 const NAME_STOP_WORDS = new Set([
   'привет', 'прив', 'хай', 'хелло', 'здравствуйте', 'здрасте', 'даров', 'салют',
@@ -248,6 +249,14 @@ async function sendMaxIdSync(user: any, data: any) {
 
 export async function POST(req: Request) {
   try {
+    if (!modulesConfig.enableCoach) {
+      return NextResponse.json({
+        reply: "Нейрокоуч Роман временно ушел на перерыв для обновления алгоритмов. Вы можете пройти наши тесты в разделе Диагностики.",
+        history: [],
+        currentStep: 0
+      });
+    }
+
     const { message, sessionId, fromLoginError, linkCode, sessionMode, reset } = await req.json();
 
     if (!message) {

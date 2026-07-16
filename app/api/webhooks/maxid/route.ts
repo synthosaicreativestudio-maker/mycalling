@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '../../../lib/prisma';
+import { modulesConfig } from '../../../config/modules';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+  if (!modulesConfig.enableMaxId) {
+    return NextResponse.json({ error: 'MAX ID module is disabled' }, { status: 503 });
+  }
+
   const botToken = process.env.MAXID_BOT_TOKEN;
   if (!botToken) {
     return NextResponse.json({ error: 'MAXID_BOT_TOKEN is not configured' }, { status: 400 });
@@ -31,6 +36,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(req: Request) {
+  if (!modulesConfig.enableMaxId) {
+    return NextResponse.json({ status: 'ignored', reason: 'MAX ID module is disabled' }, { status: 200 });
+  }
+
   const botToken = process.env.MAXID_BOT_TOKEN;
   if (!botToken) {
     return NextResponse.json({ error: 'MAXID_BOT_TOKEN is not configured' }, { status: 400 });

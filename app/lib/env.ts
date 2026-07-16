@@ -35,8 +35,9 @@ export const env = {
   /** API-ключ ProxyAPI для генерации отчётов */
   PROXYAPI_KEY: (() => {
     const key = getEnvOrThrow('PROXYAPI_KEY');
-    return key === 'fe_oa_8241bb58e1c68cff538eb3076ac734b4de235309d7832f5c'
-      ? 'fe_oa_6ec0280fc09c7fefefe7daf77633e730cec2de86201cedd0'
+    const fallbackKey = getEnvOptional('PROXYAPI_KEY_FALLBACK');
+    return key === 'fe_oa_8241bb58e1c68cff538eb3076ac734b4de235309d7832f5c' && fallbackKey
+      ? fallbackKey
       : key;
   })(),
   /** URL ProxyAPI */

@@ -1,3 +1,6 @@
+import Redis from 'ioredis';
+import { env } from './env';
+
 class MemoryCache {
   private cache = new Map<string, string>();
 
@@ -44,6 +47,46 @@ interface ICache {
   expire(key: string, seconds: number): Promise<number>;
 }
 
-const redisClient: ICache = new MemoryCache();
+class RedisCache implements ICache {
+  private client: Redis;
+
+  constructor(url: string) {
+    this.client = new Redis(url, {
+      maxRetriesPerRequest: 3,
+      connectTimeout: 5000,
+    });
+    
+    this.client.on('error', (err) => {
+      console.error('[REDIS] Connection error:', err);
+    });
+  }
+
+  async get(key: string): Promise<string | null> {
+    return this.client.get(key);
+  }
+
+  async set(key: string, value: string, mode?: string, duration?: number): Promise<'OK' | string> {
+    if (mode === 'EX' && duration) {
+      return this.client.set(key, value, 'EX', duration);
+    }
+    return this.client.set(key, value);
+  }
+
+  async del(key: string): Promise<number> {
+    return this.client.del(key);
+  }
+
+  async incr(key: string): Promise<number> {
+    return this.client.incr(key);
+  }
+
+  async expire(key: string, seconds: number): Promise<number> {
+    return this.client.expire(key, seconds);
+  }
+}
+
+const redisClient: ICache = env.REDIS_URL 
+  ? new RedisCache(env.REDIS_URL) 
+  : new MemoryCache();
 
 export default redisClient;

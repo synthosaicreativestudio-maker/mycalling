@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '../../../../lib/prisma';
+import logger from '../../../../lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +68,7 @@ export async function GET(request: Request) {
     const token = searchParams.get('token');
     const exchangeToken = searchParams.get('exchange_token');
 
-    console.log('[auth] Callback received request:', { hasToken: !!token, hasExchangeToken: !!exchangeToken, isJson });
+    logger.info('[auth] Callback received request:', { hasToken: !!token, hasExchangeToken: !!exchangeToken, isJson });
 
     let finalSessionToken = '';
     let finalExpiresAt: Date;
@@ -84,7 +85,7 @@ export async function GET(request: Request) {
       });
 
       if (!tokenRecord) {
-        console.warn('[auth] Callback exchange token invalid, used or expired');
+        logger.warn('[auth] Callback exchange token invalid, used or expired');
         if (isJson) {
           return NextResponse.json({ error: 'expired_session' }, { status: 400 });
         }
@@ -118,7 +119,7 @@ export async function GET(request: Request) {
       });
 
       if (!session || session.expiresAt < new Date()) {
-        console.warn('[auth] Callback session not found or expired:', { exists: !!session });
+        logger.warn('[auth] Callback session not found or expired:', { exists: !!session });
         if (isJson) {
           return NextResponse.json({ error: 'expired_session' }, { status: 400 });
         }
@@ -129,7 +130,7 @@ export async function GET(request: Request) {
       finalExpiresAt = session.expiresAt;
       userId = session.userId;
     } else {
-      console.warn('[auth] Callback missing both token and exchange_token');
+      logger.warn('[auth] Callback missing both token and exchange_token');
       if (isJson) {
         return NextResponse.json({ error: 'missing_token' }, { status: 400 });
       }
@@ -151,19 +152,19 @@ export async function GET(request: Request) {
       redirectPath = '/assessment';
     }
 
-    console.log('[auth] Callback redirection target:', { userId, redirectPath, coachCompleted: coachSession?.status === 'COMPLETED', testCompleted: !!diagnosticResult });
+    logger.info('[auth] Callback redirection target:', { userId, redirectPath, coachCompleted: coachSession?.status === 'COMPLETED', testCompleted: !!diagnosticResult });
 
     // Получаем секрет Better Auth
     const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
     if (!betterAuthSecret) {
-      console.error('[auth] BETTER_AUTH_SECRET is not set!');
+      logger.error('[auth] BETTER_AUTH_SECRET is not set!');
       return NextResponse.redirect(new URL('/auth?error=config_error', request.url));
     }
 
     // Подписываем токен по тому же алгоритму что better-call
     const signedToken = await signCookieValue(finalSessionToken, betterAuthSecret);
     
-    console.log('[auth] Signed cookie created:', {
+    logger.info('[auth] Signed cookie created:', {
       tokenLength: finalSessionToken.length,
       signedLength: signedToken.length,
       signedPreview: signedToken.substring(0, 20) + '...',
@@ -222,7 +223,7 @@ export async function GET(request: Request) {
     response.headers.append('Set-Cookie', secureCookie);
     response.headers.append('Set-Cookie', fallbackCookie);
 
-    console.log('[auth] Set-Cookie headers appended:', {
+    logger.info('[auth] Set-Cookie headers appended:', {
       secureCookieName: '__Secure-better-auth.session_token',
       fallbackCookieName: 'better-auth.session_token',
       signedTokenLength: signedToken.length,
@@ -230,7 +231,7 @@ export async function GET(request: Request) {
 
     return response;
   } catch (error) {
-    console.error('Error in telegram callback:', error);
+    logger.error('Error in telegram callback:', error);
     if (isJson) {
       return NextResponse.json({ error: 'internal_error' }, { status: 500 });
     }
