@@ -41,21 +41,10 @@ export function DarkCosmicBackground() {
         muted
         playsInline
         preload="auto"
-        className="absolute inset-0 w-full h-full object-cover opacity-90 select-none pointer-events-none theme-dark-only"
+        className="absolute inset-0 w-full h-full object-cover opacity-100 select-none pointer-events-none theme-dark-only"
       >
         <source src="/assets/videos/background-video.mp4" type="video/mp4" />
       </video>
-
-      {/* Слой 2: Полупрозрачное затемнение для читаемости контента (темная тема) */}
-      <div className="absolute inset-0 bg-[#040506]/40 pointer-events-none theme-dark-only" />
-
-      {/* Слой 3: Виньетирование по краям экрана (темная тема) */}
-      <div 
-        className="absolute inset-0 pointer-events-none theme-dark-only"
-        style={{
-          background: 'radial-gradient(circle, transparent 40%, rgba(4, 5, 6, 0.6) 100%)',
-        }}
-      />
 
       {/* Слой 4: SVG Noise Overlay (Шум против бандинга) */}
       <svg 

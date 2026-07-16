@@ -30,6 +30,10 @@
   --border-subtle: rgba(0, 240, 255, 0.12);
   --border-hover: rgba(0, 240, 255, 0.3);
   
+  /* Переменные для пульсации CTA-кнопки */
+  --cta-glow-color: rgba(59, 130, 246, 0.15);
+  --cta-glow-color-active: rgba(59, 130, 246, 0.35);
+
   /* Переменные для адаптивных SVG-иконок */
   --accent-svg-1: #60A5FA;
   --accent-svg-2: #3B82F6;
@@ -408,6 +412,10 @@ a:focus-visible {
   --border-subtle: rgba(141, 91, 76, 0.18);
   --border-hover: rgba(141, 91, 76, 0.38);
 
+  /* Переменные для пульсации CTA-кнопки в светлой теме */
+  --cta-glow-color: rgba(166, 124, 82, 0.18);
+  --cta-glow-color-active: rgba(166, 124, 82, 0.45);
+
   /* Переменные для адаптивных SVG-иконок в светлой теме */
   --accent-svg-1: #A67C52;
   --accent-svg-2: #8D5B4C;
@@ -783,4 +791,20 @@ a:focus-visible {
   border-color: rgba(141, 91, 76, 0.6) !important;
   box-shadow: 0 0 0 4px rgba(141, 91, 76, 0.12) !important;
   outline: none !important;
+}
+
+/* Пульсация CTA-кнопки (интегрирована с темой) */
+@keyframes ctaGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px var(--cta-glow-color);
+  }
+  50% {
+    box-shadow: 0 0 32px var(--cta-glow-color-active);
+  }
+}
+
+.cta-glow-wrapper {
+  animation: ctaGlowPulse 3s ease-in-out infinite;
+  border-radius: 9999px;
+  display: inline-flex;
 }

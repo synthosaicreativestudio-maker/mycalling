@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { AnimatedLogo } from './components/AnimatedLogo';
 import { IconTimer, IconScience, IconReport, UspCard, ForWhomCard, TrustCard, FaqItem, ReviewCard } from './components/landing/LandingUI';
 import { m } from 'framer-motion';
-import { sectionVariants, fadeUpVariants, heroVariants, ctaGlowVariants } from './lib/animations';
+import { sectionVariants, fadeUpVariants, heroVariants } from './lib/animations';
 
 const faqItems = [
   {
@@ -130,17 +130,12 @@ export default function HomePage() {
               variants={heroVariants}
               className="mt-12 flex flex-col items-start gap-4 sm:flex-row sm:items-center justify-start"
             >
-              <m.div
-                variants={ctaGlowVariants}
-                initial="idle"
-                animate="pulse"
-                className="rounded-full"
-              >
+              <div className="cta-glow-wrapper rounded-full">
                 <Link href={mainCtaLink} className="cta-glass h-[62px] min-w-[280px] px-8 text-base sm:text-lg">
                   {mainCtaText}
                   <ArrowRight className="h-5 w-5" />
                 </Link>
-              </m.div>
+              </div>
             </m.div>
             <m.span
               custom={1.0}
