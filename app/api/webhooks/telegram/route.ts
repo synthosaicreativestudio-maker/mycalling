@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '../../../lib/prisma';
 import { modulesConfig } from '../../../config/modules';
+import { migrateGuestToUser } from '../../../lib/auth/migrate-guest';
 
 const TG_API_BASE = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
 
@@ -524,57 +525,7 @@ export async function POST(req: Request) {
 
           if (authLink) {
             if (authLink.userId && authLink.userId !== user.id) {
-              try {
-                // 1. Получаем гостевого пользователя
-                const guestUser = await prisma.user.findUnique({
-                  where: { id: authLink.userId }
-                });
-
-                // 2. Копируем ответы на тесты
-                if (guestUser?.diagnosticAnswers) {
-                  await prisma.user.update({
-                    where: { id: user.id },
-                    data: {
-                      diagnosticAnswers: guestUser.diagnosticAnswers
-                    }
-                  });
-                }
-
-                // 3. Переносим коуч-сессию
-                await prisma.coachSession.deleteMany({ where: { userId: user.id } });
-                await prisma.coachSession.updateMany({
-                  where: { userId: authLink.userId },
-                  data: { userId: user.id }
-                });
-
-                // 4. Переносим результаты тестов
-                await prisma.diagnosticResult.updateMany({
-                  where: { userId: authLink.userId },
-                  data: { userId: user.id }
-                });
-
-                // 5. Переносим цифровой профиль
-                await prisma.digitalProfile.deleteMany({ where: { userId: user.id } });
-                await prisma.digitalProfile.updateMany({
-                  where: { userId: authLink.userId },
-                  data: { userId: user.id }
-                });
-
-                // 6. Переносим отчет
-                await prisma.report.deleteMany({ where: { userId: user.id } });
-                await prisma.report.updateMany({
-                  where: { userId: authLink.userId },
-                  data: { userId: user.id }
-                });
-
-                // 7. Помечаем гостевого пользователя как объединенного (soft merge)
-                await prisma.user.update({
-                  where: { id: authLink.userId },
-                  data: { mergedInto: user.id }
-                });
-              } catch (e) {
-                console.error('Error migrating guest session in Telegram webhook (text fallback):', e);
-              }
+              await migrateGuestToUser(authLink.userId, user.id);
             }
 
             await prisma.authLink.update({

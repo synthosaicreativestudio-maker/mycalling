@@ -68,6 +68,25 @@ async function callFreemodelRaw(requestBody: any, timeoutMs = 20000): Promise<an
 }
 
 /**
+ * Обертка с автоматическими повторными попытками (retry + backoff) при сбоях ИИ API.
+ */
+async function callFreemodelWithRetry(requestBody: any, timeoutMs = 20000, retries = 2): Promise<any> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await callFreemodelRaw(requestBody, timeoutMs);
+    } catch (err: any) {
+      if (attempt === retries) {
+        console.error(`[gemini] All ${retries + 1} attempts failed for Freemodel API request:`, err.message);
+        throw err;
+      }
+      const backoffMs = 1000 * Math.pow(2, attempt);
+      console.warn(`[gemini] Freemodel API call failed (attempt ${attempt + 1}/${retries + 1}). Retrying in ${backoffMs}ms... Error:`, err.message);
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
+    }
+  }
+}
+
+/**
  * Генерирует текстовый ответ в режиме чата.
  */
 export async function generateText(systemPrompt: string, history: Message[], temperature = 0.7): Promise<string> {
@@ -97,7 +116,7 @@ export async function generateText(systemPrompt: string, history: Message[], tem
     max_tokens: 1024
   };
 
-  const responseData = await callFreemodelRaw(requestBody);
+  const responseData = await callFreemodelWithRetry(requestBody);
   const text = responseData.choices?.[0]?.message?.content;
   
   if (!text) {
@@ -142,7 +161,7 @@ export async function generateJson(systemPrompt: string, prompt: string, schema:
     max_tokens: 2048
   };
 
-  const responseData = await callFreemodelRaw(requestBody, 25000); // 25 секунд лимит для полной генерации отчета
+  const responseData = await callFreemodelWithRetry(requestBody, 25000); // 25 секунд лимит для полной генерации отчета
   const text = responseData.choices?.[0]?.message?.content;
   
   if (!text) {

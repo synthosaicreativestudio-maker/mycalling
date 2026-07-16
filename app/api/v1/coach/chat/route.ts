@@ -2,6 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { z } from 'zod';
 import prisma from '../../../../lib/prisma';
 import { auth } from '../../../../lib/auth';
 import { generateText, generateJson } from '../../../../lib/gemini';
@@ -23,6 +24,15 @@ import { fallbackExtract } from '../../../../lib/coach/extraction';
 // ГЛАВНЫЙ ОБРАБОТЧИК ДИАЛОГА
 // ============================
 
+const ChatRequestSchema = z.object({
+  message: z.string().min(1, 'Сообщение пользователя не передано').max(10000, 'Слишком длинное сообщение'),
+  sessionId: z.string().optional().nullable().transform(val => val ?? undefined),
+  linkCode: z.string().optional().nullable().transform(val => val ?? undefined),
+  sessionMode: z.enum(['EXPRESS', 'DEEP']).optional().nullable().transform(val => val ?? undefined),
+  reset: z.boolean().optional(),
+  fromLoginError: z.boolean().optional(),
+});
+
 export async function POST(req: Request) {
   try {
     if (!modulesConfig.enableCoach) {
@@ -33,11 +43,15 @@ export async function POST(req: Request) {
       });
     }
 
-    const { message, sessionId, fromLoginError, linkCode, sessionMode, reset } = await req.json();
+    const rawBody = await req.json().catch(() => ({}));
+    const parseResult = ChatRequestSchema.safeParse(rawBody);
 
-    if (!message) {
-      return NextResponse.json({ error: 'Сообщение пользователя не передано' }, { status: 400 });
+    if (!parseResult.success) {
+      const errorMessage = parseResult.error.issues[0]?.message || 'Некорректный формат данных запроса';
+      return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
+
+    const { message, sessionId, fromLoginError, linkCode, sessionMode, reset } = parseResult.data;
 
     const getStrLen = (val: any): number => {
       return typeof val === 'string' ? val.trim().length : 0;

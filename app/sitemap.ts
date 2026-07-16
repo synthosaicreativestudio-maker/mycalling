@@ -1,30 +1,43 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = 'https://synthosai.ru';
   return [
     {
-      url: 'https://moeprizvanie.ru',
+      url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 1,
+      priority: 1.0,
     },
     {
-      url: 'https://moeprizvanie.ru/auth',
+      url: `${baseUrl}/coach`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/assessment`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/auth`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: 'https://moeprizvanie.ru/privacy',
+      url: `${baseUrl}/privacy`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
-      priority: 0.5,
+      priority: 0.3,
     },
     {
-      url: 'https://moeprizvanie.ru/terms',
+      url: `${baseUrl}/terms`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
-      priority: 0.5,
+      priority: 0.3,
     },
   ];
 }

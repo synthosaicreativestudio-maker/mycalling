@@ -64,6 +64,8 @@ model Session {
   userId    String   @map("user_id") @db.Uuid
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([expiresAt])
   @@map("session")
 }
 
@@ -121,6 +123,7 @@ model DiagnosticResult {
   reliability   String   // "high" | "medium" | "low"
   completedAt   DateTime @default(now()) @map("completed_at") @db.Timestamptz(6)
 
+  @@index([userId, testCode])
   @@map("diagnostic_results")
 }
 
@@ -157,6 +160,8 @@ model AuthLink {
   expiresAt    DateTime @map("expires_at")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
+  @@index([telegramId, status])
+  @@index([expiresAt])
   @@map("auth_links")
 }
 
@@ -168,5 +173,7 @@ model AuthExchangeToken {
   used      Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
+  @@index([token, used])
+  @@index([expiresAt])
   @@map("auth_exchange_tokens")
 }

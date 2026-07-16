@@ -36,10 +36,16 @@ const marckScript = Marck_Script({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://synthosai.ru'),
-  title: 'МоёПризвание — диагностика талантов для школьников',
+  title: {
+    default: 'МоёПризвание — диагностика талантов для школьников',
+    template: '%s | МоёПризвание',
+  },
   description: 'Определи свой путь. Глубокая диагностика талантов, характера и интересов за 25 минут. Понятный отчёт с рекомендациями по профессиям для школьников 8–11 классов.',
   keywords: ['профориентация', 'диагностика талантов', 'тест на профессию', 'школьник', 'выбор профессии', 'RIASEC', 'Big Five'],
   authors: [{ name: 'SynthosAI Creative Studio' }],
+  alternates: {
+    canonical: 'https://synthosai.ru',
+  },
   icons: {
     icon: '/assets/logos/logo.png',
     apple: '/assets/logos/logo.png',
@@ -94,19 +100,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "WebApplication",
-                "name": "МоёПризвание",
-                "url": "https://synthosai.ru",
-                "applicationCategory": "EducationalApplication",
-                "operatingSystem": "All",
-                "offers": {
-                  "@type": "Offer",
-                  "price": "0",
-                  "priceCurrency": "RUB"
+              __html: JSON.stringify([
+                {
+                  "@context": "https://schema.org",
+                  "@type": "WebApplication",
+                  "name": "МоёПризвание",
+                  "url": "https://synthosai.ru",
+                  "applicationCategory": "EducationalApplication",
+                  "operatingSystem": "All",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "RUB"
+                  }
+                },
+                {
+                  "@context": "https://schema.org",
+                  "@type": "Organization",
+                  "name": "МоёПризвание",
+                  "url": "https://synthosai.ru",
+                  "logo": "https://synthosai.ru/assets/logos/logo.png",
+                  "sameAs": [
+                    "https://t.me/moiprizvanie_bot"
+                  ]
                 }
-              }),
+              ]),
             }}
           />
 
