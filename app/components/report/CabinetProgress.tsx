@@ -92,8 +92,8 @@ export default function CabinetProgress({ progress, session, handleLogout, total
           </div>
         </div>
 
-        {/* Step Cards with premium animations and brand colors */}
-        <div className="space-y-5">
+        {/* Step Cards with premium animations and brand colors in a 3-column grid on desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Step 1: Coach Session */}
           <motion.div 
@@ -105,7 +105,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                 : '0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(196, 164, 132, 0.15)'
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden ${
+            className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-4 relative overflow-hidden min-h-[220px] ${
               progress.coachCompleted 
                 ? 'bg-green-500/5 border-green-500/20' 
                 : 'bg-[#C4A484]/5 border-[#C4A484]/20 shadow-[0_0_15px_rgba(196,164,132,0.03)]'
@@ -124,7 +124,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
             )}
             <div className="space-y-1.5 flex-1 relative z-10">
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
+                <span className={`text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
                   progress.coachCompleted 
                     ? 'bg-green-500/15 text-green-400' 
                     : 'bg-[#C4A484]/15 text-[#C4A484] animate-pulse'
@@ -139,11 +139,11 @@ export default function CabinetProgress({ progress, session, handleLogout, total
               </p>
             </div>
             
-            <div className="relative z-10 self-stretch md:self-auto shrink-0">
+            <div className="relative z-10 shrink-0">
               {progress.coachCompleted ? (
                 <Link
                   href="/coach"
-                  className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 bg-white/5 hover:bg-white/10 text-white/90 border border-white/10"
+                  className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 bg-white/5 hover:bg-white/10 text-white/90 border border-white/10 w-full"
                 >
                   <span>Войти в чат</span>
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -166,7 +166,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                 >
                   <Link
                     href="/coach"
-                    className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[#C4A484] hover:bg-[#b09071] text-[#080C14] text-xs font-bold font-sans transition duration-300"
+                    className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[#C4A484] hover:bg-[#b09071] text-[#080C14] text-xs font-bold font-sans transition duration-300 w-full"
                   >
                     <span>Продолжить сессию</span>
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -186,7 +186,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                 : '0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.15)'
             } : {}}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden ${
+            className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-4 relative overflow-hidden min-h-[220px] ${
               progress.testCompleted 
                 ? 'bg-green-500/5 border-green-500/20' 
                 : (progress.coachCompleted 
@@ -208,7 +208,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
             )}
             <div className="space-y-1.5 flex-1 relative z-10">
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
+                <span className={`text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
                   progress.testCompleted 
                     ? 'bg-green-500/15 text-green-400' 
                     : (progress.coachCompleted 
@@ -226,16 +226,16 @@ export default function CabinetProgress({ progress, session, handleLogout, total
               </p>
             </div>
             
-            <div className="relative z-10 self-stretch md:self-auto shrink-0">
+            <div className="relative z-10 shrink-0">
               {!progress.coachCompleted ? (
-                <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed">
+                <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed w-full">
                   <Lock className="h-3.5 w-3.5" />
                   <span>Заблокировано</span>
                 </div>
               ) : progress.testCompleted ? (
                 <Link
                   href="/assessment"
-                  className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 bg-white/5 hover:bg-white/10 text-white/90 border border-white/10"
+                  className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans transition duration-300 bg-white/5 hover:bg-white/10 text-white/90 border border-white/10 w-full"
                 >
                   <span>Перейти к тестам</span>
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -258,7 +258,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                 >
                   <Link
                     href="/assessment"
-                    className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold font-sans transition duration-300"
+                    className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold font-sans transition duration-300 w-full"
                   >
                     <span>Начать тесты</span>
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -276,7 +276,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
               boxShadow: '0 15px 40px rgba(0, 0, 0, 0.65), 0 0 25px rgba(196, 164, 132, 0.2)'
             } : {}}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden ${
+            className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between gap-4 relative overflow-hidden min-h-[220px] ${
               progress.coachCompleted && progress.testCompleted 
                 ? 'bg-gradient-to-br from-[#C4A484]/15 to-[#3B82F6]/5 border-[#C4A484]/30 shadow-[0_8px_30px_rgba(0,0,0,0.5)]' 
                 : 'bg-white/[0.01] border-white/5 opacity-50'
@@ -295,7 +295,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
             )}
             <div className="space-y-1.5 flex-1 relative z-10">
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
+                <span className={`text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wide ${
                   (progress.coachCompleted && progress.testCompleted)
                     ? 'bg-[#C4A484]/20 text-[#EAD5C3] animate-pulse'
                     : 'bg-white/5 text-slate-500'
@@ -309,9 +309,9 @@ export default function CabinetProgress({ progress, session, handleLogout, total
               </p>
             </div>
             
-            <div className="relative z-10 self-stretch md:self-auto shrink-0">
+            <div className="relative z-10 shrink-0">
               {!(progress.coachCompleted && progress.testCompleted) ? (
-                <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed">
+                <div className="flex items-center justify-center gap-1.5 px-5 py-3 rounded-xl text-xs font-bold font-sans bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed w-full">
                   <Lock className="h-3.5 w-3.5" />
                   <span>Заблокировано</span>
                 </div>

@@ -40,8 +40,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       emoji: '⚡',
       description: 'Простое двухминутное действие для запуска цели',
       val: getField('deepFirstStep'),
-      color: '#f97316', // Оранжевый
-      glowColor: 'rgba(249, 115, 22, 0.4)',
+      color: 'var(--riasec-startup)',
+      glowColor: 'var(--riasec-startup)',
       points: '200,40 224,80 176,80', // Вершина
       textPos: { x: 200, y: 66 }
     },
@@ -52,8 +52,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       emoji: '🚀',
       description: 'Ключевые действия и навыки на 90 дней',
       val: getField('deepActions'),
-      color: '#10b981', // Зеленый
-      glowColor: 'rgba(16, 185, 129, 0.4)',
+      color: 'var(--riasec-organizational)',
+      glowColor: 'var(--riasec-organizational)',
       points: '172,86 228,86 250,126 150,126',
       textPos: { x: 200, y: 108 }
     },
@@ -64,8 +64,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       emoji: '👑',
       description: 'Манифест вашей новой роли и качеств',
       val: getField('deepIdentity'),
-      color: '#a855f7', // Фиолетовый
-      glowColor: 'rgba(168, 85, 247, 0.4)',
+      color: 'var(--riasec-analytical)',
+      glowColor: 'var(--riasec-analytical)',
       points: '146,132 254,132 276,172 124,172',
       textPos: { x: 200, y: 154 }
     },
@@ -76,8 +76,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       emoji: '🔥',
       description: 'Эмоциональный отклик и энергия',
       val: getField('deepEmotions'),
-      color: '#eab308', // Золотой
-      glowColor: 'rgba(234, 179, 8, 0.4)',
+      color: 'var(--riasec-social)',
+      glowColor: 'var(--riasec-social)',
       points: '120,178 280,178 302,218 98,218',
       textPos: { x: 200, y: 200 }
     },
@@ -88,8 +88,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       emoji: '🌟',
       description: 'Детальная визуализация успеха',
       val: getField('deepOutcome'),
-      color: theme === 'light' ? '#A67C52' : '#3b82f6', // Золотой в светлой теме, Синий в темной
-      glowColor: theme === 'light' ? 'rgba(166, 124, 82, 0.4)' : 'rgba(59, 130, 246, 0.4)',
+      color: 'var(--riasec-outcome)',
+      glowColor: 'var(--riasec-outcome)',
       points: '94,224 306,224 328,264 72,264',
       textPos: { x: 200, y: 246 }
     },
@@ -100,8 +100,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       emoji: '🎯',
       description: 'Ваша главная цель самореализации',
       val: getField('deepGoal'),
-      color: theme === 'light' ? '#8D5B4C' : '#38bdf8', // Кофейный в светлой теме, Голубой в темной
-      glowColor: theme === 'light' ? 'rgba(141, 91, 76, 0.4)' : 'rgba(56, 189, 248, 0.4)',
+      color: 'var(--riasec-goal)',
+      glowColor: 'var(--riasec-goal)',
       points: '68,270 332,270 354,310 46,310', // Основание
       textPos: { x: 200, y: 292 }
     }
@@ -223,7 +223,7 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       </div>
 
       {/* Список шагов (чек-лист) */}
-      <div className="w-full space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
+      <div className="w-full space-y-2.5 max-h-[160px] overflow-y-auto pr-1 hidden md:block">
         {levels.slice().reverse().map((lvl) => {
           const hasData = lvl.val.trim().length > 0;
           return (

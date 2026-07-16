@@ -35,6 +35,16 @@
   --accent-svg-2: #3B82F6;
   --accent-svg-3: #93C5FD;
   --accent-svg-shadow: rgba(59, 130, 246, 0.25);
+
+  /* RIASEC переменные для темной темы */
+  --riasec-creative: #ec4899;
+  --riasec-tech: #3b82f6;
+  --riasec-analytical: #a855f7;
+  --riasec-social: #eab308;
+  --riasec-organizational: #10b981;
+  --riasec-startup: #f97316;
+  --riasec-outcome: #3b82f6;
+  --riasec-goal: #38bdf8;
 }
 
 html {
@@ -403,6 +413,16 @@ a:focus-visible {
   --accent-svg-2: #8D5B4C;
   --accent-svg-3: #D2B48C;
   --accent-svg-shadow: rgba(141, 91, 76, 0.25);
+
+  /* RIASEC переменные для светлой темы капучино */
+  --riasec-creative: #C58F82; /* карамельно-розовый */
+  --riasec-tech: #5D7A9E; /* приглушенный джинсовый */
+  --riasec-analytical: #7C6C8D; /* сливовый капучино */
+  --riasec-social: #B89B6C; /* мягкий ореховый */
+  --riasec-organizational: #5E8C73; /* шалфейный зеленый */
+  --riasec-startup: #A3684B; /* терракотовый */
+  --riasec-outcome: #A67C52; /* карамельный золотой */
+  --riasec-goal: #8D5B4C; /* капучино-коричневый */
 }
 
 /* Скрытие видеофона в светлой теме и показ градиента */
@@ -415,6 +435,23 @@ a:focus-visible {
 [data-theme="light"] .theme-light-only {
   display: block !important;
   opacity: 1 !important;
+}
+
+/* Оверрайды для контрастности второстепенных красных кнопок и ошибок в светлой теме */
+[data-theme="light"] .text-red-400 {
+  color: #8C2D19 !important; /* глубокий терракотово-красный */
+}
+[data-theme="light"] .text-red-400\/80 {
+  color: rgba(140, 45, 25, 0.8) !important;
+}
+[data-theme="light"] .bg-red-500\/10 {
+  background-color: rgba(140, 45, 25, 0.08) !important;
+}
+[data-theme="light"] .border-red-500\/20 {
+  border-color: rgba(140, 45, 25, 0.18) !important;
+}
+[data-theme="light"] .hover\:bg-red-500\/20:hover {
+  background-color: rgba(140, 45, 25, 0.15) !important;
 }
 
 /* Оверрайды для жестко захардкоженных утилит Tailwind в светлой теме */

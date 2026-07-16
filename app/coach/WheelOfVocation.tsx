@@ -30,8 +30,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Творчество, дизайн, тексты',
       value: Math.max(0.15, getScore('creative') / 100), // Минимальный радиус 15% для красоты
       rawScore: getScore('creative'),
-      color: '#ec4899', // Розовый
-      glowColor: 'rgba(236, 72, 153, 0.4)',
+      color: 'var(--riasec-creative)',
+      glowColor: 'var(--riasec-creative)',
     },
     {
       name: 'Технологии & Код',
@@ -40,8 +40,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Программирование, инженерия',
       value: Math.max(0.15, getScore('tech') / 100),
       rawScore: getScore('tech'),
-      color: '#3b82f6', // Синий
-      glowColor: 'rgba(59, 130, 246, 0.4)',
+      color: 'var(--riasec-tech)',
+      glowColor: 'var(--riasec-tech)',
     },
     {
       name: 'Наука & Аналитика',
@@ -50,8 +50,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Логика, формулы, исследования',
       value: Math.max(0.15, getScore('analytical') / 100),
       rawScore: getScore('analytical'),
-      color: '#a855f7', // Фиолетовый
-      glowColor: 'rgba(168, 85, 247, 0.4)',
+      color: 'var(--riasec-analytical)',
+      glowColor: 'var(--riasec-analytical)',
     },
     {
       name: 'Коммуникация & Люди',
@@ -60,8 +60,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Общение, продажи, обучение',
       value: Math.max(0.15, getScore('social') / 100),
       rawScore: getScore('social'),
-      color: '#eab308', // Золотой
-      glowColor: 'rgba(234, 179, 8, 0.4)',
+      color: 'var(--riasec-social)',
+      glowColor: 'var(--riasec-social)',
     },
     {
       name: 'Организация & Системы',
@@ -70,8 +70,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Менеджмент, процессы, порядок',
       value: Math.max(0.15, getScore('organizational') / 100),
       rawScore: getScore('organizational'),
-      color: '#10b981', // Зеленый
-      glowColor: 'rgba(16, 185, 129, 0.4)',
+      color: 'var(--riasec-organizational)',
+      glowColor: 'var(--riasec-organizational)',
     },
     {
       name: 'Стартап & Лидерство',
@@ -80,8 +80,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Предпринимательство, проекты',
       value: Math.max(0.15, getScore('startup') / 100),
       rawScore: getScore('startup'),
-      color: '#f97316', // Оранжевый
-      glowColor: 'rgba(249, 115, 22, 0.4)',
+      color: 'var(--riasec-startup)',
+      glowColor: 'var(--riasec-startup)',
     },
   ];
 
