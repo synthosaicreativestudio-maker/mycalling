@@ -24,6 +24,35 @@ import { fallbackExtract } from '../../../../lib/coach/extraction';
 // ГЛАВНЫЙ ОБРАБОТЧИК ДИАЛОГА
 // ============================
 
+// Optimistic-locking запись CoachSession: защищает от гонки параллельных запросов
+// (двойной клик, ретрай сети, две вкладки), которая раньше могла молча откатывать
+// extractedData (в т.ч. прогресс Пирамиды Идентичности) к более старой версии.
+async function saveCoachSession(
+  id: string,
+  expectedVersion: number,
+  data: Record<string, any>
+): Promise<number> {
+  const result = await prisma.coachSession.updateMany({
+    where: { id, version: expectedVersion },
+    data: { ...data, version: { increment: 1 } }
+  });
+
+  if (result.count > 0) {
+    return expectedVersion + 1;
+  }
+
+  // Конфликт версий: кто-то другой успел записать раньше. Перечитываем актуальную
+  // версию и повторяем запись один раз поверх неё (наши данные важнее, т.к. это
+  // самый свежий по времени обработки запрос), а не молча теряем текущий прогресс.
+  const fresh = await prisma.coachSession.findUnique({ where: { id }, select: { version: true } });
+  const freshVersion = fresh?.version ?? expectedVersion;
+  await prisma.coachSession.updateMany({
+    where: { id, version: freshVersion },
+    data: { ...data, version: { increment: 1 } }
+  });
+  return freshVersion + 1;
+}
+
 const ChatRequestSchema = z.object({
   message: z.string().min(1, 'Сообщение пользователя не передано').max(10000, 'Слишком длинное сообщение'),
   sessionId: z.string().optional().nullable().transform(val => val ?? undefined),
@@ -160,6 +189,7 @@ export async function POST(req: Request) {
             transcript: { EXPRESS: [], DEEP: [] },
             extractedData: {
               currentStep: userName ? 2 : 1,
+              maxVirtualStepReached: userName ? 2 : 1,
               fullName: userName || 'Гость',
               phone: userPhone,
               age: null,
@@ -248,13 +278,16 @@ export async function POST(req: Request) {
       const currentExtracted = (coachSession.extractedData as Record<string, any>) || {};
       if (sessionMode && currentExtracted.sessionMode !== sessionMode) {
         currentExtracted.sessionMode = sessionMode;
-        coachSession = await prisma.coachSession.update({
-          where: { id: coachSession.id },
-          data: { extractedData: currentExtracted },
-          include: { user: true }
+        const newVersion = await saveCoachSession(coachSession.id, coachSession.version, {
+          extractedData: currentExtracted
         });
+        coachSession = { ...coachSession, extractedData: currentExtracted, version: newVersion };
       }
     }
+
+    // Отслеживаем версию сессии локально — все дальнейшие записи идут через
+    // saveCoachSession с optimistic locking, чтобы не терять прогресс на гонках.
+    let sessionVersion = coachSession.version;
 
     let rawTranscript = coachSession.transcript;
     let expressTranscript: any[] = [];
@@ -591,14 +624,11 @@ export async function POST(req: Request) {
         extractedData.lastStep = 2;
         extractedData.stepAttempts = 0;
         
-        await prisma.coachSession.update({
-          where: { id: coachSession.id },
-          data: {
-            transcript: { EXPRESS: expressTranscript, DEEP: deepTranscript },
-            extractedData: extractedData
-          }
+        sessionVersion = await saveCoachSession(coachSession.id, sessionVersion, {
+          transcript: { EXPRESS: expressTranscript, DEEP: deepTranscript },
+          extractedData: extractedData
         });
-        
+
         transcript = isDeepMode ? deepTranscript : expressTranscript;
         finalNextStep = 2;
         nextStep = 2;
@@ -628,13 +658,10 @@ export async function POST(req: Request) {
       expressTranscript.push(newMsg);
       deepTranscript.push(newMsg);
       
-      await prisma.coachSession.update({
-        where: { id: coachSession.id },
-        data: { 
-          transcript: { EXPRESS: expressTranscript, DEEP: deepTranscript }, 
-          extractedData: { ...extractedData, currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 10 : 0 },
-          status: 'IN_PROGRESS'
-        }
+      sessionVersion = await saveCoachSession(coachSession.id, sessionVersion, {
+        transcript: { EXPRESS: expressTranscript, DEEP: deepTranscript },
+        extractedData: { ...extractedData, currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 10 : 0 },
+        status: 'IN_PROGRESS'
       });
 
       return NextResponse.json({
@@ -1010,6 +1037,15 @@ ${dialogHistory}
       }
     }
 
+    // Ratchet: шаг никогда не откатывается назад. currentVirtualStep выше пересчитывается
+    // с нуля из наличия полей в extractedData на каждый запрос — раньше это приводило
+    // к дёрганью Пирамиды Идентичности между соседними уровнями (напр. 2↔3) при гонке
+    // записи в БД. Персистентный максимум фиксирует реально достигнутый прогресс.
+    const maxStepReached = typeof extractedData.maxVirtualStepReached === 'number'
+      ? extractedData.maxVirtualStepReached
+      : 0;
+    currentVirtualStep = Math.max(currentVirtualStep, maxStepReached);
+    extractedData.maxVirtualStepReached = currentVirtualStep;
     extractedData.currentStep = currentVirtualStep;
 
     // Обновляем пользователя при нативной регистрации
@@ -1161,13 +1197,10 @@ ${dialogHistory}
         EXPRESS: expressTranscript,
         DEEP: deepTranscript
       };
-      await prisma.coachSession.update({
-        where: { id: coachSession.id },
-        data: {
-          transcript: finalDbTranscript,
-          extractedData,
-          status: 'IN_PROGRESS'
-        }
+      sessionVersion = await saveCoachSession(coachSession.id, sessionVersion, {
+        transcript: finalDbTranscript,
+        extractedData,
+        status: 'IN_PROGRESS'
       });
 
       return NextResponse.json({
@@ -1233,7 +1266,9 @@ ${dialogHistory}
       // Внедряем автоопределение narrativeTheme на основе talentScores
       let narrativeTheme = 'CREATIVE';
       try {
-        const scores = extractedData.talentScores || {};
+        // Баг: talentScores лежит внутри expressExtracted, а не в корне extractedData —
+        // раньше это условие всегда получало пустой объект и narrativeTheme был случайным.
+        const scores = extractedData.expressExtracted?.talentScores || {};
         const maxScoreKey = Object.entries(scores).reduce(
           (max, [key, val]) => (Number(val) > max.val ? { key, val: Number(val) } : max),
           { key: 'creative', val: -1 }
@@ -1292,14 +1327,11 @@ ${dialogHistory}
     };
 
     // Сохраняем обновленную сессию в БД
-    await prisma.coachSession.update({
-      where: { id: coachSession.id },
-      data: {
-        transcript: finalDbTranscript,
-        extractedData,
-        status,
-        completedAt
-      }
+    sessionVersion = await saveCoachSession(coachSession.id, sessionVersion, {
+      transcript: finalDbTranscript,
+      extractedData,
+      status,
+      completedAt
     });
 
     // Фоновая отправка уведомлений

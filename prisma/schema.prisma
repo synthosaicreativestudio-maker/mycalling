@@ -106,6 +106,7 @@ model CoachSession {
   status        SessionStatus  @default(IN_PROGRESS)
   transcript    Json           // полная история диалога (массив сообщений)
   extractedData Json           // структурированные качественные данные
+  version       Int            @default(0) // optimistic locking — защита от гонки параллельных запросов
   completedAt   DateTime?      @map("completed_at") @db.Timestamptz(6)
   createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
