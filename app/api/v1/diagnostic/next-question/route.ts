@@ -103,6 +103,17 @@ export async function GET(request: Request) {
         return Array.isArray(val) ? val.filter((v) => typeof v === 'string') : [];
       };
 
+      const getNumberField = (key: string): number | undefined => {
+        let val: any = undefined;
+        if (coachExtracted.expressExtracted && typeof coachExtracted.expressExtracted === 'object') {
+          val = (coachExtracted.expressExtracted as Record<string, any>)[key];
+        }
+        if (val === undefined) {
+          val = coachExtracted[key];
+        }
+        return typeof val === 'number' ? val : undefined;
+      };
+
       const coachData = {
         dreams: getField('dreams') || 'Не указано',
         idols: getField('idols') || 'Не указано',
@@ -218,19 +229,51 @@ export async function GET(request: Request) {
           hollandCode,
           antiInterests: getArrayField('antiInterests'),
           hobbies: getArrayField('voluntaryHobbies'),
+          cabinVisualArt: getNumberField('cabinVisualArt'),
+          cabinPerformingArt: getNumberField('cabinPerformingArt'),
+          subjectSTEM: getNumberField('subjectSTEM'),
+          subjectHumanities: getNumberField('subjectHumanities'),
+          subjectBioChem: getNumberField('subjectBioChem'),
+          digitalInterests: getArrayField('digitalInterests'),
         },
         personality: {
           bigFive: finalBigFive,
           locusOfControl: typeof finalBigFive.LOC === 'number' ? finalBigFive.LOC : undefined,
           ambiguityTolerance: typeof finalBigFive.AMB === 'number' ? finalBigFive.AMB : undefined,
           honestyFlag: typeof finalBigFive.honestyFlag === 'boolean' ? finalBigFive.honestyFlag : undefined,
+          teiqueSelfAwareness: getNumberField('teiqueSelfAwareness'),
+          teiqueSelfRegulation: getNumberField('teiqueSelfRegulation'),
+          teiqueSocialSkills: getNumberField('teiqueSocialSkills'),
+          teiqueMotivation: getNumberField('teiqueMotivation'),
+          grit: getNumberField('grit'),
+          proactivity: getNumberField('proactivity'),
+          selfControl: getNumberField('selfControl'),
+          stressEvaluation: getNumberField('stressEvaluation'),
+          emotionalReactivity: getNumberField('emotionalReactivity'),
+          mindsetGrowth: getNumberField('mindsetGrowth'),
+          mindsetOptimism: getNumberField('mindsetOptimism'),
+          locusControlInternal: getNumberField('locusControlInternal'),
         },
         strengths: {
           via: viaScores,
           signatureStrengths: viaScores.signatureStrengths,
+          viaWisdom: getNumberField('viaWisdom'),
+          viaCourage: getNumberField('viaCourage'),
+          viaHumanity: getNumberField('viaHumanity'),
+          viaJustice: getNumberField('viaJustice'),
+          viaTemperance: getNumberField('viaTemperance'),
         },
         cognitive: {
           icar: icarScores,
+          execInhibition: getNumberField('execInhibition'),
+          execFlexibility: getNumberField('execFlexibility'),
+          learnDeep: getNumberField('learnDeep'),
+          learnSurface: getNumberField('learnSurface'),
+          selfEfficacyAcademic: getNumberField('selfEfficacyAcademic'),
+          metacogPlanning: getNumberField('metacogPlanning'),
+          metacogMonitoring: getNumberField('metacogMonitoring'),
+          curiosityEpistemic: getNumberField('curiosityEpistemic'),
+          cogAiLiteracy: getNumberField('cogAiLiteracy'),
         },
         motivation: {
           coachValues: coachData.values !== 'Не указано' ? coachData.values : undefined,
@@ -238,10 +281,46 @@ export async function GET(request: Request) {
           pvq: pvqScores.raw,
           topValues: topPvqNames.length > 0 ? topPvqNames : (coachData.values !== 'Не указано' ? [coachData.values] : []),
         },
+        social: {
+          belbinLeader: getNumberField('belbinLeader'),
+          belbinDoer: getNumberField('belbinDoer'),
+          belbinCreator: getNumberField('belbinCreator'),
+          belbinPeacemaker: getNumberField('belbinPeacemaker'),
+          assertiveness: getNumberField('assertiveness'),
+          empatheticListening: getNumberField('empatheticListening'),
+          feedbackSkill: getNumberField('feedbackSkill'),
+          conflictResolution: getNumberField('conflictResolution'),
+          peerFriendships: getNumberField('peerFriendships'),
+          groupBelonging: getNumberField('groupBelonging'),
+          bullyingResistance: getNumberField('bullyingResistance'),
+          peerDependence: getNumberField('peerDependence'),
+          parentalInfluence: getNumberField('parentalInfluence'),
+          mentorInfluence: getNumberField('mentorInfluence'),
+          socialCapital: getNumberField('socialCapital'),
+        },
         behavior: {
           procrastination: procrastinationScore,
           deepActions: coachData.deepActions || undefined,
           deepFirstStep: coachData.deepFirstStep || undefined,
+          savickasConcern: getNumberField('savickasConcern'),
+          savickasControl: getNumberField('savickasControl'),
+          savickasCuriosity: getNumberField('savickasCuriosity'),
+          savickasConfidence: getNumberField('savickasConfidence'),
+          perfectionismBarrier: getNumberField('perfectionismBarrier'),
+          fearOfFailure: getNumberField('fearOfFailure'),
+          decisionRational: getNumberField('decisionRational'),
+          decisionIntuitive: getNumberField('decisionIntuitive'),
+          decisionDependent: getNumberField('decisionDependent'),
+          decisionImpulsive: getNumberField('decisionImpulsive'),
+          resilienceFailure: getNumberField('resilienceFailure'),
+          learningFromMistakes: getNumberField('learningFromMistakes'),
+          timeManagement: getNumberField('timeManagement'),
+          routineDiscipline: getNumberField('routineDiscipline'),
+          balanceWorkRest: getNumberField('balanceWorkRest'),
+          digitalHygiene: getNumberField('digitalHygiene'),
+          contentCreationStyle: getNumberField('contentCreationStyle'),
+          cyberSocialization: getNumberField('cyberSocialization'),
+          aiCollaboration: getNumberField('aiCollaboration'),
         },
         context: {
           age: scoreContext.age,
@@ -249,6 +328,15 @@ export async function GET(request: Request) {
           city: getField('city') || undefined,
           idols: coachData.idols !== 'Не указано' ? coachData.idols : undefined,
           barriers: coachData.barriers !== 'Не указано' ? coachData.barriers : undefined,
+          familyPressure: getNumberField('familyPressure'),
+          familyFinance: getNumberField('familyFinance'),
+          mobility: getNumberField('mobility'),
+          health: getNumberField('health'),
+          grades: getNumberField('grades'),
+          limitingBeliefs: getNumberField('limitingBeliefs'),
+          educationEnvAvail: getNumberField('educationEnvAvail'),
+          careerReadiness: getNumberField('careerReadiness'),
+          digitalDivide: getNumberField('digitalDivide'),
         },
         consistency,
       });

@@ -778,32 +778,51 @@ export async function POST(req: Request) {
         properties.talentScores = {
           type: "OBJECT",
           properties: {
-            creative: { type: "INTEGER", description: "Оценка склонности к творчеству от 0 до 100. Если подросток НЕ упоминал хобби/предметы про творчество, верни строго 0 (НЕ пиши 50 по умолчанию)." },
-            tech: { type: "INTEGER", description: "Оценка склонности к технологиям и программированию от 0 до 100. Если в тексте нет про механизмы/код/спорт, верни строго 0 (НЕ пиши 50 по умолчанию)." },
-            analytical: { type: "INTEGER", description: "Оценка склонности к аналитике (формулы, исследования) от 0 до 100. Если нет про логику/исследования, верни строго 0 (НЕ пиши 50 по умолчанию)." },
-            social: { type: "INTEGER", description: "Оценка склонности к коммуникации и помощи людям от 0 до 100. Если нет про заботу/общение, верни строго 0 (НЕ пиши 50 по умолчанию)." },
-            organizational: { type: "INTEGER", description: "Оценка склонности к организации (порядок, финансы) от 0 до 100. Если нет про списки/порядок, верни строго 0 (НЕ пиши 50 по умолчанию)." },
-            startup: { type: "INTEGER", description: "Оценка склонности к лидерству и продажам от 0 до 100. Если нет про лидерство/управление, верни строго 0 (НЕ пиши 50 по умолчанию)." }
+            creative: { type: "INTEGER", description: "Оценка склонности к творчеству от 0 до 100." },
+            tech: { type: "INTEGER", description: "Оценка склонности к технологиям от 0 до 100." },
+            analytical: { type: "INTEGER", description: "Оценка склонности к аналитике от 0 до 100." },
+            social: { type: "INTEGER", description: "Оценка склонности к коммуникации от 0 до 100." },
+            organizational: { type: "INTEGER", description: "Оценка склонности к организации от 0 до 100." },
+            startup: { type: "INTEGER", description: "Оценка склонности к лидерству и продажам от 0 до 100." }
           }
         };
 
-        // Д-7: анти-интересы и добровольные хобби (только через ИИ-экстракцию, без regex-fallback)
+        // Шкалы Белбина для подростков (0-100)
+        properties.belbinLeader = { type: "INTEGER", description: "Склонность к роли Лидера/Координатора в команде (0-100)." };
+        properties.belbinDoer = { type: "INTEGER", description: "Склонность к роли Исполнителя/Рабочей пчелы (0-100)." };
+        properties.belbinCreator = { type: "INTEGER", description: "Склонность к роли Генератора идей (0-100)." };
+        properties.belbinPeacemaker = { type: "INTEGER", description: "Склонность к роли Миротворца/Сглаживателя углов (0-100)." };
+
+        // Карьерная адаптивность Савикаса (0-100)
+        properties.savickasConcern = { type: "INTEGER", description: "Забота о будущем и планирование карьеры (0-100)." };
+        properties.savickasControl = { type: "INTEGER", description: "Контроль и ответственность за свой выбор (0-100)." };
+        properties.savickasCuriosity = { type: "INTEGER", description: "Любознательность в поиске профессий (0-100)." };
+        properties.savickasConfidence = { type: "INTEGER", description: "Уверенность в преодолении барьеров (0-100)." };
+
+        // Статус идентичности по Марсии
+        properties.marciaStatus = { type: "STRING", description: "Статус выбора: 'DIFFUSION' (нет целей), 'FORECLOSURE' (навязано родителями), 'MORATORIUM' (в поиске), 'ACHIEVEMENT' (осознанно)." };
+
+        // Эмоциональный интеллект TEIQue (0-100)
+        properties.teiqueSelfAwareness = { type: "INTEGER", description: "Эмоциональное самосознание (0-100)." };
+        properties.teiqueSelfRegulation = { type: "INTEGER", description: "Саморегуляция эмоций (0-100)." };
+
+        // Д-7: анти-интересы и добровольные хобби
         properties.antiInterests = {
           type: "ARRAY",
           items: { type: "STRING" },
-          description: "Список конкретных вещей/сфер/деятельностей, которые подросток категорически НЕ любит или от которых хочет держаться подальше (ответ на вопрос «что тебе точно НЕ нравится, от чего хочется сбежать?»). Если в сообщении об этом ничего нет — верни пустой массив."
+          description: "Список вещей, которые подросток категорически НЕ любит. Если нет — пустой массив."
         };
         properties.voluntaryHobbies = {
           type: "ARRAY",
           items: { type: "STRING" },
-          description: "Список занятий, которыми подросток занимается добровольно, когда его никто не заставляет (ответ на вопрос «чем занимаешься по своей воле, когда никто не заставляет?»). Если в сообщении об этом ничего нет — верни пустой массив."
+          description: "Занятия, которыми занимается добровольно. Если нет — пустой массив."
         };
 
-        // Д-4: результат техники "адвокат дьявола" (заполняется, если коуч оспаривал шаблонный ответ про страхи/цель)
-        properties.motivationTested = { type: "BOOLEAN", description: "true, только если в последней реплике коуча Романа было парадоксальное оспаривание шаблонного ответа подростка, и подросток на это ответил." };
-        properties.trueMotivation = { type: "STRING", description: "Новая, более личная аргументация подростка, данная ПОСЛЕ того, как коуч оспорил его шаблонный ответ. Заполняй, только если оспаривание произошло и подросток переформулировал ответ. Иначе — пустая строка." };
+        // Д-4: результат техники "адвокат дьявола"
+        properties.motivationTested = { type: "BOOLEAN", description: "true, только если коуч оспаривал шаблонный ответ." };
+        properties.trueMotivation = { type: "STRING", description: "Новая аргументация подростка после оспаривания коуча." };
 
-        fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle, talentScores (scores 0-100 reflecting the user's vocational areas), antiInterests (array), voluntaryHobbies (array), motivationTested (boolean), trueMotivation (string)";
+        fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle, talentScores, belbinLeader, belbinDoer, belbinCreator, belbinPeacemaker, savickasConcern, savickasControl, savickasCuriosity, savickasConfidence, marciaStatus, teiqueSelfAwareness, teiqueSelfRegulation, antiInterests (array), voluntaryHobbies (array), motivationTested (boolean), trueMotivation (string)";
 
         properties.fullName = { type: "STRING" };
         properties.age = { type: "INTEGER" };
@@ -813,9 +832,8 @@ export async function POST(req: Request) {
       } else if (isDeepMode && currentStepBefore >= 16 && currentStepBefore <= 21) {
         if (currentStepBefore === 16) {
           properties.deepGoal = { type: "STRING" };
-          // Д-4: результат техники "адвокат дьявола" на шаге "Что я хочу?"
-          properties.motivationTested = { type: "BOOLEAN", description: "true, только если в последней реплике коуча Романа было парадоксальное оспаривание шаблонного ответа подростка про цель, и подросток на это ответил." };
-          properties.trueMotivation = { type: "STRING", description: "Новая, более личная аргументация подростка про цель, данная ПОСЛЕ того, как коуч оспорил его шаблонный ответ. Заполняй, только если оспаривание произошло. Иначе — пустая строка." };
+          properties.motivationTested = { type: "BOOLEAN", description: "true, только если коуч оспаривал шаблонный ответ про цель." };
+          properties.trueMotivation = { type: "STRING", description: "Новая аргументация про цель." };
           fieldsToExtract += ", deepGoal, motivationTested (boolean), trueMotivation (string)";
         } else if (currentStepBefore === 17) {
           properties.deepOutcome = { type: "STRING" };
@@ -948,6 +966,30 @@ ${dialogHistory}
         updateScore('organizational');
         updateScore('startup');
         extractedData.expressExtracted.talentScores = prevScores;
+      }
+
+      // Накопление новых подростковых шкал (накопительный принцип)
+      const updateMaxField = (key: string, val: any) => {
+        if (typeof val === 'number') {
+          extractedData.expressExtracted[key] = Math.max(extractedData.expressExtracted[key] || 0, val);
+        }
+      };
+      
+      updateMaxField('belbinLeader', parsedData.belbinLeader);
+      updateMaxField('belbinDoer', parsedData.belbinDoer);
+      updateMaxField('belbinCreator', parsedData.belbinCreator);
+      updateMaxField('belbinPeacemaker', parsedData.belbinPeacemaker);
+      
+      updateMaxField('savickasConcern', parsedData.savickasConcern);
+      updateMaxField('savickasControl', parsedData.savickasControl);
+      updateMaxField('savickasCuriosity', parsedData.savickasCuriosity);
+      updateMaxField('savickasConfidence', parsedData.savickasConfidence);
+      
+      updateMaxField('teiqueSelfAwareness', parsedData.teiqueSelfAwareness);
+      updateMaxField('teiqueSelfRegulation', parsedData.teiqueSelfRegulation);
+      
+      if (parsedData.marciaStatus) {
+        extractedData.expressExtracted.marciaStatus = parsedData.marciaStatus;
       }
       
       // Глубокий коучинг
