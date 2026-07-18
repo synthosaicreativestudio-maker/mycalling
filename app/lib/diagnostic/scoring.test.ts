@@ -30,33 +30,39 @@ describe('riasecScorer', () => {
 });
 
 describe('bfiScorer', () => {
-  it('maps historical scale aliases (C_bigfive/E_bigfive/A_bigfive) to canonical O/C/E/A/N keys', () => {
+  it('maps historical scale aliases (C_bigfive/E_bigfive/A_bigfive) to canonical O/C/E/A/N keys, plus LOC/AMB', () => {
     const answers: Record<string, number> = {
-      'bfi-o1': 4, 'bfi-o2': 5,
-      'bfi-c1': 4, 'bfi-c2': 2, // reverse -> 4
-      'bfi-e1': 5, 'bfi-e2': 1, // reverse -> 5
-      'bfi-a1': 3, 'bfi-a2': 4,
-      'bfi-n1': 2, 'bfi-n2': 4, // reverse -> 2
+      'bfi-o1': 4, 'bfi-o2': 5, 'bfi-o3': 4, 'bfi-o4': 2, // reverse -> 4
+      'bfi-c1': 4, 'bfi-c2': 2, 'bfi-c3': 4, 'bfi-c4': 2, // reverse -> 4, 4
+      'bfi-e1': 5, 'bfi-e2': 1, 'bfi-e3': 5, 'bfi-e4': 1, // reverse -> 5, 5
+      'bfi-a1': 3, 'bfi-a2': 4, 'bfi-a3': 3, 'bfi-a4': 4, // a3 reverse -> 3
+      'bfi-n1': 2, 'bfi-n2': 4, 'bfi-n3': 2, 'bfi-n4': 4, // reverse -> 2, 2
+      'bfi-loc1': 4, 'bfi-loc2': 2, 'bfi-loc3': 4, 'bfi-loc4': 2, // reverse -> 4, 4
+      'bfi-amb1': 4, 'bfi-amb2': 2, 'bfi-amb3': 4, // reverse -> 4
     };
     const result = bfiScorer.score(answers, diagnosticQuestions);
-    expect(result.scores.O).toBe(4.5);
+    expect(result.scores.O).toBe(4.25);
     expect(result.scores.C).toBe(4);
     expect(result.scores.E).toBe(5);
     expect(result.scores.A).toBe(3.5);
     expect(result.scores.N).toBe(2);
+    expect(result.scores.LOC).toBe(4);
+    expect(result.scores.AMB).toBe(4);
     expect(result.scores.honestyFlag).toBe(false);
     expect(result.reliability).toBe('high');
     // Legacy bogus keys (bug in the pre-refactor route) must not resurface.
     expect(result.scores).not.toHaveProperty('C_bigfive');
   });
 
-  it('flags honesty when reverse-pair answers contradict each other', () => {
+  it('flags honesty when reverse-pair answers contradict each other on a single scale', () => {
     const answers: Record<string, number> = {
-      'bfi-o1': 3, 'bfi-o2': 3,
-      'bfi-c1': 5, 'bfi-c2': 5, // direct 5 vs reverse-adjusted (6-5)=1 -> deviation 4
-      'bfi-e1': 3, 'bfi-e2': 3,
-      'bfi-a1': 3, 'bfi-a2': 3,
-      'bfi-n1': 3, 'bfi-n2': 3,
+      'bfi-o1': 3, 'bfi-o2': 3, 'bfi-o3': 3, 'bfi-o4': 3,
+      'bfi-c1': 5, 'bfi-c2': 5, 'bfi-c3': 5, 'bfi-c4': 5, // direct 5 vs reverse-adjusted (6-5)=1 -> deviation 4
+      'bfi-e1': 3, 'bfi-e2': 3, 'bfi-e3': 3, 'bfi-e4': 3,
+      'bfi-a1': 3, 'bfi-a2': 3, 'bfi-a3': 3, 'bfi-a4': 3,
+      'bfi-n1': 3, 'bfi-n2': 3, 'bfi-n3': 3, 'bfi-n4': 3,
+      'bfi-loc1': 3, 'bfi-loc2': 3, 'bfi-loc3': 3, 'bfi-loc4': 3,
+      'bfi-amb1': 3, 'bfi-amb2': 3, 'bfi-amb3': 3,
     };
     const result = bfiScorer.score(answers, diagnosticQuestions);
     expect(result.scores.honestyFlag).toBe(true);

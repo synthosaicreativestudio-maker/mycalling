@@ -222,6 +222,161 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
     options: scaleOptions,
     visualAssetUrl: '/assets/webp/stability.webp'
   },
+  {
+    id: 'bfi-o3',
+    testCode: 'BFI',
+    text: 'Мне нравится задавать вопросы «а что если» и представлять, как всё могло бы быть устроено иначе.',
+    scale: 'O',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/openness.webp'
+  },
+  {
+    id: 'bfi-o4',
+    testCode: 'BFI',
+    text: 'Я предпочитаю проверенные способы делать что-то, а не экспериментировать с новыми подходами.',
+    scale: 'O',
+    reverseScored: true,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/openness.webp'
+  },
+  {
+    id: 'bfi-c3',
+    testCode: 'BFI',
+    text: 'Я довожу до конца даже скучные задачи, если понимаю, что они важны.',
+    scale: 'C_bigfive',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/conscientiousness.webp'
+  },
+  {
+    id: 'bfi-c4',
+    testCode: 'BFI',
+    text: 'Мне трудно заставить себя закончить дело, если оно перестало быть интересным.',
+    scale: 'C_bigfive',
+    reverseScored: true,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/conscientiousness.webp'
+  },
+  {
+    id: 'bfi-e3',
+    testCode: 'BFI',
+    text: 'На вечеринке или в компании я обычно один из тех, кто начинает разговор первым.',
+    scale: 'E_bigfive',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/extraversion.webp'
+  },
+  {
+    id: 'bfi-e4',
+    testCode: 'BFI',
+    text: 'После активного общения с людьми мне нужно время побыть в одиночестве, чтобы восстановиться.',
+    scale: 'E_bigfive',
+    reverseScored: true,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/extraversion.webp'
+  },
+  {
+    id: 'bfi-a3',
+    testCode: 'BFI',
+    text: 'Иногда я специально ставлю свои интересы выше интересов других, даже если это создаёт трение.',
+    scale: 'A_bigfive',
+    reverseScored: true,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/agreeableness.webp'
+  },
+  {
+    id: 'bfi-a4',
+    testCode: 'BFI',
+    text: 'Я стараюсь понять точку зрения человека, даже если совсем с ней не согласен.',
+    scale: 'A_bigfive',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/agreeableness.webp'
+  },
+  {
+    id: 'bfi-n3',
+    testCode: 'BFI',
+    text: 'Меня легко вывести из равновесия неожиданными плохими новостями.',
+    scale: 'N',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/stability.webp'
+  },
+  {
+    id: 'bfi-n4',
+    testCode: 'BFI',
+    text: 'Даже после неприятного события я быстро прихожу в норму и продолжаю заниматься делами.',
+    scale: 'N',
+    reverseScored: true,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/stability.webp'
+  },
+
+  // ─── 2b. Локус контроля (LOC) и толерантность к неопределённости (AMB) ───
+  {
+    id: 'bfi-loc1',
+    testCode: 'BFI',
+    text: 'Мои успехи в учёбе зависят в первую очередь от того, сколько усилий я вкладываю.',
+    scale: 'LOC',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/locus.webp'
+  },
+  {
+    id: 'bfi-loc2',
+    testCode: 'BFI',
+    text: 'То, получится у меня что-то или нет, чаще всего зависит от везения или обстоятельств, а не от меня.',
+    scale: 'LOC',
+    reverseScored: true,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/locus.webp'
+  },
+  {
+    id: 'bfi-loc3',
+    testCode: 'BFI',
+    text: 'Если я готовлюсь заранее, то могу повлиять на результат экзамена или соревнования.',
+    scale: 'LOC',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/locus.webp'
+  },
+  {
+    id: 'bfi-loc4',
+    testCode: 'BFI',
+    text: 'Что бы я ни делал, оценки и результаты часто зависят от учителя или обстоятельств, а не от меня.',
+    scale: 'LOC',
+    reverseScored: true,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/locus.webp'
+  },
+  {
+    id: 'bfi-amb1',
+    testCode: 'BFI',
+    text: 'Мне комфортно браться за задачу, даже если не все правила и шаги заранее понятны.',
+    scale: 'AMB',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/ambiguity.webp'
+  },
+  {
+    id: 'bfi-amb2',
+    testCode: 'BFI',
+    text: 'Я чувствую сильный дискомфорт, когда не знаю точно, что от меня ожидают.',
+    scale: 'AMB',
+    reverseScored: true,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/ambiguity.webp'
+  },
+  {
+    id: 'bfi-amb3',
+    testCode: 'BFI',
+    text: 'Задачи без единственного правильного ответа увлекают меня больше, чем пугают.',
+    scale: 'AMB',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/ambiguity.webp'
+  },
 
   // ─── 3. Когнитивный тест (ICAR): verbal / numeric / spatial ───
   {

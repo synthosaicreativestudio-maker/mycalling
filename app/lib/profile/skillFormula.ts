@@ -19,11 +19,16 @@ export interface SkillFormulaResult {
   evidence: Record<string, string>;
 }
 
+export interface SkillFormulaViaScores {
+  [strengthCode: string]: number | string[] | undefined;
+  signatureStrengths?: string[];
+}
+
 export interface SkillFormulaProfile {
   riasec: Record<string, number>;
   bigFive: Record<string, number | boolean>;
   icar: { bySubscale: Record<string, number> };
-  via?: Record<string, number> & { signatureStrengths?: string[] };
+  via?: SkillFormulaViaScores;
 }
 
 const NEUTRAL = 3; // нейтральное значение шкалы 1..5, если сигнал отсутствует
