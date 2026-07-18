@@ -1,5 +1,6 @@
 import React from 'react';
 import { Compass } from 'lucide-react';
+import { professionsDb } from '../../data/professions_db';
 
 interface RpgProfessionCardProps {
   name: string;
@@ -7,26 +8,31 @@ interface RpgProfessionCardProps {
   why: string;
 }
 
-export default function RpgProfessionCard({ name, score, why }: RpgProfessionCardProps) {
-  const lowerName = name.toLowerCase();
-  
-  let analytic = 50;
-  let creative = 50;
-  let practical = 50;
+// Раньше "RPG-статы" считались наивным сопоставлением ключевых слов в НАЗВАНИИ
+// профессии — например, любая профессия с "менеджер" в названии получала
+// одинаковые статы независимо от реального RIASEC-профиля. Теперь берём
+// фактический riasec-код профессии из базы (professions_db.ts) и переводим
+// его в три понятные шкалы. Если профессия не найдена в базе (рассинхрон
+// имён) — честно не рисуем статы, а не подставляем выдуманные числа.
+const codeWeight = (riasec: string[], code: string): number => {
+  const idx = riasec.indexOf(code);
+  if (idx === -1) return 20;
+  return [95, 65, 40][idx] ?? 30;
+};
 
-  if (lowerName.includes('аналити') || lowerName.includes('програм') || lowerName.includes('инженер') || lowerName.includes('разработ')) {
-    analytic = 85;
-    practical = 70;
-    creative = 45;
-  } else if (lowerName.includes('дизайн') || lowerName.includes('арт') || lowerName.includes('худож') || lowerName.includes('creativ') || lowerName.includes('креатив') || lowerName.includes('писатель') || lowerName.includes('редактор')) {
-    creative = 90;
-    analytic = 40;
-    practical = 55;
-  } else if (lowerName.includes('консульт') || lowerName.includes('менеджер') || lowerName.includes('управлен') || lowerName.includes('лидер') || lowerName.includes('бизнес') || lowerName.includes('стартап')) {
-    practical = 80;
-    creative = 65;
-    analytic = 60;
-  }
+function getRiasecStats(name: string): { analytic: number; creative: number; practical: number } | null {
+  const profession = professionsDb.find(p => p.name === name);
+  if (!profession) return null;
+  const riasec = profession.riasec;
+  return {
+    analytic: Math.round((codeWeight(riasec, 'Investigative') + codeWeight(riasec, 'Conventional')) / 2),
+    creative: codeWeight(riasec, 'Artistic'),
+    practical: Math.round((codeWeight(riasec, 'Realistic') + codeWeight(riasec, 'Enterprising')) / 2)
+  };
+}
+
+export default function RpgProfessionCard({ name, score, why }: RpgProfessionCardProps) {
+  const stats = getRiasecStats(name);
 
   return (
     <div className="relative group overflow-hidden rounded-[24px] border border-white/5 bg-[#080C14]/40 p-5 space-y-4 hover:border-[#3B82F6]/30 hover:bg-[#3B82F6]/5 hover:shadow-[0_8px_30px_rgba(59,130,246,0.03)] transition-all duration-300 text-left">
@@ -52,39 +58,41 @@ export default function RpgProfessionCard({ name, score, why }: RpgProfessionCar
         </div>
       </div>
 
-      <div className="border-t border-white/5 pt-3.5 space-y-2">
-        <span className="text-[8px] uppercase tracking-widest font-extrabold text-[#7A8A9E] block mb-1 font-sans">RPG Характеристики</span>
-        
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-[9px] font-bold text-white/70">
-            <span>Аналитический склад</span>
-            <span>{analytic}/100</span>
-          </div>
-          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${analytic}%` }} />
-          </div>
-        </div>
+      {stats && (
+        <div className="border-t border-white/5 pt-3.5 space-y-2">
+          <span className="text-[8px] uppercase tracking-widest font-extrabold text-[#7A8A9E] block mb-1 font-sans">Профиль по RIASEC</span>
 
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-[9px] font-bold text-white/70">
-            <span>Креативный потенциал</span>
-            <span>{creative}/100</span>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[9px] font-bold text-white/70">
+              <span>Аналитический склад</span>
+              <span>{stats.analytic}/100</span>
+            </div>
+            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${stats.analytic}%` }} />
+            </div>
           </div>
-          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-pink-500 rounded-full transition-all duration-1000" style={{ width: `${creative}%` }} />
-          </div>
-        </div>
 
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-[9px] font-bold text-white/70">
-            <span>Практические навыки</span>
-            <span>{practical}/100</span>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[9px] font-bold text-white/70">
+              <span>Креативный потенциал</span>
+              <span>{stats.creative}/100</span>
+            </div>
+            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-pink-500 rounded-full transition-all duration-1000" style={{ width: `${stats.creative}%` }} />
+            </div>
           </div>
-          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-green-500 rounded-full transition-all duration-1000" style={{ width: `${practical}%` }} />
+
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[9px] font-bold text-white/70">
+              <span>Практические навыки</span>
+              <span>{stats.practical}/100</span>
+            </div>
+            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full bg-green-500 rounded-full transition-all duration-1000" style={{ width: `${stats.practical}%` }} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
