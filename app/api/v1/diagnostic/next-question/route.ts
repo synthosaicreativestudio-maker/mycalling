@@ -8,6 +8,8 @@ import { generateJson } from '../../../../lib/gemini';
 import { scorers, type ScoreResult } from '../../../../lib/diagnostic/scoring';
 import { viaStrengthByCode, viaVirtueNames } from '../../../../data/viaStrengths';
 import { computeConsistency } from '../../../../lib/profile/consistency';
+import { deriveSkillFormula } from '../../../../lib/profile/skillFormula';
+import { skillByCode } from '../../../../data/skills';
 
 export const dynamic = 'force-dynamic';
 
@@ -154,6 +156,21 @@ export async function GET(request: Request) {
         coachData
       });
 
+      const skillFormula = deriveSkillFormula({
+        riasec: finalRiasec,
+        bigFive: finalBigFive,
+        icar: icarScores,
+        via: viaScores
+      });
+      const skillFormulaSkills = skillFormula.top3.map((code) => ({
+        code,
+        nameRu: skillByCode[code]?.nameRu || code,
+        evidence: skillFormula.evidence[code] || ''
+      }));
+      const skillFormulaApplications = Array.from(
+        new Set(skillFormula.top3.flatMap((code) => skillByCode[code]?.applications || []))
+      ).slice(0, 8);
+
       const summaryProfile = {
         riasec: finalRiasec,
         bigFive: finalBigFive,
@@ -161,7 +178,8 @@ export async function GET(request: Request) {
         via: viaScores,
         procrastination: procrastinationScore,
         coachData,
-        consistency
+        consistency,
+        skillFormula
       };
 
       // Безопасный upsert цифрового профиля
@@ -202,6 +220,7 @@ export async function GET(request: Request) {
 - Сильные стороны характера (VIA Youth, топ-5 сигнатурных сил): ${signatureStrengths.map((s) => `${s.nameRu} (${s.virtue})`).join(', ')}
 - Качественные данные коуча: ${coachDataPrompt}
 - Индекс согласованности данных тестов и коуч-сессии: ${consistency.index}/100 (${consistency.level}). ${consistency.contradictions.length > 0 ? `Обнаруженные противоречия: ${consistency.contradictions.map((c) => `«${c.testFact}» vs «${c.coachFact}»`).join('; ')}.` : 'Противоречий не обнаружено.'}
+- Формула успеха (3 переносимые компетенции, выведенные детерминированно из профиля): ${skillFormulaSkills.map((s) => s.nameRu).join(' + ')}
 
 Правила формирования отчета:
 1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
@@ -211,7 +230,8 @@ export async function GET(request: Request) {
 5. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем".
 6. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
 7. Раздел "innerConflicts": если индекс согласованности ниже "high" (см. данные выше), заполните его 1-3 пунктами — по каждому обнаруженному противоречию сформулируйте тёплый, любопытный (не осуждающий) вопрос-наблюдение в стиле "Тест показал X, но ты говорил Y — как это уживается в тебе?", используя фактические данные из списка противоречий выше. Если индекс "high" и противоречий нет — верните пустой массив.
-8. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
+8. Раздел "professions": вместо привязки только к должностям, объясняйте в 'why' связь профессии с формулой успеха (3 компетенции выше), когда это уместно — подчеркните, что эти компетенции переносятся между профессиями, если технологии изменят конкретные роли.
+9. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
 
 Ответьте СТРОГО в формате JSON.
 Структура JSON:
@@ -357,7 +377,7 @@ export async function GET(request: Request) {
           nextQuestionReportSchema,
           0.7
         );
-        htmlReportContent = JSON.stringify({ ...resultJson, riasecScores: finalRiasec, isFallback: false });
+        htmlReportContent = JSON.stringify({ ...resultJson, riasecScores: finalRiasec, successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications }, isFallback: false });
       } catch (err) {
         console.error('Gemini report generation failed in next-question, creating fallback report:', err);
         // Резервный отчет на основе реальных баллов, чтобы личный кабинет не оставался пустым
@@ -474,7 +494,7 @@ export async function GET(request: Request) {
           })),
           isFallback: true
         };
-        htmlReportContent = JSON.stringify({ ...fallbackReport, riasecScores: finalRiasec });
+        htmlReportContent = JSON.stringify({ ...fallbackReport, riasecScores: finalRiasec, successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications } });
       }
 
       // Безопасный upsert отчета в БД

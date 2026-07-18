@@ -7,7 +7,11 @@ export const professions = professionsDb.map(p => ({
   directions: [p.industry, ...p.transferableTo],
   summary: p.summary,
   why: p.why,
-  tags: [...p.riasec.map(r => r.toLowerCase()), ...p.skillFormula.map(sf => sf.toLowerCase())]
+  tags: [...p.riasec.map(r => r.toLowerCase()), ...p.skillFormula.map(sf => sf.toLowerCase())],
+  // Переносимые компетенции ("формула успеха" профессии, уже авторски заданы в professions_db.ts)
+  // и сферы, куда она переносится.
+  skillFormula: p.skillFormula,
+  transferableTo: Array.from(new Set([p.industry, ...p.transferableTo])).slice(0, 6)
 }));
 
 

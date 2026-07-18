@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import RpgProfessionCard from '../components/report/RpgProfessionCard';
 import RadarChart from '../components/report/RadarChart';
 import CabinetProgress from '../components/report/CabinetProgress';
+import SkillFormulaCard from '../components/report/SkillFormulaCard';
 
 type Trait = {
   name: string;
@@ -33,6 +34,7 @@ type ReportData = {
   growthAreas: string[];
   consistencyLevel?: 'high' | 'medium' | 'low';
   innerConflicts?: { title: string; text: string }[];
+  successFormula?: { skills: { code: string; nameRu: string; evidence: string }[]; applications: string[] };
   coachSection?: {
     dreams?: string;
     idols?: string;
@@ -79,6 +81,14 @@ const defaultReport: ReportData = {
     'Работа в неопределенных условиях без готовых шаблонов.',
     'Развитие навыков планирования.'
   ],
+  successFormula: {
+    skills: [
+      { code: 'analytics', nameRu: 'Аналитика', evidence: 'по результатам логического блока (ICAR) и исследовательского интереса (RIASEC)' },
+      { code: 'creativity', nameRu: 'Креативность', evidence: 'по артистическому интересу (RIASEC), открытости новому (Big Five) и творческой силе характера (VIA)' },
+      { code: 'empathy', nameRu: 'Эмпатия', evidence: 'по доброжелательности характера (Big Five) и силам заботы о людях (VIA)' }
+    ],
+    applications: ['Аналитика данных', 'Дизайн', 'UX-исследования', 'Продуктовый менеджмент']
+  },
   coachSection: {
     dreams: 'Мечтает разрабатывать цифровые продукты, приносящие пользу обществу.',
     idols: 'Вдохновляется инноваторами и создателями культовых технологических решений.',
@@ -218,6 +228,9 @@ function ReportPageContent() {
           growthAreas: Array.isArray(rawData.growthAreas) ? rawData.growthAreas : [],
           consistencyLevel: rawData.consistencyLevel,
           innerConflicts: Array.isArray(rawData.innerConflicts) ? rawData.innerConflicts : [],
+          successFormula: rawData.successFormula && Array.isArray(rawData.successFormula.skills)
+            ? rawData.successFormula
+            : undefined,
           coachSection: rawData.coachSection || {},
           professions: Array.isArray(rawData.professions) ? rawData.professions : []
         };
@@ -595,6 +608,14 @@ function ReportPageContent() {
                     </div>
                     <p className="text-[#7A8A9E] text-sm leading-relaxed">{report.riasecSummary}</p>
                   </div>
+                )}
+
+                {/* Формула успеха: переносимые компетенции вместо жёсткой привязки к профессии */}
+                {report.successFormula && (
+                  <SkillFormulaCard
+                    skills={report.successFormula.skills}
+                    applications={report.successFormula.applications}
+                  />
                 )}
 
                 {/* Рекомендуемые профессии */}
