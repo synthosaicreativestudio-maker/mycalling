@@ -37,7 +37,7 @@ export function CookieBanner() {
             </p>
             <button
               onClick={acceptCookies}
-              className="whitespace-nowrap rounded-xl bg-[#3B82F6] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#2563EB] transition-colors w-full md:w-auto"
+              className="whitespace-nowrap rounded-xl bg-[#2563EB] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#1D4ED8] transition-colors w-full md:w-auto"
             >
               Согласен
             </button>

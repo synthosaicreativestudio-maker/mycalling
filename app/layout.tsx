@@ -137,14 +137,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="site-header-inner">
               <div className="mx-auto max-w-7xl px-6 lg:px-10">
                 <div className="flex items-center justify-between py-2">
-                  <Link href="/" className="flex items-center transition hover:opacity-90">
+                  {/* AnimatedLogo сам рендерит Link href="/" — внешняя обёртка-ссылка
+                      создавала невалидную вложенность <a><a> и пустую ссылку для скринридеров */}
+                  <div className="flex items-center transition hover:opacity-90">
                     <AnimatedLogo
                       showText={true}
                       animate={true}
                       isHeader={true}
                       className="w-auto"
                     />
-                  </Link>
+                  </div>
                   
                   <div className="flex items-center gap-6">
                     <HeaderAuth />

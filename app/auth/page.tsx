@@ -175,7 +175,7 @@ function AuthCard() {
         <button
           onClick={() => setActiveTab('telegram')}
           className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 text-xs font-bold uppercase tracking-wider transition ${
-            activeTab === 'telegram' ? 'bg-[#3B82F6] text-white shadow-[0_0_15px_rgba(59,130,246,0.25)]' : 'text-muted hover:text-white'
+            activeTab === 'telegram' ? 'bg-[#2563EB] text-white shadow-[0_0_15px_rgba(59,130,246,0.25)]' : 'text-muted hover:text-white'
           }`}
         >
           <Send className="h-4 w-4" /> Telegram
@@ -183,7 +183,7 @@ function AuthCard() {
         <button
           onClick={() => setActiveTab('maxid')}
           className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 text-xs font-bold uppercase tracking-wider transition ${
-            activeTab === 'maxid' ? 'bg-[#3B82F6] text-white shadow-[0_0_15px_rgba(59,130,246,0.25)]' : 'text-muted hover:text-white'
+            activeTab === 'maxid' ? 'bg-[#2563EB] text-white shadow-[0_0_15px_rgba(59,130,246,0.25)]' : 'text-muted hover:text-white'
           }`}
         >
           <Fingerprint className="h-4 w-4" /> MAX ID
@@ -198,17 +198,17 @@ function AuthCard() {
 
           {/* QR-код */}
           <div className="mx-auto w-[210px] h-[210px] bg-white rounded-3xl p-4 flex items-center justify-center shadow-lg border border-[#349ed9]/20">
-            <QRCodeSVG value={qrTelegramLink} size={180} fgColor="#349ed9" level="H" includeMargin={true} />
+            <QRCodeSVG value={qrTelegramLink} size={180} fgColor="#349ed9" level="H" includeMargin={true} title="QR-код для входа через Telegram" />
           </div>
 
           <div className="space-y-3">
             <a
               href={telegramAppLink}
-              className="w-full h-[56px] inline-flex items-center justify-center gap-2.5 rounded-2xl bg-[#349ed9] text-base font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_30px_rgba(52,158,217,0.25)]"
+              className="w-full h-[56px] inline-flex items-center justify-center gap-2.5 rounded-2xl bg-[#1779B5] text-base font-bold text-white transition hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_30px_rgba(52,158,217,0.25)]"
             >
               Войти через Telegram <ExternalLink className="h-4 w-4" />
             </a>
-            <p className="text-xs text-muted/65 leading-relaxed">
+            <p className="text-xs text-muted leading-relaxed">
               Если приложение не открылось,{' '}
               <a 
                 href={telegramWebLink} 

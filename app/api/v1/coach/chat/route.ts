@@ -538,7 +538,7 @@ export async function POST(req: Request) {
       if (nextStep === lastStep) {
         stepAttempts++;
         if (nextStep >= 3 && nextStep <= 15) {
-          if (stepAttempts >= 3) {
+          if (stepAttempts >= 2) {
             const hasHobbies = getStrLen(extractedData.expressExtracted?.hobbies) > 6;
             const hasSchoolSubjects = getStrLen(extractedData.expressExtracted?.schoolSubjects) > 6;
             const hasDreams = getStrLen(extractedData.expressExtracted?.dreams) > 6;
@@ -586,7 +586,7 @@ export async function POST(req: Request) {
             stepAttempts = 0;
           }
         } else if (isDeepMode && nextStep >= 16 && nextStep <= 21) {
-          if (stepAttempts >= 3) {
+          if (stepAttempts >= 2) {
             const deepFields = [
               { key: 'deepGoal', step: 16, val: 'Сформулировано наставником' },
               { key: 'deepOutcome', step: 17, val: 'Образ результата принят' },
@@ -1022,19 +1022,25 @@ ${dialogHistory}
       } else if (!hasPersonalInfo) {
         currentVirtualStep = 2;
       } else if (!hasDeepGoal) {
-        currentVirtualStep = 10;
-      } else if (!hasDeepOutcome) {
-        currentVirtualStep = 11;
-      } else if (!hasDeepEmotions) {
-        currentVirtualStep = 12;
-      } else if (!hasDeepIdentity) {
-        currentVirtualStep = 13;
-      } else if (!hasDeepActions) {
-        currentVirtualStep = 14;
-      } else if (!hasDeepFirstStep) {
-        currentVirtualStep = 15;
-      } else {
+        // Шкала DEEP-шагов едина с фронтендом (STEP_NAMES/степпер пирамиды):
+        // 16 = Запрос, 17 = Результат, 18 = Эмоции, 19 = Идентичность,
+        // 20 = План, 21 = Микро-шаг, 22 = Финал. Раньше здесь была своя
+        // шкала 10-16, из-за чего шапка показывала чужие названия шагов,
+        // степпер пирамиды не рендерился, а анти-залипание (nextStep 16-21)
+        // никогда не срабатывало.
         currentVirtualStep = 16;
+      } else if (!hasDeepOutcome) {
+        currentVirtualStep = 17;
+      } else if (!hasDeepEmotions) {
+        currentVirtualStep = 18;
+      } else if (!hasDeepIdentity) {
+        currentVirtualStep = 19;
+      } else if (!hasDeepActions) {
+        currentVirtualStep = 20;
+      } else if (!hasDeepFirstStep) {
+        currentVirtualStep = 21;
+      } else {
+        currentVirtualStep = 22;
       }
       isFinalStateNow = hasPersonalInfo && hasPhone && hasDeepGoal && hasDeepOutcome && hasDeepEmotions && hasDeepIdentity && hasDeepActions && hasDeepFirstStep;
     } else {

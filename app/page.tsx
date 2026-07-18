@@ -120,7 +120,7 @@ export default function HomePage() {
             <m.p
               custom={0.6}
               variants={heroVariants}
-              className="mt-9 w-full text-[0.98rem] sm:text-[1.08rem] md:text-[1.2rem] leading-relaxed text-[#7A8A9E] font-normal font-sans"
+              className="mt-9 w-full text-[0.98rem] sm:text-[1.08rem] md:text-[1.2rem] leading-relaxed text-[#93A3B8] font-normal font-sans"
             >
               Раскройте сильные стороны ребёнка за 45–60 минут интерактивной диагностики и получите понятный план развития для всей семьи.
             </m.p>
@@ -140,7 +140,7 @@ export default function HomePage() {
             <m.span
               custom={1.0}
               variants={heroVariants}
-              className="text-xs font-semibold text-[#60A5FA]/70 mt-3 pl-2"
+              className="text-xs font-semibold text-[#60A5FA]/90 mt-3 pl-2"
             >
               Бесплатно · Без длинных анкет и скучных тестов
             </m.span>
@@ -152,6 +152,7 @@ export default function HomePage() {
       {/* ─── УТП (3 карточки) ─── */}
       <section className="px-6 lg:px-10 py-24 relative z-10 bg-transparent">
         <div className="mx-auto max-w-5xl">
+          <h2 className="sr-only">Почему МоёПризвание</h2>
           <m.div
             variants={sectionVariants}
             initial="hidden"
@@ -471,7 +472,7 @@ export default function HomePage() {
             <div className="flex items-center gap-6">
               <AnimatedLogo
                 showText={true}
-                className="h-8 w-auto opacity-60"
+                className="h-8 w-auto opacity-90"
               />
               <span className="text-xs text-[#7A8A9E] font-sans">
                 © {new Date().getFullYear()} SynthosAI Creative Studio
@@ -479,13 +480,13 @@ export default function HomePage() {
             </div>
 
             <nav className="flex items-center gap-6 text-xs text-[#7A8A9E] font-sans">
-              <Link href="/privacy">
+              <Link href="/privacy" className="inline-flex items-center min-h-[32px] py-1.5">
                 <span className="hover:text-white transition cursor-pointer">Политика конфиденциальности</span>
               </Link>
-              <Link href="/terms">
+              <Link href="/terms" className="inline-flex items-center min-h-[32px] py-1.5">
                 <span className="hover:text-white transition cursor-pointer">Пользовательское соглашение</span>
               </Link>
-              <a href="mailto:hello@synthosai.ru" className="hover:text-white transition">
+              <a href="mailto:hello@synthosai.ru" className="inline-flex items-center min-h-[32px] py-1.5 hover:text-white transition">
                 Контакты
               </a>
             </nav>

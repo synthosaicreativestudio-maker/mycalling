@@ -2,8 +2,12 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import prisma from '../../../lib/prisma';
 import { auth } from '../../../lib/auth';
+import { appendSessionCookies } from '../../../lib/auth/session-cookies';
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8701463375:AAEQxV563Y7P5Anfm0tK1o1CvjmeC2TnEyg';
+// Токен бота берётся ТОЛЬКО из окружения. Захардкоженный fallback-токен,
+// который здесь был раньше, попал в git-историю и должен считаться
+// скомпрометированным — его нужно отозвать через BotFather.
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 
 function verifyTelegramAuth(data: any): boolean {
   const secretKey = crypto.createHash('sha256').update(BOT_TOKEN).digest();
@@ -63,20 +67,15 @@ export async function GET(request: Request) {
     });
 
     const response = NextResponse.redirect(new URL('/assessment', request.url));
-    
-    // Устанавливаем куки в формате Better Auth
-    const isHttps = request.url.startsWith('https:');
-    const cookieName = isHttps ? '__secure-better-auth.session_token' : 'better-auth.session_token';
 
-    response.cookies.set({
-      name: cookieName,
-      value: sessionToken,
-      httpOnly: true,
-      secure: isHttps,
-      sameSite: 'lax',
-      path: '/',
-      expires: expiresAt
-    });
+    // Ставим обе куки Better Auth с подписанным токеном. Раньше здесь
+    // ставилась одна кука с неверным регистром имени (__secure- вместо
+    // __Secure-) и неподписанным токеном — Better Auth такую сессию не видел.
+    const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
+    if (!betterAuthSecret) {
+      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+    }
+    await appendSessionCookies(response, sessionToken, betterAuthSecret, expiresAt);
 
     return response;
   } catch (error) {

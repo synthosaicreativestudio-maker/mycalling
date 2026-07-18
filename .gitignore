@@ -19,3 +19,5 @@ public/assets/tree_test/
 .vercel
 .env*
 .claude/
+test-results/
+playwright-report/
