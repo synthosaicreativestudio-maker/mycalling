@@ -5,6 +5,7 @@ import redisClient from '../../../../lib/redis';
 import { diagnosticQuestions } from '../../../../data/questions';
 import { env } from '../../../../lib/env';
 import { generateJson } from '../../../../lib/gemini';
+import { scorers, type ScoreResult } from '../../../../lib/diagnostic/scoring';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,97 +67,9 @@ export async function GET(request: Request) {
 
     // Если все вопросы отвечены
     if (currentQuestionIndex >= totalQuestions) {
-      // 2. Рассчитываем результаты (СКОРИНГ)
-      const riasecScores: Record<string, number> = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
-      const bigFiveScores: Record<string, number> = { O: 0, C: 0, E: 0, A: 0, N: 0 };
-      let correctIcarAnswers = 0;
-      let procrastinationScore = 0;
-
-      const riasecCounts: Record<string, number> = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
-      const bigFiveCounts: Record<string, number> = { O: 0, C: 0, E: 0, A: 0, N: 0 };
-      const procrastinationCounts = { count: 0 };
-
-      diagnosticQuestions.forEach((q) => {
-        const value = answers[q.id];
-        if (value === undefined) return;
-
-        if (q.testCode === 'RIASEC') {
-          riasecScores[q.scale] += value;
-          riasecCounts[q.scale] += 1;
-        } else if (q.testCode === 'BFI') {
-          const finalVal = q.reverseScored ? 6 - value : value;
-          bigFiveScores[q.scale] += finalVal;
-          bigFiveCounts[q.scale] += 1;
-        } else if (q.testCode === 'ICAR') {
-          // ICAR-1: 64 (index 3, value 4)
-          // ICAR-2: З (index 1, value 2)
-          // ICAR-3: Медь может быть металлом, а может и нет (index 1, value 2)
-          let isCorrect = false;
-          if (q.id === 'icar-1' && value === 4) isCorrect = true;
-          if (q.id === 'icar-2' && value === 2) isCorrect = true;
-          if (q.id === 'icar-3' && value === 2) isCorrect = true;
-          if (isCorrect) correctIcarAnswers += 1;
-        } else if (q.testCode === 'PROCRASTINATION') {
-          const finalVal = q.reverseScored ? 6 - value : value;
-          procrastinationScore += finalVal;
-          procrastinationCounts.count += 1;
-        }
-      });
-
-      // Переводим шкалы RIASEC и BFI в средний балл (1-5)
-      const finalRiasec = Object.fromEntries(
-        Object.entries(riasecScores).map(([key, val]) => [key, riasecCounts[key] ? parseFloat((val / riasecCounts[key]).toFixed(2)) : 3])
-      );
-      const finalBigFive = Object.fromEntries(
-        Object.entries(bigFiveScores).map(([key, val]) => [key, bigFiveCounts[key] ? parseFloat((val / bigFiveCounts[key]).toFixed(2)) : 3])
-      );
-
-      // Сохраняем по одной записи DiagnosticResult для каждого теста в БД
       const userId = sessionData.userId;
 
-      // Сначала очищаем старые результаты диагностик для этого пользователя
-      try {
-        await prisma.diagnosticResult.deleteMany({
-          where: { userId }
-        });
-      } catch (delErr) {
-        console.error('Ошибка очистки старых результатов тестов:', delErr);
-      }
-
-      await prisma.diagnosticResult.createMany({
-        data: [
-          {
-            userId,
-            testCode: 'RIASEC',
-            rawResponses: answers,
-            scores: finalRiasec,
-            reliability: 'high'
-          },
-          {
-            userId,
-            testCode: 'BFI',
-            rawResponses: answers,
-            scores: finalBigFive,
-            reliability: 'high'
-          },
-          {
-            userId,
-            testCode: 'ICAR',
-            rawResponses: answers,
-            scores: { score: correctIcarAnswers },
-            reliability: 'medium'
-          },
-          {
-            userId,
-            testCode: 'PROCRASTINATION',
-            rawResponses: answers,
-            scores: { score: procrastinationScore },
-            reliability: 'high'
-          }
-        ]
-      });
-
-      // Загружаем качественные данные коуча
+      // Загружаем качественные данные коуча (нужны до скоринга — возраст используется нормами ICAR)
       const coachSession = await prisma.coachSession.findUnique({
         where: { userId }
       });
@@ -182,7 +95,7 @@ export async function GET(request: Request) {
         idols: getField('idols') || 'Не указано',
         values: getField('values') || 'Не указано',
         barriers: getField('fears') || getField('barriers') || 'Не указано',
-        
+
         deepGoal: getField('deepGoal') || '',
         deepOutcome: getField('deepOutcome') || '',
         deepEmotions: getField('deepEmotions') || '',
@@ -191,10 +104,45 @@ export async function GET(request: Request) {
         deepFirstStep: getField('deepFirstStep') || ''
       };
 
+      const ageField = getField('age');
+      const age = ageField ? parseInt(ageField, 10) : undefined;
+      const scoreContext = { age: Number.isFinite(age) ? age : undefined };
+
+      // 2. Рассчитываем результаты (СКОРИНГ) через единый реестр скореров
+      const results: Record<string, ScoreResult> = {};
+      Object.values(scorers).forEach((scorer) => {
+        results[scorer.testCode] = scorer.score(answers, diagnosticQuestions, scoreContext);
+      });
+
+      const finalRiasec = results.RIASEC.scores as Record<string, number>;
+      const finalBigFive = results.BFI.scores as Record<string, number | boolean>;
+      const icarScores = results.ICAR.scores as { raw: number; bySubscale: Record<string, number>; band: string };
+      const correctIcarAnswers = icarScores.raw;
+      const procrastinationScore = (results.PROCRASTINATION.scores as { score: number }).score;
+
+      // Сначала очищаем старые результаты диагностик для этого пользователя
+      try {
+        await prisma.diagnosticResult.deleteMany({
+          where: { userId }
+        });
+      } catch (delErr) {
+        console.error('Ошибка очистки старых результатов тестов:', delErr);
+      }
+
+      await prisma.diagnosticResult.createMany({
+        data: Object.entries(results).map(([testCode, result]) => ({
+          userId,
+          testCode,
+          rawResponses: answers,
+          scores: result.scores as any,
+          reliability: result.reliability
+        }))
+      });
+
       const summaryProfile = {
         riasec: finalRiasec,
         bigFive: finalBigFive,
-        icar: correctIcarAnswers,
+        icar: icarScores,
         procrastination: procrastinationScore,
         coachData
       };
@@ -232,14 +180,14 @@ export async function GET(request: Request) {
 Данные для анализа:
 - Профиль интересов (RIASEC): ${JSON.stringify(finalRiasec)}
 - Профиль личности (Big Five): ${JSON.stringify(finalBigFive)}
-- Логика (ICAR): ${correctIcarAnswers} из 3 правильных ответов
+- Логика (ICAR): уровень готовности к задачам такого типа относительно возраста — «${icarScores.band}» (verbal: ${icarScores.bySubscale.verbal ?? 0}/3, numeric: ${icarScores.bySubscale.numeric ?? 0}/3, spatial: ${icarScores.bySubscale.spatial ?? 0}/3)
 - Прокрастинация (Лэй): ${procrastinationScore} баллов (шкала 4-20)
 - Качественные данные коуча: ${coachDataPrompt}
 
 Правила формирования отчета:
 1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
 2. Проанализируйте Big Five черты.
-3. Опишите сильные стороны и зоны развития с учетом прокрастинации (если балл прокрастинации выше 12, дайте совет, как с этим справляться) и логических задач.
+3. Опишите сильные стороны и зоны развития с учетом прокрастинации (если балл прокрастинации выше 12, дайте совет, как с этим справляться) и логических задач. КРИТИЧЕСКИ ВАЖНО: НИКОГДА не давайте абсолютных оценок интеллекта или чисел вида "X из Y правильных" — только уровень готовности относительно возраста ("developing"/"solid"/"strong" переводите как "в процессе развития"/"уверенный уровень"/"сильная сторона").
 4. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем".
 5. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
 6. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
@@ -359,7 +307,9 @@ export async function GET(request: Request) {
             'Успешно пройден экспресс-анализ интересов и психологических качеств.',
             'На основе ваших ответов сформирована интерактивная карта способностей.'
           ],
-          personalityTraits: Object.entries(finalBigFive).map(([key, val]) => {
+          personalityTraits: Object.entries(finalBigFive)
+            .filter(([key]) => key !== 'honestyFlag' && key !== 'LOC' && key !== 'AMB')
+            .map(([key, val]) => {
             const cleanKey = key.trim();
             const names: Record<string, string> = {
               O: 'Открытость новому',

@@ -8,12 +8,16 @@ export const scaleOptions: [string, string, string, string, string] = [
 
 export interface DiagnosticQuestion {
   id: string;
-  testCode: 'RIASEC' | 'BFI' | 'ICAR' | 'PROCRASTINATION';
+  testCode: 'RIASEC' | 'BFI' | 'ICAR' | 'PROCRASTINATION' | 'VIA' | 'PVQ';
   text: string;
   scale: string;
   reverseScored: boolean;
   options: string[];
   visualAssetUrl: string;
+  /** Индекс (1-based) правильного варианта в options — только для тестов с объективно верным ответом (ICAR). */
+  correctValue?: number;
+  /** Сложность задания 1-3 — только для ICAR. */
+  difficulty?: 1 | 2 | 3;
 }
 
 export const diagnosticQuestions: DiagnosticQuestion[] = [
@@ -219,30 +223,34 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
     visualAssetUrl: '/assets/webp/stability.webp'
   },
 
-  // ─── 3. Когнитивный тест (ICAR) ───
+  // ─── 3. Когнитивный тест (ICAR): verbal / numeric / spatial ───
   {
     id: 'icar-1',
     testCode: 'ICAR',
     text: 'Продолжите логический числовой ряд: 2, 4, 8, 16, 32, ... какой номер будет следующим?',
-    scale: 'LOGIC',
+    scale: 'numeric',
     reverseScored: false,
     options: ['40', '48', '60', '64', '128'],
-    visualAssetUrl: '/assets/webp/cognitive.webp'
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 4,
+    difficulty: 1
   },
   {
     id: 'icar-2',
     testCode: 'ICAR',
     text: 'Какая буква должна быть следующей в ряду: А, В, Д, Ё, ... ? (Используется русский алфавит с шагом через одну букву)',
-    scale: 'LOGIC',
+    scale: 'verbal',
     reverseScored: false,
     options: ['Ж', 'З', 'И', 'К', 'Л'],
-    visualAssetUrl: '/assets/webp/cognitive.webp'
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 2,
+    difficulty: 2
   },
   {
     id: 'icar-3',
     testCode: 'ICAR',
     text: 'Все металлы проводят электрический ток. Медь проводит электрический ток. Какой вывод верен?',
-    scale: 'LOGIC',
+    scale: 'verbal',
     reverseScored: false,
     options: [
       'Медь — это обязательно металл',
@@ -251,7 +259,75 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
       'Металлы сделаны из меди',
       'Нет верного вывода'
     ],
-    visualAssetUrl: '/assets/webp/cognitive.webp'
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 2,
+    difficulty: 2
+  },
+  {
+    id: 'icar-4',
+    testCode: 'ICAR',
+    text: 'Если позавчера было воскресенье, какой день недели будет завтра?',
+    scale: 'verbal',
+    reverseScored: false,
+    options: ['Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 2,
+    difficulty: 2
+  },
+  {
+    id: 'icar-5',
+    testCode: 'ICAR',
+    text: 'Продолжите ряд чисел Фибоначчи: 1, 1, 2, 3, 5, 8, 13, ... какое число следующее?',
+    scale: 'numeric',
+    reverseScored: false,
+    options: ['18', '19', '20', '21', '24'],
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 4,
+    difficulty: 2
+  },
+  {
+    id: 'icar-6',
+    testCode: 'ICAR',
+    text: 'В ряду чисел 3, 6, 11, 18, 27 разница между соседними числами каждый раз увеличивается на 2 (3, 5, 7, 9). Какое число идёт следующим?',
+    scale: 'numeric',
+    reverseScored: false,
+    options: ['34', '36', '38', '40', '42'],
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 2,
+    difficulty: 3
+  },
+  {
+    id: 'icar-7',
+    testCode: 'ICAR',
+    text: 'В сетке 2×2 фигуры связаны одним правилом: сверху слева — маленький круг, сверху справа — большой круг, снизу слева — маленький квадрат. По аналогии (маленький → большой), какая фигура должна быть снизу справа?',
+    scale: 'spatial',
+    reverseScored: false,
+    options: ['Маленький круг', 'Маленький квадрат', 'Большой квадрат', 'Большой треугольник', 'Большой круг'],
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 3,
+    difficulty: 2
+  },
+  {
+    id: 'icar-8',
+    testCode: 'ICAR',
+    text: 'Ряд фигур увеличивает число сторон на единицу каждый шаг: треугольник (3 стороны), квадрат (4), пятиугольник (5), шестиугольник (6), ... Сколько сторон будет у следующей фигуры в ряду?',
+    scale: 'spatial',
+    reverseScored: false,
+    options: ['5', '6', '7', '8', '9'],
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 3,
+    difficulty: 1
+  },
+  {
+    id: 'icar-9',
+    testCode: 'ICAR',
+    text: 'В сетке 3×3 точка движется по кругу через четыре угла по часовой стрелке, пропуская центр: верхний-левый → верхний-правый → нижний-правый → нижний-левый → снова верхний-левый. Сейчас точка в верхнем-правом углу. В каком углу она окажется через 3 хода?',
+    scale: 'spatial',
+    reverseScored: false,
+    options: ['Верхний-левый', 'Верхний-правый', 'Нижний-правый', 'Нижний-левый', 'В центре'],
+    visualAssetUrl: '/assets/webp/cognitive.webp',
+    correctValue: 1,
+    difficulty: 3
   },
 
   // ─── 4. Поведение (Прокрастинация Лэя) ───
