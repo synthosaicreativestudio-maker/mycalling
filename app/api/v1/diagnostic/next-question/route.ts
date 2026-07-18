@@ -9,6 +9,7 @@ import { scorers, type ScoreResult } from '../../../../lib/diagnostic/scoring';
 import { viaStrengthByCode, viaVirtueNames } from '../../../../data/viaStrengths';
 import { computeConsistency } from '../../../../lib/profile/consistency';
 import { deriveSkillFormula } from '../../../../lib/profile/skillFormula';
+import { buildSummaryProfile } from '../../../../lib/profile/layers';
 import { skillByCode } from '../../../../data/skills';
 
 export const dynamic = 'force-dynamic';
@@ -94,6 +95,13 @@ export async function GET(request: Request) {
         return coachExtracted[key] || '';
       };
 
+      const getArrayField = (key: string): string[] => {
+        const val = coachExtracted.expressExtracted && typeof coachExtracted.expressExtracted === 'object'
+          ? (coachExtracted.expressExtracted as Record<string, any>)[key]
+          : undefined;
+        return Array.isArray(val) ? val.filter((v) => typeof v === 'string') : [];
+      };
+
       const coachData = {
         dreams: getField('dreams') || 'Не указано',
         idols: getField('idols') || 'Не указано',
@@ -171,26 +179,56 @@ export async function GET(request: Request) {
         new Set(skillFormula.top3.flatMap((code) => skillByCode[code]?.applications || []))
       ).slice(0, 8);
 
-      const summaryProfile = {
-        riasec: finalRiasec,
-        bigFive: finalBigFive,
-        icar: icarScores,
-        via: viaScores,
-        procrastination: procrastinationScore,
-        coachData,
+      const summaryProfile = buildSummaryProfile({
+        interests: {
+          riasec: finalRiasec,
+          antiInterests: getArrayField('antiInterests'),
+          hobbies: getArrayField('voluntaryHobbies'),
+        },
+        personality: {
+          bigFive: finalBigFive,
+          locusOfControl: typeof finalBigFive.LOC === 'number' ? finalBigFive.LOC : undefined,
+          ambiguityTolerance: typeof finalBigFive.AMB === 'number' ? finalBigFive.AMB : undefined,
+          honestyFlag: typeof finalBigFive.honestyFlag === 'boolean' ? finalBigFive.honestyFlag : undefined,
+        },
+        strengths: {
+          via: viaScores,
+          signatureStrengths: viaScores.signatureStrengths,
+        },
+        cognitive: {
+          icar: icarScores,
+        },
+        motivation: {
+          coachValues: coachData.values !== 'Не указано' ? coachData.values : undefined,
+          dreams: coachData.dreams !== 'Не указано' ? coachData.dreams : undefined,
+          topValues: coachData.values !== 'Не указано' ? [coachData.values] : [],
+        },
+        behavior: {
+          procrastination: procrastinationScore,
+          deepActions: coachData.deepActions || undefined,
+          deepFirstStep: coachData.deepFirstStep || undefined,
+        },
+        context: {
+          age: scoreContext.age,
+          grade: getField('grade') || undefined,
+          city: getField('city') || undefined,
+          idols: coachData.idols !== 'Не указано' ? coachData.idols : undefined,
+          barriers: coachData.barriers !== 'Не указано' ? coachData.barriers : undefined,
+        },
         consistency,
-        skillFormula
-      };
+      });
+      // Данные, не входящие в 7-слойную схему аудита, но нужные последующим шагам (отчёту).
+      const summaryExtras = { coachData, skillFormula };
 
       // Безопасный upsert цифрового профиля
       await prisma.digitalProfile.upsert({
         where: { userId },
         create: {
           userId,
-          summary: summaryProfile as any
+          summary: { ...summaryProfile, ...summaryExtras } as any
         },
         update: {
-          summary: summaryProfile as any
+          summary: { ...summaryProfile, ...summaryExtras } as any
         }
       });
 
