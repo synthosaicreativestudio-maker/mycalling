@@ -189,7 +189,7 @@ export async function POST(req: Request) {
             transcript: { EXPRESS: [], DEEP: [] },
             extractedData: {
               currentStep: userName ? 2 : 1,
-              maxVirtualStepReached: userName ? 2 : 1,
+              maxStepReachedByMode: { EXPRESS: userName ? 2 : 1, DEEP: 0 },
               fullName: userName || 'Гость',
               phone: userPhone,
               age: null,
@@ -274,14 +274,36 @@ export async function POST(req: Request) {
       });
     } else {
       userId = coachSession.userId;
-      // Если режим явно передан и еще не зафиксирован в сессии, обновляем его
+      // Если режим явно передан и еще не зафиксирован в сессии, обновляем его.
+      // sessionMode — метка ПОСЛЕДНЕЙ активной сессии, а не разовый выбор навсегда:
+      // пользователь может завершить EXPRESS и затем осознанно перейти в DEEP.
       const currentExtracted = (coachSession.extractedData as Record<string, any>) || {};
       if (sessionMode && currentExtracted.sessionMode !== sessionMode) {
+        // Переход в DEEP после уже завершённой EXPRESS-сессии: архивируем момент
+        // завершения EXPRESS и снимаем статус COMPLETED, иначе /api/auth/progress
+        // продолжит считать коуч-сессию завершённой и будет уводить пользователя
+        // с /coach раньше, чем он пройдёт глубокую часть.
+        const switchingToDeepAfterExpress =
+          sessionMode === 'DEEP' &&
+          coachSession.status === 'COMPLETED' &&
+          !currentExtracted.deepSessionCompletedAt;
+
         currentExtracted.sessionMode = sessionMode;
-        const newVersion = await saveCoachSession(coachSession.id, coachSession.version, {
-          extractedData: currentExtracted
-        });
-        coachSession = { ...coachSession, extractedData: currentExtracted, version: newVersion };
+        const updatePayload: Record<string, any> = { extractedData: currentExtracted };
+        if (switchingToDeepAfterExpress) {
+          currentExtracted.expressCompletedAt = currentExtracted.expressCompletedAt || coachSession.completedAt;
+          updatePayload.status = 'IN_PROGRESS';
+          updatePayload.completedAt = null;
+        }
+
+        const newVersion = await saveCoachSession(coachSession.id, coachSession.version, updatePayload);
+        coachSession = {
+          ...coachSession,
+          extractedData: currentExtracted,
+          version: newVersion,
+          status: switchingToDeepAfterExpress ? 'IN_PROGRESS' : coachSession.status,
+          completedAt: switchingToDeepAfterExpress ? null : coachSession.completedAt
+        };
       }
     }
 
@@ -1041,11 +1063,17 @@ ${dialogHistory}
     // с нуля из наличия полей в extractedData на каждый запрос — раньше это приводило
     // к дёрганью Пирамиды Идентичности между соседними уровнями (напр. 2↔3) при гонке
     // записи в БД. Персистентный максимум фиксирует реально достигнутый прогресс.
-    const maxStepReached = typeof extractedData.maxVirtualStepReached === 'number'
-      ? extractedData.maxVirtualStepReached
-      : 0;
+    // Ratchet ведётся ОТДЕЛЬНО по режиму (EXPRESS/DEEP): пользователь может завершить
+    // EXPRESS (шаг 16) и затем начать DEEP с шага 10 — общий ratchet ошибочно зажал бы
+    // DEEP-шаг на уровне EXPRESS-финала.
+    const modeKey = isDeepMode ? 'DEEP' : 'EXPRESS';
+    const stepsByMode = (extractedData.maxStepReachedByMode && typeof extractedData.maxStepReachedByMode === 'object')
+      ? extractedData.maxStepReachedByMode
+      : {};
+    const maxStepReached = typeof stepsByMode[modeKey] === 'number' ? stepsByMode[modeKey] : 0;
     currentVirtualStep = Math.max(currentVirtualStep, maxStepReached);
-    extractedData.maxVirtualStepReached = currentVirtualStep;
+    stepsByMode[modeKey] = currentVirtualStep;
+    extractedData.maxStepReachedByMode = stepsByMode;
     extractedData.currentStep = currentVirtualStep;
 
     // Обновляем пользователя при нативной регистрации
@@ -1262,6 +1290,34 @@ ${dialogHistory}
       status = 'COMPLETED';
       completedAt = new Date();
       extractedData.preliminaryFeedback = replyContent;
+
+      // Д-3(Блок 3): завершение глубокой сессии — собственный мини-отчёт с ownId,
+      // который затем отдельным разделом попадает в финальный отчёт (см.
+      // next-question/route.ts и app/report/page.tsx). Не смешиваем его с обычным
+      // preliminaryFeedback, чтобы не терять структуру полей глубинного разбора.
+      if (isDeepMode) {
+        extractedData.deepSessionCompletedAt = new Date().toISOString();
+        const deep = extractedData.deepExtracted || {};
+        let deepSynthesis = replyContent;
+        try {
+          const deepSummarySystem = 'Ты — экспертный психолог-коуч. На основе глубинной коуч-сессии подростка по методологии «Хочу → Действие» напиши краткое профессиональное резюме (4-6 предложений) от третьего лица: синтезируй инсайт, не цитируй пользователя дословно, без markdown-разметки.';
+          const deepSummaryUser = `Глубинная цель: ${deep.deepGoal || '—'}\nЖелаемый результат: ${deep.deepOutcome || '—'}\nЭмоциональный отклик: ${deep.deepEmotions || '—'}\nНовая идентичность: ${deep.deepIdentity || '—'}\nПлан действий: ${deep.deepActions || '—'}\nПервый микро-шаг: ${deep.deepFirstStep || '—'}`;
+          deepSynthesis = await generateText(deepSummarySystem, [{ role: 'user', content: deepSummaryUser }], 0.6);
+        } catch (e) {
+          console.warn('Failed to generate deep session synthesis, using raw reply as fallback:', e);
+        }
+        extractedData.deepReportSummary = {
+          id: `deep_${coachSession.id}_${Date.now()}`,
+          completedAt: extractedData.deepSessionCompletedAt,
+          goal: deep.deepGoal || '',
+          outcome: deep.deepOutcome || '',
+          emotions: deep.deepEmotions || '',
+          identity: deep.deepIdentity || '',
+          actions: deep.deepActions || '',
+          firstStep: deep.deepFirstStep || '',
+          synthesis: deepSynthesis
+        };
+      }
 
       // Внедряем автоопределение narrativeTheme на основе talentScores
       let narrativeTheme = 'CREATIVE';

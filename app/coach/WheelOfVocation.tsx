@@ -21,6 +21,12 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     return 0;
   };
 
+  // Минимальный видимый радиус только для РЕАЛЬНО оценённых секторов (чтобы низкий,
+  // но ненулевой балл был заметен). У rawScore === 0 радиус — честный ноль: это
+  // "ещё нет данных", а не "оценено в ноль", и визуально не должно выглядеть
+  // как закрашенный клин наравне с реально оценёнными сферами.
+  const sectorValue = (score: number) => (score > 0 ? Math.max(0.12, score / 100) : 0);
+
   // Группируем по 6 сферам талантов (сбалансированная динамическая карта)
   const sectors = [
     {
@@ -28,7 +34,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       emoji: '🎨',
       icon: Palette,
       description: 'Творчество, дизайн, тексты',
-      value: Math.max(0.15, getScore('creative') / 100), // Минимальный радиус 15% для красоты
+      value: sectorValue(getScore('creative')),
       rawScore: getScore('creative'),
       color: 'var(--riasec-creative)',
       glowColor: 'var(--riasec-creative)',
@@ -38,7 +44,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       emoji: '💻',
       icon: Cpu,
       description: 'Программирование, инженерия',
-      value: Math.max(0.15, getScore('tech') / 100),
+      value: sectorValue(getScore('tech')),
       rawScore: getScore('tech'),
       color: 'var(--riasec-tech)',
       glowColor: 'var(--riasec-tech)',
@@ -48,7 +54,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       emoji: '🔬',
       icon: Microscope,
       description: 'Логика, формулы, исследования',
-      value: Math.max(0.15, getScore('analytical') / 100),
+      value: sectorValue(getScore('analytical')),
       rawScore: getScore('analytical'),
       color: 'var(--riasec-analytical)',
       glowColor: 'var(--riasec-analytical)',
@@ -58,7 +64,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       emoji: '🗣️',
       icon: Users,
       description: 'Общение, продажи, обучение',
-      value: Math.max(0.15, getScore('social') / 100),
+      value: sectorValue(getScore('social')),
       rawScore: getScore('social'),
       color: 'var(--riasec-social)',
       glowColor: 'var(--riasec-social)',
@@ -68,7 +74,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       emoji: '📊',
       icon: ClipboardList,
       description: 'Менеджмент, процессы, порядок',
-      value: Math.max(0.15, getScore('organizational') / 100),
+      value: sectorValue(getScore('organizational')),
       rawScore: getScore('organizational'),
       color: 'var(--riasec-organizational)',
       glowColor: 'var(--riasec-organizational)',
@@ -78,7 +84,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       emoji: '🚀',
       icon: Rocket,
       description: 'Предпринимательство, проекты',
-      value: Math.max(0.15, getScore('startup') / 100),
+      value: sectorValue(getScore('startup')),
       rawScore: getScore('startup'),
       color: 'var(--riasec-startup)',
       glowColor: 'var(--riasec-startup)',

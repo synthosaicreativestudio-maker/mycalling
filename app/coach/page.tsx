@@ -128,7 +128,11 @@ export default function CoachPage() {
           const data = await res.json();
           if (data.authenticated) {
             console.log('[auth] User is authenticated. Progress status:', data);
-            if (data.coachCompleted) {
+            const forceDeep = new URLSearchParams(window.location.search).get('forceDeep') === '1';
+            // Если пользователь явно пришёл пройти глубокую сессию (со страницы
+            // тестирования), не уводим его на /report даже если EXPRESS уже завершён —
+            // сначала даём пройти DEEP (см. handleSelectMode ниже).
+            if (data.coachCompleted && !forceDeep) {
               if (data.testCompleted) {
                 router.push('/report');
               } else {
@@ -262,6 +266,27 @@ export default function CoachPage() {
           setExtractedData(data.extracted || {});
           if (typeof window !== 'undefined') {
             localStorage.setItem('coachSessionId', data.sessionId);
+          }
+        }
+
+        // Пользователь пришёл со страницы тестирования, явно выбрав глубокую сессию —
+        // переключаем режим сразу, минуя карточку выбора EXPRESS/DEEP.
+        const forceDeep = searchParams.get('forceDeep') === '1';
+        if (forceDeep && data.extracted?.sessionMode !== 'DEEP') {
+          const deepRes = await fetch('/api/v1/coach/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: 'Начать глубокий коучинг',
+              sessionId: data.sessionId,
+              sessionMode: 'DEEP'
+            })
+          });
+          const deepData = await deepRes.json();
+          if (deepData.reply || (Array.isArray(deepData.history) && deepData.history.length > 0)) {
+            setMessages(Array.isArray(deepData.history) ? deepData.history : [{ role: 'assistant', content: deepData.reply }]);
+            setStep(deepData.currentStep || 0);
+            setExtractedData(deepData.extracted || {});
           }
         }
       } catch (err) {
@@ -620,7 +645,7 @@ export default function CoachPage() {
   const progressPercent = Math.round((step / maxSteps) * 100);
 
   return (
-    <main className="min-h-screen pt-28 pb-12 flex flex-col items-center justify-center px-4 relative z-10">
+    <main className="h-screen pt-28 pb-4 flex flex-col items-center px-4 relative z-10 overflow-hidden">
       
       {process.env.NODE_ENV !== 'production' && (
         <div className="fixed top-4 left-4 z-50 bg-black/90 border border-white/10 rounded-xl p-3 text-[10px] text-slate-400 font-mono shadow-2xl space-y-1">
@@ -631,13 +656,13 @@ export default function CoachPage() {
       )}
 
       {/* progress top panel */}
-      <div className="w-full max-w-7xl mb-6 glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center text-[#3B82F6]">
+      <div className="w-full max-w-7xl mb-6 shrink-0 sticky top-4 z-20 glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#040506]/95 backdrop-blur-xl">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-10 w-10 shrink-0 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center text-[#3B82F6]">
             <Brain className="h-5 w-5 animate-pulse" />
           </div>
-          <div>
-            <h2 className="text-sm font-bold font-sans text-white">
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold font-sans text-white truncate">
               Шаг {step} из {maxSteps}: {getStepName(step, isDeep)}
             </h2>
           </div>
@@ -675,10 +700,10 @@ export default function CoachPage() {
       </div>
 
       {/* Main layout container: Chat + Wheel of Vocation */}
-      <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[660px] lg:h-[75vh] relative">
+      <div className="w-full max-w-7xl flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-12 gap-6 relative">
         
         {/* Left column: Chat History & Input */}
-        <div className="col-span-1 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
+        <div className="col-span-1 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
           
           {/* Horizontal Stepper for DEEP mode */}
           {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 22 && (
@@ -726,7 +751,7 @@ export default function CoachPage() {
           )}
 
           {/* Chat message history */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4">
             {messages.map((msg, idx) => {
               const isCoach = msg.role === 'assistant';
               const tgPayload = linkCode || '';

@@ -49,6 +49,9 @@
   --riasec-startup: #f97316;
   --riasec-outcome: #3b82f6;
   --riasec-goal: #38bdf8;
+
+  /* Переменная для "пустого"/неактивного состояния SVG-заливок (Пирамида идентичности и т.п.) */
+  --pyramid-idle-fill: rgba(255, 255, 255, 0.02);
 }
 
 html {
@@ -422,6 +425,9 @@ a:focus-visible {
   --accent-svg-3: #D2B48C;
   --accent-svg-shadow: rgba(141, 91, 76, 0.25);
 
+  /* Переменная для "пустого"/неактивного состояния SVG-заливок в светлой теме */
+  --pyramid-idle-fill: rgba(62, 39, 35, 0.04);
+
   /* RIASEC переменные для светлой темы капучино */
   --riasec-creative: #B85042; /* глубокий терракотово-коралловый */
   --riasec-tech: #2B5B84; /* глубокий индиго-джинсовый */
@@ -488,6 +494,9 @@ a:focus-visible {
   color: var(--text-muted) !important;
 }
 [data-theme="light"] .text-white {
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] .text-white\/95 {
   color: var(--text-primary) !important;
 }
 [data-theme="light"] .text-white\/90 {
@@ -567,6 +576,9 @@ a:focus-visible {
 }
 [data-theme="light"] .bg-\[\#040506\]\/85 {
   background-color: rgba(253, 251, 247, 0.85) !important;
+}
+[data-theme="light"] .bg-\[\#040506\]\/95 {
+  background-color: rgba(253, 251, 247, 0.95) !important;
 }
 [data-theme="light"] .bg-\#040506 {
   background-color: var(--bg-deep) !important;

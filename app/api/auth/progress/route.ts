@@ -52,11 +52,15 @@ export async function GET(req: Request) {
       where: { userId }
     });
 
+    const extracted = (coachSession?.extractedData as Record<string, any>) || {};
+
     return NextResponse.json({
       authenticated: true,
       coachCompleted: coachSession?.status === 'COMPLETED',
       testCompleted: !!diagnosticResult,
-      sessionId: coachSession?.id || null
+      sessionId: coachSession?.id || null,
+      coachSessionMode: extracted.sessionMode || null,
+      deepSessionCompleted: !!extracted.deepSessionCompletedAt
     });
   } catch (error: any) {
     console.error('Error fetching progress status:', error);

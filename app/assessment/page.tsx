@@ -190,13 +190,34 @@ export default function AssessmentPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.currentQuestion?.question_id]);
 
-  // Перенаправление на отчет при завершении
+  // При завершении тестирования: если пользователь проходил простую (EXPRESS)
+  // коуч-сессию и ещё не проходил глубокую — предлагаем её опцией, а не сразу
+  // уводим на отчёт. Если это неактуально (уже DEEP, или уже пройдена, или
+  // проверка не удалась) — ведём себя как раньше.
+  const [deepOffer, setDeepOffer] = useState(false);
+
   useEffect(() => {
-    if (store.isCompleted && store.sessionId) {
-      // Сохраняем флаг завершения диагностики для шаг-карты на главной
-      localStorage.setItem('diagnosticCompleted', 'true');
-      router.push(`/report?session_id=${store.sessionId}`);
-    }
+    if (!store.isCompleted || !store.sessionId) return;
+    localStorage.setItem('diagnosticCompleted', 'true');
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/progress');
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled && data.authenticated && data.coachSessionMode === 'EXPRESS' && !data.deepSessionCompleted) {
+            setDeepOffer(true);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('[assessment] Failed to check deep-session offer eligibility:', err);
+      }
+      if (!cancelled) router.push(`/report?session_id=${store.sessionId}`);
+    })();
+
+    return () => { cancelled = true; };
   }, [store.isCompleted, store.sessionId, router]);
 
   // Горячие клавиши (1-5 для ответов, ArrowLeft для Назад)
@@ -248,6 +269,39 @@ export default function AssessmentPage() {
             </div>
             <div className="text-4xl font-extrabold font-sans text-red-500">
               {store.lockdownTimeLeft} сек
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // 1.5. Предложение пройти глубокую сессию после завершения тестирования
+  if (deepOffer) {
+    return (
+      <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
+        <div className="rounded-[32px] glass-card p-10 text-center relative overflow-hidden">
+          <div className="relative z-10 flex flex-col items-center space-y-6">
+            <span className="text-4xl">🧭</span>
+            <div className="space-y-3">
+              <h1 className="text-2xl font-bold font-sans text-white">Тестирование завершено!</h1>
+              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
+                Ты уже собрал базовый профиль. Хочешь пройти <span className="text-[#C4A484] font-semibold">глубокую сессию</span> с наставником Романом — разобрать свою цель, эмоции и первый шаг детальнее? Это займёт ещё немного времени, но результат войдёт отдельным разделом в твой финальный отчёт.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 w-full pt-2">
+              <button
+                onClick={() => router.push('/coach?forceDeep=1')}
+                className="flex-1 rounded-2xl bg-[#C4A484] px-6 py-3 text-sm font-bold font-sans text-[#1a1208] transition hover:brightness-110"
+              >
+                Пройти глубокую сессию
+              </button>
+              <button
+                onClick={() => router.push(`/report?session_id=${store.sessionId}`)}
+                className="flex-1 rounded-2xl border border-white/10 px-6 py-3 text-sm font-bold font-sans text-white/80 transition hover:bg-white/5"
+              >
+                Перейти сразу к отчёту
+              </button>
             </div>
           </div>
         </div>

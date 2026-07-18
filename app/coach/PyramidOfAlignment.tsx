@@ -129,8 +129,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
           </defs>
 
           {/* Фоновая разметка сетки */}
-          <line x1="200" y1="20" x2="200" y2="330" stroke="white/5" strokeDasharray="3 3" />
-          <line x1="30" y1="310" x2="370" y2="310" stroke="white/10" />
+          <line x1="200" y1="20" x2="200" y2="330" stroke="var(--border-subtle)" strokeDasharray="3 3" />
+          <line x1="30" y1="310" x2="370" y2="310" stroke="var(--border-subtle)" />
 
           {/* Отрисовка уровней пирамиды */}
           {levels.map((lvl) => {
@@ -149,8 +149,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
                 {/* Подсветка при наведении */}
                 <motion.polygon
                   points={lvl.points}
-                  fill={hasData ? `url(#grad-pyr-${lvl.idx})` : 'rgba(255,255,255,0.01)'}
-                  stroke={hasData ? lvl.color : 'rgba(255,255,255,0.1)'}
+                  fill={hasData ? `url(#grad-pyr-${lvl.idx})` : 'var(--pyramid-idle-fill)'}
+                  stroke={hasData ? lvl.color : 'var(--border-subtle)'}
                   strokeWidth={isHovered || isSelected ? 2.5 : 1.2}
                   style={{
                     filter: hasData ? `drop-shadow(0 0 ${isHovered || isSelected ? '12px' : '4px'} ${lvl.glowColor})` : 'none',
@@ -183,7 +183,7 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
       {/* Информационная панель деталей уровня */}
       <div 
         className="w-full min-h-[110px] max-h-[180px] overflow-y-auto p-4 rounded-2xl bg-white/[0.02] border flex flex-col justify-center transition-all duration-300"
-        style={{ borderColor: activeLevel ? `${activeLevel.color}33` : 'rgba(255,255,255,0.05)' }}
+        style={{ borderColor: activeLevel ? `color-mix(in srgb, ${activeLevel.color} 20%, transparent)` : 'var(--border-subtle)' }}
       >
         <AnimatePresence mode="wait">
           {activeLevel ? (
@@ -242,9 +242,9 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
               </div>
               <span 
                 className="text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 font-sans"
-                style={{ 
-                  backgroundColor: hasData ? `${lvl.color}15` : 'rgba(255,255,255,0.05)',
-                  color: hasData ? lvl.color : '#64748B'
+                style={{
+                  backgroundColor: hasData ? `color-mix(in srgb, ${lvl.color} 12%, transparent)` : 'var(--pyramid-idle-fill)',
+                  color: hasData ? lvl.color : 'var(--text-muted)'
                 }}
               >
                 {hasData ? 'Готово' : 'В процессе'}
