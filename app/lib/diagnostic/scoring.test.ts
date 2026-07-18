@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { diagnosticQuestions } from '../../data/questions';
-import { bfiScorer, icarScorer, procrastinationScorer, riasecScorer } from './scoring';
+import { bfiScorer, icarScorer, procrastinationScorer, riasecScorer, viaScorer } from './scoring';
+import { viaStrengths } from '../../data/viaStrengths';
 
 describe('riasecScorer', () => {
   it('computes per-scale averages from varied answers', () => {
@@ -105,5 +106,35 @@ describe('procrastinationScorer', () => {
     const result = procrastinationScorer.score(answers, diagnosticQuestions);
     expect(result.scores).toEqual({ score: 18 });
     expect(result.reliability).toBe('high');
+  });
+});
+
+describe('viaScorer', () => {
+  it('scores all 24 strengths and picks the top-5 signature strengths', () => {
+    const answers: Record<string, number> = {};
+    viaStrengths.forEach((s, i) => {
+      // Give 'creativity' (index 0) the top score, then descending, so the
+      // expected top-5 is deterministic and matches viaStrengths declaration order on ties.
+      answers[`via-${s.code}`] = Math.max(1, 5 - Math.floor(i / 6));
+    });
+    const result = viaScorer.score(answers, diagnosticQuestions);
+    const scores = result.scores as Record<string, number> & { signatureStrengths: string[] };
+    expect(scores.creativity).toBe(5);
+    expect(scores.signatureStrengths).toHaveLength(5);
+    // Top-5 should all be the highest-scoring (first 6 declared) strengths.
+    const topDeclaredCodes = viaStrengths.slice(0, 6).map((s) => s.code);
+    scores.signatureStrengths.forEach((code) => {
+      expect(topDeclaredCodes).toContain(code);
+    });
+    expect(result.reliability).toBe('high');
+  });
+
+  it('flags flat-pattern answers (all neutral) as low reliability', () => {
+    const answers: Record<string, number> = {};
+    viaStrengths.forEach((s) => {
+      answers[`via-${s.code}`] = 3;
+    });
+    const result = viaScorer.score(answers, diagnosticQuestions);
+    expect(result.reliability).toBe('low');
   });
 });

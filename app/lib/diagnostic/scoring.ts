@@ -1,6 +1,7 @@
 import type { DiagnosticQuestion } from '../../data/questions';
 import { computeMaxReverseDeviation, computeReliability, type Reliability } from './reliability';
 import { icarBand } from './icarNorms';
+import { viaStrengths } from '../../data/viaStrengths';
 
 export interface ScoreContext {
   age?: number;
@@ -147,11 +148,40 @@ export const procrastinationScorer: TestScorer = {
   },
 };
 
+/**
+ * VIA Youth Survey: средний балл 1-5 по каждой из 24 сильных сторон характера,
+ * плюс топ-5 сигнатурных сил (при равенстве баллов — по порядку добродетелей в viaStrengths).
+ */
+export const viaScorer: TestScorer = {
+  testCode: 'VIA',
+  score(answers, questions) {
+    const qs = questionsFor('VIA', questions);
+    const scores: Record<string, number> = {};
+    qs.forEach((q) => {
+      const value = answers[q.id];
+      if (value === undefined) return;
+      scores[q.scale] = value;
+    });
+
+    const signatureStrengths = viaStrengths
+      .map((s) => s.code)
+      .filter((code) => scores[code] !== undefined)
+      .sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0))
+      .slice(0, 5);
+
+    return {
+      scores: { ...scores, signatureStrengths },
+      reliability: computeReliability(answers, qs),
+    };
+  },
+};
+
 export const scorers: Record<string, TestScorer> = {
   RIASEC: riasecScorer,
   BFI: bfiScorer,
   ICAR: icarScorer,
   PROCRASTINATION: procrastinationScorer,
+  VIA: viaScorer,
 };
 
 export function registerScorer(scorer: TestScorer): void {

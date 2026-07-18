@@ -330,7 +330,129 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
     difficulty: 3
   },
 
-  // ─── 4. Поведение (Прокрастинация Лэя) ───
+  // ─── 4. Сильные стороны характера (VIA Youth Survey, 24 силы / 6 добродетелей) ───
+  {
+    id: 'via-creativity', testCode: 'VIA', scale: 'creativity', reverseScored: false,
+    text: 'Я часто придумываю новые способы сделать что-то — такие, до которых другие не додумались.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-wisdom.webp'
+  },
+  {
+    id: 'via-curiosity', testCode: 'VIA', scale: 'curiosity', reverseScored: false,
+    text: 'Мне интересно узнавать новое просто потому, что это увлекательно, а не потому что заставляют.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-wisdom.webp'
+  },
+  {
+    id: 'via-judgment', testCode: 'VIA', scale: 'judgment', reverseScored: false,
+    text: 'Прежде чем сделать вывод, я стараюсь посмотреть на ситуацию с разных сторон.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-wisdom.webp'
+  },
+  {
+    id: 'via-love_of_learning', testCode: 'VIA', scale: 'love_of_learning', reverseScored: false,
+    text: 'Мне нравится осваивать новый навык или тему просто ради самого процесса обучения.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-wisdom.webp'
+  },
+  {
+    id: 'via-perspective', testCode: 'VIA', scale: 'perspective', reverseScored: false,
+    text: 'Друзья часто приходят ко мне за советом, потому что я умею взглянуть на их ситуацию со стороны.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-wisdom.webp'
+  },
+  {
+    id: 'via-bravery', testCode: 'VIA', scale: 'bravery', reverseScored: false,
+    text: 'Я не отступаю, даже когда мне страшно или ситуация некомфортна.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-courage.webp'
+  },
+  {
+    id: 'via-perseverance', testCode: 'VIA', scale: 'perseverance', reverseScored: false,
+    text: 'Если я начал дело, я довожу его до конца, даже когда становится скучно или трудно.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-courage.webp'
+  },
+  {
+    id: 'via-honesty', testCode: 'VIA', scale: 'honesty', reverseScored: false,
+    text: 'Для меня важно говорить правду и вести себя в согласии с тем, во что я верю.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-courage.webp'
+  },
+  {
+    id: 'via-zest', testCode: 'VIA', scale: 'zest', reverseScored: false,
+    text: 'Я подхожу к жизни с энергией и энтузиазмом, редко отсиживаюсь в стороне.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-courage.webp'
+  },
+  {
+    id: 'via-love', testCode: 'VIA', scale: 'love', reverseScored: false,
+    text: 'Близкие отношения с людьми много значат для меня, я умею заботиться о других.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-humanity.webp'
+  },
+  {
+    id: 'via-kindness', testCode: 'VIA', scale: 'kindness', reverseScored: false,
+    text: 'Я часто делаю что-то хорошее для других, даже не ожидая ничего взамен.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-humanity.webp'
+  },
+  {
+    id: 'via-social_intelligence', testCode: 'VIA', scale: 'social_intelligence', reverseScored: false,
+    text: 'Я хорошо понимаю, что чувствуют и о чём думают другие люди, даже если они молчат об этом.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-humanity.webp'
+  },
+  {
+    id: 'via-teamwork', testCode: 'VIA', scale: 'teamwork', reverseScored: false,
+    text: 'Мне легко работать в команде на общий результат, даже если приходится уступать в мелочах.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-justice.webp'
+  },
+  {
+    id: 'via-fairness', testCode: 'VIA', scale: 'fairness', reverseScored: false,
+    text: 'Для меня важно относиться ко всем одинаково честно, даже к тем, кто мне не нравится.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-justice.webp'
+  },
+  {
+    id: 'via-leadership', testCode: 'VIA', scale: 'leadership', reverseScored: false,
+    text: 'Мне легко организовать группу людей и повести её к цели.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-justice.webp'
+  },
+  {
+    id: 'via-forgiveness', testCode: 'VIA', scale: 'forgiveness', reverseScored: false,
+    text: 'Я довольно легко прощаю тех, кто поступил со мной плохо, и не держу обиду долго.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-temperance.webp'
+  },
+  {
+    id: 'via-humility', testCode: 'VIA', scale: 'humility', reverseScored: false,
+    text: 'Я не люблю выставлять напоказ свои успехи и даю другим проявить себя.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-temperance.webp'
+  },
+  {
+    id: 'via-prudence', testCode: 'VIA', scale: 'prudence', reverseScored: false,
+    text: 'Я стараюсь тщательно обдумывать решения и не рисковать без необходимости.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-temperance.webp'
+  },
+  {
+    id: 'via-self_regulation', testCode: 'VIA', scale: 'self_regulation', reverseScored: false,
+    text: 'Я умею управлять своими эмоциями и поведением, даже когда злюсь или расстроен.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-temperance.webp'
+  },
+  {
+    id: 'via-appreciation_of_beauty', testCode: 'VIA', scale: 'appreciation_of_beauty', reverseScored: false,
+    text: 'Я замечаю и по-настоящему ценю красоту в природе, искусстве или мастерстве других людей.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-transcendence.webp'
+  },
+  {
+    id: 'via-gratitude', testCode: 'VIA', scale: 'gratitude', reverseScored: false,
+    text: 'Я часто замечаю хорошее, что происходит в моей жизни, и чувствую благодарность за это.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-transcendence.webp'
+  },
+  {
+    id: 'via-hope', testCode: 'VIA', scale: 'hope', reverseScored: false,
+    text: 'Я верю, что моё будущее будет хорошим, и готов работать ради этого.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-transcendence.webp'
+  },
+  {
+    id: 'via-humor', testCode: 'VIA', scale: 'humor', reverseScored: false,
+    text: 'Я люблю шутить и поднимать настроение другим людям.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-transcendence.webp'
+  },
+  {
+    id: 'via-spirituality', testCode: 'VIA', scale: 'spirituality', reverseScored: false,
+    text: 'Мне важно понимать, зачем я делаю то, что делаю — искать смысл в своих действиях.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/via-transcendence.webp'
+  },
+
+  // ─── 5. Поведение (Прокрастинация Лэя) ───
   {
     id: 'lay-1',
     testCode: 'PROCRASTINATION',

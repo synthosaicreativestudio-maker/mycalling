@@ -6,6 +6,7 @@ import { diagnosticQuestions } from '../../../../data/questions';
 import { env } from '../../../../lib/env';
 import { generateJson } from '../../../../lib/gemini';
 import { scorers, type ScoreResult } from '../../../../lib/diagnostic/scoring';
+import { viaStrengthByCode, viaVirtueNames } from '../../../../data/viaStrengths';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,6 +120,11 @@ export async function GET(request: Request) {
       const icarScores = results.ICAR.scores as { raw: number; bySubscale: Record<string, number>; band: string };
       const correctIcarAnswers = icarScores.raw;
       const procrastinationScore = (results.PROCRASTINATION.scores as { score: number }).score;
+      const viaScores = results.VIA.scores as Record<string, number> & { signatureStrengths: string[] };
+      const signatureStrengths = viaScores.signatureStrengths.map((code) => {
+        const strength = viaStrengthByCode[code];
+        return strength ? { code, nameRu: strength.nameRu, virtue: viaVirtueNames[strength.virtue] } : { code, nameRu: code, virtue: '' };
+      });
 
       // Сначала очищаем старые результаты диагностик для этого пользователя
       try {
@@ -143,6 +149,7 @@ export async function GET(request: Request) {
         riasec: finalRiasec,
         bigFive: finalBigFive,
         icar: icarScores,
+        via: viaScores,
         procrastination: procrastinationScore,
         coachData
       };
@@ -182,15 +189,17 @@ export async function GET(request: Request) {
 - Профиль личности (Big Five): ${JSON.stringify(finalBigFive)}
 - Логика (ICAR): уровень готовности к задачам такого типа относительно возраста — «${icarScores.band}» (verbal: ${icarScores.bySubscale.verbal ?? 0}/3, numeric: ${icarScores.bySubscale.numeric ?? 0}/3, spatial: ${icarScores.bySubscale.spatial ?? 0}/3)
 - Прокрастинация (Лэй): ${procrastinationScore} баллов (шкала 4-20)
+- Сильные стороны характера (VIA Youth, топ-5 сигнатурных сил): ${signatureStrengths.map((s) => `${s.nameRu} (${s.virtue})`).join(', ')}
 - Качественные данные коуча: ${coachDataPrompt}
 
 Правила формирования отчета:
 1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
 2. Проанализируйте Big Five черты.
 3. Опишите сильные стороны и зоны развития с учетом прокрастинации (если балл прокрастинации выше 12, дайте совет, как с этим справляться) и логических задач. КРИТИЧЕСКИ ВАЖНО: НИКОГДА не давайте абсолютных оценок интеллекта или чисел вида "X из Y правильных" — только уровень готовности относительно возраста ("developing"/"solid"/"strong" переводите как "в процессе развития"/"уверенный уровень"/"сильная сторона").
-4. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем".
-5. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
-6. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
+4. Раздел "strengths" (сильные стороны) стройте В ПЕРВУЮ ОЧЕРЕДЬ на основе топ-5 сигнатурных сил VIA Youth, а не на общих домыслах — раскройте, как каждая сила проявляется в учебе и жизни подростка.
+5. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем".
+6. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
+7. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
 
 Ответьте СТРОГО в формате JSON.
 Структура JSON:
@@ -206,6 +215,13 @@ export async function GET(request: Request) {
   ],
   "riasecSummary": "Краткое описание ведущих типов интересов.",
   "strengths": ["Сильная сторона 1", "Сильная сторона 2"],
+  "signatureStrengths": [
+    {
+      "code": "код силы, ровно как в списке выше",
+      "nameRu": "Название на русском",
+      "description": "Как эта сила проявляется у этого конкретного подростка (1-2 предложения)."
+    }
+  ],
   "growthAreas": ["Зона развития 1", "Зона развития 2"],
   "coachSection": {
     "dreams": "Анализ мечт (для Экспресс, или пустая строка если DEEP)",
@@ -252,6 +268,18 @@ export async function GET(request: Request) {
             type: "ARRAY",
             items: { type: "STRING" }
           },
+          signatureStrengths: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                code: { type: "STRING" },
+                nameRu: { type: "STRING" },
+                description: { type: "STRING" }
+              },
+              required: ["code", "nameRu", "description"]
+            }
+          },
           growthAreas: {
             type: "ARRAY",
             items: { type: "STRING" }
@@ -285,7 +313,7 @@ export async function GET(request: Request) {
         },
         required: [
           "studentName", "heroSummary", "personalityTraits", "riasecSummary",
-          "strengths", "growthAreas", "coachSection", "professions"
+          "strengths", "signatureStrengths", "growthAreas", "coachSection", "professions"
         ]
       };
 
@@ -372,6 +400,14 @@ export async function GET(request: Request) {
             'Способность к гибкой адаптации в учебных задачах.',
             'Выявленный баланс между аналитическим и практическим подходами.'
           ],
+          signatureStrengths: signatureStrengths.map((s) => {
+            const strength = viaStrengthByCode[s.code];
+            return {
+              code: s.code,
+              nameRu: s.nameRu,
+              description: strength?.shortDescription || 'Одна из ключевых сильных сторон характера.'
+            };
+          }),
           growthAreas: [
             'Развитие навыков долгосрочного планирования.',
             'Повышение устойчивости при работе со сложными логическими задачами.'

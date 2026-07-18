@@ -29,6 +29,7 @@ type ReportData = {
   riasecSummary?: string;
   riasecScores?: Record<string, number>;
   strengths: string[];
+  signatureStrengths?: { code: string; nameRu: string; description: string }[];
   growthAreas: string[];
   coachSection?: {
     dreams?: string;
@@ -63,6 +64,13 @@ const defaultReport: ReportData = {
     'Быстро переводит сложные абстрактные идеи в понятные структуры.',
     'Способен находить скрытые логические связи и упорядочивать хаотичные данные.',
     'Высокая чувствительность к потребностям людей.'
+  ],
+  signatureStrengths: [
+    { code: 'creativity', nameRu: 'Креативность', description: 'Находит нестандартные решения там, где другие видят только один путь.' },
+    { code: 'curiosity', nameRu: 'Любознательность', description: 'Задаёт вопросы «а что если» чаще сверстников и любит копать глубже.' },
+    { code: 'judgment', nameRu: 'Критическое мышление', description: 'Прежде чем сделать вывод, взвешивает разные точки зрения.' },
+    { code: 'perspective', nameRu: 'Мудрость перспективы', description: 'К нему часто обращаются за советом — умеет посмотреть на ситуацию со стороны.' },
+    { code: 'social_intelligence', nameRu: 'Социальный интеллект', description: 'Тонко считывает настроение и мотивы людей вокруг.' }
   ],
   growthAreas: [
     'Переход от генерации концептов к практическому программированию и сборке.',
@@ -204,6 +212,7 @@ function ReportPageContent() {
           riasecSummary: rawData.riasecSummary || '',
           riasecScores: rawData.riasecScores || {},
           strengths: Array.isArray(rawData.strengths) ? rawData.strengths : [],
+          signatureStrengths: Array.isArray(rawData.signatureStrengths) ? rawData.signatureStrengths : [],
           growthAreas: Array.isArray(rawData.growthAreas) ? rawData.growthAreas : [],
           coachSection: rawData.coachSection || {},
           professions: Array.isArray(rawData.professions) ? rawData.professions : []
@@ -498,6 +507,25 @@ function ReportPageContent() {
                               <div className="h-full bg-[#3B82F6] rounded-full" style={{ width: `${trait.score}%` }} />
                             </div>
                             <p className="text-[11px] text-[#7A8A9E] leading-relaxed">{trait.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Артефакты силы (VIA Youth — топ-5 сигнатурных сил характера) */}
+                  {report.signatureStrengths && report.signatureStrengths.length > 0 && (
+                    <div className="glass-card rounded-[28px] p-8">
+                      <h2 className="text-lg font-bold text-white mb-1">Артефакты силы</h2>
+                      <p className="text-xs text-[#7A8A9E] mb-4">Топ-5 сильных сторон характера по методике VIA Youth Survey</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {report.signatureStrengths.map((s, i) => (
+                          <div key={s.code || i} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Award className="w-4 h-4 text-[#EAB308]" />
+                              <span className="text-sm font-bold text-white">{s.nameRu}</span>
+                            </div>
+                            <p className="text-[11px] text-[#7A8A9E] leading-relaxed">{s.description}</p>
                           </div>
                         ))}
                       </div>
