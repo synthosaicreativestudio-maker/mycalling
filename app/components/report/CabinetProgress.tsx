@@ -4,10 +4,9 @@ import { motion } from 'framer-motion';
 import { User, Phone, LogOut, CheckCircle2, ChevronRight, Lock } from 'lucide-react';
 import { narrative, ASSESSMENT_CHAPTER_ORDER } from '../../data/narrative';
 
-// В questions.ts на данный момент реально существуют не все блоки из ASSESSMENT_CHAPTER_ORDER
-// (например, VIA/PVQ подключаются отдельным этапом Д-1/Д-11). Показываем только те главы,
-// которые сейчас есть в тестовой батарее, чтобы не обещать шаги, которых ещё нет.
-const EXISTING_TEST_CODES = new Set(['RIASEC', 'BFI', 'ICAR', 'PROCRASTINATION']);
+// Показываем только главы, которые реально есть в тестовой батарее (app/data/questions.ts),
+// чтобы не обещать шаги, которых ещё нет.
+const EXISTING_TEST_CODES = new Set(['RIASEC', 'BFI', 'ICAR', 'VIA', 'PVQ', 'PROCRASTINATION']);
 const visibleChapters = ASSESSMENT_CHAPTER_ORDER.filter((code) => EXISTING_TEST_CODES.has(code)).map(
   (code) => narrative[code]
 );
