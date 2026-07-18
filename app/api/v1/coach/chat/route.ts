@@ -182,6 +182,8 @@ export async function POST(req: Request) {
                 autonomyStyle: "",
                 values: "",
                 decisionStyle: "",
+                antiInterests: [],
+                voluntaryHobbies: [],
                 talentScores: {
                   creative: 0,
                   tech: 0,
@@ -198,7 +200,11 @@ export async function POST(req: Request) {
                 deepIdentity: "",
                 deepActions: "",
                 deepFirstStep: ""
-              }
+              },
+              // Д-4: "адвокат дьявола" — сбрасываем guard использованных шагов
+              _devilsAdvocateUsed: [],
+              motivationTested: false,
+              trueMotivation: ""
             },
             status: 'IN_PROGRESS',
             completedAt: null
@@ -731,8 +737,25 @@ export async function POST(req: Request) {
             startup: { type: "INTEGER", description: "Оценка склонности к лидерству и продажам от 0 до 100. Если нет про лидерство/управление, верни строго 0 (НЕ пиши 50 по умолчанию)." }
           }
         };
-        fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle, talentScores (scores 0-100 reflecting the user's vocational areas)";
-        
+
+        // Д-7: анти-интересы и добровольные хобби (только через ИИ-экстракцию, без regex-fallback)
+        properties.antiInterests = {
+          type: "ARRAY",
+          items: { type: "STRING" },
+          description: "Список конкретных вещей/сфер/деятельностей, которые подросток категорически НЕ любит или от которых хочет держаться подальше (ответ на вопрос «что тебе точно НЕ нравится, от чего хочется сбежать?»). Если в сообщении об этом ничего нет — верни пустой массив."
+        };
+        properties.voluntaryHobbies = {
+          type: "ARRAY",
+          items: { type: "STRING" },
+          description: "Список занятий, которыми подросток занимается добровольно, когда его никто не заставляет (ответ на вопрос «чем занимаешься по своей воле, когда никто не заставляет?»). Если в сообщении об этом ничего нет — верни пустой массив."
+        };
+
+        // Д-4: результат техники "адвокат дьявола" (заполняется, если коуч оспаривал шаблонный ответ про страхи/цель)
+        properties.motivationTested = { type: "BOOLEAN", description: "true, только если в последней реплике коуча Романа было парадоксальное оспаривание шаблонного ответа подростка, и подросток на это ответил." };
+        properties.trueMotivation = { type: "STRING", description: "Новая, более личная аргументация подростка, данная ПОСЛЕ того, как коуч оспорил его шаблонный ответ. Заполняй, только если оспаривание произошло и подросток переформулировал ответ. Иначе — пустая строка." };
+
+        fieldsToExtract += ", hobbies, schoolSubjects, dreams, idols, parents, fears, experience, workFormat, thinkingType, successMeasure, energySources, teamRole, autonomyStyle, values, decisionStyle, talentScores (scores 0-100 reflecting the user's vocational areas), antiInterests (array), voluntaryHobbies (array), motivationTested (boolean), trueMotivation (string)";
+
         properties.fullName = { type: "STRING" };
         properties.age = { type: "INTEGER" };
         properties.grade = { type: "STRING" };
@@ -741,7 +764,10 @@ export async function POST(req: Request) {
       } else if (isDeepMode && currentStepBefore >= 16 && currentStepBefore <= 21) {
         if (currentStepBefore === 16) {
           properties.deepGoal = { type: "STRING" };
-          fieldsToExtract += ", deepGoal";
+          // Д-4: результат техники "адвокат дьявола" на шаге "Что я хочу?"
+          properties.motivationTested = { type: "BOOLEAN", description: "true, только если в последней реплике коуча Романа было парадоксальное оспаривание шаблонного ответа подростка про цель, и подросток на это ответил." };
+          properties.trueMotivation = { type: "STRING", description: "Новая, более личная аргументация подростка про цель, данная ПОСЛЕ того, как коуч оспорил его шаблонный ответ. Заполняй, только если оспаривание произошло. Иначе — пустая строка." };
+          fieldsToExtract += ", deepGoal, motivationTested (boolean), trueMotivation (string)";
         } else if (currentStepBefore === 17) {
           properties.deepOutcome = { type: "STRING" };
           fieldsToExtract += ", deepOutcome";
@@ -773,6 +799,7 @@ ${dialogHistory}
 Текущий шаг диалога: ${currentStepBefore} (где шаги 3-15 — сбор склонностей/интересов, а 16=Что хочу/Цель, 17=Результат/Образ, 18=Эмоции, 19=Идентичность, 20=Действия/Навыки/KPI, 21=Первый шаг).
 Для shouldAdvanceStep: установи true, если пользователь дал осмысленный ответ по сути текущего шага. Если пользователь уклоняется от ответа или задает встречный вопрос, установи false.
 Если анализируется Экспресс-коучинг или первая фаза Глубокого коучинга (шаги 3..15), в поле talentScores оцени склонности пользователя по 6 шкалам (от 0 до 100). ВНИМАНИЕ: Если в диалоге еще НЕТ информации по какой-либо шкале (пользователь не говорил про хобби, спорт, программирование и т.д.), возвращай для нее строго 0. Категорически запрещено ставить 50 или средние значения по умолчанию.
+Если в реплике коуча Романа была фраза, оспаривающая шаблонный/социально желаемый ответ подростка (техника "адвокат дьявола", например парадоксальный вопрос вроде "а если через 5 лет это сделают алгоритмы?") и подросток на неё ответил — заполни motivationTested: true и trueMotivation переформулированной личной аргументацией подростка. Если такого оспаривания не было — верни motivationTested: false и пустую строку в trueMotivation.
 Извлекай: ${fieldsToExtract}`;
 
       const extractionSchema = {
@@ -832,7 +859,26 @@ ${dialogHistory}
       updateExpressField('autonomyStyle', parsedData.autonomyStyle);
       updateExpressField('values', parsedData.values);
       updateExpressField('decisionStyle', parsedData.decisionStyle);
-      
+
+      // Д-7: анти-интересы и добровольные хобби — накопительное объединение массивов без дублей
+      const updateExpressArrayField = (key: string, val: any) => {
+        if (Array.isArray(val) && val.length > 0) {
+          const existing: string[] = Array.isArray(extractedData.expressExtracted[key]) ? extractedData.expressExtracted[key] : [];
+          const incoming = val.map((v: any) => String(v).trim()).filter(Boolean);
+          extractedData.expressExtracted[key] = Array.from(new Set([...existing, ...incoming]));
+        }
+      };
+      updateExpressArrayField('antiInterests', parsedData.antiInterests);
+      updateExpressArrayField('voluntaryHobbies', parsedData.voluntaryHobbies);
+
+      // Д-4: "адвокат дьявола" — фиксируем результат оспаривания в extractedData
+      if (parsedData.motivationTested === true) {
+        extractedData.motivationTested = true;
+      }
+      if (parsedData.trueMotivation) {
+        extractedData.trueMotivation = parsedData.trueMotivation;
+      }
+
       if (parsedData.talentScores) {
         if (!extractedData.expressExtracted.talentScores) {
           extractedData.expressExtracted.talentScores = {
