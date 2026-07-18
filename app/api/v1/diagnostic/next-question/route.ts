@@ -8,6 +8,7 @@ import { generateJson } from '../../../../lib/gemini';
 import { scorers, type ScoreResult } from '../../../../lib/diagnostic/scoring';
 import { viaStrengthByCode, viaVirtueNames } from '../../../../data/viaStrengths';
 import { computeConsistency } from '../../../../lib/profile/consistency';
+import { deriveArchetype } from '../../../../lib/profile/archetype';
 import { deriveSkillFormula } from '../../../../lib/profile/skillFormula';
 import { buildSummaryProfile } from '../../../../lib/profile/layers';
 import { pvqValueByCode } from '../../../../data/pvqValues';
@@ -226,6 +227,14 @@ export async function GET(request: Request) {
         icar: icarScores,
         via: viaScores
       });
+
+      // Ведущий архетип — детерминированно из VIA + PVQ (см. app/lib/profile/archetype.ts),
+      // а не «на глазок» LLM. Закрывает претензию методического аудита о низкой
+      // валидности самописного определения архетипа.
+      const archetype = deriveArchetype(
+        viaScores as Record<string, number>,
+        pvqScores.centered
+      );
       const skillFormulaSkills = skillFormula.top3.map((code) => ({
         code,
         nameRu: skillByCode[code]?.nameRu || code,
@@ -399,6 +408,7 @@ export async function GET(request: Request) {
 - Индекс согласованности данных тестов и коуч-сессии: ${consistency.index}/100 (${consistency.level}). ${consistency.contradictions.length > 0 ? `Обнаруженные противоречия: ${consistency.contradictions.map((c) => `«${c.testFact}» vs «${c.coachFact}»`).join('; ')}.` : 'Противоречий не обнаружено.'}
 - Формула успеха (3 переносимые компетенции, выведенные детерминированно из профиля): ${skillFormulaSkills.map((s) => s.nameRu).join(' + ')}
 - Ведущие ценности по тесту PVQ Шварца (топ-3): ${topPvqNames.join(', ')}
+- Ведущий архетип (вычислен детерминированно из VIA + PVQ, НЕ придумывай свой): ${archetype ? `${archetype.nameRu} — суперсила: ${archetype.superpower}` : 'не определён'}
 - Глубинная сессия: ${deepSessionPrompt}
 
 Правила формирования отчета:
@@ -580,6 +590,7 @@ export async function GET(request: Request) {
           // скопирует уже готовый синтез без искажений/добавления цитат.
           deepSession: deepSessionForReport,
           innerConflicts: innerConflictsForReport,
+          archetype: archetype ? { nameRu: archetype.nameRu, superpower: archetype.superpower, evidence: archetype.evidence } : null,
           isFallback: false
         });
       } catch (err) {
@@ -693,6 +704,7 @@ export async function GET(request: Request) {
           ],
           consistencyLevel: consistency.level,
           innerConflicts: innerConflictsForReport,
+          archetype: archetype ? { nameRu: archetype.nameRu, superpower: archetype.superpower, evidence: archetype.evidence } : null,
           // Простой структурный passthrough без дополнительного вызова ИИ — синтез уже
           // готов из deepReportSummary (см. app/api/v1/coach/chat/route.ts).
           deepSession: deepSessionForReport,

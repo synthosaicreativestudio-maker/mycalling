@@ -37,6 +37,7 @@ type ReportData = {
   signatureStrengths?: { code: string; nameRu: string; description: string }[];
   growthAreas: string[];
   consistencyLevel?: 'high' | 'medium' | 'low';
+  archetype?: { nameRu: string; superpower: string; evidence?: string[] } | null;
   innerConflicts?: { title: string; text: string; testFact?: string; coachFact?: string }[];
   successFormula?: { skills: { code: string; nameRu: string; evidence: string }[]; applications: string[] };
   coachSection?: {
@@ -255,6 +256,7 @@ function ReportPageContent() {
           signatureStrengths: Array.isArray(rawData.signatureStrengths) ? rawData.signatureStrengths : [],
           growthAreas: Array.isArray(rawData.growthAreas) ? rawData.growthAreas : [],
           consistencyLevel: rawData.consistencyLevel,
+          archetype: rawData.archetype && rawData.archetype.nameRu ? rawData.archetype : null,
           innerConflicts: Array.isArray(rawData.innerConflicts) ? rawData.innerConflicts : [],
           successFormula: rawData.successFormula && Array.isArray(rawData.successFormula.skills)
             ? rawData.successFormula
@@ -574,6 +576,29 @@ function ReportPageContent() {
                           </div>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Ведущий архетип — вычислен детерминированно из VIA + PVQ */}
+                  {report.archetype && (
+                    <div className="glass-card rounded-[28px] p-8 border border-[#8b5cf6]/25">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sparkles className="w-4 h-4 text-[#8b5cf6]" />
+                        <span className="text-[10px] uppercase tracking-widest font-extrabold text-[#8b5cf6]">Твой архетип</span>
+                      </div>
+                      <h2 className="text-2xl font-bold text-white mb-2">{report.archetype.nameRu}</h2>
+                      <p className="text-sm text-[#93A3B8] leading-relaxed mb-3">
+                        Твоя суперсила — {report.archetype.superpower}
+                      </p>
+                      {report.archetype.evidence && report.archetype.evidence.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {report.archetype.evidence.map((e, i) => (
+                            <span key={i} className="text-[10px] font-semibold text-[#8b5cf6] bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-full px-2.5 py-1">
+                              {e}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 
