@@ -31,6 +31,8 @@ type ReportData = {
   strengths: string[];
   signatureStrengths?: { code: string; nameRu: string; description: string }[];
   growthAreas: string[];
+  consistencyLevel?: 'high' | 'medium' | 'low';
+  innerConflicts?: { title: string; text: string }[];
   coachSection?: {
     dreams?: string;
     idols?: string;
@@ -214,6 +216,8 @@ function ReportPageContent() {
           strengths: Array.isArray(rawData.strengths) ? rawData.strengths : [],
           signatureStrengths: Array.isArray(rawData.signatureStrengths) ? rawData.signatureStrengths : [],
           growthAreas: Array.isArray(rawData.growthAreas) ? rawData.growthAreas : [],
+          consistencyLevel: rawData.consistencyLevel,
+          innerConflicts: Array.isArray(rawData.innerConflicts) ? rawData.innerConflicts : [],
           coachSection: rawData.coachSection || {},
           professions: Array.isArray(rawData.professions) ? rawData.professions : []
         };
@@ -529,6 +533,31 @@ function ReportPageContent() {
                           </div>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Индекс согласованности: внутренние противоречия или бейдж достоверности */}
+                  {report.innerConflicts && report.innerConflicts.length > 0 ? (
+                    <div className="glass-card rounded-[28px] p-8 border border-amber-500/20">
+                      <div className="flex items-center gap-2 mb-1">
+                        <AlertCircle className="w-4 h-4 text-amber-400" />
+                        <h2 className="text-lg font-bold text-white">Внутренние противоречия — твои скрытые ресурсы</h2>
+                      </div>
+                      <p className="text-xs text-[#7A8A9E] mb-4">Тесты и разговор с Романом показали разные грани — это не ошибка, а повод разобраться глубже.</p>
+                      <div className="space-y-3">
+                        {report.innerConflicts.map((c, i) => (
+                          <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-sm font-bold text-white mb-1">{c.title}</p>
+                            <p className="text-[11px] text-[#7A8A9E] leading-relaxed">{c.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : report.consistencyLevel === 'high' && (
+                    <div className="glass-card rounded-[28px] p-4 flex items-center gap-2 border border-emerald-500/20">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span className="text-xs font-bold text-emerald-400">Высокая достоверность профиля</span>
+                      <span className="text-[11px] text-[#7A8A9E]">— данные тестов и разговора с Романом совпадают</span>
                     </div>
                   )}
 

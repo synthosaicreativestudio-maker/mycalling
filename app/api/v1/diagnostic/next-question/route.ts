@@ -7,6 +7,7 @@ import { env } from '../../../../lib/env';
 import { generateJson } from '../../../../lib/gemini';
 import { scorers, type ScoreResult } from '../../../../lib/diagnostic/scoring';
 import { viaStrengthByCode, viaVirtueNames } from '../../../../data/viaStrengths';
+import { computeConsistency } from '../../../../lib/profile/consistency';
 
 export const dynamic = 'force-dynamic';
 
@@ -145,13 +146,22 @@ export async function GET(request: Request) {
         }))
       });
 
+      const consistency = computeConsistency({
+        riasec: finalRiasec,
+        bigFive: finalBigFive,
+        procrastination: procrastinationScore,
+        via: viaScores,
+        coachData
+      });
+
       const summaryProfile = {
         riasec: finalRiasec,
         bigFive: finalBigFive,
         icar: icarScores,
         via: viaScores,
         procrastination: procrastinationScore,
-        coachData
+        coachData,
+        consistency
       };
 
       // Безопасный upsert цифрового профиля
@@ -191,6 +201,7 @@ export async function GET(request: Request) {
 - Прокрастинация (Лэй): ${procrastinationScore} баллов (шкала 4-20)
 - Сильные стороны характера (VIA Youth, топ-5 сигнатурных сил): ${signatureStrengths.map((s) => `${s.nameRu} (${s.virtue})`).join(', ')}
 - Качественные данные коуча: ${coachDataPrompt}
+- Индекс согласованности данных тестов и коуч-сессии: ${consistency.index}/100 (${consistency.level}). ${consistency.contradictions.length > 0 ? `Обнаруженные противоречия: ${consistency.contradictions.map((c) => `«${c.testFact}» vs «${c.coachFact}»`).join('; ')}.` : 'Противоречий не обнаружено.'}
 
 Правила формирования отчета:
 1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
@@ -199,7 +210,8 @@ export async function GET(request: Request) {
 4. Раздел "strengths" (сильные стороны) стройте В ПЕРВУЮ ОЧЕРЕДЬ на основе топ-5 сигнатурных сил VIA Youth, а не на общих домыслах — раскройте, как каждая сила проявляется в учебе и жизни подростка.
 5. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем".
 6. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
-7. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
+7. Раздел "innerConflicts": если индекс согласованности ниже "high" (см. данные выше), заполните его 1-3 пунктами — по каждому обнаруженному противоречию сформулируйте тёплый, любопытный (не осуждающий) вопрос-наблюдение в стиле "Тест показал X, но ты говорил Y — как это уживается в тебе?", используя фактические данные из списка противоречий выше. Если индекс "high" и противоречий нет — верните пустой массив.
+8. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
 
 Ответьте СТРОГО в формате JSON.
 Структура JSON:
@@ -239,6 +251,13 @@ export async function GET(request: Request) {
       "name": "Название профессии",
       "score": 90,
       "why": "Почему подходит"
+    }
+  ],
+  "consistencyLevel": "${consistency.level}",
+  "innerConflicts": [
+    {
+      "title": "Короткий заголовок противоречия",
+      "text": "Тёплый вопрос-наблюдение по формату из правила 7"
     }
   ]
 }`;
@@ -309,11 +328,24 @@ export async function GET(request: Request) {
               },
               required: ["name", "score", "why"]
             }
+          },
+          consistencyLevel: { type: "STRING" },
+          innerConflicts: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                title: { type: "STRING" },
+                text: { type: "STRING" }
+              },
+              required: ["title", "text"]
+            }
           }
         },
         required: [
           "studentName", "heroSummary", "personalityTraits", "riasecSummary",
-          "strengths", "signatureStrengths", "growthAreas", "coachSection", "professions"
+          "strengths", "signatureStrengths", "growthAreas", "coachSection", "professions",
+          "consistencyLevel", "innerConflicts"
         ]
       };
 
@@ -435,6 +467,11 @@ export async function GET(request: Request) {
               why: 'Подходит под выраженный социальный профиль и интерес к практическому применению технологий.'
             }
           ],
+          consistencyLevel: consistency.level,
+          innerConflicts: consistency.contradictions.map((c) => ({
+            title: 'Внутреннее противоречие — твой скрытый ресурс',
+            text: c.probe
+          })),
           isFallback: true
         };
         htmlReportContent = JSON.stringify({ ...fallbackReport, riasecScores: finalRiasec });
