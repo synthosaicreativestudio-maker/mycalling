@@ -548,5 +548,86 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     primary: ['riasec_enterprising', 'riasec_social', 'beh_time_management', 'beh_teamwork'],
     secondary: ['bigfive_extraversion', 'via_zest', 'via_leadership', 'beh_public_speaking'],
     anti: ['mot_security']
+  },
+
+  // Точечные дополнения в существующие отрасли
+  'Архитектор облачной безопасности': {
+    primary: ['riasec_conventional', 'riasec_realistic', 'cog_math_logic', 'cog_ai_literacy'],
+    secondary: ['bigfive_conscientiousness', 'via_judgment', 'cog_attention', 'beh_digital_literacy'],
+    anti: []
+  },
+  'Специалист по клеточному сельскому хозяйству': {
+    primary: ['riasec_investigative', 'riasec_realistic', 'cog_math_logic', 'via_curiosity_scientific'],
+    secondary: ['bigfive_conscientiousness', 'via_curiosity', 'cog_attention', 'mot_climate_responsibility'],
+    anti: []
+  },
+  'Эко-аудитор (ESG)': {
+    primary: ['riasec_conventional', 'riasec_investigative', 'cog_critical', 'mot_climate_responsibility'],
+    secondary: ['bigfive_conscientiousness', 'via_judgment', 'via_honesty', 'beh_writing'],
+    anti: []
+  },
+  'Нейромаркетолог': {
+    primary: ['riasec_investigative', 'riasec_enterprising', 'cog_verbal', 'beh_empathy'],
+    secondary: ['bigfive_openness', 'via_social_intelligence', 'cog_math_logic', 'beh_self_presentation'],
+    anti: []
+  },
+  'Консультант по DeFi и токенизации': {
+    primary: ['riasec_investigative', 'riasec_enterprising', 'cog_math_logic', 'beh_financial_literacy'],
+    secondary: ['bigfive_openness', 'via_judgment', 'cog_system', 'beh_digital_literacy'],
+    anti: []
+  },
+
+  // 21. Оркестрация ИИ и Агенты (AI Orchestration & Agentic Systems)
+  'Архитектор ИИ-агентов': {
+    primary: ['riasec_investigative', 'riasec_conventional', 'cog_ai_literacy', 'beh_ai_collaboration'],
+    secondary: ['bigfive_openness', 'via_creativity', 'cog_system', 'mot_lifelong_learning'],
+    anti: []
+  },
+  'Инженер по оркестрации ИИ': {
+    primary: ['riasec_conventional', 'riasec_realistic', 'cog_system', 'beh_ai_collaboration'],
+    secondary: ['bigfive_conscientiousness', 'via_judgment', 'cog_ai_literacy', 'beh_digital_literacy'],
+    anti: []
+  },
+  'Аудитор ИИ-систем на безопасность': {
+    primary: ['riasec_conventional', 'riasec_investigative', 'cog_critical', 'cog_ai_literacy'],
+    secondary: ['bigfive_conscientiousness', 'via_honesty', 'ctx_ai_dependency', 'beh_writing'],
+    anti: []
+  },
+  'Тренер ИИ по эмпатии': {
+    primary: ['riasec_social', 'riasec_artistic', 'cog_verbal', 'beh_empathy'],
+    secondary: ['bigfive_agreeableness', 'via_social_intelligence', 'cog_ai_literacy', 'beh_writing'],
+    anti: []
+  },
+  'Разработчик когнитивных интерфейсов': {
+    primary: ['riasec_artistic', 'riasec_investigative', 'cog_spatial', 'cog_ai_literacy'],
+    secondary: ['bigfive_openness', 'via_creativity', 'beh_ai_collaboration', 'beh_empathy'],
+    anti: []
+  },
+
+  // 22. Космические технологии и коммерция (SpaceTech & Space Commerce)
+  'Диспетчер космического трафика': {
+    primary: ['riasec_conventional', 'riasec_realistic', 'cog_spatial', 'beh_stress_resistance'],
+    secondary: ['bigfive_stability', 'via_prudence', 'via_self_regulation', 'beh_discipline'],
+    anti: ['temp_excitability']
+  },
+  'Орбитальный архитектор': {
+    primary: ['riasec_artistic', 'riasec_realistic', 'cog_spatial', 'via_curiosity_scientific'],
+    secondary: ['bigfive_openness', 'via_creativity', 'via_perspective', 'beh_writing'],
+    anti: []
+  },
+  'Аналитик космического мусора': {
+    primary: ['riasec_investigative', 'riasec_realistic', 'cog_math_logic', 'via_curiosity_scientific'],
+    secondary: ['bigfive_conscientiousness', 'via_judgment', 'cog_system', 'beh_digital_literacy'],
+    anti: []
+  },
+  'Инженер космической робототехники': {
+    primary: ['riasec_realistic', 'riasec_investigative', 'cog_spatial', 'via_curiosity_scientific'],
+    secondary: ['bigfive_conscientiousness', 'via_judgment', 'cog_system', 'beh_digital_literacy'],
+    anti: []
+  },
+  'Организатор космического туризма': {
+    primary: ['riasec_enterprising', 'riasec_social', 'cog_verbal', 'beh_public_speaking'],
+    secondary: ['bigfive_extraversion', 'via_social_intelligence', 'via_zest', 'beh_self_presentation'],
+    anti: ['mot_security']
   }
 };

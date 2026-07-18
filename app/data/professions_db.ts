@@ -1887,5 +1887,281 @@ export const professionsDb: Profession[] = [
     demand: 'high',
     skillFormula: ['Деловые конференции MICE', 'Бронирование чартеров', 'Сценарный тайминг'],
     transferableTo: ['Boutique-hotel-manager', 'Sports-event-manager', 'Project Manager']
+  },
+
+  // Точечные дополнения в существующие отрасли
+  {
+    id: 'cloud-security-architect',
+    name: 'Архитектор облачной безопасности',
+    industry: 'IT и разработка ПО',
+    riasec: ['Conventional', 'Realistic', 'Investigative'],
+    gardner: ['Logical-Mathematical'],
+    bigFive: { traits: { Conscientiousness: 'high', Stability: 'high' } },
+    subjects: ['Математика', 'Информатика', 'Русский язык'],
+    summary: 'Проектирует защищенные облачные контуры и отражает кибератаки.',
+    why: 'Контролирует соблюдение стандартов ИБ и настраивает сетевые фильтры (Conventional/Realistic) для отражения хакерских угроз.',
+    skills: {
+      hard: ['Безопасность AWS/Azure/Yandex Cloud', 'Пентестинг сетей', 'Шифрование SSL/TLS', 'Настройка WAF/SIEM'],
+      soft: ['Абсолютная ответственность', 'Аналитический склад ума', 'Хладнокровие']
+    },
+    demand: 'high',
+    skillFormula: ['Облачная безопасность', 'Шифрование данных', 'Отражение кибератак'],
+    transferableTo: ['DevOps-инженер', 'Блокчейн-инженер', 'Системный администратор']
+  },
+  {
+    id: 'cellular-agriculture-specialist',
+    name: 'Специалист по клеточному сельскому хозяйству',
+    industry: 'Биотехнологии и биоинженерия',
+    riasec: ['Investigative', 'Realistic', 'Conventional'],
+    gardner: ['Naturalist', 'Logical-Mathematical'],
+    bigFive: { traits: { Openness: 'high', Conscientiousness: 'high' } },
+    subjects: ['Биология', 'Химия', 'Математика'],
+    summary: 'Выращивает искусственное мясо и молочные белки из клеток в биореакторах.',
+    why: 'Проводит лабораторные исследования клеток (Investigative) для создания физических продуктов питания нового поколения (Realistic).',
+    skills: {
+      hard: ['Культивирование клеток in vitro', 'Работа с биореакторами', 'Анализ белков и липидов', 'Стандарты пищевой безопасности HACCP'],
+      soft: ['Научный азарт', 'Педантичность', 'Экологическое сознание']
+    },
+    demand: 'high',
+    skillFormula: ['Культивирование клеток', 'Работа с биореакторами', 'Пищевой синтез'],
+    transferableTo: ['Биофармаколог', 'Пищевой технолог', 'Агрогенетик']
+  },
+  {
+    id: 'sustainability-compliance-officer',
+    name: 'Эко-аудитор (ESG)',
+    industry: 'Энергетика и эко-технологии',
+    riasec: ['Conventional', 'Investigative', 'Social'],
+    gardner: ['Naturalist', 'Linguistic'],
+    bigFive: { traits: { Conscientiousness: 'high', Agreeableness: 'high' } },
+    subjects: ['Обществознание', 'Биология', 'Русский язык'],
+    summary: 'Проверяет соответствие предприятий экологическим стандартам и нормам ESG.',
+    why: 'Анализирует отчетность по выбросам и проверяет фильтры (Conventional) для снижения вреда окружающей среде (Social).',
+    skills: {
+      hard: ['Экологический аудит предприятий', 'ESG-стандарты отчетности', 'Законодательство РФ об охране природы', 'Расчет углеродного следа'],
+      soft: ['Принципиальность', 'Педантичность', 'Дипломатия']
+    },
+    demand: 'high',
+    skillFormula: ['Экологический аудит', 'Расчет выбросов ESG', 'Нормы природоохраны'],
+    transferableTo: ['Углеродный аудитор', 'Эколог-урбанист', 'Комплаенс-офицер']
+  },
+  {
+    id: 'neuromarketing-specialist',
+    name: 'Нейромаркетолог',
+    industry: 'Маркетинг, PR и бренд-менеджмент',
+    riasec: ['Investigative', 'Enterprising', 'Artistic'],
+    gardner: ['Interpersonal', 'Logical-Mathematical'],
+    bigFive: { traits: { Openness: 'high', Agreeableness: 'high' } },
+    subjects: ['Обществознание', 'Биология', 'Русский язык'],
+    summary: 'Исследует реакцию мозга и эмоции потребителей на рекламу с помощью нейро-интерфейсов.',
+    why: 'Снимает показания ЭЭГ и айтрекеров (Investigative) для увеличения коммерческих продаж рекламы (Enterprising).',
+    skills: {
+      hard: ['Работа с ЭЭГ и полиграфами', 'Анализ движения глаз (Eye-tracking)', 'Психофизиология восприятия', 'Маркетинговые тесты'],
+      soft: ['Глубокая эмпатия', 'Аналитический склад ума', 'Креативность']
+    },
+    demand: 'medium',
+    skillFormula: ['Нейро-интерфейсы ЭЭГ', 'Маркетинговые тесты', 'Психофизиология эмоций'],
+    transferableTo: ['Digital-маркетолог', 'Нейробиолог', 'UX-исследователь']
+  },
+  {
+    id: 'tokenomics-advisor',
+    name: 'Консультант по DeFi и токенизации',
+    industry: 'Финансовые технологии и инвестиции',
+    riasec: ['Investigative', 'Enterprising', 'Conventional'],
+    gardner: ['Logical-Mathematical'],
+    bigFive: { traits: { Openness: 'high', Conscientiousness: 'high', Stability: 'high' } },
+    subjects: ['Математика', 'Информатика', 'Русский язык'],
+    summary: 'Проектирует экономические модели токенов и децентрализованных финансовых систем.',
+    why: 'Рассчитывает инфляционные модели эмиссии токенов (Investigative/Conventional) для коммерческого стартапа (Enterprising).',
+    skills: {
+      hard: ['Разработка моделей токеномики', 'Понимание смарт-контрактов', 'Теория игр и стимулов', 'Децентрализованные финансы (DeFi)'],
+      soft: ['Абстрактное мышление', 'Стрессоустойчивость', 'Прогнозирование']
+    },
+    demand: 'high',
+    skillFormula: ['Разработка токеномики', 'Децентрализованные финансы', 'Теория игр'],
+    transferableTo: ['Криптотрейдер', 'Блокчейн-инженер', 'Финансовый аналитик']
+  },
+
+  // 21. Оркестрация ИИ и Агенты (AI Orchestration & Agentic Systems)
+  {
+    id: 'ai-agent-architect',
+    name: 'Архитектор ИИ-агентов',
+    industry: 'Оркестрация ИИ и Агенты',
+    riasec: ['Investigative', 'Conventional', 'Realistic'],
+    gardner: ['Logical-Mathematical', 'Spatial-Visual'],
+    bigFive: { traits: { Openness: 'high', Conscientiousness: 'high' } },
+    subjects: ['Математика', 'Информатика', 'Русский язык'],
+    summary: 'Проектирует автономные агентные системы на базе LLM для автоматизации бизнес-процессов.',
+    why: 'Разрабатывает когнитивную архитектуру и планировщики действий ИИ (Investigative/Conventional) для решения практических задач (Realistic).',
+    skills: {
+      hard: ['Frameworks (LangChain/CrewAI/Autogen)', 'Программирование Python/Node.js', 'Векторные базы данных (Vector DB)', 'Prompt Engineering'],
+      soft: ['Системное видение', 'Креативность', 'Упорство']
+    },
+    demand: 'high',
+    skillFormula: ['Проектирование ИИ-агентов', 'LangChain и CrewAI', 'Векторный поиск'],
+    transferableTo: ['ML-инженер', 'Backend-разработчик', 'Системный архитектор']
+  },
+  {
+    id: 'ai-orchestration-engineer',
+    name: 'Инженер по оркестрации ИИ',
+    industry: 'Оркестрация ИИ и Агенты',
+    riasec: ['Conventional', 'Realistic', 'Investigative'],
+    gardner: ['Logical-Mathematical'],
+    bigFive: { traits: { Conscientiousness: 'high', Stability: 'high' } },
+    subjects: ['Математика', 'Информатика', 'Русский язык'],
+    summary: 'Связывает десятки специализированных нейросетей и ИИ-агентов в единые бизнес-пайплайны.',
+    why: 'Организует потоки вызовов API и баз данных (Conventional) для стабильного взаимодействия ИИ-систем (Realistic).',
+    skills: {
+      hard: ['Разработка API-интеграций', 'Облачные архитектуры (Microservices)', 'Python/Go', 'Мониторинг ИИ-пайплайнов'],
+      soft: ['Методичность', 'Внимание к деталям', 'Стрессоустойчивость']
+    },
+    demand: 'high',
+    skillFormula: ['Оркестрация API ИИ', 'Потоки вызовов нейросетей', 'Облачная микросервисность'],
+    transferableTo: ['DevOps-инженер', 'Backend-разработчик', 'Инженер данных']
+  },
+  {
+    id: 'ai-safety-auditor',
+    name: 'Аудитор ИИ-систем на безопасность',
+    industry: 'Оркестрация ИИ и Агенты',
+    riasec: ['Conventional', 'Investigative', 'Enterprising'],
+    gardner: ['Logical-Mathematical', 'Linguistic'],
+    bigFive: { traits: { Conscientiousness: 'high', Stability: 'high' } },
+    subjects: ['Информатика', 'Обществознание', 'Русский язык'],
+    summary: 'Проверяет нейросети на предмет галлюцинаций, дискриминации, уязвимостей (jailbreak) и утечек.',
+    why: 'Тестирует ограничения моделей по стандартам безопасности (Conventional) для предотвращения репутационных рисков бизнеса (Enterprising).',
+    skills: {
+      hard: ['Тестирование ИИ-безопасности (Red Teaming)', 'Анализ предвзятости данных (Bias Detection)', 'GDPR/AI Act комплаенс', 'Jailbreak-атаки'],
+      soft: ['Критическое мышление', 'Честность', 'Педантичность']
+    },
+    demand: 'high',
+    skillFormula: ['ИИ Red Teaming', 'Комплаенс AI Act', 'Поиск галлюцинаций ИИ'],
+    transferableTo: ['QA-инженер (тестировщик)', 'Compliance-офицер', 'IT-юрист']
+  },
+  {
+    id: 'ai-empathy-trainer',
+    name: 'Тренер ИИ по эмпатии',
+    industry: 'Оркестрация ИИ и Агенты',
+    riasec: ['Social', 'Artistic', 'Investigative'],
+    gardner: ['Interpersonal', 'Linguistic'],
+    bigFive: { traits: { Agreeableness: 'high', Extraversion: 'high' } },
+    subjects: ['Обществознание', 'Литература', 'Русский язык'],
+    summary: 'Обучает разговорных ИИ-ассистентов проявлять эмпатию, оказывать психологическую поддержку и корректно общаться.',
+    why: 'Разрабатывает этические гайдлайны и сценарии сочувствия (Social/Artistic) на основе лингвистического анализа диалогов (Investigative).',
+    skills: {
+      hard: ['Разметка диалоговых датасетов', 'Оценка тональности текста (Sentiment Analysis)', 'Психологический консалтинг ИИ', 'LLM RLHF'],
+      soft: ['Высокая эмпатия', 'Филологический слух', 'Креативность']
+    },
+    demand: 'high',
+    skillFormula: ['Обучение эмпатии ИИ', 'Психологический консалтинг', 'Разметка датасетов RLHF'],
+    transferableTo: ['Промпт-инженер', 'Семейный психотерапевт', 'Копирайтер']
+  },
+  {
+    id: 'cognitive-ui-developer',
+    name: 'Разработчик когнитивных интерфейсов',
+    industry: 'Оркестрация ИИ и Агенты',
+    riasec: ['Artistic', 'Investigative', 'Realistic'],
+    gardner: ['Spatial-Visual', 'Logical-Mathematical'],
+    bigFive: { traits: { Openness: 'high', Conscientiousness: 'high' } },
+    subjects: ['Информатика', 'Обществознание', 'Русский язык'],
+    summary: 'Создает динамические интерфейсы, адаптирующиеся под психофизиологическое состояние и эмоции пользователя в реальном времени.',
+    why: 'Проектирует UI с использованием биометрической обратной связи (Artistic/Realistic) для создания максимального комфорта (Social).',
+    skills: {
+      hard: ['Фронтенд-разработка (React/WebSockets)', 'Обработка биометрических сигналов', 'Интеграция ИИ-агентов в UI', 'UX-тестирование'],
+      soft: ['Инновационное мышление', 'Эмпатия к пользователю', 'Внимание к деталям']
+    },
+    demand: 'high',
+    skillFormula: ['Динамический адаптивный UI', 'Биометрическая обратная связь', 'Фронтенд React/WebSockets'],
+    transferableTo: ['UX/UI-дизайнер', 'Frontend-разработчик', 'Мобильный разработчик']
+  },
+
+  // 22. Космические технологии и коммерция (SpaceTech & Space Commerce)
+  {
+    id: 'space-traffic-controller',
+    name: 'Диспетчер космического трафика',
+    industry: 'Космические технологии и коммерция',
+    riasec: ['Conventional', 'Realistic', 'Investigative'],
+    gardner: ['Spatial-Visual', 'Logical-Mathematical'],
+    bigFive: { traits: { Stability: 'high', Conscientiousness: 'high' } },
+    subjects: ['Математика', 'Физика', 'Русский язык'],
+    summary: 'Координирует орбиты спутников, предотвращает столкновения и планирует безопасные коридоры запусков.',
+    why: 'Рассчитывает траектории орбит на мониторах (Conventional) для управления движением реальных космических аппаратов (Realistic).',
+    skills: {
+      hard: ['Баллистика и механика полета', 'Диспетчерские радарные системы', 'Управление орбитальными маневрами', 'Анализ рисков столкновений'],
+      soft: ['Железное хладнокровие', 'Высокая концентрация внимания', 'Ответственность']
+    },
+    demand: 'medium',
+    skillFormula: ['Баллистические расчеты', 'Радарный мониторинг', 'Управление маневрами орбит'],
+    transferableTo: ['Диспетчер портов', 'Аналитик космического мусора', 'Оператор БПЛА']
+  },
+  {
+    id: 'space-architect',
+    name: 'Орбитальный архитектор',
+    industry: 'Космические технологии и коммерция',
+    riasec: ['Artistic', 'Realistic', 'Investigative'],
+    gardner: ['Spatial-Visual', 'Logical-Mathematical'],
+    bigFive: { traits: { Openness: 'high', Conscientiousness: 'high' } },
+    subjects: ['Математика', 'Физика', 'Русский язык'],
+    summary: 'Проектирует интерьеры космических станций, лунных баз и капсул с учетом невесомости и психологии космонавтов.',
+    why: 'Разрабатывает художественные концепты модулей (Artistic) на основе жестких расчетов герметичности и жизнеобеспечения (Realistic).',
+    skills: {
+      hard: ['Проектирование систем жизнеобеспечения ECLSS', '3D CAD моделирование', 'Эргономика невесомости', 'Материаловедение космоса'],
+      soft: ['Визионерство', 'Междисциплинарность', 'Пространственное воображение']
+    },
+    demand: 'medium',
+    skillFormula: ['Системы жизнеобеспечения ECLSS', 'Космическая эргономика', '3D CAD моделирование модулей'],
+    transferableTo: ['Архитектор', 'Промышленный дизайнер', 'Проектировщик умных городов']
+  },
+  {
+    id: 'orbital-debris-specialist',
+    name: 'Аналитик космического мусора',
+    industry: 'Космические технологии и коммерция',
+    riasec: ['Investigative', 'Realistic', 'Conventional'],
+    gardner: ['Logical-Mathematical', 'Naturalist'],
+    bigFive: { traits: { Conscientiousness: 'high', Stability: 'high' } },
+    subjects: ['Математика', 'Физика', 'Русский язык'],
+    summary: 'Выявляет, классифицирует и прогнозирует траектории обломков космических аппаратов для обеспечения безопасности полетов.',
+    why: 'Исследует орбитальные аномалии по базам данных (Investigative) для практической защиты действующих станций (Realistic).',
+    skills: {
+      hard: ['Спектральный анализ космических объектов', 'Астродинамика', 'Python/Matlab моделирование', 'Радарная томография'],
+      soft: ['Концентрация внимания', 'Скрупулезность', 'Аналитичность']
+    },
+    demand: 'high',
+    skillFormula: ['Моделирование траекторий мусора', 'Радарная томография обломков', 'Астродинамика орбит'],
+    transferableTo: ['Диспетчер космического трафика', 'Астрофизик', 'Data Scientist']
+  },
+  {
+    id: 'space-robotics-engineer',
+    name: 'Инженер космической робототехники',
+    industry: 'Космические технологии и коммерция',
+    riasec: ['Realistic', 'Investigative', 'Conventional'],
+    gardner: ['Logical-Mathematical', 'Spatial-Visual'],
+    bigFive: { traits: { Conscientiousness: 'high', Stability: 'high' } },
+    subjects: ['Математика', 'Физика', 'Информатика'],
+    summary: 'Разрабатывает роботы-манипуляторы, луноходы и автономные буровые установки для работы в вакууме и на других планетах.',
+    why: 'Конструирует физических роботов-манипуляторов (Realistic) с алгоритмическим программированием движения в вакууме (Investigative).',
+    skills: {
+      hard: ['Проектирование роботов для космоса', 'Программирование ROS/C++', 'Управление манипуляторами', 'Защита электроники от радиации'],
+      soft: ['Изобретательность', 'Упорство', 'Системное мышление']
+    },
+    demand: 'high',
+    skillFormula: ['Роботы для космического вакуума', 'Программирование манипуляторов', 'Радиационная защита плат'],
+    transferableTo: ['Инженер-робототехник', 'Специалист по IoT', 'Аэрокосмический инженер']
+  },
+  {
+    id: 'space-tourism-planner',
+    name: 'Организатор космического туризма',
+    industry: 'Космические технологии и коммерция',
+    riasec: ['Enterprising', 'Social', 'Conventional'],
+    gardner: ['Interpersonal'],
+    bigFive: { traits: { Extraversion: 'high', Agreeableness: 'high', Conscientiousness: 'high' } },
+    subjects: ['Обществознание', 'Иностранный язык', 'Русский язык'],
+    summary: 'Планирует частные полеты в космос, координирует предполетную подготовку и логистику туристов.',
+    why: 'Заключает B2B контракты на запуски (Enterprising) с психологическим сопровождением и подготовкой туристов (Social).',
+    skills: {
+      hard: ['Медицинские критерии космического отбора', 'Организация предполетной подготовки', 'Космическое право и страхование', 'B2B-продажи'],
+      soft: ['Дипломатия', 'Эмпатия', 'Железная собранность']
+    },
+    demand: 'medium',
+    skillFormula: ['Космическое страхование и право', 'Предполетная подготовка туристов', 'B2B космические продажи'],
+    transferableTo: ['Организатор делового туризма (MICE)', 'Управляющий глэмпингом / бутик-отелем', 'Project Manager']
   }
 ];

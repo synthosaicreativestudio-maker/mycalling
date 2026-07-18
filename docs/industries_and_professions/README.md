@@ -63,9 +63,11 @@
 
 ## 4. Карта структуры документации
 
-Документы с детализацией по отраслям разделены по 5 файлам:
+Документы с детализацией по отраслям разделены по 6 файлам:
 1. [01_digital_and_tech.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/01_digital_and_tech.md) — Программирование, ИИ, роботы и инженерия.
 2. [02_science_and_nature.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/02_science_and_nature.md) — Естественные науки, биотехнологии, экология, агроном-системы.
 3. [03_business_and_finance.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/03_business_and_finance.md) — Стартапы, проекты, финтех, трейдинг, маркетинг.
 4. [04_humanities_and_help.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/04_humanities_and_help.md) — Медицина, коучинг, реабилитация, онлайн-обучение, IT-право.
 5. [05_creative_and_lifestyle.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/05_creative_and_lifestyle.md) — Дизайн, медиа, логистика, спорт и эко-туризм.
+6. [06_ai_and_space.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/06_ai_and_space.md) — Оркестрация ИИ-агентов и Космические технологии (SpaceTech).
+

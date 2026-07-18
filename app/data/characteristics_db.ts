@@ -118,5 +118,17 @@ export const characteristicsDb: Characteristic[] = [
   { id: 'ctx_mindset', name: 'Fixed vs Growth Mindset', layer: 'context', description: 'Вера в то, что интеллект можно развить усилиями, а не только генами.' },
   { id: 'ctx_education_env', name: 'Доступная образовательная среда', layer: 'context', description: 'Наличие в городе проживания сильных школ, кружков и вузов.' },
   { id: 'ctx_social_capital', name: 'Социальный капитал', layer: 'context', description: 'Связи и знакомства семьи, способные помочь со стажировками.' },
-  { id: 'ctx_career_maturity', name: 'Карьерная зрелость', layer: 'context', description: 'Уровень готовности и осознанности подростка делать выбор самостоятельно.' }
+  { id: 'ctx_career_maturity', name: 'Карьерная зрелость', layer: 'context', description: 'Уровень готовности и осознанности подростка делать выбор самостоятельно.' },
+
+  // Расширенные характеристики 2026-2030 (Интеграция ИИ, экологическая ответственность и метапознание)
+  { id: 'cog_ai_literacy', name: 'ИИ-грамотность', layer: 'cognitive', description: 'Понимание логики работы нейросетей, умение формулировать эффективные промты.' },
+  { id: 'beh_ai_collaboration', name: 'Гибридное сотрудничество (Человек+ИИ)', layer: 'behavior', description: 'Навык делегирования рутинных задач ИИ-агентам и оркестрации их работы.' },
+  { id: 'mot_lifelong_learning', name: 'Ценность непрерывного обучения', layer: 'motivation', description: 'Внутренняя готовность регулярно обновлять свои знания и переучиваться.' },
+  { id: 'mot_climate_responsibility', name: 'Экологическая и климатическая ответственность', layer: 'motivation', description: 'Осознание важности минимизации углеродного следа и устойчивого развития.' },
+  { id: 'beh_remote_work', name: 'Навык удаленной самоорганизации', layer: 'behavior', description: 'Умение держать рабочую дисциплину при удаленном или распределенном формате работы.' },
+  { id: 'cog_metacognition', name: 'Метапознание (Metacognition)', layer: 'cognitive', description: 'Способность осознавать, анализировать и корректировать собственные стратегии мышления.' },
+  { id: 'ctx_digital_divide', name: 'Доступность передовых технологий (Цифровой разрыв)', layer: 'context', description: 'Наличие инфраструктурного и financial доступа к передовым ИИ-инструментам.' },
+  { id: 'ctx_ai_dependency', name: 'Риск ИИ-зависимости', layer: 'context', description: 'Склонность полагаться на готовые ответы ИИ в ущерб собственному критическому мышлению.' },
+  { id: 'pers_hybrid', name: 'Адаптивная гибридность личности', layer: 'personality', description: 'Способность быстро переключаться между противоположными ролевыми моделями.' },
+  { id: 'via_curiosity_scientific', name: 'Научная любознательность (VIA)', layer: 'strengths', description: 'Выраженная тяга к познанию законов природы и естественнонаучным исследованиям.' }
 ];
