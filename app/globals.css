@@ -425,8 +425,10 @@ a:focus-visible {
   --accent-svg-3: #D2B48C;
   --accent-svg-shadow: rgba(141, 91, 76, 0.25);
 
-  /* Переменная для "пустого"/неактивного состояния SVG-заливок в светлой теме */
-  --pyramid-idle-fill: rgba(62, 39, 35, 0.04);
+  /* Переменная для "пустого"/неактивного состояния SVG-заливок в светлой теме.
+     Было 0.04 — незаполненные уровни пирамиды сливались с фоном; поднято до 0.08,
+     чтобы «пустая» пирамида читалась как светло-кофейный контур, а не пустое место. */
+  --pyramid-idle-fill: rgba(62, 39, 35, 0.08);
 
   /* RIASEC переменные для светлой темы капучино */
   --riasec-creative: #B85042; /* глубокий терракотово-коралловый */
@@ -504,6 +506,11 @@ a:focus-visible {
 }
 [data-theme="light"] .text-white\/80 {
   color: var(--text-primary) !important;
+}
+/* Кнопки «На главную»/«Заново» в шапке коуча (text-white/70) были невидимы
+   в светлой теме — белый 70% на светлом фоне. */
+[data-theme="light"] .text-white\/70 {
+  color: var(--text-muted) !important;
 }
 [data-theme="light"] .text-slate-400 {
   color: var(--text-muted) !important;

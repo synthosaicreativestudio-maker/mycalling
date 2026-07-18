@@ -96,7 +96,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
   if (isEmpty) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 glass-panel rounded-3xl w-full h-full min-h-[320px] text-center space-y-6 relative overflow-hidden border border-white/5 bg-[#080C14]/30 backdrop-blur-xl">
+      <div className="flex flex-col items-center justify-center p-8 w-full h-full min-h-[320px] text-center space-y-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-[#C4A484]/5 rounded-full blur-[50px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#3B82F6]/5 rounded-full blur-[50px] pointer-events-none" />
         

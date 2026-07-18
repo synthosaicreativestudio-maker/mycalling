@@ -37,7 +37,7 @@ type ReportData = {
   signatureStrengths?: { code: string; nameRu: string; description: string }[];
   growthAreas: string[];
   consistencyLevel?: 'high' | 'medium' | 'low';
-  innerConflicts?: { title: string; text: string }[];
+  innerConflicts?: { title: string; text: string; testFact?: string; coachFact?: string }[];
   successFormula?: { skills: { code: string; nameRu: string; evidence: string }[]; applications: string[] };
   coachSection?: {
     dreams?: string;
@@ -588,7 +588,23 @@ function ReportPageContent() {
                       <div className="space-y-3">
                         {report.innerConflicts.map((c, i) => (
                           <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                            <p className="text-sm font-bold text-white mb-1">{c.title}</p>
+                            <p className="text-sm font-bold text-white mb-2">{c.title}</p>
+                            {(c.testFact || c.coachFact) && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                                {c.testFact && (
+                                  <div className="rounded-xl border border-[#3B82F6]/20 bg-[#3B82F6]/5 p-2.5">
+                                    <span className="block text-[9px] uppercase tracking-wider font-extrabold text-[#3B82F6] mb-0.5">Тесты</span>
+                                    <span className="text-[11px] text-[#93A3B8] leading-snug">{c.testFact}</span>
+                                  </div>
+                                )}
+                                {c.coachFact && (
+                                  <div className="rounded-xl border border-[#C4A484]/20 bg-[#C4A484]/5 p-2.5">
+                                    <span className="block text-[9px] uppercase tracking-wider font-extrabold text-[#C4A484] mb-0.5">Разговор с Романом</span>
+                                    <span className="text-[11px] text-[#93A3B8] leading-snug">{c.coachFact}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                             <p className="text-[11px] text-[#7A8A9E] leading-relaxed">{c.text}</p>
                           </div>
                         ))}

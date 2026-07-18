@@ -739,10 +739,10 @@ export async function POST(req: Request) {
       }
     } else if (!isInitMessage) {
       // Для работы fallbackExtract
-      const prevHasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1 && extractedData.fullName !== 'Гость';
+      const prevHasName = getStrLen(extractedData.fullName) > 1 && extractedData.fullName !== 'Гость';
       const prevHasAge = !!extractedData.age;
       const prevHasGrade = !!extractedData.grade;
-      const prevHasCity = !!extractedData.city && extractedData.city.trim().length > 1;
+      const prevHasCity = getStrLen(extractedData.city) > 1;
 
       let properties: Record<string, any> = {
         shouldAdvanceStep: { type: "BOOLEAN" }
@@ -851,6 +851,23 @@ export async function POST(req: Request) {
           properties.deepFirstStep = { type: "STRING" };
           fieldsToExtract += ", deepFirstStep";
         }
+
+        // Колесо талантов не должно «умирать» во второй половине сессии: глубокий
+        // диалог (цель, идентичность, план) богат сигналами о склонностях, поэтому
+        // продолжаем оценивать talentScores и в DEEP-фазе. Обновление идёт по тому
+        // же ratchet-принципу (Math.max), что и в EXPRESS — колесо только растёт.
+        properties.talentScores = {
+          type: "OBJECT",
+          properties: {
+            creative: { type: "INTEGER", description: "Оценка склонности к творчеству от 0 до 100." },
+            tech: { type: "INTEGER", description: "Оценка склонности к технологиям от 0 до 100." },
+            analytical: { type: "INTEGER", description: "Оценка склонности к аналитике от 0 до 100." },
+            social: { type: "INTEGER", description: "Оценка склонности к коммуникации от 0 до 100." },
+            organizational: { type: "INTEGER", description: "Оценка склонности к организации от 0 до 100." },
+            startup: { type: "INTEGER", description: "Оценка склонности к лидерству и продажам от 0 до 100." }
+          }
+        };
+        fieldsToExtract += ", talentScores";
       }
 
       const contextMessages = transcript.slice(-9, -1);
@@ -865,7 +882,7 @@ ${dialogHistory}
 Последнее сообщение пользователя: "${message}"
 Текущий шаг диалога: ${currentStepBefore} (где шаги 3-15 — сбор склонностей/интересов, а 16=Что хочу/Цель, 17=Результат/Образ, 18=Эмоции, 19=Идентичность, 20=Действия/Навыки/KPI, 21=Первый шаг).
 Для shouldAdvanceStep: установи true, если пользователь дал осмысленный ответ по сути текущего шага. Если пользователь уклоняется от ответа или задает встречный вопрос, установи false.
-Если анализируется Экспресс-коучинг или первая фаза Глубокого коучинга (шаги 3..15), в поле talentScores оцени склонности пользователя по 6 шкалам (от 0 до 100). ВНИМАНИЕ: Если в диалоге еще НЕТ информации по какой-либо шкале (пользователь не говорил про хобби, спорт, программирование и т.д.), возвращай для нее строго 0. Категорически запрещено ставить 50 или средние значения по умолчанию.
+Если в схеме присутствует поле talentScores (Экспресс-коучинг, первая фаза Глубокого 3..15, а также глубокие шаги 16..21), оцени склонности пользователя по 6 шкалам (от 0 до 100), опираясь на весь диалог, включая рассказ о цели, идентичности и планах. ВНИМАНИЕ: Если в диалоге еще НЕТ информации по какой-либо шкале (пользователь не говорил про хобби, спорт, программирование и т.д.), возвращай для нее строго 0. Категорически запрещено ставить 50 или средние значения по умолчанию.
 Если в реплике коуча Романа была фраза, оспаривающая шаблонный/социально желаемый ответ подростка (техника "адвокат дьявола", например парадоксальный вопрос вроде "а если через 5 лет это сделают алгоритмы?") и подросток на неё ответил — заполни motivationTested: true и trueMotivation переформулированной личной аргументацией подростка. Если такого оспаривания не было — верни motivationTested: false и пустую строку в trueMotivation.
 Извлекай: ${fieldsToExtract}`;
 
@@ -1004,10 +1021,10 @@ ${dialogHistory}
     hasPhone = hasPhone || !!parsedData.phone;
     
     // Проверяем заполненность отдельных полей личных данных в реальном времени
-    hasName = !!extractedData.fullName && extractedData.fullName.trim().length > 1 && extractedData.fullName !== 'Гость';
+    hasName = getStrLen(extractedData.fullName) > 1 && extractedData.fullName !== 'Гость';
     hasAge = !!extractedData.age;
     hasGrade = !!extractedData.grade;
-    hasCity = !!extractedData.city && extractedData.city.trim().length > 1;
+    hasCity = getStrLen(extractedData.city) > 1;
     
     // Личные данные считаются полностью собранными, если есть имя, возраст, класс и город
     hasPersonalInfo = hasName && hasAge && hasGrade && hasCity;

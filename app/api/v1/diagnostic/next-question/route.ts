@@ -208,6 +208,18 @@ export async function GET(request: Request) {
         coachData
       });
 
+      // Триангуляция «тест vs коуч» для отчёта (док §4, «Индекс согласованности»).
+      // Отдаём не только вопрос-наблюдение (probe), но и явный контраст фактов
+      // testFact/coachFact, чтобы отчёт показал «что сошлось / что расходится»
+      // конкретно, а не абстрактно. Переопределяется детерминированно в обоих
+      // путях генерации (AI и fallback) — не полагаемся на дословное копирование LLM.
+      const innerConflictsForReport = consistency.contradictions.map((c) => ({
+        title: 'Тест vs Разговор — точка роста',
+        testFact: c.testFact,
+        coachFact: c.coachFact,
+        text: c.probe
+      }));
+
       const skillFormula = deriveSkillFormula({
         riasec: finalRiasec,
         bigFive: finalBigFive,
@@ -567,6 +579,7 @@ export async function GET(request: Request) {
           // Переопределяем детерминированно: не полагаемся на то, что модель дословно
           // скопирует уже готовый синтез без искажений/добавления цитат.
           deepSession: deepSessionForReport,
+          innerConflicts: innerConflictsForReport,
           isFallback: false
         });
       } catch (err) {
@@ -679,10 +692,7 @@ export async function GET(request: Request) {
             }
           ],
           consistencyLevel: consistency.level,
-          innerConflicts: consistency.contradictions.map((c) => ({
-            title: 'Внутреннее противоречие — твой скрытый ресурс',
-            text: c.probe
-          })),
+          innerConflicts: innerConflictsForReport,
           // Простой структурный passthrough без дополнительного вызова ИИ — синтез уже
           // готов из deepReportSummary (см. app/api/v1/coach/chat/route.ts).
           deepSession: deepSessionForReport,

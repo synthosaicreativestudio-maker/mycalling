@@ -163,6 +163,9 @@ export default function AssessmentPage() {
     if (store.sessionId && !store.currentQuestion && !store.isLoading && !store.isCompleted) {
       store.fetchNextQuestion();
     }
+    // Зависим от конкретных полей store, а не от всего объекта store (он новый
+    // на каждый рендер zustand-селектора) — иначе эффект зациклится.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.sessionId, store.currentQuestion, store.isLoading, store.isCompleted]);
 
   // Запуск таймера при появлении вопроса

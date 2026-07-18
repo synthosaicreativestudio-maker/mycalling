@@ -218,6 +218,10 @@ export default function CoachPage() {
       if (intervalId) clearInterval(intervalId);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
+    // userId намеренно не в зависимостях: опрос перезапускается по смене
+    // linkCode/статуса авторизации/сессии, а userId внутри читается «по факту»
+    // и его изменение не должно пересоздавать интервал опроса.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkCode, isAuthenticated, sessionId]);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -645,7 +649,7 @@ export default function CoachPage() {
   const progressPercent = Math.round((step / maxSteps) * 100);
 
   return (
-    <main className="h-screen pt-28 pb-4 flex flex-col items-center px-4 relative z-10 overflow-hidden">
+    <main className="h-[100dvh] pt-24 pb-4 flex flex-col items-center px-4 relative z-10 overflow-hidden">
       
       {process.env.NODE_ENV !== 'production' && (
         <div className="fixed top-4 left-4 z-50 bg-black/90 border border-white/10 rounded-xl p-3 text-[10px] text-slate-400 font-mono shadow-2xl space-y-1">
@@ -790,8 +794,12 @@ export default function CoachPage() {
                     {isCoach && isFinalStep && idx === messages.length - 1 && extractedData.avatarUrl && (
                       <div className="mt-4 mb-4 flex flex-col items-center gap-3">
                         <div className="relative w-64 h-64 rounded-2xl overflow-hidden border border-[#3B82F6]/30 shadow-2xl bg-black/40">
-                          <img 
-                            src={extractedData.avatarUrl} 
+                          {/* Внешний динамический URL (Pollinations AI) с неизвестными
+                              размерами — next/image здесь неуместен (требует remotePatterns
+                              и фикс. размеров). Обычный img оправдан. */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={extractedData.avatarUrl}
                             alt="Цифровой Аватар Личности"
                             className="w-full h-full object-cover"
                             loading="lazy"
@@ -979,12 +987,11 @@ export default function CoachPage() {
               </div>
             )}
         </div>
-      </div>
 
-      {/* Right column: Wheel of Vocation or Pyramid of Alignment (Desktop only) */}
-      <div 
-        className="lg:col-span-5 hidden lg:block h-full relative select-none"
-      >
+        {/* Right column: Wheel of Vocation or Pyramid of Alignment (Desktop only) */}
+        <div
+          className="lg:col-span-5 hidden lg:flex flex-col h-full min-h-0 relative select-none glass-card rounded-3xl overflow-hidden border border-white/5 bg-[#040506]/35 backdrop-blur-xl"
+        >
         {/* Tabs and Zoom-in buttons for desktop */}
         {extractedData.sessionMode === 'DEEP' ? (
           <div className="absolute top-4 left-4 right-4 z-20 flex gap-2 p-1.5 rounded-2xl bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 shadow-inner items-center">
@@ -1030,9 +1037,9 @@ export default function CoachPage() {
           </div>
         )}
         
-        <div 
+        <div
           onClick={() => setIsWheelHovered(true)}
-          className={`w-full h-full flex items-center justify-center cursor-zoom-in ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}
+          className={`w-full flex-1 min-h-0 flex items-center justify-center cursor-zoom-in p-4 ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}
         >
           {extractedData.sessionMode === 'DEEP' ? (
             activeTab === 'pyramid' ? (
@@ -1043,6 +1050,7 @@ export default function CoachPage() {
           ) : (
             <WheelOfVocation extractedData={extractedData} />
           )}
+        </div>
         </div>
       </div>
     </div>
