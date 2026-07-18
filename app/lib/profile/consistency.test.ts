@@ -85,3 +85,34 @@ describe('computeConsistency', () => {
     expect(codes).toContain('via-vs-leader-identity');
   });
 });
+
+describe('computeConsistency — PVQ rule', () => {
+  it('flags when top-3 PVQ values share no keyword overlap with stated values', () => {
+    // "Забота о близких" shares no keyword with "адреналин и новые приключения".
+    const result2 = computeConsistency({
+      riasec: { R: 3, I: 4.5, A: 3, S: 3, E: 2, C: 3 },
+      bigFive: { O: 4, C: 4, E: 3, A: 3.5, N: 3 },
+      procrastination: 10,
+      topPvqValues: ['Забота о близких'],
+      coachData: {
+        dreams: 'Хочу разрабатывать данные для науки',
+        values: 'Для меня важнее всего адреналин и новые приключения',
+      },
+    });
+    expect(result2.contradictions.map((c) => c.code)).toContain('pvq-vs-stated-values');
+  });
+
+  it('does not flag when a top PVQ value keyword appears in the stated values', () => {
+    const result = computeConsistency({
+      riasec: { R: 3, I: 4.5, A: 3, S: 3, E: 2, C: 3 },
+      bigFive: { O: 4, C: 4, E: 3, A: 3.5, N: 3 },
+      procrastination: 10,
+      topPvqValues: ['Забота о близких'],
+      coachData: {
+        dreams: 'Хочу разрабатывать данные для науки',
+        values: 'Для меня важнее всего забота о семье',
+      },
+    });
+    expect(result.contradictions.map((c) => c.code)).not.toContain('pvq-vs-stated-values');
+  });
+});

@@ -607,7 +607,59 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
     options: scaleOptions, visualAssetUrl: '/assets/webp/via-transcendence.webp'
   },
 
-  // ─── 5. Поведение (Прокрастинация Лэя) ───
+  // ─── 5. Ценности (PVQ Шварца, короткая версия — 10 базовых ценностей) ───
+  {
+    id: 'pvq-self_direction', testCode: 'PVQ', scale: 'self_direction', reverseScored: false,
+    text: 'Мне важно самому решать, что делать, и пробовать новое по своей инициативе.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-stimulation', testCode: 'PVQ', scale: 'stimulation', reverseScored: false,
+    text: 'Мне нравятся риск и приключения, я люблю, когда в жизни много разнообразия.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-hedonism', testCode: 'PVQ', scale: 'hedonism', reverseScored: false,
+    text: 'Для меня важно получать удовольствие от жизни и радовать себя.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-achievement', testCode: 'PVQ', scale: 'achievement', reverseScored: false,
+    text: 'Для меня важно добиваться успеха и показывать, на что я способен.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-power', testCode: 'PVQ', scale: 'power', reverseScored: false,
+    text: 'Мне важно, чтобы у меня было влияние на других и вес в компании или команде.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-security', testCode: 'PVQ', scale: 'security', reverseScored: false,
+    text: 'Мне важно чувствовать себя в безопасности и жить стабильно, без резких потрясений.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-conformity', testCode: 'PVQ', scale: 'conformity', reverseScored: false,
+    text: 'Мне важно вести себя правильно и не создавать проблем окружающим.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-tradition', testCode: 'PVQ', scale: 'tradition', reverseScored: false,
+    text: 'Для меня важно уважать традиции и придерживаться того, что принято в моей семье и культуре.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-benevolence', testCode: 'PVQ', scale: 'benevolence', reverseScored: false,
+    text: 'Для меня важно заботиться о близких людях и быть им полезным.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+  {
+    id: 'pvq-universalism', testCode: 'PVQ', scale: 'universalism', reverseScored: false,
+    text: 'Для меня важно, чтобы ко всем людям относились справедливо, и чтобы берегли природу.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/pvq.webp'
+  },
+
+  // ─── 6. Поведение (Прокрастинация Лэя) ───
   {
     id: 'lay-1',
     testCode: 'PROCRASTINATION',

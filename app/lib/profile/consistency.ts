@@ -1,4 +1,5 @@
 import { detectDreamRiasecCodes } from '../../data/dreamCategories';
+import { pvqValues } from '../../data/pvqValues';
 
 export interface Contradiction {
   code: string;
@@ -32,6 +33,8 @@ export interface ConsistencyProfile {
   bigFive: Record<string, number | boolean>;
   procrastination: number;
   via?: ConsistencyViaScores | undefined;
+  /** Русские названия топ-3 ценностей PVQ Шварца (см. app/data/pvqValues.ts). */
+  topPvqValues?: string[];
   coachData: ConsistencyCoachData;
 }
 
@@ -131,6 +134,22 @@ export function computeConsistency(profile: ConsistencyProfile): ConsistencyResu
         testFact: `Топ-5 сильных сторон по VIA не включает лидерство/командность: ${profile.via.signatureStrengths.join(', ')}`,
         coachFact: `Описывает себя через лидерскую роль: «${identity}»`,
         probe: 'Ты называешь себя лидером, но твои главные сильные стороны по тесту — другие. Через что ты на самом деле ведёшь за собой людей?',
+        weight: 1,
+      });
+    }
+  }
+
+  // Правило 6: топ-3 ценности PVQ не находят отклика ни в одном ключевом слове из values коуча.
+  if (profile.topPvqValues && profile.topPvqValues.length > 0 && profile.coachData.values && profile.coachData.values.trim().length > 3) {
+    const valuesText = profile.coachData.values.toLowerCase();
+    const topDefs = pvqValues.filter((v) => profile.topPvqValues!.includes(v.nameRu));
+    const hasOverlap = topDefs.some((v) => v.keywords.some((kw) => valuesText.includes(kw)));
+    if (topDefs.length > 0 && !hasOverlap) {
+      contradictions.push({
+        code: 'pvq-vs-stated-values',
+        testFact: `Топ-3 ценности по PVQ: ${profile.topPvqValues.join(', ')}`,
+        coachFact: `В разговоре о ценностях назвал другое: «${profile.coachData.values}»`,
+        probe: 'Тест по ценностям показал одно, а когда мы говорили об этом напрямую, ты назвал другое. Какое из этих двух сейчас важнее для тебя?',
         weight: 1,
       });
     }

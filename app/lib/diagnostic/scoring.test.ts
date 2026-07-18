@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { diagnosticQuestions } from '../../data/questions';
-import { bfiScorer, icarScorer, procrastinationScorer, riasecScorer, viaScorer } from './scoring';
+import { bfiScorer, icarScorer, procrastinationScorer, pvqScorer, riasecScorer, viaScorer } from './scoring';
 import { viaStrengths } from '../../data/viaStrengths';
+import { pvqValues } from '../../data/pvqValues';
 
 describe('riasecScorer', () => {
   it('computes per-scale averages from varied answers', () => {
@@ -142,5 +143,36 @@ describe('viaScorer', () => {
     });
     const result = viaScorer.score(answers, diagnosticQuestions);
     expect(result.reliability).toBe('low');
+  });
+});
+
+describe('pvqScorer', () => {
+  it('centers scores (ipsatization) and picks top-3 values with deterministic tie-break', () => {
+    const answers: Record<string, number> = {
+      'pvq-self_direction': 5,
+      'pvq-stimulation': 2,
+      'pvq-hedonism': 2,
+      'pvq-achievement': 5,
+      'pvq-power': 2,
+      'pvq-security': 2,
+      'pvq-conformity': 2,
+      'pvq-tradition': 1,
+      'pvq-benevolence': 2,
+      'pvq-universalism': 2,
+    };
+    const result = pvqScorer.score(answers, diagnosticQuestions);
+    const scores = result.scores as { raw: Record<string, number>; centered: Record<string, number>; topValues: string[] };
+    expect(scores.raw.self_direction).toBe(5);
+    expect(scores.centered.self_direction).toBe(2.5);
+    expect(scores.centered.tradition).toBe(-1.5);
+    expect(scores.topValues).toEqual(['self_direction', 'achievement', 'stimulation']);
+  });
+
+  it('covers all 10 declared values', () => {
+    const answers: Record<string, number> = {};
+    pvqValues.forEach((v) => { answers[`pvq-${v.code}`] = 3; });
+    const result = pvqScorer.score(answers, diagnosticQuestions);
+    const scores = result.scores as { raw: Record<string, number> };
+    expect(Object.keys(scores.raw)).toHaveLength(10);
   });
 });

@@ -10,6 +10,7 @@ import { viaStrengthByCode, viaVirtueNames } from '../../../../data/viaStrengths
 import { computeConsistency } from '../../../../lib/profile/consistency';
 import { deriveSkillFormula } from '../../../../lib/profile/skillFormula';
 import { buildSummaryProfile } from '../../../../lib/profile/layers';
+import { pvqValueByCode } from '../../../../data/pvqValues';
 import { skillByCode } from '../../../../data/skills';
 
 export const dynamic = 'force-dynamic';
@@ -131,6 +132,8 @@ export async function GET(request: Request) {
       const icarScores = results.ICAR.scores as { raw: number; bySubscale: Record<string, number>; band: string };
       const correctIcarAnswers = icarScores.raw;
       const procrastinationScore = (results.PROCRASTINATION.scores as { score: number }).score;
+      const pvqScores = results.PVQ.scores as { raw: Record<string, number>; centered: Record<string, number>; topValues: string[] };
+      const topPvqNames = pvqScores.topValues.map((code) => pvqValueByCode[code]?.nameRu || code);
       const viaScores = results.VIA.scores as Record<string, number> & { signatureStrengths: string[] };
       const signatureStrengths = viaScores.signatureStrengths.map((code) => {
         const strength = viaStrengthByCode[code];
@@ -161,6 +164,7 @@ export async function GET(request: Request) {
         bigFive: finalBigFive,
         procrastination: procrastinationScore,
         via: viaScores,
+        topPvqValues: topPvqNames,
         coachData
       });
 
@@ -201,7 +205,8 @@ export async function GET(request: Request) {
         motivation: {
           coachValues: coachData.values !== 'Не указано' ? coachData.values : undefined,
           dreams: coachData.dreams !== 'Не указано' ? coachData.dreams : undefined,
-          topValues: coachData.values !== 'Не указано' ? [coachData.values] : [],
+          pvq: pvqScores.raw,
+          topValues: topPvqNames.length > 0 ? topPvqNames : (coachData.values !== 'Не указано' ? [coachData.values] : []),
         },
         behavior: {
           procrastination: procrastinationScore,
@@ -259,13 +264,14 @@ export async function GET(request: Request) {
 - Качественные данные коуча: ${coachDataPrompt}
 - Индекс согласованности данных тестов и коуч-сессии: ${consistency.index}/100 (${consistency.level}). ${consistency.contradictions.length > 0 ? `Обнаруженные противоречия: ${consistency.contradictions.map((c) => `«${c.testFact}» vs «${c.coachFact}»`).join('; ')}.` : 'Противоречий не обнаружено.'}
 - Формула успеха (3 переносимые компетенции, выведенные детерминированно из профиля): ${skillFormulaSkills.map((s) => s.nameRu).join(' + ')}
+- Ведущие ценности по тесту PVQ Шварца (топ-3): ${topPvqNames.join(', ')}
 
 Правила формирования отчета:
 1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
 2. Проанализируйте Big Five черты.
 3. Опишите сильные стороны и зоны развития с учетом прокрастинации (если балл прокрастинации выше 12, дайте совет, как с этим справляться) и логических задач. КРИТИЧЕСКИ ВАЖНО: НИКОГДА не давайте абсолютных оценок интеллекта или чисел вида "X из Y правильных" — только уровень готовности относительно возраста ("developing"/"solid"/"strong" переводите как "в процессе развития"/"уверенный уровень"/"сильная сторона").
 4. Раздел "strengths" (сильные стороны) стройте В ПЕРВУЮ ОЧЕРЕДЬ на основе топ-5 сигнатурных сил VIA Youth, а не на общих домыслах — раскройте, как каждая сила проявляется в учебе и жизни подростка.
-5. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем".
+5. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем". При анализе ценностей опирайтесь в первую очередь на топ-3 ценности по тесту PVQ Шварца (см. данные выше), а качественные слова коуча используйте как дополнение, а не замену.
 6. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
 7. Раздел "innerConflicts": если индекс согласованности ниже "high" (см. данные выше), заполните его 1-3 пунктами — по каждому обнаруженному противоречию сформулируйте тёплый, любопытный (не осуждающий) вопрос-наблюдение в стиле "Тест показал X, но ты говорил Y — как это уживается в тебе?", используя фактические данные из списка противоречий выше. Если индекс "high" и противоречий нет — верните пустой массив.
 8. Раздел "professions": вместо привязки только к должностям, объясняйте в 'why' связь профессии с формулой успеха (3 компетенции выше), когда это уместно — подчеркните, что эти компетенции переносятся между профессиями, если технологии изменят конкретные роли.

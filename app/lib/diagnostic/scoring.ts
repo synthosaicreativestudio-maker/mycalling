@@ -2,6 +2,7 @@ import type { DiagnosticQuestion } from '../../data/questions';
 import { computeMaxReverseDeviation, computeReliability, type Reliability } from './reliability';
 import { icarBand } from './icarNorms';
 import { viaStrengths } from '../../data/viaStrengths';
+import { pvqValues } from '../../data/pvqValues';
 
 export interface ScoreContext {
   age?: number;
@@ -176,12 +177,49 @@ export const viaScorer: TestScorer = {
   },
 };
 
+/**
+ * PVQ Шварца: сырой балл 1-5 по каждой из 10 ценностей плюс центрированный
+ * балл (ипсатизация — стандарт для PVQ, убирает индивидуальный сдвиг шкалы
+ * "все важно"/"всё неважно") и топ-3 ценности по центрированному баллу.
+ */
+export const pvqScorer: TestScorer = {
+  testCode: 'PVQ',
+  score(answers, questions) {
+    const qs = questionsFor('PVQ', questions);
+    const raw: Record<string, number> = {};
+    qs.forEach((q) => {
+      const value = answers[q.id];
+      if (value === undefined) return;
+      raw[q.scale] = value;
+    });
+
+    const rawValues = Object.values(raw);
+    const mean = rawValues.length ? rawValues.reduce((s, v) => s + v, 0) / rawValues.length : 0;
+    const centered: Record<string, number> = {};
+    Object.entries(raw).forEach(([code, v]) => {
+      centered[code] = parseFloat((v - mean).toFixed(2));
+    });
+
+    const topValues = pvqValues
+      .map((v) => v.code)
+      .filter((code) => centered[code] !== undefined)
+      .sort((a, b) => (centered[b] ?? 0) - (centered[a] ?? 0))
+      .slice(0, 3);
+
+    return {
+      scores: { raw, centered, topValues },
+      reliability: computeReliability(answers, qs),
+    };
+  },
+};
+
 export const scorers: Record<string, TestScorer> = {
   RIASEC: riasecScorer,
   BFI: bfiScorer,
   ICAR: icarScorer,
   PROCRASTINATION: procrastinationScorer,
   VIA: viaScorer,
+  PVQ: pvqScorer,
 };
 
 export function registerScorer(scorer: TestScorer): void {
