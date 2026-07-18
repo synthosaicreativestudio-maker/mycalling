@@ -3,13 +3,16 @@
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Brain, Compass, Sparkles, Award, RefreshCw, AlertCircle, ArrowLeft, Download, Loader2, ShieldCheck, Clock, LogOut, CheckCircle2, Lock, ChevronRight, Phone, Send, User } from 'lucide-react';
+import { Brain, Compass, Sparkles, Award, RefreshCw, AlertCircle, ArrowLeft, Download, Loader2, ShieldCheck, Clock, LogOut, CheckCircle2, Lock, ChevronRight, Phone, Send, User, TrendingUp, Target, Gauge, Heart } from 'lucide-react';
 import { authClient } from '../lib/auth-client';
 import { motion } from 'framer-motion';
 import RpgProfessionCard from '../components/report/RpgProfessionCard';
 import RadarChart from '../components/report/RadarChart';
 import CabinetProgress from '../components/report/CabinetProgress';
 import SkillFormulaCard from '../components/report/SkillFormulaCard';
+import ProfileSummaryHeader from '../components/report/ProfileSummaryHeader';
+import ValueBars from '../components/report/ValueBars';
+import DeepSessionCard, { type DeepSessionData } from '../components/report/DeepSessionCard';
 
 type Trait = {
   name: string;
@@ -48,6 +51,20 @@ type ReportData = {
     deepFirstStep?: string;
   };
   professions: Profession[];
+  /** Топ-3 ведущие ценности PVQ Шварца (названия) — для бейджа в шапке профиля. */
+  topValues?: string[];
+  /** Те же топ-ценности со скорами 1-5 — для горизонтальных баров ValueBars. */
+  topValueScores?: { nameRu: string; score: number }[];
+  /** Субшкалы логического теста ICAR (verbal/numeric/spatial), каждая 0-3. */
+  icarSubscales?: Record<string, number>;
+  /** Раздел "Глубинная сессия" — присутствует только если пройдена DEEP-сессия коучинга. */
+  deepSession?: DeepSessionData | null;
+};
+
+const ICAR_SUBSCALE_LABELS: Record<string, string> = {
+  verbal: 'Вербальная',
+  numeric: 'Числовая',
+  spatial: 'Пространственная'
 };
 
 const defaultReport: ReportData = {
@@ -96,6 +113,14 @@ const defaultReport: ReportData = {
     idols: 'Вдохновляется инноваторами и создателями культовых технологических решений.',
     values: 'Главная ценность — свобода самовыражения и возможность созидать новые системы.'
   },
+  topValues: ['Самостоятельность', 'Достижения', 'Стимуляция'],
+  topValueScores: [
+    { nameRu: 'Самостоятельность', score: 4.6 },
+    { nameRu: 'Достижения', score: 4.3 },
+    { nameRu: 'Стимуляция', score: 4.0 }
+  ],
+  icarSubscales: { verbal: 3, numeric: 2, spatial: 3 },
+  deepSession: null,
   professions: [
     {
       name: 'UX/UI Дизайнер интерфейсов',
@@ -235,7 +260,11 @@ function ReportPageContent() {
             ? rawData.successFormula
             : undefined,
           coachSection: rawData.coachSection || {},
-          professions: Array.isArray(rawData.professions) ? rawData.professions : []
+          professions: Array.isArray(rawData.professions) ? rawData.professions : [],
+          topValues: Array.isArray(rawData.topValues) ? rawData.topValues : undefined,
+          topValueScores: Array.isArray(rawData.topValueScores) ? rawData.topValueScores : undefined,
+          icarSubscales: rawData.icarSubscales && typeof rawData.icarSubscales === 'object' ? rawData.icarSubscales : undefined,
+          deepSession: rawData.deepSession && typeof rawData.deepSession === 'object' ? rawData.deepSession : null
         };
         setReport(sanitizedReport);
         setIsDemo(false);
@@ -408,6 +437,13 @@ function ReportPageContent() {
                 
                 {/* Левая колонка */}
                 <div className="space-y-8">
+                  {/* Шапка-визитка профиля: код Холланда, ключевая сила, ведущая ценность */}
+                  <ProfileSummaryHeader
+                    hollandCode={report.hollandCode}
+                    topSignatureStrength={report.signatureStrengths?.[0]}
+                    topValue={report.topValues?.[0]}
+                  />
+
                   {/* Главное резюме потенциала */}
                   <div className="glass-card rounded-[28px] p-8">
                     <h2 className="text-lg font-bold text-white mb-4">Главное резюме потенциала</h2>
@@ -428,80 +464,69 @@ function ReportPageContent() {
                         </h2>
                       </div>
                       <div className="space-y-4">
-                        {/* Хелпер очистки повторов */}
-                        {(() => {
-                          const clean = (val?: string) => {
-                            if (!val) return '';
-                            const parts = val.split(/;|\n|,/).map(p => p.trim()).filter(Boolean);
-                            const unique = Array.from(new Set(parts));
-                            return unique.join(' · ');
-                          };
+                        {/* Экспресс-коучинг */}
+                        {report.coachSection?.dreams && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Мечты и устремления</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.dreams.trim()}</p>
+                          </div>
+                        )}
+                        {report.coachSection?.idols && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Ролевые модели и кумиры</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.idols.trim()}</p>
+                          </div>
+                        )}
+                        {report.coachSection?.values && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Ключевые ценности</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.values.trim()}</p>
+                          </div>
+                        )}
 
-                          return (
-                            <>
-                              {/* Экспресс-коучинг */}
-                              {report.coachSection?.dreams && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Мечты и устремления</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.dreams)}</p>
-                                </div>
-                              )}
-                              {report.coachSection?.idols && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Ролевые модели и кумиры</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.idols)}</p>
-                                </div>
-                              )}
-                              {report.coachSection?.values && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Ключевые ценности</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.values)}</p>
-                                </div>
-                              )}
-
-                              {/* Глубокий коучинг */}
-                              {report.coachSection?.deepGoal && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🎯 Мой запрос / Цель</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.deepGoal)}</p>
-                                </div>
-                              )}
-                              {report.coachSection?.deepOutcome && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🌟 Ожидаемый результат</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.deepOutcome)}</p>
-                                </div>
-                              )}
-                              {report.coachSection?.deepEmotions && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🔥 Эмоциональный отклик</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{clean(report.coachSection.deepEmotions)}</p>
-                                </div>
-                              )}
-                              {report.coachSection?.deepIdentity && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">👑 Моя идентичность</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold italic">{clean(report.coachSection.deepIdentity)}</p>
-                                </div>
-                              )}
-                              {report.coachSection?.deepActions && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🚀 План действий и навыки</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text whitespace-pre-wrap font-medium">{clean(report.coachSection.deepActions)}</p>
-                                </div>
-                              )}
-                              {report.coachSection?.deepFirstStep && (
-                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                                  <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">⚡ Первый шаг за 2 минуты</h4>
-                                  <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold">{clean(report.coachSection.deepFirstStep)}</p>
-                                </div>
-                              )}
-                            </>
-                          );
-                        })()}
+                        {/* Глубокий коучинг */}
+                        {report.coachSection?.deepGoal && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🎯 Мой запрос / Цель</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepGoal.trim()}</p>
+                          </div>
+                        )}
+                        {report.coachSection?.deepOutcome && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🌟 Ожидаемый результат</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepOutcome.trim()}</p>
+                          </div>
+                        )}
+                        {report.coachSection?.deepEmotions && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🔥 Эмоциональный отклик</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepEmotions.trim()}</p>
+                          </div>
+                        )}
+                        {report.coachSection?.deepIdentity && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">👑 Моя идентичность</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold italic">{report.coachSection.deepIdentity.trim()}</p>
+                          </div>
+                        )}
+                        {report.coachSection?.deepActions && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🚀 План действий и навыки</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text whitespace-pre-wrap font-medium">{report.coachSection.deepActions.trim()}</p>
+                          </div>
+                        )}
+                        {report.coachSection?.deepFirstStep && (
+                          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">⚡ Первый шаг за 2 минуты</h4>
+                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold">{report.coachSection.deepFirstStep.trim()}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
+
+                  {/* Глубинная сессия (только если пройдена DEEP-сессия коучинга) */}
+                  <DeepSessionCard deepSession={report.deepSession} />
                 </div>
 
                 {/* Правая колонка */}
@@ -580,21 +605,60 @@ function ReportPageContent() {
                   {/* Силы и Зоны развития */}
                   <div className="glass-card rounded-[28px] p-8">
                     <h2 className="text-lg font-bold text-white mb-4">Сильные стороны и зоны развития</h2>
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       <div>
-                        <h4 className="text-xs uppercase tracking-wider font-bold text-emerald-400 mb-2">Сильные стороны</h4>
-                        <ul className="list-disc list-inside space-y-1.5 text-xs text-[#7A8A9E]">
-                          {report.strengths.map((s, i) => <li key={i}>{s}</li>)}
-                        </ul>
+                        <h4 className="text-xs uppercase tracking-wider font-bold text-emerald-400 mb-3">Сильные стороны</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {report.strengths.map((s, i) => (
+                            <div key={i} className="flex items-start gap-2 rounded-xl border border-emerald-500/15 bg-emerald-500/5 p-3">
+                              <TrendingUp className="h-3.5 w-3.5 mt-0.5 shrink-0 text-emerald-400" />
+                              <span className="text-xs text-[#7A8A9E] leading-relaxed">{s}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                       <div>
-                        <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-2">Зоны развития</h4>
-                        <ul className="list-disc list-inside space-y-1.5 text-xs text-[#7A8A9E]">
-                          {report.growthAreas.map((g, i) => <li key={i}>{g}</li>)}
-                        </ul>
+                        <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-3">Зоны развития</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {report.growthAreas.map((g, i) => (
+                            <div key={i} className="flex items-start gap-2 rounded-xl border border-[#3B82F6]/15 bg-[#3B82F6]/5 p-3">
+                              <Target className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#3B82F6]" />
+                              <span className="text-xs text-[#7A8A9E] leading-relaxed">{g}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Ведущие ценности PVQ Шварца — горизонтальные бары */}
+                  {report.topValueScores && report.topValueScores.length > 0 && (
+                    <ValueBars
+                      title="Ведущие ценности"
+                      subtitle="Топ-3 ценности по методике PVQ Шварца"
+                      icon={<Heart className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      items={report.topValueScores.map((v) => ({
+                        label: v.nameRu,
+                        value: v.score,
+                        max: 5,
+                        valueLabel: `${v.score.toFixed(1)}/5`
+                      }))}
+                    />
+                  )}
+
+                  {/* Субшкалы логического теста ICAR — горизонтальные бары */}
+                  {report.icarSubscales && Object.keys(report.icarSubscales).length > 0 && (
+                    <ValueBars
+                      title="Логическое мышление (ICAR)"
+                      subtitle="Готовность по субшкалам: вербальная, числовая, пространственная"
+                      icon={<Gauge className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      items={Object.entries(report.icarSubscales).map(([key, value]) => ({
+                        label: ICAR_SUBSCALE_LABELS[key] || key,
+                        value,
+                        max: 3
+                      }))}
+                    />
+                  )}
                 </div>
 
               </div>
@@ -676,6 +740,16 @@ function ReportPageContent() {
           </div>
         )}
 
+        {report.deepSession && (
+          <div className="print-card">
+            <h2>Глубинная сессия</h2>
+            <p>{report.deepSession.synthesis}</p>
+            {report.deepSession.goal && <p><strong>Цель:</strong> {report.deepSession.goal}</p>}
+            {report.deepSession.identity && <p><strong>Идентичность:</strong> {report.deepSession.identity}</p>}
+            {report.deepSession.firstStep && <p><strong>Первый шаг:</strong> {report.deepSession.firstStep}</p>}
+          </div>
+        )}
+
         {report.riasecSummary && (
           <div className="print-card">
             <h2>Профессиональные интересы (RIASEC)</h2>
@@ -689,6 +763,22 @@ function ReportPageContent() {
           <h2>Зоны развития</h2>
           <ul>{report.growthAreas.map((g, i) => <li key={i}>{g}</li>)}</ul>
         </div>
+
+        {report.topValueScores && report.topValueScores.length > 0 && (
+          <div className="print-card">
+            <h2>Ведущие ценности (PVQ Шварца)</h2>
+            <ul>{report.topValueScores.map((v, i) => <li key={i}>{v.nameRu} — {v.score.toFixed(1)}/5</li>)}</ul>
+          </div>
+        )}
+
+        {report.icarSubscales && Object.keys(report.icarSubscales).length > 0 && (
+          <div className="print-card">
+            <h2>Логическое мышление (ICAR)</h2>
+            <ul>{Object.entries(report.icarSubscales).map(([key, value], i) => (
+              <li key={i}>{ICAR_SUBSCALE_LABELS[key] || key} — {value}/3</li>
+            ))}</ul>
+          </div>
+        )}
 
         <div className="print-card">
           <h2>Рекомендуемые профессии</h2>

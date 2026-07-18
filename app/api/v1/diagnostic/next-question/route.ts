@@ -144,6 +144,31 @@ export async function GET(request: Request) {
         return strength ? { code, nameRu: strength.nameRu, virtue: viaVirtueNames[strength.virtue] } : { code, nameRu: code, virtue: '' };
       });
 
+      // Топ-3 ценности PVQ с их сырыми баллами (1-5) — для бейджа в шапке отчета
+      // и для горизонтальных баров ValueBars на странице отчета.
+      const topPvqValueScores = pvqScores.topValues.map((code) => ({
+        nameRu: pvqValueByCode[code]?.nameRu || code,
+        score: pvqScores.raw[code] ?? 0
+      }));
+
+      // Глубинная сессия коучинга (см. app/api/v1/coach/chat/route.ts): уже
+      // синтезированный ИИ-текст (не дословная цитата пользователя), сохранённый
+      // в CoachSession.extractedData.deepReportSummary при завершении DEEP-сессии.
+      const deepReportSummary = coachExtracted.deepReportSummary && typeof coachExtracted.deepReportSummary === 'object'
+        ? (coachExtracted.deepReportSummary as {
+            id: string; completedAt: string; goal: string; outcome: string; emotions: string;
+            identity: string; actions: string; firstStep: string; synthesis: string;
+          })
+        : null;
+      const deepSessionForReport = deepReportSummary && deepReportSummary.synthesis
+        ? {
+            synthesis: deepReportSummary.synthesis,
+            goal: deepReportSummary.goal || '',
+            identity: deepReportSummary.identity || '',
+            firstStep: deepReportSummary.firstStep || ''
+          }
+        : null;
+
       // Сначала очищаем старые результаты диагностик для этого пользователя
       try {
         await prisma.diagnosticResult.deleteMany({
@@ -256,6 +281,9 @@ export async function GET(request: Request) {
       if (!coachDataPrompt) {
         coachDataPrompt = 'Данные коучинга не предоставлены.';
       }
+      const deepSessionPrompt = deepSessionForReport
+        ? `Готовый синтез глубинной коуч-сессии (уже написан от третьего лица, НЕ цитата пользователя, использовать как есть в разделе "deepSession.synthesis"): "${deepSessionForReport.synthesis}". Опорная цель: ${deepSessionForReport.goal || '—'}. Идентичность: ${deepSessionForReport.identity || '—'}. Первый шаг: ${deepSessionForReport.firstStep || '—'}.`
+        : 'Глубинная сессия не проводилась или не завершена — раздел "deepSession" должен быть null.';
 
       const systemPrompt = `Вы — ведущий мировой эксперт в профориентации подростков и возрастной психологии.
 Ваша задача — проанализировать результаты диагностики (RIASEC, Big Five, логический тест, прокрастинация) и качественные данные от коуча, чтобы составить подробный, вдохновляющий отчет.
@@ -271,17 +299,19 @@ export async function GET(request: Request) {
 - Индекс согласованности данных тестов и коуч-сессии: ${consistency.index}/100 (${consistency.level}). ${consistency.contradictions.length > 0 ? `Обнаруженные противоречия: ${consistency.contradictions.map((c) => `«${c.testFact}» vs «${c.coachFact}»`).join('; ')}.` : 'Противоречий не обнаружено.'}
 - Формула успеха (3 переносимые компетенции, выведенные детерминированно из профиля): ${skillFormulaSkills.map((s) => s.nameRu).join(' + ')}
 - Ведущие ценности по тесту PVQ Шварца (топ-3): ${topPvqNames.join(', ')}
+- Глубинная сессия: ${deepSessionPrompt}
 
 Правила формирования отчета:
 1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
 2. Проанализируйте Big Five черты.
 3. Опишите сильные стороны и зоны развития с учетом прокрастинации (если балл прокрастинации выше 12, дайте совет, как с этим справляться) и логических задач. КРИТИЧЕСКИ ВАЖНО: НИКОГДА не давайте абсолютных оценок интеллекта или чисел вида "X из Y правильных" — только уровень готовности относительно возраста ("developing"/"solid"/"strong" переводите как "в процессе развития"/"уверенный уровень"/"сильная сторона").
 4. Раздел "strengths" (сильные стороны) стройте В ПЕРВУЮ ОЧЕРЕДЬ на основе топ-5 сигнатурных сил VIA Youth, а не на общих домыслах — раскройте, как каждая сила проявляется в учебе и жизни подростка.
-5. Раздел коуч-сессии: явно укажите качественный анализ полученных от коуча целей, образа будущего или ценностей с пометкой "Источник: диалог с нейрокоучем". При анализе ценностей опирайтесь в первую очередь на топ-3 ценности по тесту PVQ Шварца (см. данные выше), а качественные слова коуча используйте как дополнение, а не замену.
+5. Раздел коуч-сессии ("coachSection"): КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО дословно цитировать пользователя, копировать его формулировки из чата или подписывать текст пометкой "Источник: диалог с нейрокоучем" — это не транскрипт. Вместо этого напишите синтезированный профессиональный инсайт от третьего лица в стиле executive summary психологической диагностики (уровень 16Personalities/CliftonStrengths): конкретно, без повторов, опираясь на данные коуч-диалога и цифровой профиль, но никогда не пересказывая ответы пользователя буквально. При анализе ценностей опирайтесь в первую очередь на топ-3 ценности по тесту PVQ Шварца (см. данные выше), а качественные слова коуча используйте как дополнение, а не замену.
 6. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
 7. Раздел "innerConflicts": если индекс согласованности ниже "high" (см. данные выше), заполните его 1-3 пунктами — по каждому обнаруженному противоречию сформулируйте тёплый, любопытный (не осуждающий) вопрос-наблюдение в стиле "Тест показал X, но ты говорил Y — как это уживается в тебе?", используя фактические данные из списка противоречий выше. Если индекс "high" и противоречий нет — верните пустой массив.
 8. Раздел "professions": вместо привязки только к должностям, объясняйте в 'why' связь профессии с формулой успеха (3 компетенции выше), когда это уместно — подчеркните, что эти компетенции переносятся между профессиями, если технологии изменят конкретные роли.
 9. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
+10. Раздел "deepSession": если выше указан готовый синтез глубинной коуч-сессии — заполните "deepSession" объектом с полями synthesis (используйте готовый текст синтеза как есть или лёгкую стилистическую правку без искажения смысла, НЕ добавляя цитаты пользователя), goal, identity, firstStep (возьмите как есть из данных выше). Если глубинная сессия не проводилась — верните "deepSession": null.
 
 Ответьте СТРОГО в формате JSON.
 Структура JSON:
@@ -329,7 +359,8 @@ export async function GET(request: Request) {
       "title": "Короткий заголовок противоречия",
       "text": "Тёплый вопрос-наблюдение по формату из правила 7"
     }
-  ]
+  ],
+  "deepSession": ${deepSessionForReport ? '{ "synthesis": "...", "goal": "...", "identity": "...", "firstStep": "..." }' : 'null'}
 }`;
 
       const nextQuestionReportSchema = {
@@ -410,6 +441,16 @@ export async function GET(request: Request) {
               },
               required: ["title", "text"]
             }
+          },
+          deepSession: {
+            type: "OBJECT",
+            nullable: true,
+            properties: {
+              synthesis: { type: "STRING" },
+              goal: { type: "STRING" },
+              identity: { type: "STRING" },
+              firstStep: { type: "STRING" }
+            }
           }
         },
         required: [
@@ -427,7 +468,19 @@ export async function GET(request: Request) {
           nextQuestionReportSchema,
           0.7
         );
-        htmlReportContent = JSON.stringify({ ...resultJson, riasecScores: finalRiasec, hollandCode, successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications }, isFallback: false });
+        htmlReportContent = JSON.stringify({
+          ...resultJson,
+          riasecScores: finalRiasec,
+          hollandCode,
+          successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications },
+          topValues: topPvqNames,
+          topValueScores: topPvqValueScores,
+          icarSubscales: icarScores.bySubscale,
+          // Переопределяем детерминированно: не полагаемся на то, что модель дословно
+          // скопирует уже готовый синтез без искажений/добавления цитат.
+          deepSession: deepSessionForReport,
+          isFallback: false
+        });
       } catch (err) {
         console.error('Gemini report generation failed in next-question, creating fallback report:', err);
         // Резервный отчет на основе реальных баллов, чтобы личный кабинет не оставался пустым
@@ -542,9 +595,20 @@ export async function GET(request: Request) {
             title: 'Внутреннее противоречие — твой скрытый ресурс',
             text: c.probe
           })),
+          // Простой структурный passthrough без дополнительного вызова ИИ — синтез уже
+          // готов из deepReportSummary (см. app/api/v1/coach/chat/route.ts).
+          deepSession: deepSessionForReport,
           isFallback: true
         };
-        htmlReportContent = JSON.stringify({ ...fallbackReport, riasecScores: finalRiasec, hollandCode, successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications } });
+        htmlReportContent = JSON.stringify({
+          ...fallbackReport,
+          riasecScores: finalRiasec,
+          hollandCode,
+          successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications },
+          topValues: topPvqNames,
+          topValueScores: topPvqValueScores,
+          icarSubscales: icarScores.bySubscale
+        });
       }
 
       // Безопасный upsert отчета в БД

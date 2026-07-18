@@ -18,3 +18,4 @@ public/assets/tree_test/
 тз для svg входа/
 .vercel
 .env*
+.claude/
