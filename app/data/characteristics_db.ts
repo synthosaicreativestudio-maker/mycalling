@@ -1,0 +1,122 @@
+export interface Characteristic {
+  id: string;
+  name: string;
+  layer: 'interests' | 'personality' | 'strengths' | 'cognitive' | 'motivation' | 'behavior' | 'context';
+  description: string;
+}
+
+export const characteristicsDb: Characteristic[] = [
+  // I. Слой «Интересы и Склонности»
+  { id: 'riasec_realistic', name: 'Реалистический тип (R)', layer: 'interests', description: 'Интерес к работе с техникой, инструментами, физическими объектами, растениями или животными.' },
+  { id: 'riasec_investigative', name: 'Исследовательский тип (I)', layer: 'interests', description: 'Интерес к науке, исследованиям, сбору и анализу данных, решению логических задач.' },
+  { id: 'riasec_artistic', name: 'Артистический тип (A)', layer: 'interests', description: 'Потребность в творческом самовыражении, дизайне, искусстве, работе без жестких стандартов.' },
+  { id: 'riasec_social', name: 'Социальный тип (S)', layer: 'interests', description: 'Интерес к обучению, лечению, консультированию, помощи людям и общению.' },
+  { id: 'riasec_enterprising', name: 'Предпринимательский тип (E)', layer: 'interests', description: 'Интерес к лидерству, организации проектов, продажам, ведению переговоров и принятию рисков.' },
+  { id: 'riasec_conventional', name: 'Конвенциональный тип (C)', layer: 'interests', description: 'Интерес к упорядочению данных, расчетам, ведению документации, соблюдению регламентов.' },
+  { id: 'interest_subjects', name: 'Предметные области', layer: 'interests', description: 'Специфические интересы к академическим дисциплинам (IT, медицина, гуманитарные науки).' },
+  { id: 'interest_format', name: 'Формат деятельности', layer: 'interests', description: 'Предпочтение работы с людьми, данными, физическими вещами или абстрактными идеями.' },
+  { id: 'interest_hobbies', name: 'Внеучебная активность', layer: 'interests', description: 'Хобби и увлечения, которыми подросток занимается по собственной воле.' },
+  { id: 'interest_anti', name: 'Анти-интересы', layer: 'interests', description: 'Сферы и виды задач, вызывающие категорическое неприятие или скуку.' },
+
+  // II. Слой «Личность и Трейты»
+  { id: 'bigfive_extraversion', name: 'Экстраверсия', layer: 'personality', description: 'Степень общительности, активности в контактах и направленности энергии вовне.' },
+  { id: 'bigfive_agreeableness', name: 'Доброжелательность', layer: 'personality', description: 'Склонность к кооперации, доверию, эмпатии и бесконфликтному общению.' },
+  { id: 'bigfive_conscientiousness', name: 'Добросовестность', layer: 'personality', description: 'Степень организованности, дисциплинированности, надежности и планирования дел.' },
+  { id: 'bigfive_openness', name: 'Открытость новому', layer: 'personality', description: 'Уровень интеллектуального любопытства, воображения и готовности к новому опыту.' },
+  { id: 'bigfive_stability', name: 'Эмоциональная стабильность', layer: 'personality', description: 'Устойчивость к стрессу, критике и тревожности при неопределенности.' },
+  { id: 'pers_locus', name: 'Локус контроля', layer: 'personality', description: 'Склонность приписывать свои успехи или неудачи внутренним или внешним факторам.' },
+  { id: 'pers_self_esteem', name: 'Самооценка', layer: 'personality', description: 'Уровень базовой уверенности в своих способностях и ценности.' },
+  { id: 'pers_risk', name: 'Рискованность', layer: 'personality', description: 'Готовность принимать решения в ситуациях высокой неопределенности.' },
+  { id: 'pers_honesty', name: 'Честность перед собой', layer: 'personality', description: 'Отсутствие склонности давать социально желаемые или искаженные ответы.' },
+  { id: 'pers_tolerance', name: 'Толерантность к двусмысленности', layer: 'personality', description: 'Способность продуктивно работать без четких пошаговых инструкций.' },
+  { id: 'temp_reactivity', name: 'Реактивность темперамента', layer: 'personality', description: 'Сила и быстрота эмоционального ответа на внешние раздражители.' },
+  { id: 'temp_pace', name: 'Темп деятельности', layer: 'personality', description: 'Естественная скорость выполнения задач и мыслительных процессов.' },
+  { id: 'temp_plasticity', name: 'Пластичность', layer: 'personality', description: 'Легкость переключения с одного вида деятельности на другой.' },
+  { id: 'temp_excitability', name: 'Эмоциональная возбудимость', layer: 'personality', description: 'Порог возникновения эмоциональных реакций.' },
+  { id: 'temp_sensitivity', name: 'Сензитивность', layer: 'personality', description: 'Чувствительность к тонким внешним воздействиям и психологическому климату.' },
+
+  // III. Слой «Сильные стороны и Таланты» (VIA Character Strengths)
+  { id: 'via_creativity', name: 'Креативность (VIA)', layer: 'strengths', description: 'Способность находить новые, оригинальные способы решения задач.' },
+  { id: 'via_curiosity', name: 'Любознательность (VIA)', layer: 'strengths', description: 'Интерес к познанию мира, поиску новой информации и исследованию.' },
+  { id: 'via_judgment', name: 'Критическое мышление / Суждение (VIA)', layer: 'strengths', description: 'Способность взвешивать все факты и принимать объективные решения.' },
+  { id: 'via_love_of_learning', name: 'Любовь к обучению (VIA)', layer: 'strengths', description: 'Естественная тяга к систематическому освоению новых знаний и навыков.' },
+  { id: 'via_perspective', name: 'Мудрость / Перспектива (VIA)', layer: 'strengths', description: 'Способность давать мудрые советы и видеть картину в целом.' },
+  { id: 'via_bravery', name: 'Смелость (VIA)', layer: 'strengths', description: 'Готовность отстаивать свои убеждения и идти на риск вопреки страху.' },
+  { id: 'via_perseverance', name: 'Настойчивость (VIA)', layer: 'strengths', description: 'Умение доводить начатое до конца вопреки трудностям и скуке.' },
+  { id: 'via_honesty', name: 'Искренность / Честность (VIA)', layer: 'strengths', description: 'Говорить правду и оставаться искренним в словах и действиях.' },
+  { id: 'via_zest', name: 'Энергия / Жизнелюбие (VIA)', layer: 'strengths', description: 'Подход к жизни с энтузиазмом, драйвом и высокой личной активностью.' },
+  { id: 'via_love', name: 'Любовь / Привязанность (VIA)', layer: 'strengths', description: 'Ценность близких, доверительных отношений с другими людьми.' },
+  { id: 'via_kindness', name: 'Доброта / Великодушие (VIA)', layer: 'strengths', description: 'Склонность совершать добрые дела и заботиться о благополучии других.' },
+  { id: 'via_social_intelligence', name: 'Социальный интеллект (VIA)', layer: 'strengths', description: 'Понимание мотивов и чувств других людей, умение ладить в социуме.' },
+  { id: 'via_teamwork', name: 'Командная работа (VIA)', layer: 'strengths', description: 'Лояльность своей группе, ответственность при совместной работе.' },
+  { id: 'via_fairness', name: 'Справедливость (VIA)', layer: 'strengths', description: 'Равное и непредвзятое отношение ко всем людям.' },
+  { id: 'via_leadership', name: 'Лидерство (VIA)', layer: 'strengths', description: 'Организация групповой деятельности и поддержание хороших отношений в команде.' },
+  { id: 'via_forgiveness', name: 'Прощение (VIA)', layer: 'strengths', description: 'Способность отпускать обиды и давать людям второй шанс.' },
+  { id: 'via_humility', name: 'Скромность / Смирение (VIA)', layer: 'strengths', description: 'Недооценка собственных заслуг, отсутствие хвастовства.' },
+  { id: 'via_prudence', name: 'Благоразумие (VIA)', layer: 'strengths', description: 'Осторожность в выборе, избегание ненужных рисков.' },
+  { id: 'via_self_regulation', name: 'Саморегуляция / Самоконтроль (VIA)', layer: 'strengths', description: 'Дисциплина в управлении своими эмоциями, аппетитом и поведением.' },
+  { id: 'via_appreciation', name: 'Ценить красоту (VIA)', layer: 'strengths', description: 'Способность замечать и ценить прекрасное в природе, науке или искусстве.' },
+  { id: 'via_gratitude', name: 'Благодарность (VIA)', layer: 'strengths', description: 'Умение замечать и искренне благодарить за хорошие вещи в жизни.' },
+  { id: 'via_hope', name: 'Оптимизм / Надежда (VIA)', layer: 'strengths', description: 'Вера в лучшее будущее и активная работа над его достижением.' },
+  { id: 'via_humor', name: 'Юмор / Жизнерадостность (VIA)', layer: 'strengths', description: 'Умение вызывать улыбку у людей и видеть светлую сторону вещей.' },
+  { id: 'via_spirituality', name: 'Духовность / Смысл (VIA)', layer: 'strengths', description: 'Понимание своего предназначения, вера в высшие смыслы жизни.' },
+
+  // IV. Слой «Когнитивный профиль»
+  { id: 'cog_g_factor', name: 'Общий когнитивный фактор (g-factor)', layer: 'cognitive', description: 'Общий уровень умственных способностей к переработке информации.' },
+  { id: 'cog_verbal', name: 'Вербальный интеллект', layer: 'cognitive', description: 'Способность понимать сложные тексты, логику суждений и выражать мысли.' },
+  { id: 'cog_math_logic', name: 'Логико-математический интеллект', layer: 'cognitive', description: 'Вычислительное и аналитическое мышление, работа с числовыми закономерностями.' },
+  { id: 'cog_spatial', name: 'Пространственное мышление', layer: 'cognitive', description: 'Умение мысленно вращать 3D-объекты, ориентироваться по схемам и картам.' },
+  { id: 'cog_speed', name: 'Скорость обработки информации', layer: 'cognitive', description: 'Быстрота выполнения простых когнитивных тестов без ошибок.' },
+  { id: 'cog_memory', name: 'Рабочая память', layer: 'cognitive', description: 'Объем удерживаемой информации, необходимой для решения задачи в моменте.' },
+  { id: 'cog_attention', name: 'Концентрация внимания', layer: 'cognitive', description: 'Способность долго удерживать фокус на монотонной или сложной задаче.' },
+  { id: 'cog_critical', name: 'Критическое мышление', layer: 'cognitive', description: 'Навык сомнения в авторитетах, фактчекинга и поиска логических ошибок.' },
+  { id: 'cog_creative', name: 'Дивергентная креативность', layer: 'cognitive', description: 'Способность генерировать множество нестандартных вариантов решения проблемы.' },
+  { id: 'cog_system', name: 'Системное мышление', layer: 'cognitive', description: 'Видение взаимосвязей между элементами сложных систем (экосистемы, код).' },
+  { id: 'cog_languages', name: 'Способность к языкам', layer: 'cognitive', description: 'Легкость запоминания иностранных слов, грамматических правил.' },
+  { id: 'cog_algorithm', name: 'Алгоритмическое мышление', layer: 'cognitive', description: 'Умение разбивать сложный процесс на последовательные логические шаги.' },
+  { id: 'cog_fluid', name: 'Обучаемость (Fluid Intelligence)', layer: 'cognitive', description: 'Скорость освоения принципиально новых навыков в незнакомой среде.' },
+  { id: 'cog_noise_resistance', name: 'Помехоустойчивость внимания', layer: 'cognitive', description: 'Способность концентрироваться на задаче при внешних отвлекающих факторах.' },
+  { id: 'cog_flexibility', name: 'Гибкость мышления (переключаемость)', layer: 'cognitive', description: 'Легкость отказа от неэффективной стратегии в пользу новой.' },
+
+  // V. Слой «Мотивация и Ценности»
+  { id: 'mot_archetype', name: 'Ведущий архетип (глубинная роль)', layer: 'motivation', description: 'Внутренняя ролевая модель (Творец, Исследователь, Правитель, Помощник).' },
+  { id: 'mot_intrinsic', name: 'Внутренняя мотивация', layer: 'motivation', description: 'Выполнение дела ради интереса к самому процессу, а не ради наград.' },
+  { id: 'mot_achievement', name: 'Мотивация достижения', layer: 'motivation', description: 'Стремление брать сложные барьеры и побеждать, а не просто избегать неудач.' },
+  { id: 'mot_autonomy', name: 'Ценность автономии', layer: 'motivation', description: 'Потребность самостоятельно планировать работу и отвечать за результат.' },
+  { id: 'mot_influence', name: 'Ценность влияния/власти', layer: 'motivation', description: 'Потребность руководить, координировать людей и влиять на процессы.' },
+  { id: 'mot_security', name: 'Ценность безопасности', layer: 'motivation', description: 'Потребность в стабильности, понятном графике и отсутствии резких перемен.' },
+  { id: 'mot_help', name: 'Ценность помощи другим', layer: 'motivation', description: 'Стремление приносить пользу обществу и поддерживать слабых.' },
+  { id: 'mot_money', name: 'Денежная мотивация', layer: 'motivation', description: 'Ориентация на высокий уровень дохода и материальный статус.' },
+  { id: 'mot_recognition', name: 'Потребность в признании', layer: 'motivation', description: 'Стремление получать похвалу, награды и публичное одобрение заслуг.' },
+  { id: 'mot_meaning', name: 'Смысловая нагрузка труда', layer: 'motivation', description: 'Понимание, РАДИ ЧЕГО глобально выполняется работа.' },
+
+  // VI. Слой «Поведенческие маркеры и Hard Skills»
+  { id: 'beh_procrastination', name: 'Уровень прокрастинации', layer: 'behavior', description: 'Склонность откладывать важные дела на потом вопреки здравому смыслу.' },
+  { id: 'beh_time_management', name: 'Тайм-менеджмент', layer: 'behavior', description: 'Навык планирования дня, расстановки приоритетов и соблюдения сроков.' },
+  { id: 'beh_decision_style', name: 'Стиль принятия решений', layer: 'behavior', description: 'Аналитический расчет рисков против интуитивного выбора.' },
+  { id: 'beh_conflict', name: 'Поведение в конфликте', layer: 'behavior', description: 'Склонность к компромиссу/кооперации против соперничества/избегания.' },
+  { id: 'beh_digital_literacy', name: 'Цифровая грамотность', layer: 'behavior', description: 'Уверенность в использовании ПО, поисковиков, облаков и ИТ-сервисов.' },
+  { id: 'beh_financial_literacy', name: 'Финансовая грамотность', layer: 'behavior', description: 'Понимание принципов сбережений, инвестиций и ведения личного бюджета.' },
+  { id: 'beh_public_speaking', name: 'Навык публичных выступлений', layer: 'behavior', description: 'Умение держать внимание аудитории и четко излагать идеи устно.' },
+  { id: 'beh_teamwork', name: 'Навык командной работы', layer: 'behavior', description: 'Эффективность координации действий внутри рабочей группы.' },
+  { id: 'beh_stress_resistance', name: 'Стрессоустойчивость в моменте', layer: 'behavior', description: 'Спокойствие и сохранение фокуса при внезапных форс-мажорах.' },
+  { id: 'beh_discipline', name: 'Дисциплина', layer: 'behavior', description: 'Способность регулярно совершать рутинные действия ради долгосрочной цели.' },
+  { id: 'beh_self_presentation', name: 'Навык самопрезентации', layer: 'behavior', description: 'Умение выгодно представить свои сильные стороны и проекты.' },
+  { id: 'beh_adaptability', name: 'Адаптивность', layer: 'behavior', description: 'Легкость приспособления к изменениям структуры компании или рынка.' },
+  { id: 'beh_empathy', name: 'Эмпатия', layer: 'behavior', description: 'Способность сочувствовать, улавливать эмоции и невербальные сигналы других.' },
+  { id: 'beh_writing', name: 'Навык письменной коммуникации', layer: 'behavior', description: 'Грамотность, лаконичность и структурированность деловой переписки.' },
+  { id: 'beh_leadership', name: 'Лидерская позиция', layer: 'behavior', description: 'Склонность брать на себя ответственность за общие результаты и направлять группу.' },
+
+  // VII. Слой «Контекст и Ограничения»
+  { id: 'ctx_family_pressure', name: 'Семейные ожидания (давление)', layer: 'context', description: 'Степень давления родителей в вопросе выбора вуза или профессии.' },
+  { id: 'ctx_family_finance', name: 'Финансовые возможности семьи', layer: 'context', description: 'Возможность оплачивать платное обучение в престижных вузах.' },
+  { id: 'ctx_mobility', name: 'Географическая мобильность', layer: 'context', description: 'Готовность подростка к переезду в другой город/страну ради учебы.' },
+  { id: 'ctx_health', name: 'Состояние здоровья', layer: 'context', description: 'Физиологические противопоказания к определенным нагрузкам.' },
+  { id: 'ctx_grades', name: 'Школьная успеваемость', layer: 'context', description: 'Объективный уровень школьных оценок и баллов пробных ЕГЭ.' },
+  { id: 'ctx_role_models', name: 'Ролевые модели (кумиры)', layer: 'context', description: 'Личности, на которых ориентируется подросток при выборе будущего.' },
+  { id: 'ctx_limiting_beliefs', name: 'Ограничивающие убеждения', layer: 'context', description: 'Страхи и барьеры («я не гуманитарий», «у меня не получится накопить»).' },
+  { id: 'ctx_mindset', name: 'Fixed vs Growth Mindset', layer: 'context', description: 'Вера в то, что интеллект можно развить усилиями, а не только генами.' },
+  { id: 'ctx_education_env', name: 'Доступная образовательная среда', layer: 'context', description: 'Наличие в городе проживания сильных школ, кружков и вузов.' },
+  { id: 'ctx_social_capital', name: 'Социальный капитал', layer: 'context', description: 'Связи и знакомства семьи, способные помочь со стажировками.' },
+  { id: 'ctx_career_maturity', name: 'Карьерная зрелость', layer: 'context', description: 'Уровень готовности и осознанности подростка делать выбор самостоятельно.' }
+];
