@@ -58,4 +58,5 @@
 4. [04_humanities_and_help.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/04_humanities_and_help.md) — Медицина, коучинг, реабилитация, онлайн-обучение, IT-право.
 5. [05_creative_and_lifestyle.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/05_creative_and_lifestyle.md) — Дизайн, медиа, логистика, спорт и эко-туризм.
 6. [06_ai_and_space.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/06_ai_and_space.md) — Оркестрация ИИ-агентов и Космические технологии (SpaceTech).
+7. [07_market_trends_2026.md](file:///Users/verakoroleva/Desktop/идеи/Мое Призвание/docs/industries_and_professions/07_market_trends_2026.md) — Исследование рынка труда 2025–2026 (WEF, hh.ru, ILO/IEA) и внесённые по его итогам правки базы: +4 профессии (кибербезопасность, MLOps, промышленная робототехника, накопители энергии), перекалибровка спроса на графического дизайнера.
 

@@ -138,5 +138,17 @@ export const characteristicsDb: Characteristic[] = [
   { id: 'ctx_exam_choice', name: 'Выбранный набор ЕГЭ/ОГЭ', layer: 'context', description: 'Ограничение выбора вуза сданными предметами.' },
   { id: 'ctx_parental_support', name: 'Поддержка со стороны родителей', layer: 'context', description: 'Уровень эмпатии семьи, готовность принять любой выбор ребенка.' },
   { id: 'ctx_social_adaptability', name: 'Общая социальная адаптируемость', layer: 'context', description: 'Легкость привыкания к новым коллективам и условиям.' },
-  { id: 'ctx_school_climate', name: 'Психологический климат в школе', layer: 'context', description: 'Уровень стресса или комфорта в текущем учебном классе.' }
+  { id: 'ctx_school_climate', name: 'Психологический климат в школе', layer: 'context', description: 'Уровень стресса или комфорта в текущем учебном классе.' },
+
+  // Дополнено 18.07.2026: характеристики из исходного списка 100 параметров аудита,
+  // на которые уже ссылался characteristics_mapping.ts, но которых не было в базе.
+  { id: 'pers_risk', name: 'Рискованность', layer: 'personality', description: 'Готовность действовать в условиях неопределенности и принимать решения с непредсказуемым исходом.' },
+  { id: 'via_curiosity_scientific', name: 'Научная любознательность', layer: 'identity', description: 'Тяга докапываться до устройства мира: эксперименты, «почему это работает», научно-популярный контент.' },
+  { id: 'mot_climate_responsibility', name: 'Экологическая ответственность', layer: 'identity', description: 'Ценность заботы о климате и природе как мотиватор выбора профессии.' },
+  { id: 'mot_security', name: 'Ценность безопасности и стабильности', layer: 'identity', description: 'Потребность в предсказуемой карьере, стабильном доходе и защищенности.' },
+  { id: 'mot_lifelong_learning', name: 'Установка на постоянное обучение', layer: 'identity', description: 'Готовность переучиваться всю жизнь как осознанная ценность, а не вынужденная мера.' },
+  { id: 'beh_self_presentation', name: 'Навык самопрезентации', layer: 'behavior', description: 'Умение рассказать о себе и своих результатах: портфолио, собеседования, сцена.' },
+  { id: 'beh_digital_literacy', name: 'Цифровая грамотность', layer: 'behavior', description: 'Уверенное владение цифровыми инструментами, поиском, базовой автоматизацией.' },
+  { id: 'beh_financial_literacy', name: 'Финансовая грамотность', layer: 'behavior', description: 'Понимание бюджета, накоплений, кредитов и базовой экономики личных финансов.' },
+  { id: 'beh_writing', name: 'Навык письменной коммуникации', layer: 'behavior', description: 'Способность ясно и структурно излагать мысли в тексте: письма, посты, документация.' }
 ];

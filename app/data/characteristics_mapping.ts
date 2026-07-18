@@ -21,7 +21,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'tolerance_ambiguity', 'learn_deep', 'exec_flexibility'],
     anti: []
   },
-  'QA-инженер (тестировщик)': {
+  'QA-инженер (Тестировщик)': {
     primary: ['riasec_conventional', 'riasec_realistic', 'exec_inhibition', 'cog_critical'],
     secondary: ['bigfive_conscientiousness', 'grit_perseverance', 'metacog_monitoring', 'feedback_skill'],
     anti: ['pers_risk']
@@ -43,7 +43,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'curiosity_epistemic', 'learn_deep', 'cog_ai_literacy'],
     anti: []
   },
-  'Промпт-инженер': {
+  'Промпт-инженер (ИИ-инструктор)': {
     primary: ['riasec_artistic', 'riasec_investigative', 'cog_verbal', 'cog_creative'],
     secondary: ['bigfive_openness', 'cog_ai_literacy', 'beh_ai_collaboration', 'content_creation_style'],
     anti: ['riasec_realistic']
@@ -53,7 +53,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'metacog_planning', 'cog_system', 'value_intrinsic'],
     anti: []
   },
-  'ML-инженер': {
+  'Инженер машинного обучения (ML)': {
     primary: ['riasec_investigative', 'riasec_realistic', 'cog_math_logic', 'cog_system'],
     secondary: ['bigfive_openness', 'curiosity_epistemic', 'learn_deep', 'cog_ai_literacy'],
     anti: []
@@ -75,17 +75,17 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'curiosity_epistemic', 'cog_math_logic', 'belbin_creator'],
     anti: []
   },
-  'Специалист по IoT': {
+  'Специалист по интернету вещей (IoT)': {
     primary: ['riasec_realistic', 'riasec_investigative', 'cog_system', 'cog_ai_literacy'],
     secondary: ['bigfive_conscientiousness', 'curiosity_epistemic', 'exec_flexibility', 'cyber_socialization'],
     anti: []
   },
-  'Специалист по БПЛА': {
+  'Оператор флота беспилотных аппаратов': {
     primary: ['riasec_realistic', 'riasec_conventional', 'cog_spatial', 'bigfive_stability'],
     secondary: ['self_control', 'exec_inhibition', 'tolerance_ambiguity', 'resilience_failure'],
     anti: []
   },
-  'Схемотехник': {
+  'Инженер-схемотехник': {
     primary: ['riasec_realistic', 'riasec_conventional', 'cog_math_logic', 'exec_inhibition'],
     secondary: ['bigfive_conscientiousness', 'grit_perseverance', 'cog_spatial', 'routine_discipline'],
     anti: []
@@ -97,7 +97,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
   },
 
   // Инженерия и промышленность
-  'Инженер-строитель': {
+  'Инженер-строитель (Конструктор)': {
     primary: ['riasec_realistic', 'riasec_conventional', 'cog_spatial', 'grit_perseverance'],
     secondary: ['bigfive_conscientiousness', 'self_control', 'cog_math_logic', 'routine_discipline'],
     anti: []
@@ -107,7 +107,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'via_curiosity_scientific', 'cog_spatial', 'bigfive_stability'],
     anti: []
   },
-  'Автомобильный инженер': {
+  'Автомобильный инженер (Беспилотники)': {
     primary: ['riasec_realistic', 'riasec_investigative', 'cog_spatial', 'cog_system'],
     secondary: ['bigfive_conscientiousness', 'grit_perseverance', 'cog_math_logic', 'digital_interests'],
     anti: []
@@ -139,12 +139,12 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'self_control', 'cog_math_logic', 'routine_discipline'],
     anti: []
   },
-  'Углеродный аудитор': {
+  'Аудитор углеродного следа': {
     primary: ['riasec_conventional', 'riasec_investigative', 'cog_math_logic', 'exec_inhibition'],
     secondary: ['bigfive_conscientiousness', 'metacog_monitoring', 'cog_system', 'mot_climate_responsibility'],
     anti: []
   },
-  'Менеджер по энергоэффективности': {
+  'Консультант по энергоэффективности': {
     primary: ['riasec_enterprising', 'riasec_conventional', 'cog_system', 'belbin_doer'],
     secondary: ['bigfive_conscientiousness', 'belbin_leader', 'cog_math_logic', 'feedback_skill'],
     anti: []
@@ -156,12 +156,12 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'curiosity_epistemic', 'via_curiosity_scientific', 'cog_ai_literacy'],
     anti: []
   },
-  'Биофармаколог': {
+  'Биофармаколог (Разработчик лекарств)': {
     primary: ['riasec_investigative', 'riasec_conventional', 'cog_math_logic', 'grit_perseverance'],
     secondary: ['bigfive_conscientiousness', 'curiosity_epistemic', 'via_curiosity_scientific', 'routine_discipline'],
     anti: []
   },
-  'Агрогенетик': {
+  'Агроном-генетик': {
     primary: ['riasec_investigative', 'riasec_realistic', 'cog_math_logic', 'cog_system'],
     secondary: ['bigfive_openness', 'curiosity_epistemic', 'via_curiosity_scientific', 'cog_ai_literacy'],
     anti: []
@@ -171,14 +171,14 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'via_curiosity_scientific', 'cog_math_logic', 'routine_discipline'],
     anti: []
   },
-  'Специалист по долголетию': {
+  'Специалист по долголетию (Биохакер)': {
     primary: ['riasec_investigative', 'riasec_social', 'cog_system', 'empathetic_listening'],
     secondary: ['bigfive_openness', 'value_intrinsic', 'cog_verbal', 'teique_self_awareness'],
     anti: []
   },
 
   // Медицина и здравоохранение
-  'Онлайн-терапевт': {
+  'Онлайн-терапевт (Теледоктор)': {
     primary: ['riasec_social', 'riasec_investigative', 'cog_verbal', 'empathetic_listening'],
     secondary: ['bigfive_agreeableness', 'teique_self_awareness', 'teique_social_skills', 'feedback_skill'],
     anti: []
@@ -203,7 +203,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_agreeableness', 'teique_social_skills', 'teique_self_awareness', 'beh_public_speaking'],
     anti: []
   },
-  'Нейрорентгенолог': {
+  'Neuro-рентгенолог': {
     primary: ['riasec_investigative', 'riasec_conventional', 'cog_spatial', 'exec_inhibition'],
     secondary: ['bigfive_conscientiousness', 'metacog_monitoring', 'cog_math_logic', 'cog_ai_literacy'],
     anti: []
@@ -225,7 +225,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'cog_creative', 'teique_social_skills', 'cog_ai_literacy'],
     anti: []
   },
-  'Таргетолог': {
+  'Таргетолог / Трафик-менеджер': {
     primary: ['riasec_conventional', 'riasec_investigative', 'cog_math_logic', 'cog_ai_literacy'],
     secondary: ['bigfive_conscientiousness', 'metacog_monitoring', 'exec_inhibition', 'value_extrinsic'],
     anti: []
@@ -235,14 +235,14 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'belbin_leader', 'cog_creative', 'belbin_peacemaker'],
     anti: []
   },
-  'Инфлюенс-маркетолог': {
+  'Influencer-менеджер': {
     primary: ['riasec_enterprising', 'riasec_social', 'cog_verbal', 'beh_self_presentation'],
     secondary: ['bigfive_extraversion', 'teique_social_skills', 'cabin_performing_art', 'beh_public_speaking'],
     anti: []
   },
 
   // Управление и бизнес-консалтинг
-  'Предприниматель': {
+  'Предприниматель (Стартапер)': {
     primary: ['riasec_enterprising', 'riasec_artistic', 'pers_risk', 'belbin_leader'],
     secondary: ['bigfive_openness', 'proactivity', 'value_intrinsic', 'beh_self_presentation'],
     anti: ['marcia_foreclosure']
@@ -257,12 +257,12 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'belbin_peacemaker', 'self_control', 'feedback_skill'],
     anti: []
   },
-  'HR-директор': {
+  'HR-бизнес-партнер': {
     primary: ['riasec_social', 'riasec_conventional', 'cog_verbal', 'empathetic_listening'],
     secondary: ['bigfive_agreeableness', 'teique_social_skills', 'belbin_leader', 'conflict_resolution'],
     anti: []
   },
-  'Change-менеджер': {
+  'Менеджер по управлению изменениями': {
     primary: ['riasec_enterprising', 'riasec_investigative', 'cog_system', 'exec_flexibility'],
     secondary: ['bigfive_openness', 'belbin_leader', 'proactivity', 'beh_public_speaking'],
     anti: []
@@ -279,7 +279,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'metacog_monitoring', 'cog_system', 'value_extrinsic'],
     anti: []
   },
-  'Криптотрейдер': {
+  'Криптотрейдер / Портфельный менеджер': {
     primary: ['riasec_enterprising', 'riasec_investigative', 'pers_risk', 'bigfive_stability'],
     secondary: ['self_control', 'teique_self_regulation', 'cog_math_logic', 'value_extrinsic'],
     anti: ['emotional_reactivity']
@@ -306,7 +306,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'cog_creative', 'cog_system', 'cog_ai_literacy'],
     anti: []
   },
-  '3D-моделлер': {
+  '3D-моделлер (Художник окружения)': {
     primary: ['riasec_artistic', 'riasec_realistic', 'cog_spatial', 'cabin_visual_art'],
     secondary: ['bigfive_conscientiousness', 'cog_creative', 'grit_perseverance', 'beh_time_management'],
     anti: []
@@ -321,7 +321,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'cog_creative', 'tolerance_ambiguity', 'beh_self_presentation'],
     anti: []
   },
-  'VR-дизайнер': {
+  'Архитектор виртуальных миров (VR/AR)': {
     primary: ['riasec_artistic', 'riasec_realistic', 'cog_spatial', 'cog_system'],
     secondary: ['bigfive_openness', 'cog_creative', 'cog_math_logic', 'cog_ai_literacy'],
     anti: []
@@ -338,12 +338,12 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'cog_creative', 'learn_deep', 'beh_time_management'],
     anti: ['riasec_realistic']
   },
-  'Подкастер': {
+  'Подкастер (Интервьюер)': {
     primary: ['riasec_artistic', 'riasec_social', 'cog_verbal', 'beh_public_speaking'],
     secondary: ['bigfive_extraversion', 'teique_social_skills', 'cabin_performing_art', 'beh_self_presentation'],
     anti: []
   },
-  'Сценарист игр': {
+  'Сценарист игр (Нарративный дизайнер)': {
     primary: ['riasec_artistic', 'riasec_investigative', 'cog_verbal', 'content_creation_style'],
     secondary: ['bigfive_openness', 'cog_creative', 'curiosity_epistemic', 'learn_deep'],
     anti: []
@@ -365,39 +365,39 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'learn_deep', 'teique_social_skills', 'metacog_planning'],
     anti: []
   },
-  'Тьютор': {
+  'Тьютор / Профориентолог': {
     primary: ['riasec_social', 'riasec_investigative', 'cog_verbal', 'empathetic_listening'],
     secondary: ['bigfive_agreeableness', 'teique_social_skills', 'teique_self_awareness', 'beh_public_speaking'],
     anti: []
   },
-  'ИТ-преподаватель': {
+  'Преподаватель программирования': {
     primary: ['riasec_social', 'riasec_realistic', 'cog_math_logic', 'beh_public_speaking'],
     secondary: ['bigfive_agreeableness', 'learn_deep', 'teique_social_skills', 'cog_ai_literacy'],
     anti: []
   },
-  'Игропедагог': {
+  'Игропедагог (Игропрактик)': {
     primary: ['riasec_social', 'riasec_artistic', 'cog_verbal', 'teique_social_skills'],
     secondary: ['bigfive_openness', 'cog_creative', 'belbin_peacemaker', 'beh_public_speaking'],
     anti: []
   },
-  'Онлайн-лектор': {
+  'Онлайн-учитель / Лектор': {
     primary: ['riasec_social', 'riasec_artistic', 'cog_verbal', 'beh_public_speaking'],
     secondary: ['bigfive_extraversion', 'teique_social_skills', 'cabin_performing_art', 'beh_self_presentation'],
     anti: []
   },
 
   // Психология и ментальное здоровье
-  'Семейный терапевт': {
+  'Семейный психотерапевт': {
     primary: ['riasec_social', 'riasec_investigative', 'cog_verbal', 'empathetic_listening'],
     secondary: ['bigfive_agreeableness', 'teique_self_awareness', 'teique_social_skills', 'bigfive_stability'],
     anti: []
   },
-  'Коуч': {
+  'Коуч по личной эффективности': {
     primary: ['riasec_social', 'riasec_artistic', 'cog_verbal', 'empathetic_listening'],
     secondary: ['bigfive_agreeableness', 'teique_self_awareness', 'teique_social_skills', 'beh_public_speaking'],
     anti: []
   },
-  'Реабилитолог': {
+  'Кинезиотерапевт (Реабилитолог)': {
     primary: ['riasec_realistic', 'riasec_social', 'cog_spatial', 'empathetic_listening'],
     secondary: ['bigfive_agreeableness', 'self_control', 'teique_self_regulation', 'routine_discipline'],
     anti: []
@@ -414,12 +414,12 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
   },
 
   // Юриспруденция, право и безопасность
-  'IT-юрист': {
+  'Юрист в сфере IT и интеллектуальной собственности': {
     primary: ['riasec_enterprising', 'riasec_investigative', 'cog_verbal', 'cog_critical'],
     secondary: ['bigfive_conscientiousness', 'metacog_planning', 'via_justice_cluster', 'feedback_skill'],
     anti: []
   },
-  'DPO': {
+  'Специалист по защите персональных данных (DPO)': {
     primary: ['riasec_conventional', 'riasec_enterprising', 'cog_math_logic', 'cog_critical'],
     secondary: ['bigfive_conscientiousness', 'self_control', 'via_justice_cluster', 'cog_ai_literacy'],
     anti: []
@@ -451,7 +451,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_openness', 'curiosity_epistemic', 'via_curiosity_scientific', 'cog_system'],
     anti: []
   },
-  'Химик-синтетик': {
+  'Химик-синтетик / Материаловед': {
     primary: ['riasec_investigative', 'riasec_realistic', 'cog_math_logic', 'grit_perseverance'],
     secondary: ['bigfive_conscientiousness', 'curiosity_epistemic', 'via_curiosity_scientific', 'cog_spatial'],
     anti: []
@@ -461,7 +461,7 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'curiosity_epistemic', 'via_curiosity_scientific', 'cog_ai_literacy'],
     anti: []
   },
-  'Социолог': {
+  'Социолог / Исследователь общественного мнения': {
     primary: ['riasec_investigative', 'riasec_artistic', 'cog_verbal', 'curiosity_epistemic'],
     secondary: ['bigfive_openness', 'cog_critical', 'learn_deep', 'feedback_skill'],
     anti: []
@@ -478,12 +478,12 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['bigfive_conscientiousness', 'curiosity_epistemic', 'cog_math_logic', 'cog_ai_literacy'],
     anti: []
   },
-  'Разработчик агро-датчиков IoT': {
+  'Специалист по умному фермерству (IoT в АПК)': {
     primary: ['riasec_realistic', 'riasec_investigative', 'cog_system', 'cog_ai_literacy'],
     secondary: ['bigfive_conscientiousness', 'curiosity_epistemic', 'cog_math_logic', 'exec_flexibility'],
     anti: []
   },
-  'Пищевой технолог (растительное мясо)': {
+  'Технолог растительного мяса и белков': {
     primary: ['riasec_investigative', 'riasec_realistic', 'cog_math_logic', 'grit_perseverance'],
     secondary: ['bigfive_openness', 'curiosity_epistemic', 'self_control', 'routine_discipline'],
     anti: []
@@ -495,56 +495,56 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     secondary: ['self_control', 'exec_inhibition', 'teique_self_regulation', 'routine_discipline'],
     anti: ['emotional_reactivity']
   },
-  'Логист': {
+  'Логист по управлению цепочками поставок': {
     primary: ['riasec_conventional', 'riasec_enterprising', 'cog_system', 'beh_time_management'],
     secondary: ['bigfive_conscientiousness', 'belbin_peacemaker', 'self_control', 'feedback_skill'],
     anti: []
   },
-  'Разработчик автопилотов': {
+  'Разработчик беспилотного транспорта': {
     primary: ['riasec_realistic', 'riasec_investigative', 'cog_math_logic', 'cog_system'],
     secondary: ['bigfive_conscientiousness', 'cog_critical', 'exec_flexibility', 'cog_ai_literacy'],
     anti: []
   },
-  'Диспетчер портов': {
+  'Диспетчер автономных портов/складов': {
     primary: ['riasec_conventional', 'riasec_realistic', 'exec_inhibition', 'bigfive_stability'],
     secondary: ['self_control', 'teique_self_regulation', 'beh_time_management', 'routine_discipline'],
     anti: ['emotional_reactivity']
   },
 
   // Спорт, фитнес и велнес
-  'Тренер киберспорта': {
+  'Тренер по киберспорту': {
     primary: ['riasec_social', 'riasec_enterprising', 'cog_math_logic', 'belbin_peacemaker'],
     secondary: ['bigfive_stability', 'belbin_leader', 'teique_social_skills', 'conflict_resolution'],
     anti: []
   },
-  'Нутрициолог': {
+  'Спортивный диетолог / Нутрициолог': {
     primary: ['riasec_investigative', 'riasec_social', 'cog_verbal', 'empathetic_listening'],
     secondary: ['bigfive_agreeableness', 'teique_self_awareness', 'teique_social_skills', 'beh_public_speaking'],
     anti: []
   },
-  'Фитнес-коуч': {
+  'Персональный фитнес-коуч': {
     primary: ['riasec_realistic', 'riasec_social', 'cog_spatial', 'beh_self_presentation'],
     secondary: ['bigfive_extraversion', 'teique_social_skills', 'teique_motivation', 'beh_public_speaking'],
     anti: []
   },
-  'Спортивный event-менеджер': {
+  'Менеджер спортивных событий': {
     primary: ['riasec_enterprising', 'riasec_social', 'beh_time_management', 'belbin_doer'],
     secondary: ['bigfive_extraversion', 'teique_social_skills', 'belbin_leader', 'beh_self_presentation'],
     anti: ['mot_security']
   },
 
   // Туризм и премиальное гостеприимство
-  'Глэмпинг-управляющий': {
+  'Управляющий глэмпингом / бутик-отелем': {
     primary: ['riasec_enterprising', 'riasec_social', 'beh_time_management', 'empathetic_listening'],
     secondary: ['bigfive_extraversion', 'teique_social_skills', 'belbin_peacemaker', 'conflict_resolution'],
     anti: []
   },
-  'Эко-гид': {
+  'Разработчик эко-туристических маршрутов': {
     primary: ['riasec_social', 'riasec_realistic', 'cog_verbal', 'beh_public_speaking'],
     secondary: ['bigfive_agreeableness', 'teique_motivation', 'tolerance_ambiguity', 'beh_self_presentation'],
     anti: []
   },
-  'MICE-организатор': {
+  'Организатор делового туризма (MICE)': {
     primary: ['riasec_enterprising', 'riasec_social', 'beh_time_management', 'belbin_doer'],
     secondary: ['bigfive_extraversion', 'teique_social_skills', 'belbin_leader', 'beh_public_speaking'],
     anti: ['mot_security']
@@ -629,5 +629,27 @@ export const characteristicsMapping: Record<string, ProfessionMapping> = {
     primary: ['riasec_enterprising', 'riasec_social', 'cog_verbal', 'beh_public_speaking'],
     secondary: ['bigfive_extraversion', 'teique_social_skills', 'teique_motivation', 'beh_self_presentation'],
     anti: ['mot_security']
+  },
+
+  // Добавлено по итогам исследования рынка 2026 (docs/industries_and_professions/07_market_trends_2026.md)
+  'Специалист по кибербезопасности': {
+    primary: ['riasec_investigative', 'riasec_conventional', 'cog_critical', 'exec_inhibition'],
+    secondary: ['bigfive_stability', 'cog_system', 'self_control', 'digital_hygiene'],
+    anti: ['decision_impulsive']
+  },
+  'MLOps-инженер': {
+    primary: ['riasec_conventional', 'riasec_realistic', 'cog_system', 'cog_ai_literacy'],
+    secondary: ['bigfive_conscientiousness', 'bigfive_stability', 'exec_flexibility', 'resilience_failure'],
+    anti: []
+  },
+  'Техник по промышленной робототехнике и сварочным комплексам': {
+    primary: ['riasec_realistic', 'riasec_conventional', 'cog_spatial', 'routine_discipline'],
+    secondary: ['bigfive_conscientiousness', 'exec_inhibition', 'grit_perseverance', 'self_efficacy_academic'],
+    anti: ['riasec_social']
+  },
+  'Инженер по накопителям энергии': {
+    primary: ['riasec_realistic', 'riasec_investigative', 'cog_math_logic', 'subj_stem'],
+    secondary: ['bigfive_conscientiousness', 'bigfive_openness', 'cog_system', 'curiosity_epistemic'],
+    anti: []
   }
 };
