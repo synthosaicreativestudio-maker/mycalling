@@ -5,26 +5,24 @@ import { viaStrengths } from '../../data/viaStrengths';
 import { pvqValues } from '../../data/pvqValues';
 
 describe('riasecScorer', () => {
-  it('computes per-scale averages from varied answers', () => {
+  it('computes per-scale averages and a tie-broken Holland code from varied answers', () => {
     const answers: Record<string, number> = {
-      'riasec-r1': 5, 'riasec-r2': 4,
-      'riasec-i1': 3, 'riasec-i2': 3,
-      'riasec-a1': 2, 'riasec-a2': 2,
-      'riasec-s1': 4, 'riasec-s2': 5,
-      'riasec-e1': 1, 'riasec-e2': 2,
-      'riasec-c1': 3, 'riasec-c2': 4,
+      'riasec-r1': 5, 'riasec-r2': 4, 'riasec-r3': 5, 'riasec-r4': 4,
+      'riasec-i1': 3, 'riasec-i2': 3, 'riasec-i3': 3, 'riasec-i4': 3,
+      'riasec-a1': 2, 'riasec-a2': 2, 'riasec-a3': 2, 'riasec-a4': 2,
+      'riasec-s1': 4, 'riasec-s2': 5, 'riasec-s3': 4, 'riasec-s4': 5,
+      'riasec-e1': 1, 'riasec-e2': 2, 'riasec-e3': 1, 'riasec-e4': 2,
+      'riasec-c1': 3, 'riasec-c2': 4, 'riasec-c3': 3, 'riasec-c4': 4,
     };
     const result = riasecScorer.score(answers, diagnosticQuestions);
-    expect(result.scores).toEqual({ R: 4.5, I: 3, A: 2, S: 4.5, E: 1.5, C: 3.5 });
+    expect(result.scores).toEqual({ R: 4.5, I: 3, A: 2, S: 4.5, E: 1.5, C: 3.5, hollandCode: 'RSC' });
     expect(result.reliability).toBe('high');
   });
 
   it('flags flat-pattern answers as low reliability', () => {
-    const answers: Record<string, number> = {
-      'riasec-r1': 3, 'riasec-r2': 3, 'riasec-i1': 3, 'riasec-i2': 3,
-      'riasec-a1': 3, 'riasec-a2': 3, 'riasec-s1': 3, 'riasec-s2': 3,
-      'riasec-e1': 3, 'riasec-e2': 3, 'riasec-c1': 3, 'riasec-c2': 3,
-    };
+    const answers: Record<string, number> = {};
+    ['r1', 'r2', 'r3', 'r4', 'i1', 'i2', 'i3', 'i4', 'a1', 'a2', 'a3', 'a4', 's1', 's2', 's3', 's4', 'e1', 'e2', 'e3', 'e4', 'c1', 'c2', 'c3', 'c4']
+      .forEach((suffix) => { answers[`riasec-${suffix}`] = 3; });
     const result = riasecScorer.score(answers, diagnosticQuestions);
     expect(result.reliability).toBe('low');
   });

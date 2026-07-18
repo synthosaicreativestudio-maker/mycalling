@@ -44,9 +44,15 @@ export const riasecScorer: TestScorer = {
       counts[q.scale] = (counts[q.scale] ?? 0) + 1;
     });
     const scales = ['R', 'I', 'A', 'S', 'E', 'C'];
-    const scores = Object.fromEntries(
+    const scores: Record<string, unknown> = Object.fromEntries(
       scales.map((key) => [key, average(sums[key] ?? 0, counts[key] ?? 0)])
     );
+    // Код Холланда: 3 буквы по убыванию балла; тай-брейк — исходный порядок R-I-A-S-E-C.
+    const hollandCode = [...scales]
+      .sort((a, b) => (scores[b] as number) - (scores[a] as number) || scales.indexOf(a) - scales.indexOf(b))
+      .slice(0, 3)
+      .join('');
+    scores.hollandCode = hollandCode;
     return { scores, reliability: computeReliability(answers, qs) };
   },
 };

@@ -127,7 +127,11 @@ export async function GET(request: Request) {
         results[scorer.testCode] = scorer.score(answers, diagnosticQuestions, scoreContext);
       });
 
-      const finalRiasec = results.RIASEC.scores as Record<string, number>;
+      const riasecScoresRaw = results.RIASEC.scores as Record<string, number | string>;
+      const hollandCode = riasecScoresRaw.hollandCode as string;
+      const finalRiasec: Record<string, number> = Object.fromEntries(
+        Object.entries(riasecScoresRaw).filter(([k]) => k !== 'hollandCode')
+      ) as Record<string, number>;
       const finalBigFive = results.BFI.scores as Record<string, number | boolean>;
       const icarScores = results.ICAR.scores as { raw: number; bySubscale: Record<string, number>; band: string };
       const correctIcarAnswers = icarScores.raw;
@@ -186,6 +190,7 @@ export async function GET(request: Request) {
       const summaryProfile = buildSummaryProfile({
         interests: {
           riasec: finalRiasec,
+          hollandCode,
           antiInterests: getArrayField('antiInterests'),
           hobbies: getArrayField('voluntaryHobbies'),
         },
@@ -257,6 +262,7 @@ export async function GET(request: Request) {
 
 Данные для анализа:
 - Профиль интересов (RIASEC): ${JSON.stringify(finalRiasec)}
+- Код Холланда (3 буквы ведущих типов интересов): ${hollandCode}
 - Профиль личности (Big Five): ${JSON.stringify(finalBigFive)}
 - Логика (ICAR): уровень готовности к задачам такого типа относительно возраста — «${icarScores.band}» (verbal: ${icarScores.bySubscale.verbal ?? 0}/3, numeric: ${icarScores.bySubscale.numeric ?? 0}/3, spatial: ${icarScores.bySubscale.spatial ?? 0}/3)
 - Прокрастинация (Лэй): ${procrastinationScore} баллов (шкала 4-20)
@@ -289,7 +295,7 @@ export async function GET(request: Request) {
       "description": "Как проявляется."
     }
   ],
-  "riasecSummary": "Краткое описание ведущих типов интересов.",
+  "riasecSummary": "Краткое описание ведущих типов интересов, упомяните код Холланда «${hollandCode}» как \"твой код призвания\".",
   "strengths": ["Сильная сторона 1", "Сильная сторона 2"],
   "signatureStrengths": [
     {
@@ -421,7 +427,7 @@ export async function GET(request: Request) {
           nextQuestionReportSchema,
           0.7
         );
-        htmlReportContent = JSON.stringify({ ...resultJson, riasecScores: finalRiasec, successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications }, isFallback: false });
+        htmlReportContent = JSON.stringify({ ...resultJson, riasecScores: finalRiasec, hollandCode, successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications }, isFallback: false });
       } catch (err) {
         console.error('Gemini report generation failed in next-question, creating fallback report:', err);
         // Резервный отчет на основе реальных баллов, чтобы личный кабинет не оставался пустым
@@ -538,7 +544,7 @@ export async function GET(request: Request) {
           })),
           isFallback: true
         };
-        htmlReportContent = JSON.stringify({ ...fallbackReport, riasecScores: finalRiasec, successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications } });
+        htmlReportContent = JSON.stringify({ ...fallbackReport, riasecScores: finalRiasec, hollandCode, successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications } });
       }
 
       // Безопасный upsert отчета в БД

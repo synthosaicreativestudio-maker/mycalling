@@ -130,6 +130,114 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
     options: scaleOptions,
     visualAssetUrl: '/assets/webp/conventional.webp'
   },
+  {
+    id: 'riasec-r3',
+    testCode: 'RIASEC',
+    text: 'Я бы с удовольствием чинил велосипед, собирал мебель или разбирался в работе бытовой техники.',
+    scale: 'R',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/realistic.webp'
+  },
+  {
+    id: 'riasec-r4',
+    testCode: 'RIASEC',
+    text: 'Мне интереснее работать руками на улице или в мастерской, чем сидеть за столом с бумагами.',
+    scale: 'R',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/realistic.webp'
+  },
+  {
+    id: 'riasec-i3',
+    testCode: 'RIASEC',
+    text: 'Мне нравится читать про научные открытия и разбираться, почему что-то работает именно так.',
+    scale: 'I',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/investigative.webp'
+  },
+  {
+    id: 'riasec-i4',
+    testCode: 'RIASEC',
+    text: 'Я люблю проводить эксперименты и проверять гипотезы, а не просто принимать готовые ответы.',
+    scale: 'I',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/investigative.webp'
+  },
+  {
+    id: 'riasec-a3',
+    testCode: 'RIASEC',
+    text: 'Мне нравится придумывать оригинальные идеи для дизайна, текста, видео или музыки.',
+    scale: 'A',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/artistic.webp'
+  },
+  {
+    id: 'riasec-a4',
+    testCode: 'RIASEC',
+    text: 'Я предпочитаю задачи, где можно проявить фантазию, а не действовать по готовому шаблону.',
+    scale: 'A',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/artistic.webp'
+  },
+  {
+    id: 'riasec-s3',
+    testCode: 'RIASEC',
+    text: 'Мне нравится выслушивать людей и помогать им разобраться в сложной личной ситуации.',
+    scale: 'S',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/social.webp'
+  },
+  {
+    id: 'riasec-s4',
+    testCode: 'RIASEC',
+    text: 'Я бы хотел заниматься чем-то, что напрямую помогает людям — обучением, заботой, консультированием.',
+    scale: 'S',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/social.webp'
+  },
+  {
+    id: 'riasec-e3',
+    testCode: 'RIASEC',
+    text: 'Мне нравится убеждать людей в своей точке зрения и вести переговоры, чтобы получить нужный результат.',
+    scale: 'E',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/enterprising.webp'
+  },
+  {
+    id: 'riasec-e4',
+    testCode: 'RIASEC',
+    text: 'Я легко беру на себя ответственность за проект и люблю видеть, как растут его результаты.',
+    scale: 'E',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/enterprising.webp'
+  },
+  {
+    id: 'riasec-c3',
+    testCode: 'RIASEC',
+    text: 'Мне комфортно работать с таблицами, базами данных или бухгалтерскими расчётами.',
+    scale: 'C',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/conventional.webp'
+  },
+  {
+    id: 'riasec-c4',
+    testCode: 'RIASEC',
+    text: 'Я стараюсь доводить любую задачу до полного порядка — проверять детали и не оставлять хвостов.',
+    scale: 'C',
+    reverseScored: false,
+    options: scaleOptions,
+    visualAssetUrl: '/assets/webp/conventional.webp'
+  },
 
   // ─── 2. Личность (Big Five / OCEAN) ───
   {

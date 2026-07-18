@@ -29,6 +29,7 @@ type ReportData = {
   personalityTraits?: Trait[];
   riasecSummary?: string;
   riasecScores?: Record<string, number>;
+  hollandCode?: string;
   strengths: string[];
   signatureStrengths?: { code: string; nameRu: string; description: string }[];
   growthAreas: string[];
@@ -56,6 +57,7 @@ const defaultReport: ReportData = {
     'Профиль указывает на склонность к решению концептуальных задач на стыке технологий и дизайна.'
   ],
   riasecScores: { R: 60, I: 85, A: 80, S: 50, E: 45, C: 30 },
+  hollandCode: 'IAR',
   personalityTraits: [
     { name: 'Открытость новому', score: 85, description: 'Высокая любознательность, готовность пробовать новые подходы и генерировать идеи.' },
     { name: 'Добросовестность', score: 70, description: 'Умение организовать учебный процесс и доводить дела до результата.' },
@@ -223,6 +225,7 @@ function ReportPageContent() {
           personalityTraits: sanitizedTraits,
           riasecSummary: rawData.riasecSummary || '',
           riasecScores: rawData.riasecScores || {},
+          hollandCode: rawData.hollandCode || undefined,
           strengths: Array.isArray(rawData.strengths) ? rawData.strengths : [],
           signatureStrengths: Array.isArray(rawData.signatureStrengths) ? rawData.signatureStrengths : [],
           growthAreas: Array.isArray(rawData.growthAreas) ? rawData.growthAreas : [],
@@ -605,6 +608,11 @@ function ReportPageContent() {
                     <div className="flex items-center gap-3 mb-4">
                       <Compass className="h-5 w-5 text-[#3B82F6]" />
                       <h2 className="text-lg font-bold text-white">Профессиональные интересы (RIASEC)</h2>
+                      {report.hollandCode && (
+                        <span className="ml-auto rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[#3B82F6]">
+                          Твой код призвания: {report.hollandCode}
+                        </span>
+                      )}
                     </div>
                     <p className="text-[#7A8A9E] text-sm leading-relaxed">{report.riasecSummary}</p>
                   </div>
