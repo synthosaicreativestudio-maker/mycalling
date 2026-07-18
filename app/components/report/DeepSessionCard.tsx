@@ -28,7 +28,7 @@ export default function DeepSessionCard({ deepSession }: DeepSessionCardProps) {
     <div className="glass-card rounded-[28px] p-8 border border-[#C4A484]/30 theme-deep-session-card">
       <div className="flex items-center gap-3 mb-5">
         <Sparkles className="h-5 w-5 text-[#C4A484] theme-deep-session-icon" />
-        <h2 className="text-lg font-bold text-white">Глубинная сессия</h2>
+        <h2 className="text-lg font-bold text-white">Глубокая коуч сессия</h2>
       </div>
 
       <p className="text-sm text-[#7A8A9E] leading-relaxed mb-6 theme-subcard-text">

@@ -742,7 +742,7 @@ function ReportPageContent() {
 
         {report.deepSession && (
           <div className="print-card">
-            <h2>Глубинная сессия</h2>
+            <h2>Глубокая коуч сессия</h2>
             <p>{report.deepSession.synthesis}</p>
             {report.deepSession.goal && <p><strong>Цель:</strong> {report.deepSession.goal}</p>}
             {report.deepSession.identity && <p><strong>Идентичность:</strong> {report.deepSession.identity}</p>}
