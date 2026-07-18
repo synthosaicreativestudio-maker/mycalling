@@ -2,6 +2,15 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { User, Phone, LogOut, CheckCircle2, ChevronRight, Lock } from 'lucide-react';
+import { narrative, ASSESSMENT_CHAPTER_ORDER } from '../../data/narrative';
+
+// В questions.ts на данный момент реально существуют не все блоки из ASSESSMENT_CHAPTER_ORDER
+// (например, VIA/PVQ подключаются отдельным этапом Д-1/Д-11). Показываем только те главы,
+// которые сейчас есть в тестовой батарее, чтобы не обещать шаги, которых ещё нет.
+const EXISTING_TEST_CODES = new Set(['RIASEC', 'BFI', 'ICAR', 'PROCRASTINATION']);
+const visibleChapters = ASSESSMENT_CHAPTER_ORDER.filter((code) => EXISTING_TEST_CODES.has(code)).map(
+  (code) => narrative[code]
+);
 
 interface CabinetProgressProps {
   progress: {
@@ -224,6 +233,23 @@ export default function CabinetProgress({ progress, session, handleLogout, total
               <p className="text-xs text-[#7A8A9E] leading-relaxed">
                 Определение вашего типа мышления (RIASEC), командных ролей, ценностей и ведущих интересов по интерактивной шкале.
               </p>
+              {/* Главы игрового квеста тестирования (Д-8) */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {visibleChapters.map((chapter) => (
+                  <span
+                    key={chapter.chapterTitle}
+                    title={chapter.intro}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-semibold ${
+                      progress.testCompleted
+                        ? 'border-green-500/20 bg-green-500/10 text-green-400'
+                        : 'border-white/10 bg-white/[0.03] text-[#7A8A9E]'
+                    }`}
+                  >
+                    <span>{chapter.emoji}</span>
+                    <span>{chapter.chapterTitle}</span>
+                  </span>
+                ))}
+              </div>
             </div>
             
             <div className="relative z-10 shrink-0">

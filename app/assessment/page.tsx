@@ -76,6 +76,7 @@ const getAdaptiveQuestionText = (qId: string, baseText: string, theme: string) =
   return baseText;
 };
 import { useDiagnosticStore } from '../store/diagnosticStore';
+import { getNarrative, type NarrativeChapter } from '../data/narrative';
 
 const blockIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   riasec: Compass,
@@ -99,6 +100,16 @@ export default function AssessmentPage() {
   const [lastSelectedValue, setLastSelectedValue] = useState<number | null>(null);
   const [isDebounced, setIsDebounced] = useState(false);
   const [imgError, setImgError] = useState(false);
+
+  // Межблочный экран-переход (Д-8: игровая упаковка). Показывается, когда
+  // test_type нового вопроса отличается от предыдущего — то есть началась
+  // новая «глава» диагностики. Чисто презентационное состояние, не влияет
+  // на store/API.
+  const [chapterTransition, setChapterTransition] = useState<{
+    to: NarrativeChapter;
+    from: NarrativeChapter | null;
+    questionId: string;
+  } | null>(null);
 
   const questionStartTime = useRef<number>(0);
 
@@ -159,9 +170,24 @@ export default function AssessmentPage() {
     if (store.currentQuestion) {
       questionStartTime.current = Date.now();
       setImgError(false);
-      setPrevBlock(store.currentQuestion.test_type);
+
+      const newBlock = store.currentQuestion.test_type;
+      // Показываем экран-переход, если это первый вопрос сессии или блок сменился
+      if (newBlock !== prevBlock) {
+        const toChapter = getNarrative(newBlock);
+        if (toChapter) {
+          setChapterTransition({
+            to: toChapter,
+            from: getNarrative(prevBlock),
+            questionId: store.currentQuestion.question_id,
+          });
+        }
+      }
+
+      setPrevBlock(newBlock);
       setLastSelectedValue(null); // Сброс выделения для нового вопроса
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.currentQuestion?.question_id]);
 
   // Перенаправление на отчет при завершении
@@ -178,6 +204,9 @@ export default function AssessmentPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (store.lockdownTimeLeft > 0 || store.isLoading) return;
       if (store.currentQuestion && store.answersHistory[store.currentQuestion.question_id]) return;
+      // Экран-переход между главами (Д-8) перехватывает клавиатуру, чтобы
+      // случайное нажатие 1-5 не отправило ответ на вопрос, который ещё не показан.
+      if (chapterTransition && store.currentQuestion && chapterTransition.questionId === store.currentQuestion.question_id) return;
 
       if (['1', '2', '3', '4', '5'].includes(e.key)) {
         const val = parseInt(e.key, 10);
@@ -190,7 +219,7 @@ export default function AssessmentPage() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.currentQuestion, store.lockdownTimeLeft, store.isLoading, store.answersHistory]);
+  }, [store.currentQuestion, store.lockdownTimeLeft, store.isLoading, store.answersHistory, chapterTransition]);
 
   const handleChooseAnswer = async (value: number) => {
     if (isDebounced || store.isLoading || store.lockdownTimeLeft > 0) return;
@@ -254,6 +283,45 @@ export default function AssessmentPage() {
 
   const narrativeTheme = (currentQuestion as any).narrative_theme || 'CREATIVE';
   const currentStyle = themeStyles[narrativeTheme] || themeStyles.CREATIVE;
+
+  // 3. Межблочный экран-переход («глава» диагностики). Показывается один раз
+  // перед первым вопросом нового блока и не трогает store/API — пользователь
+  // просто жмёт «Продолжить», чтобы увидеть сам вопрос.
+  if (chapterTransition && chapterTransition.questionId === currentQuestion.question_id) {
+    const { to, from } = chapterTransition;
+    return (
+      <main className={`mx-auto flex min-h-[calc(100vh-140px)] max-w-xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10 transition-all duration-700 bg-gradient-to-b ${currentStyle.bgClass}`}>
+        <div className="rounded-[32px] glass-card p-8 md:p-10 text-center relative overflow-hidden border border-white/10 shadow-2xl">
+          <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-[120px] pointer-events-none opacity-20" style={{ backgroundColor: currentStyle.accentColor }} />
+          <div className="relative z-10 flex flex-col items-center space-y-6">
+            {from && (
+              <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wide">
+                {from.emoji} «{from.chapterTitle}» пройдена — {from.outro}
+              </p>
+            )}
+            <span className="text-5xl">{to.emoji}</span>
+            <div className="space-y-3">
+              <span className="text-[10px] uppercase tracking-[0.25em] font-bold" style={{ color: currentStyle.accentColor }}>
+                Глава {to.chapterNumber || ''} · Новый этап
+              </span>
+              <h1 className="text-2xl font-bold font-sans text-white">{to.chapterTitle}</h1>
+              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
+                {to.intro}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setChapterTransition(null)}
+              className="mt-2 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold font-sans text-white transition duration-300 hover:opacity-90"
+              style={{ backgroundColor: currentStyle.accentColor }}
+            >
+              Продолжить
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={`mx-auto h-[calc(100dvh-90px)] max-w-7xl px-4 py-4 lg:px-8 relative z-10 pt-20 flex flex-col justify-between overflow-hidden transition-all duration-700 bg-gradient-to-b ${currentStyle.bgClass}`}>
