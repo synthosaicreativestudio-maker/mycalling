@@ -712,10 +712,10 @@ export default function CoachPage() {
       </div>
 
       {/* Main layout container: Chat + Wheel of Vocation */}
-      <div className="w-full max-w-7xl flex-1 min-h-0 grid grid-cols-12 gap-6 relative overflow-hidden">
+      <div className="w-full max-w-7xl flex-1 min-h-0 grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6 relative overflow-hidden">
 
         {/* Left column: Chat History & Input */}
-        <div className="col-span-12 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 shrink-0 border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
+        <div className="col-span-1 md:col-span-7 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 shrink-0 border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
           
           {/* Horizontal Stepper for DEEP mode */}
           {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 22 && (
@@ -1003,7 +1003,7 @@ export default function CoachPage() {
 
         {/* Right column: Wheel of Vocation or Pyramid of Alignment */}
         <div
-          className="hidden lg:flex lg:col-span-5 flex-col h-full min-h-0 relative select-none glass-card rounded-3xl overflow-hidden border border-white/5 bg-[#040506]/35 backdrop-blur-xl"
+          className="hidden md:flex md:col-span-5 lg:col-span-5 flex-col h-full min-h-0 relative select-none glass-card rounded-3xl overflow-hidden border border-white/5 bg-[#040506]/35 backdrop-blur-xl"
         >
         {/* Tabs and Zoom-in buttons for desktop */}
         {extractedData.sessionMode === 'DEEP' ? (
@@ -1068,7 +1068,7 @@ export default function CoachPage() {
       </div>
 
       {/* Floating button for mobile/tablet to view Wheel/Pyramid */}
-      <div className="lg:hidden fixed bottom-6 right-6 z-30">
+      <div className="md:hidden fixed bottom-6 right-6 z-30">
         <button
           onClick={() => setIsWheelHovered(true)}
           className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#3B82F6] text-white font-sans font-bold text-xs shadow-2xl shadow-[#3B82F6]/50 border border-white/20 active:scale-95 transition-all"
