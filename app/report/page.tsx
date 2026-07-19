@@ -616,16 +616,22 @@ function ReportPageContent() {
                     </div>
                   )}
 
-                  {/* Ведущий архетип — вычислен детерминированно из VIA + PVQ */}
+                  {/* Метафора роли — вычислена детерминированно из VIA + PVQ, показывается
+                      как отдельный мотивирующий блок, НЕ как психологический диагноз или
+                      тип личности (методологический аудит: архетипы Юнга не валидированы
+                      психометрически даже при детерминированном подсчёте). */}
                   {report.archetype && (
                     <div className="glass-card rounded-[28px] p-8 border border-[#8b5cf6]/25">
                       <div className="flex items-center gap-2 mb-1">
                         <Sparkles className="w-4 h-4 text-[#8b5cf6]" />
-                        <span className="text-[10px] uppercase tracking-widest font-extrabold text-[#8b5cf6]">Твой архетип</span>
+                        <span className="text-[10px] uppercase tracking-widest font-extrabold text-[#8b5cf6]">Твоя метафора роли</span>
                       </div>
                       <h2 className="text-2xl font-bold text-white mb-2">{report.archetype.nameRu}</h2>
                       <p className="text-sm text-[#93A3B8] leading-relaxed mb-3">
                         Твоя суперсила — {report.archetype.superpower}
+                      </p>
+                      <p className="text-[10px] text-[#7A8A9E]/80 leading-relaxed mb-3">
+                        Это образный ярлык поверх твоих результатов VIA и ценностей — способ увидеть себя в истории, а не психологический диагноз или тип личности.
                       </p>
                       {report.archetype.evidence && report.archetype.evidence.length > 0 && (
                         <div className="flex flex-wrap gap-2">
