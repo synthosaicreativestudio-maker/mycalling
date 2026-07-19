@@ -8,6 +8,7 @@ import { generateJson } from '../../../../lib/gemini';
 import { scorers, type ScoreResult } from '../../../../lib/diagnostic/scoring';
 import { viaStrengthByCode, viaVirtueNames } from '../../../../data/viaStrengths';
 import { computeConsistency } from '../../../../lib/profile/consistency';
+import { topProfessions, type ProfessionMatch } from '../../../../lib/profile/professionMatch';
 import { deriveArchetype } from '../../../../lib/profile/archetype';
 import { deriveSkillFormula } from '../../../../lib/profile/skillFormula';
 import { buildSummaryProfile } from '../../../../lib/profile/layers';
@@ -145,6 +146,35 @@ export async function GET(request: Request) {
         Object.entries(riasecScoresRaw).filter(([k]) => k !== 'hollandCode')
       ) as Record<string, number>;
       const finalBigFive = results.BFI.scores as Record<string, number | boolean>;
+
+      // §11.6: детерминированный топ-20 профессий из базы (ранжируется ВСЯ база
+      // 119 профессий по RIASEC + Big Five). Названия всегда из базы, поэтому
+      // карточка в отчёте (RpgProfessionCard) гарантированно обогащается
+      // RIASEC-статами. why персонализируется моделью для верхних кандидатов
+      // (см. buildReportProfessions), для остальных берётся текст из базы.
+      const rankedProfessions: ProfessionMatch[] = topProfessions(finalRiasec, finalBigFive, 20);
+      // Топ-8 названий передаём модели как кандидатов для персонального why.
+      const professionCandidatesForLlm = rankedProfessions
+        .slice(0, 8)
+        .map((m) => `- ${m.profession.name}: ${m.profession.summary}`)
+        .join('\n');
+      // Собирает финальный массив из 20 профессий: имя+score детерминированные,
+      // why — от модели, если она написала про это же название (дословно),
+      // иначе готовый текст из базы.
+      const buildReportProfessions = (llmProfessions: unknown): { name: string; score: number; why: string }[] => {
+        const llmList = Array.isArray(llmProfessions) ? llmProfessions : [];
+        return rankedProfessions.map(({ profession, matchScore }) => {
+          const match = llmList.find(
+            (p: any) => p && typeof p.name === 'string' && p.name.trim() === profession.name,
+          ) as { why?: unknown } | undefined;
+          const llmWhy = match && typeof match.why === 'string' ? match.why.trim() : '';
+          return {
+            name: profession.name,
+            score: matchScore,
+            why: llmWhy.length > 10 ? llmWhy : profession.why,
+          };
+        });
+      };
       const icarScores = results.ICAR.scores as { raw: number; bySubscale: Record<string, number>; band: string };
       const correctIcarAnswers = icarScores.raw;
       const procrastinationScore = (results.PROCRASTINATION.scores as { score: number }).score;
@@ -426,6 +456,8 @@ export async function GET(request: Request) {
 - Ведущие ценности по тесту PVQ Шварца (топ-3): ${topPvqNames.join(', ')}
 - Ведущий архетип (вычислен детерминированно из VIA + PVQ, НЕ придумывай свой): ${archetype ? `${archetype.nameRu} — суперсила: ${archetype.superpower}` : 'не определён'}
 - Глубинная сессия: ${deepSessionPrompt}
+- Кандидаты профессий (уже детерминированно отобраны по профилю ученика из базы — используй ТОЛЬКО эти названия, ДОСЛОВНО, ничего не выдумывай):
+${professionCandidatesForLlm}
 
 Правила формирования отчета:
 1. Сопоставьте ведущие интересы RIASEC с профессиональными рекомендациями.
@@ -433,7 +465,7 @@ export async function GET(request: Request) {
 3. Опишите сильные стороны и зоны развития с учетом прокрастинации (если балл прокрастинации выше 12, дайте совет, как с этим справляться) и логических задач. КРИТИЧЕСКИ ВАЖНО: НИКОГДА не давайте абсолютных оценок интеллекта или чисел вида "X из Y правильных" — только уровень готовности относительно возраста ("developing"/"solid"/"strong" переводите как "в процессе развития"/"уверенный уровень"/"сильная сторона").
 4. Раздел "strengths" (сильные стороны) стройте В ПЕРВУЮ ОЧЕРЕДЬ на основе топ-5 сигнатурных сил VIA Youth, а не на общих домыслах — раскройте, как каждая сила проявляется в учебе и жизни подростка.
 5. Раздел коуч-сессии ("coachSection"): КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО дословно цитировать пользователя, копировать его формулировки из чата или подписывать текст пометкой "Источник: диалог с нейрокоучем" — это не транскрипт. Вместо этого напишите синтезированный профессиональный инсайт от третьего лица в стиле executive summary психологической диагностики (уровень 16Personalities/CliftonStrengths): конкретно, без повторов, опираясь на данные коуч-диалога и цифровой профиль, но никогда не пересказывая ответы пользователя буквально. При анализе ценностей опирайтесь в первую очередь на топ-3 ценности по тесту PVQ Шварца (см. данные выше), а качественные слова коуча используйте как дополнение, а не замену.
-6. Предложите 3-5 конкретных профессий, объяснив причину выбора ('why').
+6. Раздел "professions": для КАЖДОГО кандидата из списка выше (используй название ДОСЛОВНО, не переименовывай и не добавляй своих) напиши персональное поле 'why' — 1-2 предложения о том, как в этой профессии сходятся интересы (RIASEC), характер (Big Five) и формула успеха именно этого подростка. Не выдумывай профессии вне списка кандидатов.
 7. Раздел "innerConflicts": если индекс согласованности ниже "high" (см. данные выше), заполните его 1-3 пунктами — по каждому обнаруженному противоречию сформулируйте тёплый, любопытный (не осуждающий) вопрос-наблюдение в стиле "Тест показал X, но ты говорил Y — как это уживается в тебе?", используя фактические данные из списка противоречий выше. Если индекс "high" и противоречий нет — верните пустой массив.
 8. Раздел "professions": вместо привязки только к должностям, объясняйте в 'why' связь профессии с формулой успеха (3 компетенции выше), когда это уместно — подчеркните, что эти компетенции переносятся между профессиями, если технологии изменят конкретные роли.
 9. КРИТИЧЕСКИ ВАЖНО: Нигде в текстах отчета НЕ должно встречаться аббревиатура 'ИИ' или словосочетание 'искусственный интеллект'. Заменяйте их на 'алгоритмы', 'автоматизация', 'цифровые системы'.
@@ -602,6 +634,10 @@ export async function GET(request: Request) {
           topValues: topPvqNames,
           topValueScores: topPvqValueScores,
           icarSubscales: icarScores.bySubscale,
+          // §11.6: раздел профессий детерминирован (топ-20 из базы), а не свободная
+          // генерация модели — имена всегда совпадают с базой, why персонализирован
+          // моделью там, где она написала про это же название, иначе текст из базы.
+          professions: buildReportProfessions((resultJson as any)?.professions),
           // Переопределяем детерминированно: не полагаемся на то, что модель дословно
           // скопирует уже готовый синтез без искажений/добавления цитат.
           deepSession: deepSessionForReport,
@@ -718,18 +754,9 @@ export async function GET(request: Request) {
             deepActions: coachData.deepActions || '',
             deepFirstStep: coachData.deepFirstStep || ''
           },
-          professions: [
-            {
-              name: 'Специалист по автоматизации процессов',
-              score: 92,
-              why: 'Хорошее сочетание аналитического мышления и склонности к упорядочиванию данных.'
-            },
-            {
-              name: 'Консультант по цифровым решениям',
-              score: 88,
-              why: 'Подходит под выраженный социальный профиль и интерес к практическому применению технологий.'
-            }
-          ],
+          // §11.6: даже в фолбэке (сбой генерации) профессии детерминированы —
+          // топ-20 из базы по реальному профилю, а не два захардкоженных примера.
+          professions: buildReportProfessions(null),
           consistencyLevel: consistency.level,
           innerConflicts: innerConflictsForReport,
           archetype: archetype ? { nameRu: archetype.nameRu, superpower: archetype.superpower, evidence: archetype.evidence } : null,
