@@ -32,14 +32,19 @@ export const env = {
   })(),
   /** Прямой URL подключения к PostgreSQL (для миграций) */
   DIRECT_URL: getEnvOrThrow('DIRECT_URL'),
-  /** API-ключ ProxyAPI для генерации отчётов */
-  PROXYAPI_KEY: (() => {
-    const key = getEnvOrThrow('PROXYAPI_KEY');
-    const fallbackKey = getEnvOptional('PROXYAPI_KEY_FALLBACK');
-    return key === 'fe_oa_8241bb58e1c68cff538eb3076ac734b4de235309d7832f5c' && fallbackKey
-      ? fallbackKey
-      : key;
-  })(),
+  /** API-ключ ProxyAPI для генерации отчётов (основной) */
+  PROXYAPI_KEY: getEnvOrThrow('PROXYAPI_KEY'),
+  /**
+   * Все рабочие ключи ProxyAPI по порядку приоритета (основной + резервные).
+   * INC-005 (19.07.2026): провайдер отдавал то 500 "container instances
+   * exceeded", то 401 на один и тот же ключ — при таких плавающих сбоях
+   * нужен реальный перебор нескольких ключей, а не один статичный fallback.
+   */
+  PROXYAPI_KEYS: [
+    getEnvOrThrow('PROXYAPI_KEY'),
+    getEnvOptional('PROXYAPI_KEY_FALLBACK'),
+    getEnvOptional('PROXYAPI_KEY_FALLBACK2'),
+  ].filter((key): key is string => !!key),
   /** URL ProxyAPI */
   PROXYAPI_URL: getEnvOptional('PROXYAPI_URL', 'https://api.proxyapi.ru/openai/v1/chat/completions'),
   /** URL Redis (опционально) */

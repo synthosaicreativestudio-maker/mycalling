@@ -3,7 +3,7 @@ import 'server-only';
 import https from 'https';
 import { env } from './env';
 
-const FREEMODEL_API_KEY = env.PROXYAPI_KEY;
+const FREEMODEL_API_KEYS = env.PROXYAPI_KEYS;
 const FREEMODEL_URL = "/v1/chat/completions";
 
 // Ключ ProxyAPI обновлён 19.07.2026 (INC-005) — новый ключ не даёт доступа к
@@ -19,10 +19,10 @@ interface Message {
 /**
  * Выполняет запрос к Freemodel API с использованием стабильного модуля https.
  */
-async function callFreemodelRaw(requestBody: any, timeoutMs = 20000): Promise<any> {
+async function callFreemodelRaw(requestBody: any, apiKey: string, timeoutMs = 20000): Promise<any> {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify(requestBody);
-    
+
     const options = {
       hostname: 'api.freemodel.dev',
       port: 443,
@@ -30,7 +30,7 @@ async function callFreemodelRaw(requestBody: any, timeoutMs = 20000): Promise<an
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${FREEMODEL_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Length': Buffer.byteLength(postData)
       },
       timeout: timeoutMs // Динамический таймаут
@@ -70,22 +70,39 @@ async function callFreemodelRaw(requestBody: any, timeoutMs = 20000): Promise<an
 }
 
 /**
- * Обертка с автоматическими повторными попытками (retry + backoff) при сбоях ИИ API.
+ * Обёртка с перебором ключей + retry/backoff. INC-005 (19.07.2026): провайдер
+ * отдавал то 500 "container instances exceeded", то 401 на один и тот же
+ * ключ подряд — единичный retry на одном ключе не спасал. Теперь при сбое
+ * пробуем каждый доступный ключ (PROXYAPI_KEY → _FALLBACK → _FALLBACK2) по
+ * очереди, и только если ВСЕ ключи не сработали — кидаем ошибку выше
+ * (откуда вызывающий код уходит в канned-фоллбэк текста).
  */
-async function callFreemodelWithRetry(requestBody: any, timeoutMs = 20000, retries = 2): Promise<any> {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      return await callFreemodelRaw(requestBody, timeoutMs);
-    } catch (err: any) {
-      if (attempt === retries) {
-        console.error(`[gemini] All ${retries + 1} attempts failed for Freemodel API request:`, err.message);
-        throw err;
+async function callFreemodelWithRetry(requestBody: any, timeoutMs = 20000, retriesPerKey = 1): Promise<any> {
+  let lastError: any;
+  for (let keyIndex = 0; keyIndex < FREEMODEL_API_KEYS.length; keyIndex++) {
+    const apiKey = FREEMODEL_API_KEYS[keyIndex];
+    for (let attempt = 0; attempt <= retriesPerKey; attempt++) {
+      try {
+        return await callFreemodelRaw(requestBody, apiKey, timeoutMs);
+      } catch (err: any) {
+        lastError = err;
+        const isLastAttemptForKey = attempt === retriesPerKey;
+        const isLastKey = keyIndex === FREEMODEL_API_KEYS.length - 1;
+        if (isLastAttemptForKey && isLastKey) {
+          console.error(`[gemini] All keys and retries exhausted for Freemodel API request:`, err.message);
+          throw err;
+        }
+        if (isLastAttemptForKey) {
+          console.warn(`[gemini] Key #${keyIndex + 1}/${FREEMODEL_API_KEYS.length} exhausted (${err.message}), switching to next key...`);
+        } else {
+          const backoffMs = 1000 * Math.pow(2, attempt);
+          console.warn(`[gemini] Freemodel API call failed (key #${keyIndex + 1}, attempt ${attempt + 1}/${retriesPerKey + 1}). Retrying in ${backoffMs}ms... Error:`, err.message);
+          await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        }
       }
-      const backoffMs = 1000 * Math.pow(2, attempt);
-      console.warn(`[gemini] Freemodel API call failed (attempt ${attempt + 1}/${retries + 1}). Retrying in ${backoffMs}ms... Error:`, err.message);
-      await new Promise((resolve) => setTimeout(resolve, backoffMs));
     }
   }
+  throw lastError;
 }
 
 /**
