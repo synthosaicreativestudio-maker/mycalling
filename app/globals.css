@@ -681,23 +681,23 @@ a:focus-visible {
 
 /* Настройки контурного свечения и панелей в светлой теме */
 [data-theme="light"] .glass-panel {
-  background: rgba(255, 255, 255, 0.70) !important;
+  background: rgba(253, 251, 247, 0.70) !important;
   border-color: rgba(141, 91, 76, 0.18) !important;
-  box-shadow: 0 16px 48px rgba(141, 91, 76, 0.04) !important;
+  box-shadow: 0 16px 48px rgba(141, 91, 76, 0.06) !important;
   backdrop-filter: blur(40px) !important;
   -webkit-backdrop-filter: blur(40px) !important;
 }
 [data-theme="light"] .glass-card {
-  background: rgba(255, 255, 255, 0.70) !important;
+  background: rgba(253, 251, 247, 0.70) !important;
   border-color: rgba(141, 91, 76, 0.15) !important;
-  box-shadow: 0 10px 30px rgba(141, 91, 76, 0.04) !important;
+  box-shadow: 0 10px 30px rgba(141, 91, 76, 0.06) !important;
   backdrop-filter: blur(40px) !important;
   -webkit-backdrop-filter: blur(40px) !important;
 }
 [data-theme="light"] .glass-card:hover {
-  background: rgba(255, 255, 255, 0.75) !important;
+  background: rgba(253, 251, 247, 0.78) !important;
   border-color: rgba(141, 91, 76, 0.3) !important;
-  box-shadow: 0 12px 40px rgba(141, 91, 76, 0.08) !important;
+  box-shadow: 0 12px 40px rgba(141, 91, 76, 0.10) !important;
 }
 [data-theme="light"] .glass-card::before {
   background: conic-gradient(
