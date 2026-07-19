@@ -1037,7 +1037,7 @@ export default function CoachPage() {
             <button
               onClick={() => setIsWheelHovered(true)}
               title="Развернуть на весь экран"
-              className="h-10 w-10 flex items-center justify-center text-[#7A8A9E] hover:text-white bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 hover:border-white/10 rounded-2xl transition shadow-lg"
+              className="h-10 w-10 flex items-center justify-center text-[#8D5B4C] dark:text-[#E2C488] bg-white/70 dark:bg-[#080C14]/70 backdrop-blur-md border border-[#D4AF37]/40 hover:border-[#D4AF37]/80 rounded-2xl transition shadow-md hover:scale-105 active:scale-95"
             >
               <Maximize2 className="h-5 w-5" />
             </button>
@@ -1046,7 +1046,7 @@ export default function CoachPage() {
         
         <div
           onClick={() => setIsWheelHovered(true)}
-          className={`w-full flex-1 min-h-0 flex items-center justify-center cursor-zoom-in p-4 ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}
+          className={`w-full flex-1 min-h-0 flex items-center justify-center cursor-zoom-in p-2 ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}
         >
           {extractedData.sessionMode === 'DEEP' ? (
             activeTab === 'pyramid' ? (
@@ -1084,11 +1084,11 @@ export default function CoachPage() {
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
-              className="bg-[#080C14] border border-white/10 rounded-3xl p-6 w-full max-w-[460px] flex flex-col relative max-h-[90vh]"
+              className="bg-[#FFFBF4] dark:bg-[#080C14] border border-[#D4AF37]/30 rounded-3xl p-6 w-full max-w-[460px] flex flex-col relative max-h-[90vh]"
             >
               <button
                 onClick={() => setShowVocationModal(false)}
-                className="absolute top-4 right-4 text-xs font-bold text-[#7A8A9E] hover:text-white px-2.5 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl"
+                className="absolute top-4 right-4 text-xs font-bold text-[#8D5B4C] dark:text-[#E2C488] px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 border border-[#D4AF37]/40 rounded-xl"
               >
                 Закрыть
               </button>
@@ -1141,7 +1141,7 @@ export default function CoachPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsWheelHovered(false)}
-            className="fixed inset-0 z-50 bg-[#040508]/85 backdrop-blur-xl flex items-center justify-center cursor-zoom-out"
+            className="fixed inset-0 z-50 bg-[#040508]/85 backdrop-blur-xl flex items-center justify-center cursor-zoom-out p-4"
           >
             <motion.div
               initial={{ scale: 0.7, opacity: 0, y: 30 }}
@@ -1149,17 +1149,17 @@ export default function CoachPage() {
               exit={{ scale: 0.7, opacity: 0, y: 30 }}
               onClick={(e) => e.stopPropagation()}
               transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-              className="w-full max-w-[680px] p-10 md:p-14 rounded-[36px] bg-[#080C14] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.95)] relative flex flex-col items-center justify-center pointer-events-auto"
+              className="w-full max-w-[760px] p-6 md:p-10 rounded-[36px] bg-[#FFFBF4] dark:bg-[#080C14] border border-[#D4AF37]/30 shadow-[0_25px_60px_rgba(0,0,0,0.6)] relative flex flex-col items-center justify-center pointer-events-auto overflow-hidden"
             >
               <button
                 onClick={() => setIsWheelHovered(false)}
                 title="Закрыть"
-                className="absolute top-6 right-6 h-10 w-10 flex items-center justify-center text-[#7A8A9E] hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition"
+                className="absolute top-6 right-6 h-10 w-10 flex items-center justify-center text-[#8D5B4C] dark:text-[#E2C488] bg-white/70 dark:bg-white/5 hover:bg-amber-500/20 border border-[#D4AF37]/40 rounded-2xl transition z-10"
               >
                 <X className="h-5 w-5" />
               </button>
               
-              <div className="w-full max-w-[480px] aspect-square flex items-center justify-center">
+              <div className="w-full max-w-[580px] aspect-square flex items-center justify-center overflow-visible">
                 {extractedData.sessionMode === 'DEEP' ? (
                   activeTab === 'pyramid' ? (
                     <PyramidOfAlignment extractedData={extractedData} />
