@@ -94,26 +94,6 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
   const totalScore = sectors.reduce((acc, s) => acc + s.rawScore, 0);
   const isEmpty = totalScore === 0;
 
-  if (isEmpty) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 w-full h-full min-h-[320px] text-center space-y-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[#C4A484]/5 rounded-full blur-[50px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#3B82F6]/5 rounded-full blur-[50px] pointer-events-none" />
-        
-        <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-b from-white/5 to-transparent border border-white/10 shadow-inner mb-2 animate-pulse">
-          <span className="text-3xl">🧭</span>
-        </div>
-        
-        <div className="space-y-2 relative z-10 max-w-[280px]">
-          <h3 className="text-md font-bold font-sans text-white tracking-wide">Карта Талантов</h3>
-          <p className="text-xs text-[#7A8A9E] font-medium leading-relaxed">
-            Наставник Роман собирает ваш профиль интересов. Ответьте на первые вопросы о себе в чате, чтобы запустить Карту Талантов!
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const cx = 200;
   const cy = 200;
   const maxRadius = 135;

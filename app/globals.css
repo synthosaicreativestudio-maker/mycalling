@@ -575,6 +575,11 @@ a:focus-visible {
 [data-theme="light"] .bg-black\/40 {
   background-color: rgba(245, 239, 235, 0.5) !important;
 }
+[data-theme="light"] .bg-\[\#040506\]\/35 {
+  background-color: rgba(245, 239, 235, 0.92) !important;
+  border-color: rgba(141, 91, 76, 0.22) !important;
+  box-shadow: 0 8px 32px rgba(62, 39, 35, 0.08) !important;
+}
 [data-theme="light"] .bg-\[\#040506\]\/85 {
   background-color: rgba(253, 251, 247, 0.85) !important;
 }
