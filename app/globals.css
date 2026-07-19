@@ -132,7 +132,7 @@ button {
 /* ─── Glass Cards с бегущим неоново-синим бликом по контуру ─── */
 .glass-card {
   position: relative;
-  background: rgba(8, 12, 20, 0.70);
+  background: rgba(8, 12, 20, 0.30);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   border: 1px solid rgba(0, 240, 255, 0.12);
@@ -167,7 +167,7 @@ button {
 }
 
 .glass-card:hover {
-  background: rgba(10, 16, 28, 0.75);
+  background: rgba(10, 16, 28, 0.35);
   border-color: rgba(0, 240, 255, 0.25);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6),
               0 0 30px rgba(0, 240, 255, 0.15);
@@ -270,7 +270,7 @@ h1, h2, h3, .font-title {
 
 /* ─── Glass Panel (для форм, карточек) ─── */
 .glass-panel {
-  background: rgba(8, 12, 20, 0.70);
+  background: rgba(8, 12, 20, 0.30);
   border: 1px solid var(--border-subtle);
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(40px);
@@ -681,21 +681,21 @@ a:focus-visible {
 
 /* Настройки контурного свечения и панелей в светлой теме */
 [data-theme="light"] .glass-panel {
-  background: rgba(253, 251, 247, 0.70) !important;
+  background: rgba(253, 251, 247, 0.30) !important;
   border-color: rgba(141, 91, 76, 0.18) !important;
   box-shadow: 0 16px 48px rgba(141, 91, 76, 0.06) !important;
   backdrop-filter: blur(40px) !important;
   -webkit-backdrop-filter: blur(40px) !important;
 }
 [data-theme="light"] .glass-card {
-  background: rgba(253, 251, 247, 0.70) !important;
+  background: rgba(253, 251, 247, 0.30) !important;
   border-color: rgba(141, 91, 76, 0.15) !important;
   box-shadow: 0 10px 30px rgba(141, 91, 76, 0.06) !important;
   backdrop-filter: blur(40px) !important;
   -webkit-backdrop-filter: blur(40px) !important;
 }
 [data-theme="light"] .glass-card:hover {
-  background: rgba(253, 251, 247, 0.78) !important;
+  background: rgba(253, 251, 247, 0.38) !important;
   border-color: rgba(141, 91, 76, 0.3) !important;
   box-shadow: 0 12px 40px rgba(141, 91, 76, 0.10) !important;
 }
