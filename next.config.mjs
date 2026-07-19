@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -43,4 +45,17 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  // Same-origin tunnel — обходит адблокеры и не требует держать домен
+  // ingest.sentry.io в connect-src CSP (запросы идут через '/self').
+  tunnelRoute: '/monitoring',
+  silent: !process.env.CI,
+  // Без SENTRY_AUTH_TOKEN плагин просто пропускает загрузку сорсмапов, сборка не падает.
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+  },
+});
