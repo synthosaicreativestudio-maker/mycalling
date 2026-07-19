@@ -10,9 +10,17 @@
  * ВАЖНО: скрипт НЕ пишет в базу сам — человек ревьюит RIASEC-коды и вставляет.
  * Это и есть «конвейер добавления»: генератор → валидатор → человек → коммит.
  *
- * Запуск:
+ * Запуск (точечно):
  *   node scripts/generate-profession.js "Риелтор"
  *   node scripts/generate-profession.js "Врач-терапевт" "Военный офицер" "Агроном"
+ *
+ * Запуск (пачкой из файла — по названию на строку, # = комментарий):
+ *   node scripts/generate-profession.js --file scripts/professions-to-add.txt
+ *   node scripts/generate-profession.js --file list.txt --out scripts/generated.ts.txt
+ *
+ * В батч-режиме валидные записи пишутся в --out (по умолчанию
+ * scripts/generated-professions.txt), провалы — в консоль сводкой. Между
+ * запросами пауза + перебор ключей при сбоях провайдера.
  *
  * Требует PROXYAPI_KEY(_FALLBACK/_FALLBACK2) в .env.
  */
@@ -61,7 +69,7 @@ function slugify(name) {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
-function callLLM(prompt) {
+function callOnce(prompt, apiKey) {
   const body = JSON.stringify({
     model: MODEL,
     messages: [
@@ -75,7 +83,7 @@ function callLLM(prompt) {
   return new Promise((resolve, reject) => {
     const req = https.request({
       hostname: 'api.freemodel.dev', port: 443, path: '/v1/chat/completions', method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${API_KEYS[0]}`, 'Content-Length': Buffer.byteLength(body) },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}`, 'Content-Length': Buffer.byteLength(body) },
       timeout: 30000,
     }, (res) => {
       let data = '';
@@ -95,6 +103,18 @@ function callLLM(prompt) {
     req.end();
   });
 }
+
+// Перебор ключей при сбое провайдера (INC-005: 500/401 «плавают»).
+async function callLLM(prompt) {
+  let lastErr;
+  for (const key of API_KEYS) {
+    try { return await callOnce(prompt, key); }
+    catch (e) { lastErr = e; }
+  }
+  throw lastErr;
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function buildPrompt(name) {
   return `Составь запись каталога профессий для «${name}» (аудитория — школьники РФ).
@@ -160,30 +180,71 @@ function toTs(name, r) {
   },`;
 }
 
+// Разбор аргументов: --file <путь>, --out <путь>, остальное — названия.
+function parseArgs(argv) {
+  const opts = { file: null, out: null, names: [] };
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--file') opts.file = argv[++i];
+    else if (argv[i] === '--out') opts.out = argv[++i];
+    else opts.names.push(argv[i]);
+  }
+  return opts;
+}
+
+function readNamesFromFile(file) {
+  return fs.readFileSync(file, 'utf8')
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'));
+}
+
 async function main() {
-  const names = process.argv.slice(2);
+  const opts = parseArgs(process.argv.slice(2));
+  const names = opts.file ? readNamesFromFile(opts.file) : opts.names;
+
   if (names.length === 0) {
-    console.error('Использование: node scripts/generate-profession.js "Название 1" "Название 2" ...');
+    console.error('Использование:');
+    console.error('  node scripts/generate-profession.js "Название 1" "Название 2"');
+    console.error('  node scripts/generate-profession.js --file list.txt [--out generated.txt]');
     process.exit(1);
   }
-  console.log(`\nОтраслей в словаре: ${INDUSTRIES.length}. Генерирую ${names.length} записей моделью ${MODEL}...\n`);
-  for (const name of names) {
+
+  const batch = !!opts.file;
+  const outPath = opts.out || path.resolve(__dirname, 'generated-professions.txt');
+  console.log(`\nОтраслей в словаре: ${INDUSTRIES.length}. Генерирую ${names.length} записей моделью ${MODEL}${batch ? ` (батч → ${outPath})` : ''}...\n`);
+
+  const okSnippets = [];
+  const failures = [];
+
+  for (let i = 0; i < names.length; i++) {
+    const name = names[i];
+    process.stdout.write(`[${i + 1}/${names.length}] ${name} … `);
     try {
       const r = await callLLM(buildPrompt(name));
       const errors = validate(name, r);
       if (errors.length) {
-        console.log(`\n❌ «${name}» — не прошло валидацию:`);
-        errors.forEach((e) => console.log(`   - ${e}`));
-        console.log('   Сырой ответ:', JSON.stringify(r));
-        continue;
+        console.log(`❌ (${errors.join('; ')})`);
+        failures.push({ name, reason: errors.join('; ') });
+      } else {
+        const snippet = toTs(name, r);
+        console.log(`✅ ${r.tier}/${r.archetype}`);
+        if (batch) okSnippets.push(snippet);
+        else console.log(snippet);
       }
-      console.log(`\n✅ «${name}» (tier: ${r.tier}, archetype: ${r.archetype}) — вставь в professions_db.ts после ревью RIASEC:`);
-      console.log(toTs(name, r));
     } catch (e) {
-      console.log(`\n❌ «${name}» — ошибка генерации: ${e.message}`);
+      console.log(`❌ ${e.message}`);
+      failures.push({ name, reason: e.message });
     }
+    if (batch && i < names.length - 1) await sleep(1200); // мягкая пауза для провайдера
   }
-  console.log('\nГотово. Проверь RIASEC-коды глазами и запусти `npx vitest run app/data/professions_db.test.ts` после вставки.\n');
+
+  if (batch) {
+    const header = `// Сгенерировано scripts/generate-profession.js ${new Date().toISOString()}\n// ${okSnippets.length} записей. ПРОВЕРЬ RIASEC глазами перед вставкой в professions_db.ts.\n\n`;
+    fs.writeFileSync(outPath, header + okSnippets.join('\n'), 'utf8');
+    console.log(`\n=== Готово: ${okSnippets.length} валидных → ${outPath}; провалов: ${failures.length} ===`);
+    if (failures.length) failures.forEach((f) => console.log(`  ❌ ${f.name}: ${f.reason}`));
+  }
+  console.log('\nПроверь RIASEC-коды глазами, вставь в professions_db.ts и запусти `npx vitest run app/data/professions_db.test.ts`.\n');
 }
 
 main();
