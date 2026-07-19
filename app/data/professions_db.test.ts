@@ -15,6 +15,19 @@ const GARDNER_CODES = [
 ];
 const DEMAND_VALUES = ['high', 'medium', 'low'];
 const BIGFIVE_VALUES = ['high', 'low', 'any'];
+// Словари для новых осей паспорта профессии (docs/23) — должны совпадать с
+// профилем ученика (app/data/pvqValues.ts, app/data/viaStrengths.ts).
+const PVQ_CODES = [
+  'self_direction', 'stimulation', 'hedonism', 'achievement', 'power',
+  'security', 'conformity', 'tradition', 'benevolence', 'universalism',
+];
+const VIA_CODES = [
+  'creativity', 'curiosity', 'judgment', 'love_of_learning', 'perspective',
+  'bravery', 'perseverance', 'honesty', 'zest', 'love', 'kindness',
+  'social_intelligence', 'teamwork', 'fairness', 'leadership', 'forgiveness',
+  'humility', 'prudence', 'self_regulation', 'appreciation_of_beauty',
+  'gratitude', 'hope', 'humor', 'spirituality',
+];
 
 describe('каталог профессий: целостность', () => {
   it('непустой', () => {
@@ -97,6 +110,24 @@ describe('каталог профессий: валидность каждой �
         if (p.archetype !== undefined) {
           expect(p.archetype.trim().length).toBeGreaterThan(0);
           expect(p.archetype, `archetype "${p.archetype}" не kebab-case`).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+        }
+      });
+
+      it('cognitiveDemand (если задан) — low/medium/high', () => {
+        if (p.cognitiveDemand !== undefined) expect(['low', 'medium', 'high']).toContain(p.cognitiveDemand);
+      });
+
+      it('values (если заданы) — только коды PVQ', () => {
+        if (p.values !== undefined) {
+          expect(p.values.length).toBeGreaterThanOrEqual(1);
+          p.values.forEach((v) => expect(PVQ_CODES, `неизвестный PVQ-код "${v}"`).toContain(v));
+        }
+      });
+
+      it('viaFit (если задан) — только коды VIA', () => {
+        if (p.viaFit !== undefined) {
+          expect(p.viaFit.length).toBeGreaterThanOrEqual(1);
+          p.viaFit.forEach((v) => expect(VIA_CODES, `неизвестный VIA-код "${v}"`).toContain(v));
         }
       });
     });
