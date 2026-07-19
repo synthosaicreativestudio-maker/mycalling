@@ -374,11 +374,11 @@ export async function POST(req: Request) {
     transcript = isDeepMode ? deepTranscript : expressTranscript;
 
     // Вычисляем, какие блоки информации уже собраны
-    let hasName = !!extractedData.fullName && extractedData.fullName !== 'Гость';
+    let hasName = getStrLen(extractedData.fullName) > 1 && extractedData.fullName !== 'Гость';
     let hasPhone = !!coachSession.user.phone || !!extractedData.phone;
     let hasAge = !!extractedData.age;
     let hasGrade = !!extractedData.grade;
-    let hasCity = !!extractedData.city;
+    let hasCity = getStrLen(extractedData.city) > 1;
     let hasPersonalInfo = hasName && hasAge && hasGrade && hasCity;
     
     // Вычисляем шаг до экстракции
