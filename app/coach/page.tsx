@@ -754,7 +754,12 @@ export default function CoachPage() {
           )}
 
           {/* Chat message history */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4">
+          <div
+            className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4"
+            tabIndex={0}
+            role="log"
+            aria-label="История диалога с наставником"
+          >
             {messages.map((msg, idx) => {
               const isCoach = msg.role === 'assistant';
               const tgPayload = linkCode || '';
@@ -978,6 +983,7 @@ export default function CoachPage() {
                   <button
                     type="submit"
                     disabled={!input.trim() || loading || isTyping}
+                    aria-label="Отправить сообщение"
                     className="h-12 w-12 rounded-xl bg-[var(--accent-svg-1)] text-white flex items-center justify-center hover:opacity-90 transition disabled:opacity-50"
                   >
                     <Send className="h-5 w-5" />
