@@ -1149,7 +1149,7 @@ export default function CoachPage() {
               exit={{ scale: 0.7, opacity: 0, y: 30 }}
               onClick={(e) => e.stopPropagation()}
               transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-              className="w-full max-w-[760px] p-6 md:p-10 rounded-[36px] bg-[#FFFBF4] dark:bg-[#080C14] border border-[#D4AF37]/30 shadow-[0_25px_60px_rgba(0,0,0,0.6)] relative flex flex-col items-center justify-center pointer-events-auto overflow-hidden"
+              className="w-full max-w-[940px] p-6 md:p-10 rounded-[36px] bg-[#FFFBF4] dark:bg-[#080C14] border border-[#D4AF37]/35 shadow-[0_25px_60px_rgba(0,0,0,0.6)] relative flex flex-col items-center justify-center pointer-events-auto overflow-hidden"
             >
               <button
                 onClick={() => setIsWheelHovered(false)}
@@ -1159,7 +1159,7 @@ export default function CoachPage() {
                 <X className="h-5 w-5" />
               </button>
               
-              <div className="w-full max-w-[580px] aspect-square flex items-center justify-center overflow-visible">
+              <div className="w-full max-w-[840px] aspect-[82/58] flex items-center justify-center overflow-visible">
                 {extractedData.sessionMode === 'DEEP' ? (
                   activeTab === 'pyramid' ? (
                     <PyramidOfAlignment extractedData={extractedData} />

@@ -123,15 +123,15 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     ].join(' ');
   };
 
-  // 1. РЕЖИМ STANDALONE (Развернутое крупное модальное окно)
+  // 1. РЕЖИМ STANDALONE (Развернутое крупное модальное окно с безопасным полем 820x580)
   if (standalone) {
-    const cx = 300;
-    const cy = 300;
-    const maxRadius = 220; // Максимально огромное колесо
+    const cx = 410;
+    const cy = 290;
+    const maxRadius = 205; // Огромное заполнительное колесо
 
     return (
       <div className="relative w-full h-full flex items-center justify-center p-1">
-        <svg width="100%" height="100%" viewBox="0 0 600 600" className="overflow-visible w-full h-full">
+        <svg width="100%" height="100%" viewBox="0 0 820 580" className="overflow-visible w-full h-full">
           <defs>
             {/* Медно-золотые градиенты секторов */}
             {sectors.map((sector, idx) => (
@@ -239,10 +239,10 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
             );
           })}
 
-          {/* ЮВЕЛИРНЫЕ 3D-МОНЕТЫ И ТЕКСТОВЫЕ ПОДПИСИ */}
+          {/* ЮВЕЛИРНЫЕ 3D-МОНЕТЫ И ТЕКСТОВЫЕ ПОДПИСИ (С ШИРОКИМ ПОЛЕМ 820px) */}
           {sectors.map((sector, idx) => {
             const angle = idx * angleStep + angleStep / 2;
-            const iconPos = polarToCartesian(cx, cy, maxRadius + 38, angle);
+            const iconPos = polarToCartesian(cx, cy, maxRadius + 36, angle);
             const isRightSide = iconPos.x >= cx;
             const IconComponent = sector.icon;
 
@@ -252,7 +252,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 <circle
                   cx={iconPos.x}
                   cy={iconPos.y}
-                  r="25"
+                  r="24"
                   fill="url(#gold-coin-face)"
                   stroke="url(#gold-metallic-ring)"
                   strokeWidth="2.8"
@@ -261,7 +261,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 <circle
                   cx={iconPos.x}
                   cy={iconPos.y}
-                  r="21"
+                  r="20"
                   fill="none"
                   stroke={sector.rawScore > 0 ? sector.color : '#B8860B'}
                   strokeWidth="1"
@@ -271,17 +271,17 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
 
                 {/* Иконка внутри монеты */}
                 <foreignObject
-                  x={iconPos.x - 13}
-                  y={iconPos.y - 13}
-                  width="26"
-                  height="26"
+                  x={iconPos.x - 12}
+                  y={iconPos.y - 12}
+                  width="24"
+                  height="24"
                 >
                   <div className="flex items-center justify-center w-full h-full" style={{ color: sector.rawScore > 0 ? sector.color : '#7A5210' }}>
                     <IconComponent className="h-5 w-5 stroke-[2.4]" />
                   </div>
                 </foreignObject>
 
-                {/* Текст названия сектора */}
+                {/* Текст названия сектора (с безопасными отступами) */}
                 <text
                   x={isRightSide ? iconPos.x + 34 : iconPos.x - 34}
                   y={iconPos.y - 8}
