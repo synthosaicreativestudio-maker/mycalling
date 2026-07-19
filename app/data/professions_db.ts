@@ -23,6 +23,18 @@ export interface Profession {
   demand: 'high' | 'medium' | 'low';
   skillFormula: string[];
   transferableTo: string[];
+  /**
+   * Слой баланса каталога (docs/22, правило 70/20/10):
+   * everyday — бытовая/массовая, future — трендовая, dream — мечта/экзотика.
+   * Опционально на время миграции; у новых записей (генератор) — обязательно.
+   */
+  tier?: 'everyday' | 'future' | 'dream';
+  /**
+   * Ключ группировки в «архетип» для roll-up в отчёте (docs/22, слой 2).
+   * Напр. IT-юрист / корпоративный юрист / нотариус → archetype: 'lawyer'.
+   * Если не задан — профессия сама себе архетип (роль в отчёте не сворачивается).
+   */
+  archetype?: string;
 }
 
 export const industries = [
