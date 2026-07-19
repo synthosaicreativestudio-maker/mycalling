@@ -86,9 +86,9 @@ export default function CoachPage() {
   }, [step, extractedData.sessionMode]);
   const { data: session } = authClient.useSession();
   const isAuthenticated = !!session?.user;
-  
+
   const [isMobile, setIsMobile] = useState(false);
-  
+
   useEffect(() => {
     const checkMobile = () => {
       const userAgent = typeof window !== 'undefined' ? navigator.userAgent || navigator.vendor || (window as any).opera : '';
@@ -102,7 +102,7 @@ export default function CoachPage() {
     if (!userId) return;
     async function getLinkCode() {
       try {
-        const res = await fetch('/api/auth/link-code', { 
+        const res = await fetch('/api/auth/link-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId })
@@ -176,14 +176,14 @@ export default function CoachPage() {
         if (data.status === 'COMPLETED') {
           if (intervalId) clearInterval(intervalId);
           isSubscribed = false;
-          
+
           await handleAuthCompleted(data.sessionToken);
         } else if (data.status === 'EXPIRED') {
           if (intervalId) clearInterval(intervalId);
           isSubscribed = false;
-          
+
           console.log('[auth] Link code expired, requesting new code');
-          const newRes = await fetch('/api/auth/link-code', { 
+          const newRes = await fetch('/api/auth/link-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId })
@@ -246,7 +246,7 @@ export default function CoachPage() {
         const res = await fetch('/api/v1/coach/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             message: 'Начать сессию с коучем',
             sessionId: savedSessionId,
             fromLoginError: isFromLogin,
@@ -614,11 +614,11 @@ export default function CoachPage() {
       setUserId(null);
       setStep(0);
       setPhoneConfirmed(false);
-      
+
       const res = await fetch('/api/v1/coach/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: 'Начать сессию с коучем',
           sessionId: null,
           reset: true
@@ -650,7 +650,7 @@ export default function CoachPage() {
 
   return (
     <main className="h-[100dvh] pt-24 pb-4 flex flex-col items-center px-4 relative z-10 overflow-hidden">
-      
+
       {process.env.NODE_ENV !== 'production' && (
         <div className="fixed top-4 left-4 z-50 bg-black/90 border border-white/10 rounded-xl p-3 text-[10px] text-slate-400 font-mono shadow-2xl space-y-1">
           <div>[DEBUG] LinkCode: <span className="text-[#3B82F6]">{linkCode || 'null'}</span></div>
@@ -675,13 +675,13 @@ export default function CoachPage() {
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-[#3B82F6]">{progressPercent}%</span>
             <div className="w-24 h-2 bg-white/5 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-[#3B82F6] transition-all duration-500" 
+              <div
+                className="h-full bg-[#3B82F6] transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
-          
+
           <Link
             href="/"
             className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-sans font-semibold text-white/70 hover:text-white transition duration-200 border border-white/10 whitespace-nowrap min-w-[120px]"
@@ -705,10 +705,10 @@ export default function CoachPage() {
 
       {/* Main layout container: Chat + Wheel of Vocation */}
       <div className="w-full max-w-7xl flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-12 gap-6 relative">
-        
+
         {/* Left column: Chat History & Input */}
         <div className="col-span-1 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
-          
+
           {/* Horizontal Stepper for DEEP mode */}
           {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 22 && (
             <div className="px-6 py-4 border-b border-white/5 bg-[#080c14]/40 flex flex-col gap-2">
@@ -732,19 +732,16 @@ export default function CoachPage() {
                     <div key={s.step} className="flex-1 flex flex-col items-center gap-1 relative">
                       <div className="w-full flex items-center justify-center relative">
                         {idx > 0 && (
-                          <div className={`absolute right-[50%] left-[-50%] top-[4px] h-[2px] transition-all duration-300 ${
-                            isCompleted ? 'bg-[#EAB308]' : 'bg-white/10'
-                          }`} />
+                          <div className={`absolute right-[50%] left-[-50%] top-[4px] h-[2px] transition-all duration-300 ${isCompleted ? 'bg-[#EAB308]' : 'bg-white/10'
+                            }`} />
                         )}
-                        <div className={`h-2.5 w-2.5 rounded-full z-10 transition-all duration-300 ${
-                          isActive 
-                            ? 'bg-[#EAB308] ring-4 ring-[#EAB308]/20 scale-125' 
+                        <div className={`h-2.5 w-2.5 rounded-full z-10 transition-all duration-300 ${isActive
+                            ? 'bg-[#EAB308] ring-4 ring-[#EAB308]/20 scale-125'
                             : (isCompleted ? 'bg-[#EAB308]' : 'bg-white/20')
-                        }`} />
+                          }`} />
                       </div>
-                      <span className={`text-[9px] font-bold font-sans transition-colors duration-300 ${
-                        isActive ? 'text-[#EAB308]' : 'text-slate-500'
-                      }`}>
+                      <span className={`text-[9px] font-bold font-sans transition-colors duration-300 ${isActive ? 'text-[#EAB308]' : 'text-slate-500'
+                        }`}>
                         {s.label}
                       </span>
                     </div>
@@ -775,19 +772,17 @@ export default function CoachPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex gap-3 max-w-[72%] ${isCoach ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
                 >
-                  <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${
-                    isCoach ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#3B82F6] text-white'
-                  }`}>
+                  <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${isCoach ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#3B82F6] text-white'
+                    }`}>
                     {isCoach ? <Brain className="h-4 w-4" /> : <User className="h-4 w-4" />}
                   </div>
-                  <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
-                    isCoach 
+                  <div className={`p-4 rounded-2xl text-sm leading-relaxed ${isCoach
                       ? (isFinalStep && idx === messages.length - 1
-                          ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
-                          : 'bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm'
-                        )
+                        ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
+                        : 'bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm'
+                      )
                       : 'bg-[#3B82F6]/25 text-[#E8ECF0] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
-                  }`}>
+                    }`}>
                     {isCoach && isFinalStep && idx === messages.length - 1 && (
                       <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] mb-2">
                         <span>✨</span> Резюме наставника Романа
@@ -821,18 +816,18 @@ export default function CoachPage() {
                         </p>
                         <div className="flex flex-wrap gap-3">
                           {/* Telegram */}
-                          <a 
+                          <a
                             href={`/auth/link?code=${tgPayload}&provider=telegram`}
-                            target="_blank" 
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-4 py-2.5 bg-[#349ed9] hover:bg-[#2d8bc0] text-xs font-bold text-white rounded-xl shadow transition duration-200"
                           >
                             <Send className="h-3.5 w-3.5" /> Telegram
                           </a>
                           {/* MAX ID */}
-                          <a 
+                          <a
                             href={`/auth/link?code=${tgPayload}&provider=maxid`}
-                            target="_blank" 
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-4 py-2.5 bg-[#8b5cf6] hover:bg-[#7c4df2] text-xs font-bold text-white rounded-xl shadow transition duration-200"
                           >
@@ -878,7 +873,7 @@ export default function CoachPage() {
                       Регистрация успешно завершена! Какое исследование талантов вам ближе?
                     </p>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {/* Экспресс-режим */}
                     <button
@@ -938,7 +933,7 @@ export default function CoachPage() {
           {/* Input area */}
           <div className="p-4 border-t border-white/5 bg-[#040506]/45 backdrop-blur-md">
             {isFinalStep ? (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center p-4 space-y-4"
@@ -948,14 +943,14 @@ export default function CoachPage() {
                   Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
-                  <button 
+                  <button
                     type="button"
                     onClick={downloadPreliminaryReport}
                     className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#C4A484]/30 text-[#C4A484] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
                   >
                     📥 Скачать резюме (PDF)
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={handleNextStep}
                     className="cta-glass h-12 px-8 text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto"
@@ -999,65 +994,63 @@ export default function CoachPage() {
         <div
           className="lg:col-span-5 hidden lg:flex flex-col h-full min-h-0 relative select-none glass-card rounded-3xl overflow-hidden border border-white/5 bg-[#040506]/35 backdrop-blur-xl"
         >
-        {/* Tabs and Zoom-in buttons for desktop */}
-        {extractedData.sessionMode === 'DEEP' ? (
-          <div className="absolute top-4 left-4 right-4 z-20 flex gap-2 p-1.5 rounded-2xl bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 shadow-inner items-center">
-            <button
-              onClick={() => setActiveTab('wheel')}
-              className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                activeTab === 'wheel'
-                  ? 'bg-[#3B82F6] text-white shadow-lg shadow-[#3B82F6]/30 border border-white/10'
-                  : 'text-[#7A8A9E] hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Compass className="h-4 w-4" />
-              Колесо талантов
-            </button>
-            <button
-              onClick={() => setActiveTab('pyramid')}
-              className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                activeTab === 'pyramid'
-                  ? 'bg-[#EAB308] text-white shadow-lg shadow-[#EAB308]/30 border border-white/10'
-                  : 'text-[#7A8A9E] hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Activity className="h-4 w-4" />
-              Пирамида целей
-            </button>
-            <button
-              onClick={() => setIsWheelHovered(true)}
-              title="Развернуть на весь экран"
-              className="h-9 w-9 shrink-0 flex items-center justify-center text-[#7A8A9E] hover:text-white hover:bg-white/5 rounded-xl border border-white/5 ml-1 transition"
-            >
-              <Maximize2 className="h-4 w-4" />
-            </button>
-          </div>
-        ) : (
-          <div className="absolute top-4 right-4 z-20">
-            <button
-              onClick={() => setIsWheelHovered(true)}
-              title="Развернуть на весь экран"
-              className="h-10 w-10 flex items-center justify-center text-[#7A8A9E] hover:text-white bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 hover:border-white/10 rounded-2xl transition shadow-lg"
-            >
-              <Maximize2 className="h-5 w-5" />
-            </button>
-          </div>
-        )}
-        
-        <div
-          onClick={() => setIsWheelHovered(true)}
-          className={`w-full flex-1 min-h-0 flex items-center justify-center cursor-zoom-in p-4 ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}
-        >
+          {/* Tabs and Zoom-in buttons for desktop */}
           {extractedData.sessionMode === 'DEEP' ? (
-            activeTab === 'pyramid' ? (
-              <PyramidOfAlignment extractedData={extractedData} />
+            <div className="absolute top-4 left-4 right-4 z-20 flex gap-2 p-1.5 rounded-2xl bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 shadow-inner items-center">
+              <button
+                onClick={() => setActiveTab('wheel')}
+                className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${activeTab === 'wheel'
+                    ? 'bg-[#3B82F6] text-white shadow-lg shadow-[#3B82F6]/30 border border-white/10'
+                    : 'text-[#7A8A9E] hover:text-white hover:bg-white/5'
+                  }`}
+              >
+                <Compass className="h-4 w-4" />
+                Колесо талантов
+              </button>
+              <button
+                onClick={() => setActiveTab('pyramid')}
+                className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${activeTab === 'pyramid'
+                    ? 'bg-[#EAB308] text-white shadow-lg shadow-[#EAB308]/30 border border-white/10'
+                    : 'text-[#7A8A9E] hover:text-white hover:bg-white/5'
+                  }`}
+              >
+                <Activity className="h-4 w-4" />
+                Пирамида целей
+              </button>
+              <button
+                onClick={() => setIsWheelHovered(true)}
+                title="Развернуть на весь экран"
+                className="h-9 w-9 shrink-0 flex items-center justify-center text-[#7A8A9E] hover:text-white hover:bg-white/5 rounded-xl border border-white/5 ml-1 transition"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="absolute top-4 right-4 z-20">
+              <button
+                onClick={() => setIsWheelHovered(true)}
+                title="Развернуть на весь экран"
+                className="h-10 w-10 flex items-center justify-center text-[#7A8A9E] hover:text-white bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 hover:border-white/10 rounded-2xl transition shadow-lg"
+              >
+                <Maximize2 className="h-5 w-5" />
+              </button>
+            </div>
+          )}
+
+          <div
+            onClick={() => setIsWheelHovered(true)}
+            className={`w-full flex-1 min-h-0 flex items-center justify-center cursor-zoom-in p-4 ${extractedData.sessionMode === 'DEEP' ? 'pt-16' : ''}`}
+          >
+            {extractedData.sessionMode === 'DEEP' ? (
+              activeTab === 'pyramid' ? (
+                <PyramidOfAlignment extractedData={extractedData} />
+              ) : (
+                <WheelOfVocation extractedData={extractedData} />
+              )
             ) : (
               <WheelOfVocation extractedData={extractedData} />
-            )
-          ) : (
-            <WheelOfVocation extractedData={extractedData} />
-          )}
-        </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1074,13 +1067,13 @@ export default function CoachPage() {
       {/* Mobile Modal for Wheel of Vocation / Pyramid of Alignment */}
       <AnimatePresence>
         {showVocationModal && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:hidden"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
@@ -1097,27 +1090,25 @@ export default function CoachPage() {
                   <div className="flex gap-2 p-1 rounded-2xl bg-[#090D1A]/80 border border-white/5 mb-4">
                     <button
                       onClick={() => setActiveTab('wheel')}
-                      className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
-                        activeTab === 'wheel'
+                      className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${activeTab === 'wheel'
                           ? 'bg-[#3B82F6] text-white shadow-sm'
                           : 'text-[#7A8A9E] hover:text-white'
-                      }`}
+                        }`}
                     >
                       Колесо талантов
                     </button>
                     <button
                       onClick={() => setActiveTab('pyramid')}
-                      className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
-                        activeTab === 'pyramid'
+                      className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${activeTab === 'pyramid'
                           ? 'bg-[#EAB308] text-white shadow-sm'
                           : 'text-[#7A8A9E] hover:text-white'
-                      }`}
+                        }`}
                     >
                       Пирамида целей
                     </button>
                   </div>
                 )}
-                
+
                 {extractedData.sessionMode === 'DEEP' ? (
                   activeTab === 'pyramid' ? (
                     <PyramidOfAlignment extractedData={extractedData} />
@@ -1158,7 +1149,7 @@ export default function CoachPage() {
               >
                 <X className="h-5 w-5" />
               </button>
-              
+
               <div className="w-full max-w-[480px] aspect-square flex items-center justify-center">
                 {extractedData.sessionMode === 'DEEP' ? (
                   activeTab === 'pyramid' ? (
