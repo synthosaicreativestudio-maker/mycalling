@@ -62,18 +62,18 @@ export const CognitiveLayerSchema = z.object({
     bySubscale: z.record(z.string(), z.number()),
     band: z.string(),
   }), // тест ICAR
-  // Ниже — нет источника. Это реальные и ценные конструкты (исполнительные
-  // функции, метакогниция), но требуют отдельного валидного инструмента
-  // (например, адаптации BRIEF или MSLQ) — не добавлять "на глазок" в
-  // существующие тесты. Оставлено как будущая работа, не кандидат на удаление.
-  execInhibition: z.number().optional(), // TODO: нет источника, нужен отдельный тест
-  execFlexibility: z.number().optional(), // TODO: нет источника, нужен отдельный тест
-  learnDeep: z.number().optional(), // TODO: нет источника, нужен отдельный тест
-  learnSurface: z.number().optional(), // TODO: нет источника, нужен отдельный тест
-  selfEfficacyAcademic: z.number().optional(), // TODO: нет источника, нужен отдельный тест
-  metacogPlanning: z.number().optional(), // TODO: нет источника, нужен отдельный тест
-  metacogMonitoring: z.number().optional(), // TODO: нет источника, нужен отдельный тест
-  curiosityEpistemic: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  // Ниже 8 конструктов (исполнительные функции, обучение, метакогниция,
+  // самоэффективность, любознательность) теперь наполняются собственным тестом
+  // COGNITIVE_STYLE («Стиль мышления», 14 пунктов) — см. docs/20 Фаза 4b,
+  // app/data/questions.ts и cognitiveStyleScorer в scoring.ts. Средний балл 1-5.
+  execInhibition: z.number().optional(), // источник: тест COGNITIVE_STYLE
+  execFlexibility: z.number().optional(), // источник: тест COGNITIVE_STYLE
+  learnDeep: z.number().optional(), // источник: тест COGNITIVE_STYLE
+  learnSurface: z.number().optional(), // источник: тест COGNITIVE_STYLE
+  selfEfficacyAcademic: z.number().optional(), // источник: тест COGNITIVE_STYLE
+  metacogPlanning: z.number().optional(), // источник: тест COGNITIVE_STYLE
+  metacogMonitoring: z.number().optional(), // источник: тест COGNITIVE_STYLE
+  curiosityEpistemic: z.number().optional(), // источник: тест COGNITIVE_STYLE
   cogAiLiteracy: z.number().optional(), // TODO: нет источника, нужен отдельный тест
 });
 

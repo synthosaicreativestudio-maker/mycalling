@@ -8,7 +8,7 @@ export const scaleOptions: [string, string, string, string, string] = [
 
 export interface DiagnosticQuestion {
   id: string;
-  testCode: 'RIASEC' | 'BFI' | 'ICAR' | 'PROCRASTINATION' | 'VIA' | 'PVQ' | 'GROWTH' | 'CONTEXT';
+  testCode: 'RIASEC' | 'BFI' | 'ICAR' | 'PROCRASTINATION' | 'VIA' | 'PVQ' | 'GROWTH' | 'COGNITIVE_STYLE' | 'CONTEXT';
   text: string;
   scale: string;
   reverseScored: boolean;
@@ -870,7 +870,83 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
     options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
   },
 
-  // ─── 8. Карта ресурсов (контекст и опоры) ───
+  // ─── 8. Стиль мышления (COGNITIVE_STYLE) ───
+  // 14 собственных пунктов, 8 конструктов (docs/20 Фаза 4b): раньше эти поля
+  // (execInhibition/Flexibility, learnDeep/Surface, selfEfficacyAcademic,
+  // metacogPlanning/Monitoring, curiosityEpistemic) домысливались коучем «на
+  // глазок» из диалога — теперь это короткий валидный самоотчёт.
+  {
+    id: 'cogstyle-inh-1', testCode: 'COGNITIVE_STYLE', scale: 'execInhibition', reverseScored: false,
+    text: 'Когда я взялся за дело, я легко не отвлекаюсь на телефон или посторонние мысли.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-inh-2', testCode: 'COGNITIVE_STYLE', scale: 'execInhibition', reverseScored: true,
+    text: 'Мне трудно удержаться, чтобы не бросить скучную задачу ради чего-то поинтереснее.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-flex-1', testCode: 'COGNITIVE_STYLE', scale: 'execFlexibility', reverseScored: false,
+    text: 'Если мой способ решения не сработал, я легко переключаюсь и пробую другой подход.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-flex-2', testCode: 'COGNITIVE_STYLE', scale: 'execFlexibility', reverseScored: false,
+    text: 'Мне нравится смотреть на задачу с разных сторон, а не одним привычным способом.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-deep-1', testCode: 'COGNITIVE_STYLE', scale: 'learnDeep', reverseScored: false,
+    text: 'Когда я что-то изучаю, мне важно понять, почему это работает именно так, а не просто запомнить.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-deep-2', testCode: 'COGNITIVE_STYLE', scale: 'learnDeep', reverseScored: false,
+    text: 'Я люблю связывать новое с тем, что уже знаю, чтобы получилась цельная картина.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-surface-1', testCode: 'COGNITIVE_STYLE', scale: 'learnSurface', reverseScored: false,
+    text: 'Чаще всего мне достаточно выучить материал наизусть к контрольной, не вникая глубоко.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-selfeff-1', testCode: 'COGNITIVE_STYLE', scale: 'selfEfficacyAcademic', reverseScored: false,
+    text: 'Даже если предмет сложный, я верю, что справлюсь, если приложу усилия.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-selfeff-2', testCode: 'COGNITIVE_STYLE', scale: 'selfEfficacyAcademic', reverseScored: false,
+    text: 'Столкнувшись с трудной задачей, я обычно уверен, что найду решение.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-plan-1', testCode: 'COGNITIVE_STYLE', scale: 'metacogPlanning', reverseScored: false,
+    text: 'Перед тем как взяться за большое задание, я продумываю, с чего начну и в каком порядке.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-plan-2', testCode: 'COGNITIVE_STYLE', scale: 'metacogPlanning', reverseScored: false,
+    text: 'Я заранее прикидываю, сколько времени и каких шагов потребует работа.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-mon-1', testCode: 'COGNITIVE_STYLE', scale: 'metacogMonitoring', reverseScored: false,
+    text: 'По ходу выполнения я останавливаюсь и проверяю, правильно ли я всё понял.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-mon-2', testCode: 'COGNITIVE_STYLE', scale: 'metacogMonitoring', reverseScored: false,
+    text: 'Если замечаю, что перестал понимать материал, я возвращаюсь и разбираюсь заново.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'cogstyle-cur-1', testCode: 'COGNITIVE_STYLE', scale: 'curiosityEpistemic', reverseScored: false,
+    text: 'Мне нравится докапываться до сути новых идей, даже если это не задано.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+
+  // ─── 9. Карта ресурсов (контекст и опоры) ───
   // Фактологические/контекстные поля из методологического аудита (БЛОК 1,
   // кластер "Контекст и Ограничения") — сознательно не спрашиваются коучем в
   // живом диалоге (неуместно для доверительной беседы), а собираются здесь как

@@ -18,6 +18,7 @@ export type NarrativeTestCode =
   | 'VIA'
   | 'PVQ'
   | 'GROWTH'
+  | 'COGNITIVE_STYLE'
   | 'CONTEXT'
   | 'COACH';
 
@@ -34,7 +35,7 @@ export interface NarrativeChapter {
   outro: string;
 }
 
-export const TOTAL_NARRATIVE_CHAPTERS = 7;
+export const TOTAL_NARRATIVE_CHAPTERS = 8;
 
 export const narrative: Record<NarrativeTestCode, NarrativeChapter> = {
   RIASEC: {
@@ -100,9 +101,18 @@ export const narrative: Record<NarrativeTestCode, NarrativeChapter> = {
     outro:
       'Компас настроен! Ты честно рассказал, как ведёшь себя в трудную минуту — это ценные данные.',
   },
+  COGNITIVE_STYLE: {
+    chapterTitle: 'Стиль мышления',
+    chapterNumber: 7,
+    emoji: '🧠',
+    intro:
+      'Разберёмся, КАК ты думаешь и учишься: как удерживаешь внимание, ищешь смысл или зубришь, планируешь ли шаги и проверяешь ли себя по ходу.',
+    outro:
+      'Отлично! Теперь понятно не только что тебе интересно, но и как устроен твой способ думать и учиться.',
+  },
   CONTEXT: {
     chapterTitle: 'Карта ресурсов',
-    chapterNumber: 7,
+    chapterNumber: 8,
     emoji: '🎒',
     intro:
       'Последний блок — карта твоих реальных возможностей и опор вокруг: семья, город, доступ к ресурсам. Если что-то не хочешь уточнять — выбирай «нейтрально».',

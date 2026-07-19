@@ -281,6 +281,35 @@ export const contextScorer: TestScorer = {
   },
 };
 
+/**
+ * "Стиль мышления" (COGNITIVE_STYLE, docs/20 Фаза 4b): 8 конструктов,
+ * средний балл 1-5 по каждому. Раньше эти поля домысливались коучем «на глазок»
+ * из диалога — теперь короткий валидный самоотчёт (14 пунктов).
+ */
+export const cognitiveStyleScorer: TestScorer = {
+  testCode: 'COGNITIVE_STYLE',
+  score(answers, questions) {
+    const qs = questionsFor('COGNITIVE_STYLE', questions);
+    const sums: Record<string, number> = {};
+    const counts: Record<string, number> = {};
+    qs.forEach((q) => {
+      const value = answers[q.id];
+      if (value === undefined) return;
+      const finalVal = q.reverseScored ? 6 - value : value;
+      sums[q.scale] = (sums[q.scale] ?? 0) + finalVal;
+      counts[q.scale] = (counts[q.scale] ?? 0) + 1;
+    });
+    const scales = [
+      'execInhibition', 'execFlexibility', 'learnDeep', 'learnSurface',
+      'selfEfficacyAcademic', 'metacogPlanning', 'metacogMonitoring', 'curiosityEpistemic',
+    ];
+    const scores: Record<string, unknown> = Object.fromEntries(
+      scales.map((key) => [key, average(sums[key] ?? 0, counts[key] ?? 0)])
+    );
+    return { scores, reliability: computeReliability(answers, qs) };
+  },
+};
+
 export const scorers: Record<string, TestScorer> = {
   RIASEC: riasecScorer,
   BFI: bfiScorer,
@@ -289,6 +318,7 @@ export const scorers: Record<string, TestScorer> = {
   VIA: viaScorer,
   PVQ: pvqScorer,
   GROWTH: growthScorer,
+  COGNITIVE_STYLE: cognitiveStyleScorer,
   CONTEXT: contextScorer,
 };
 

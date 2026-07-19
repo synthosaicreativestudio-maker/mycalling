@@ -187,6 +187,16 @@ export async function GET(request: Request) {
       // просто останутся undefined (не блокирует остальной отчёт).
       const growthScores = (results.GROWTH?.scores ?? {}) as Record<string, number>;
       const contextScores = (results.CONTEXT?.scores ?? {}) as Record<string, number>;
+      // docs/20 Фаза 4b: реальные баллы теста "Стиль мышления" (1-5) вместо
+      // оценки коучем «на глазок». Фолбэк на getNumberField — для сессий,
+      // пройденных до появления этого теста.
+      const cogStyleScores = (results.COGNITIVE_STYLE?.scores ?? {}) as Record<string, number>;
+      // Тест реально пройден, только если есть хотя бы один ответ на его пункты
+      // (иначе скорер вернул бы нейтральный fallback 3 по всем шкалам — нельзя
+      // отличить от настоящего 3). Для старых сессий без теста — фолбэк на коуча.
+      const cogStyleTaken = Object.keys(answers).some((k) => k.startsWith('cogstyle-'));
+      const cogField = (key: string): number | undefined =>
+        cogStyleTaken && typeof cogStyleScores[key] === 'number' ? cogStyleScores[key] : getNumberField(key);
 
       const signatureStrengths = viaScores.signatureStrengths.map((code) => {
         const strength = viaStrengthByCode[code];
@@ -330,14 +340,14 @@ export async function GET(request: Request) {
         },
         cognitive: {
           icar: icarScores,
-          execInhibition: getNumberField('execInhibition'),
-          execFlexibility: getNumberField('execFlexibility'),
-          learnDeep: getNumberField('learnDeep'),
-          learnSurface: getNumberField('learnSurface'),
-          selfEfficacyAcademic: getNumberField('selfEfficacyAcademic'),
-          metacogPlanning: getNumberField('metacogPlanning'),
-          metacogMonitoring: getNumberField('metacogMonitoring'),
-          curiosityEpistemic: getNumberField('curiosityEpistemic'),
+          execInhibition: cogField('execInhibition'),
+          execFlexibility: cogField('execFlexibility'),
+          learnDeep: cogField('learnDeep'),
+          learnSurface: cogField('learnSurface'),
+          selfEfficacyAcademic: cogField('selfEfficacyAcademic'),
+          metacogPlanning: cogField('metacogPlanning'),
+          metacogMonitoring: cogField('metacogMonitoring'),
+          curiosityEpistemic: cogField('curiosityEpistemic'),
           cogAiLiteracy: getNumberField('cogAiLiteracy'),
         },
         motivation: {
@@ -445,6 +455,18 @@ export async function GET(request: Request) {
         hobbies: getArrayField('voluntaryHobbies'),
         // Прокрастинация по Лэй (4-20), уже посчитана скорером.
         procrastination: procrastinationScore,
+        // docs/20 Фаза 4b: стиль мышления (8 конструктов, 1-5) из теста
+        // COGNITIVE_STYLE. undefined-поля отфильтруются при рендере.
+        cognitiveStyle: {
+          execInhibition: cogField('execInhibition'),
+          execFlexibility: cogField('execFlexibility'),
+          learnDeep: cogField('learnDeep'),
+          learnSurface: cogField('learnSurface'),
+          selfEfficacyAcademic: cogField('selfEfficacyAcademic'),
+          metacogPlanning: cogField('metacogPlanning'),
+          metacogMonitoring: cogField('metacogMonitoring'),
+          curiosityEpistemic: cogField('curiosityEpistemic'),
+        },
       };
 
       // 3. Генерация ИИ-отчета через ProxyAPI

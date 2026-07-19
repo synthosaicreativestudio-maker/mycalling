@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { diagnosticQuestions } from '../../data/questions';
-import { bfiScorer, contextScorer, growthScorer, icarScorer, procrastinationScorer, pvqScorer, riasecScorer, viaScorer } from './scoring';
+import { bfiScorer, cognitiveStyleScorer, contextScorer, growthScorer, icarScorer, procrastinationScorer, pvqScorer, riasecScorer, viaScorer } from './scoring';
 import { viaStrengths } from '../../data/viaStrengths';
 import { pvqValues } from '../../data/pvqValues';
 
@@ -111,6 +111,38 @@ describe('procrastinationScorer', () => {
     const result = procrastinationScorer.score(answers, diagnosticQuestions);
     expect(result.scores).toEqual({ score: 18 });
     expect(result.reliability).toBe('high');
+  });
+});
+
+describe('cognitiveStyleScorer', () => {
+  it('усредняет по конструктам и учитывает реверс тормозного контроля', () => {
+    const answers: Record<string, number> = {
+      'cogstyle-inh-1': 4, 'cogstyle-inh-2': 2, // reverse: 6-2=4 → avg (4+4)/2 = 4
+      'cogstyle-flex-1': 5, 'cogstyle-flex-2': 3, // avg 4
+      'cogstyle-deep-1': 5, 'cogstyle-deep-2': 5, // avg 5
+      'cogstyle-surface-1': 2, // 2
+      'cogstyle-selfeff-1': 4, 'cogstyle-selfeff-2': 4, // avg 4
+      'cogstyle-plan-1': 3, 'cogstyle-plan-2': 5, // avg 4
+      'cogstyle-mon-1': 5, 'cogstyle-mon-2': 5, // avg 5
+      'cogstyle-cur-1': 5, // 5
+    };
+    const result = cognitiveStyleScorer.score(answers, diagnosticQuestions);
+    const s = result.scores as Record<string, number>;
+    expect(s.execInhibition).toBe(4);
+    expect(s.execFlexibility).toBe(4);
+    expect(s.learnDeep).toBe(5);
+    expect(s.learnSurface).toBe(2);
+    expect(s.selfEfficacyAcademic).toBe(4);
+    expect(s.metacogPlanning).toBe(4);
+    expect(s.metacogMonitoring).toBe(5);
+    expect(s.curiosityEpistemic).toBe(5);
+  });
+
+  it('без ответов даёт нейтральный fallback 3 по всем 8 конструктам (не падает)', () => {
+    const result = cognitiveStyleScorer.score({}, diagnosticQuestions);
+    const s = result.scores as Record<string, number>;
+    expect(s.execInhibition).toBe(3);
+    expect(Object.keys(s)).toHaveLength(8);
   });
 });
 

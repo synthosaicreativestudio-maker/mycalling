@@ -73,6 +73,10 @@ type ReportData = {
     antiInterests?: string[];
     hobbies?: string[];
     procrastination?: number;
+    cognitiveStyle?: {
+      execInhibition?: number; execFlexibility?: number; learnDeep?: number; learnSurface?: number;
+      selfEfficacyAcademic?: number; metacogPlanning?: number; metacogMonitoring?: number; curiosityEpistemic?: number;
+    };
   };
 };
 
@@ -94,6 +98,17 @@ const BELBIN_LABELS: Record<string, string> = {
   doer: 'Исполнитель / реализатор',
   creator: 'Генератор идей',
   peacemaker: 'Миротворец / командный игрок'
+};
+
+const COGNITIVE_STYLE_LABELS: Record<string, string> = {
+  execInhibition: 'Удержание внимания',
+  execFlexibility: 'Гибкость мышления',
+  learnDeep: 'Глубокое обучение (смысл)',
+  learnSurface: 'Поверхностное обучение (зубрёжка)',
+  selfEfficacyAcademic: 'Вера в свои силы в учёбе',
+  metacogPlanning: 'Планирование',
+  metacogMonitoring: 'Самопроверка понимания',
+  curiosityEpistemic: 'Любознательность'
 };
 
 const SAVICKAS_LABELS: Record<string, string> = {
@@ -815,6 +830,25 @@ function ReportPageContent() {
                           value: Math.round(value * 100),
                           max: 100,
                           valueLabel: `${Math.round(value * 100)}%`
+                        }))}
+                    />
+                  )}
+
+                  {/* docs/20 (Фаза 4b): стиль мышления — 8 конструктов из теста
+                      COGNITIVE_STYLE (1-5), раньше домысливались коучем. */}
+                  {report.methodologyProfile?.cognitiveStyle &&
+                    Object.values(report.methodologyProfile.cognitiveStyle).some((v) => typeof v === 'number' && v > 0) && (
+                    <ValueBars
+                      title="Стиль мышления"
+                      subtitle="Как ты удерживаешь внимание, учишься, планируешь и проверяешь себя"
+                      icon={<Brain className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      items={Object.entries(report.methodologyProfile.cognitiveStyle)
+                        .filter(([, value]) => typeof value === 'number' && value > 0)
+                        .map(([key, value]) => ({
+                          label: COGNITIVE_STYLE_LABELS[key] || key,
+                          value: value as number,
+                          max: 5,
+                          valueLabel: `${(value as number).toFixed(1)}/5`
                         }))}
                     />
                   )}
