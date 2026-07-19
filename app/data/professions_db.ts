@@ -28,7 +28,9 @@ export interface Profession {
 export const industries = [
   'IT и разработка ПО',
   'Аналитика данных и ИИ',
+  'Оркестрация ИИ и Агенты',
   'Робототехника и хардвер',
+  'Космические технологии и коммерция',
   'Инженерия и промышленность',
   'Энергетика и эко-технологии',
   'Биотехнологии и биоинженерия',
@@ -1302,7 +1304,7 @@ export const professionsDb: Profession[] = [
     id: 'programming-teacher',
     name: 'Преподаватель программирования',
     industry: 'Образование и EdTech',
-    riasec: ['Social', 'Investigative', 'Realistic', 'Conventional'],
+    riasec: ['Social', 'Investigative', 'Realistic'],
     gardner: ['Interpersonal', 'Logical-Mathematical'],
     bigFive: { traits: { Agreeableness: 'high', Conscientiousness: 'high' } },
     subjects: ['Математика', 'Информатика', 'Русский язык'],
