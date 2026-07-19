@@ -72,6 +72,7 @@ export default function CoachPage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [extractedData, setExtractedData] = useState<Record<string, any>>({});
   const [isWheelHovered, setIsWheelHovered] = useState(false);
+  const [showVocationModal, setShowVocationModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'wheel' | 'pyramid'>('wheel');
 
   useEffect(() => {
@@ -223,7 +224,7 @@ export default function CoachPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkCode, isAuthenticated, sessionId]);
 
-  const chatScrollRef = useRef<HTMLDivElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Инициализация первой реплики коуча
   useEffect(() => {
@@ -302,18 +303,9 @@ export default function CoachPage() {
     initSession();
   }, []);
 
-  // Скролл вниз при добавлении сообщений.
-  // scrollIntoView() поднимается по ВСЕМ скроллящимся предкам — после того,
-  // как внешняя колонка (grid-обёртка) стала overflow-y-auto (см. фикс
-  // Колеса/Пирамиды), это утаскивало вниз всю страницу целиком, а не только
-  // внутренний список сообщений: пропадала верхняя часть карточки чата
-  // (сообщения), в видимой области оставалась только строка ввода + карточка
-  // Колеса под ней. Скроллим напрямую только сам контейнер истории чата.
+  // Скролл вниз при добавлении сообщений
   useEffect(() => {
-    const container = chatScrollRef.current;
-    if (container) {
-      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping, extractedData.sessionMode]);
 
   // Выход на главную по кнопке Escape
@@ -712,10 +704,10 @@ export default function CoachPage() {
       </div>
 
       {/* Main layout container: Chat + Wheel of Vocation */}
-      <div className="w-full max-w-7xl flex-1 min-h-0 grid grid-cols-1 md:grid-cols-12 gap-4 lg:gap-6 relative overflow-hidden">
-
+      <div className="w-full max-w-7xl flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-12 gap-6 relative">
+        
         {/* Left column: Chat History & Input */}
-        <div className="col-span-1 md:col-span-7 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 shrink-0 border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
+        <div className="col-span-1 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
           
           {/* Horizontal Stepper for DEEP mode */}
           {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 22 && (
@@ -764,7 +756,6 @@ export default function CoachPage() {
 
           {/* Chat message history */}
           <div
-            ref={chatScrollRef}
             className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4"
             tabIndex={0}
             role="log"
@@ -940,6 +931,8 @@ export default function CoachPage() {
                 </div>
               </div>
             )}
+
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input area */}
@@ -1001,9 +994,9 @@ export default function CoachPage() {
             )}
         </div>
 
-        {/* Right column: Wheel of Vocation or Pyramid of Alignment */}
+        {/* Right column: Wheel of Vocation or Pyramid of Alignment (Desktop only) */}
         <div
-          className="hidden md:flex md:col-span-5 lg:col-span-5 flex-col h-full min-h-0 relative select-none glass-card rounded-3xl overflow-hidden border border-white/5 bg-[#040506]/35 backdrop-blur-xl"
+          className="lg:col-span-5 hidden lg:flex flex-col h-full min-h-0 relative select-none glass-card rounded-3xl overflow-hidden border border-white/5 bg-[#040506]/35 backdrop-blur-xl"
         >
         {/* Tabs and Zoom-in buttons for desktop */}
         {extractedData.sessionMode === 'DEEP' ? (
@@ -1066,22 +1059,81 @@ export default function CoachPage() {
         </div>
         </div>
       </div>
-
-      {/* Floating button for mobile/tablet to view Wheel/Pyramid */}
-      <div className="md:hidden fixed bottom-6 right-6 z-30">
-        <button
-          onClick={() => setIsWheelHovered(true)}
-          className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#3B82F6] text-white font-sans font-bold text-xs shadow-2xl shadow-[#3B82F6]/50 border border-white/20 active:scale-95 transition-all"
-        >
-          <Compass className="h-4 w-4" />
-          <span>Карта Талантов</span>
-        </button>
-      </div>
     </div>
 
-      {/* Zoom overlay for Wheel of Vocation / Pyramid of Alignment on click
-          (теперь единственный способ развернуть на весь экран на любой
-          ширине — инлайн-карточка выше кликабельна на всех breakpoint'ах) */}
+      {/* Floating button for mobile view of Wheel Of Vocation */}
+      <div className="lg:hidden fixed bottom-24 right-6 z-40">
+        <button
+          onClick={() => setShowVocationModal(true)}
+          className="h-12 w-12 rounded-full bg-[#3B82F6] text-white flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)] border border-[#3B82F6]/30 hover:bg-[#2563EB] transition active:scale-95 duration-200"
+        >
+          <Compass className="h-6 w-6 animate-[spin_10s_linear_infinite]" />
+        </button>
+      </div>
+
+      {/* Mobile Modal for Wheel of Vocation / Pyramid of Alignment */}
+      <AnimatePresence>
+        {showVocationModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 lg:hidden"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              className="bg-[#080C14] border border-white/10 rounded-3xl p-6 w-full max-w-[460px] flex flex-col relative max-h-[90vh]"
+            >
+              <button
+                onClick={() => setShowVocationModal(false)}
+                className="absolute top-4 right-4 text-xs font-bold text-[#7A8A9E] hover:text-white px-2.5 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl"
+              >
+                Закрыть
+              </button>
+              <div className="flex-1 overflow-y-auto pt-4">
+                {extractedData.sessionMode === 'DEEP' && (
+                  <div className="flex gap-2 p-1 rounded-2xl bg-[#090D1A]/80 border border-white/5 mb-4">
+                    <button
+                      onClick={() => setActiveTab('wheel')}
+                      className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
+                        activeTab === 'wheel'
+                          ? 'bg-[#3B82F6] text-white shadow-sm'
+                          : 'text-[#7A8A9E] hover:text-white'
+                      }`}
+                    >
+                      Колесо талантов
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('pyramid')}
+                      className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
+                        activeTab === 'pyramid'
+                          ? 'bg-[#EAB308] text-white shadow-sm'
+                          : 'text-[#7A8A9E] hover:text-white'
+                      }`}
+                    >
+                      Пирамида целей
+                    </button>
+                  </div>
+                )}
+                
+                {extractedData.sessionMode === 'DEEP' ? (
+                  activeTab === 'pyramid' ? (
+                    <PyramidOfAlignment extractedData={extractedData} />
+                  ) : (
+                    <WheelOfVocation extractedData={extractedData} />
+                  )
+                ) : (
+                  <WheelOfVocation extractedData={extractedData} />
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Zoom overlay for Wheel of Vocation / Pyramid of Alignment on Desktop click */}
       <AnimatePresence>
         {isWheelHovered && (
           <motion.div
