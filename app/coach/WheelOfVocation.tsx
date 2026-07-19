@@ -289,7 +289,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   dominantBaseline="middle"
                   fontSize="14 font-sans"
                   fontWeight="800"
-                  fill={sector.rawScore > 0 ? '#2D1F17' : '#7A6B5D'}
+                  fill={sector.rawScore > 0 ? 'var(--text-primary)' : 'var(--text-muted)'}
                   className="tracking-wide"
                 >
                   {sector.name}
@@ -302,7 +302,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                     y="0"
                     textAnchor={isRightSide ? 'start' : 'end'}
                     dominantBaseline="middle"
-                    fill={sector.rawScore > 0 ? sector.color : '#9E8570'}
+                    fill={sector.rawScore > 0 ? sector.color : 'var(--text-muted)'}
                     fontSize="13"
                     fontWeight="900"
                   >

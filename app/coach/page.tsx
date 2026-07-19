@@ -1149,7 +1149,7 @@ export default function CoachPage() {
               exit={{ scale: 0.7, opacity: 0, y: 30 }}
               onClick={(e) => e.stopPropagation()}
               transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-              className="w-full max-w-[1060px] p-6 md:p-10 rounded-[36px] bg-[#FFFBF4] dark:bg-[#080C14] border border-[#D4AF37]/35 shadow-[0_25px_60px_rgba(0,0,0,0.6)] relative flex flex-col items-center justify-center pointer-events-auto overflow-hidden"
+              className="w-full max-w-[1060px] p-6 md:p-10 rounded-[36px] glass-card border border-[#D4AF37]/25 shadow-[0_25px_60px_rgba(0,0,0,0.6)] relative flex flex-col items-center justify-center pointer-events-auto overflow-hidden"
             >
               <button
                 onClick={() => setIsWheelHovered(false)}
