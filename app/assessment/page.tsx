@@ -347,7 +347,7 @@ export default function AssessmentPage() {
   if (chapterTransition && chapterTransition.questionId === currentQuestion.question_id) {
     const { to, from } = chapterTransition;
     return (
-      <main className={`mx-auto flex min-h-[calc(100vh-140px)] max-w-xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10 transition-all duration-700 bg-gradient-to-b ${currentStyle.bgClass}`}>
+      <main className={`mx-auto flex min-h-[calc(100vh-140px)] max-w-xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10 transition-all duration-700`}>
         <div className="rounded-[32px] glass-card p-8 md:p-10 text-center relative overflow-hidden border border-white/10 shadow-2xl">
           <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-[120px] pointer-events-none opacity-20" style={{ backgroundColor: currentStyle.accentColor }} />
           <div className="relative z-10 flex flex-col items-center space-y-6">
@@ -381,7 +381,7 @@ export default function AssessmentPage() {
   }
 
   return (
-    <main className={`mx-auto h-[calc(100dvh-90px)] max-w-7xl px-4 py-4 lg:px-8 relative z-10 pt-20 flex flex-col justify-between overflow-hidden transition-all duration-700 bg-gradient-to-b ${currentStyle.bgClass}`}>
+    <main className={`mx-auto h-[calc(100dvh-90px)] max-w-7xl px-4 py-4 lg:px-8 relative z-10 pt-20 flex flex-col justify-between overflow-hidden transition-all duration-700`}>
       {/* Мягкие размытые круги под выбранную тему */}
       <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-[120px] pointer-events-none opacity-20 transition-all duration-700" style={{ backgroundColor: currentStyle.accentColor }} />
       <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-[120px] pointer-events-none opacity-10 transition-all duration-700" style={{ backgroundColor: currentStyle.accentColor }} />
