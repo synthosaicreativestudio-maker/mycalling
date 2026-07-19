@@ -6,8 +6,10 @@ import { env } from './env';
 const FREEMODEL_API_KEY = env.PROXYAPI_KEY;
 const FREEMODEL_URL = "/v1/chat/completions";
 
-// Используем модель Claude Sonnet по запросу пользователя для идеального коучинга
-const DEFAULT_MODEL = "claude-sonnet-4-20250514";
+// Ключ ProxyAPI обновлён 19.07.2026 (INC-005) — новый ключ не даёт доступа к
+// Claude Sonnet 4, только к линейке GPT-5.x. Временно переключено на gpt-5.5
+// по решению пользователя; вернуть Claude, если появится ключ с доступом к нему.
+const DEFAULT_MODEL = "gpt-5.5";
 
 interface Message {
   role: 'user' | 'assistant' | 'model';
