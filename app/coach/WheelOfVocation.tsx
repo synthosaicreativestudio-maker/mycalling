@@ -123,15 +123,15 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     ].join(' ');
   };
 
-  // 1. РЕЖИМ STANDALONE (Развернутое крупное модальное окно с безопасным полем 820x580)
+  // 1. РЕЖИМ STANDALONE (Развернутое крупное модальное окно с безопасным полем 960x580)
   if (standalone) {
-    const cx = 410;
+    const cx = 480;
     const cy = 290;
     const maxRadius = 205; // Огромное заполнительное колесо
 
     return (
       <div className="relative w-full h-full flex items-center justify-center p-1">
-        <svg width="100%" height="100%" viewBox="0 0 820 580" className="overflow-visible w-full h-full">
+        <svg width="100%" height="100%" viewBox="0 0 960 580" className="overflow-visible w-full h-full">
           <defs>
             {/* Медно-золотые градиенты секторов */}
             {sectors.map((sector, idx) => (
