@@ -1,0 +1,90 @@
+name: A11y & release checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Эфемерная БД для CI — никаких прод/staging секретов не нужно.
+    # DATABASE_URL/DIRECT_URL ниже указывают на этот контейнер, а не на
+    # реальный Supabase.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: moe_prizvanie_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/moe_prizvanie_ci
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/moe_prizvanie_ci
+      # Фиктивные значения — реальные вызовы ProxyAPI/подпись cookie в a11y-
+      # тестах не нужны, env.ts на рантайме требует только непустую строку.
+      PROXYAPI_KEY: ci-dummy-key
+      BETTER_AUTH_SECRET: ci-dummy-secret-not-used-outside-this-run
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prisma generate
+
+      - name: Push schema to ephemeral CI database
+        run: npx prisma db push --skip-generate --accept-data-loss
+
+      - run: npx tsc --noEmit
+
+      - run: npm run lint
+
+      - run: npx vitest run
+
+      - run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start production server
+        run: nohup npm run start > server.log 2>&1 &
+
+      - name: Wait for server to be ready
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/ > /dev/null; then
+              echo "Server is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Server did not start in time"
+          cat server.log
+          exit 1
+
+      - run: npx playwright test
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+            server.log
+          retention-days: 7
