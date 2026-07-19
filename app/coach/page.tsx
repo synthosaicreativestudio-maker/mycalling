@@ -992,6 +992,7 @@ export default function CoachPage() {
                 </form>
               </div>
             )}
+          </div>
         </div>
 
         {/* Right column: Wheel of Vocation or Pyramid of Alignment (Desktop only) */}
@@ -1059,7 +1060,6 @@ export default function CoachPage() {
         </div>
         </div>
       </div>
-    </div>
 
       {/* Floating button for mobile view of Wheel Of Vocation */}
       <div className="lg:hidden fixed bottom-24 right-6 z-40">
