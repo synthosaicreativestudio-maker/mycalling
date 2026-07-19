@@ -17,6 +17,8 @@ export type NarrativeTestCode =
   | 'PROCRASTINATION'
   | 'VIA'
   | 'PVQ'
+  | 'GROWTH'
+  | 'CONTEXT'
   | 'COACH';
 
 export interface NarrativeChapter {
@@ -32,7 +34,7 @@ export interface NarrativeChapter {
   outro: string;
 }
 
-export const TOTAL_NARRATIVE_CHAPTERS = 5;
+export const TOTAL_NARRATIVE_CHAPTERS = 7;
 
 export const narrative: Record<NarrativeTestCode, NarrativeChapter> = {
   RIASEC: {
@@ -89,6 +91,24 @@ export const narrative: Record<NarrativeTestCode, NarrativeChapter> = {
     outro:
       'Компас откалиброван! Твои ценности зафиксированы и лягут в основу итоговой карты призвания.',
   },
+  GROWTH: {
+    chapterTitle: 'Внутренний компас',
+    chapterNumber: 6,
+    emoji: '🧗',
+    intro:
+      'Настрой внутренний компас: как ты справляешься с трудностями, во что веришь насчёт своих способностей и как чувствуешь свои эмоции.',
+    outro:
+      'Компас настроен! Ты честно рассказал, как ведёшь себя в трудную минуту — это ценные данные.',
+  },
+  CONTEXT: {
+    chapterTitle: 'Карта ресурсов',
+    chapterNumber: 7,
+    emoji: '🎒',
+    intro:
+      'Последний блок — карта твоих реальных возможностей и опор вокруг: семья, город, доступ к ресурсам. Если что-то не хочешь уточнять — выбирай «нейтрально».',
+    outro:
+      'Карта ресурсов собрана! Теперь у нас есть полная картина не только про тебя, но и про твои условия.',
+  },
   COACH: {
     chapterTitle: 'Диалог с Наставником',
     chapterNumber: 0,
@@ -119,4 +139,6 @@ export const ASSESSMENT_CHAPTER_ORDER: NarrativeTestCode[] = [
   'VIA',
   'PROCRASTINATION',
   'PVQ',
+  'GROWTH',
+  'CONTEXT',
 ];

@@ -8,7 +8,7 @@ export const scaleOptions: [string, string, string, string, string] = [
 
 export interface DiagnosticQuestion {
   id: string;
-  testCode: 'RIASEC' | 'BFI' | 'ICAR' | 'PROCRASTINATION' | 'VIA' | 'PVQ';
+  testCode: 'RIASEC' | 'BFI' | 'ICAR' | 'PROCRASTINATION' | 'VIA' | 'PVQ' | 'GROWTH' | 'CONTEXT';
   text: string;
   scale: string;
   reverseScored: boolean;
@@ -803,5 +803,112 @@ export const diagnosticQuestions: DiagnosticQuestion[] = [
     reverseScored: true,
     options: scaleOptions,
     visualAssetUrl: '/assets/webp/procrastination.webp'
+  },
+
+  // ─── 7. Внутренний компас (Grit / Mindset / Эмоциональный интеллект) ───
+  // Короткие адаптированные шкалы вместо оценки "на глазок" ИИ-коучем по
+  // конспекту диалога (методологический аудит проекта, БЛОК 3 п.5 —
+  // самописные численные оценки от LLM имеют низкую валидность).
+  {
+    id: 'grit-1', testCode: 'GROWTH', scale: 'GRIT', reverseScored: false,
+    text: 'Если я по-настоящему увлечён целью, трудности не заставляют меня бросить её надолго.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'grit-2', testCode: 'GROWTH', scale: 'GRIT', reverseScored: true,
+    text: 'Я часто загораюсь новым увлечением, но быстро остываю и переключаюсь на другое.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'grit-3', testCode: 'GROWTH', scale: 'GRIT', reverseScored: false,
+    text: 'Я довожу до конца важные для меня дела, даже если на это уходят месяцы.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'grit-4', testCode: 'GROWTH', scale: 'GRIT', reverseScored: true,
+    text: 'Неудача в начале пути обычно заставляет меня отказаться от затеи.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'mindset-1', testCode: 'GROWTH', scale: 'MINDSET', reverseScored: false,
+    text: 'Я верю, что способности и ум можно развить упорной практикой, а не только получить от природы.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'mindset-2', testCode: 'GROWTH', scale: 'MINDSET', reverseScored: true,
+    text: 'Если что-то не получается сразу, я решаю, что это просто "не моё" от природы.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'mindset-3', testCode: 'GROWTH', scale: 'MINDSET', reverseScored: false,
+    text: 'Ошибки — это нормальная часть обучения, а не доказательство того, что я недостаточно способный.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'mindset-4', testCode: 'GROWTH', scale: 'MINDSET', reverseScored: true,
+    text: 'Умных людей сразу видно — им не нужно особо стараться, чтобы разобраться в новой теме.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'teique-sa-1', testCode: 'GROWTH', scale: 'TEIQUE_SA', reverseScored: false,
+    text: 'Я обычно хорошо понимаю, какую именно эмоцию сейчас испытываю и почему.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'teique-sa-2', testCode: 'GROWTH', scale: 'TEIQUE_SA', reverseScored: true,
+    text: 'Мне трудно объяснить словами, что я чувствую, даже когда эмоция сильная.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'teique-sr-1', testCode: 'GROWTH', scale: 'TEIQUE_SR', reverseScored: false,
+    text: 'Когда я злюсь или расстроен, я обычно могу взять себя в руки без чужой помощи.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+  {
+    id: 'teique-sr-2', testCode: 'GROWTH', scale: 'TEIQUE_SR', reverseScored: true,
+    text: 'Сильные эмоции часто берут надо мной верх, и я потом жалею о сказанном или сделанном.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/growth.webp'
+  },
+
+  // ─── 8. Карта ресурсов (контекст и опоры) ───
+  // Фактологические/контекстные поля из методологического аудита (БЛОК 1,
+  // кластер "Контекст и Ограничения") — сознательно не спрашиваются коучем в
+  // живом диалоге (неуместно для доверительной беседы), а собираются здесь как
+  // короткий необязательный самоотчёт. Нейтральный ответ ("нейтрально") везде
+  // безопасен и не искажает отчёт.
+  {
+    id: 'ctx-family-pressure', testCode: 'CONTEXT', scale: 'familyPressure', reverseScored: true,
+    text: 'Родители довольно настойчиво продвигают мне конкретную профессию или вуз, которые выбрали не совсем я.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/context.webp'
+  },
+  {
+    id: 'ctx-family-finance', testCode: 'CONTEXT', scale: 'familyFinance', reverseScored: false,
+    text: 'Семья может поддержать почти любой мой выбор образования, невзирая на его стоимость или удалённость от дома.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/context.webp'
+  },
+  {
+    id: 'ctx-mobility', testCode: 'CONTEXT', scale: 'mobility', reverseScored: false,
+    text: 'Я готов(а) переехать в другой город или страну ради учёбы или работы мечты.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/context.webp'
+  },
+  {
+    id: 'ctx-health', testCode: 'CONTEXT', scale: 'health', reverseScored: true,
+    text: 'Есть особенности здоровья, которые стоит учитывать при выборе будущей профессии (нагрузка, режим, среда).',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/context.webp'
+  },
+  {
+    id: 'ctx-edu-env', testCode: 'CONTEXT', scale: 'educationEnvAvail', reverseScored: false,
+    text: 'В моём городе/районе есть кружки, секции или курсы по темам, которые мне реально интересны.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/context.webp'
+  },
+  {
+    id: 'ctx-career-readiness', testCode: 'CONTEXT', scale: 'careerReadiness', reverseScored: false,
+    text: 'Я готов(а) уже сейчас обсуждать конкретные варианты будущей профессии, а не просто "как-нибудь потом решу".',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/context.webp'
+  },
+  {
+    id: 'ctx-digital-divide', testCode: 'CONTEXT', scale: 'digitalDivide', reverseScored: true,
+    text: 'Мне не хватает доступа к компьютеру, интернету или нужным программам, чтобы учиться и пробовать новое.',
+    options: scaleOptions, visualAssetUrl: '/assets/webp/context.webp'
   }
 ];

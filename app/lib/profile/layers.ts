@@ -6,45 +6,54 @@ import { z } from 'zod';
  */
 
 export const InterestsLayerSchema = z.object({
-  riasec: z.record(z.string(), z.number()),
-  hollandCode: z.string().optional(),
-  antiInterests: z.array(z.string()).default([]),
-  hobbies: z.array(z.string()).default([]),
-  cabinVisualArt: z.number().optional(),
-  cabinPerformingArt: z.number().optional(),
-  subjectSTEM: z.number().optional(),
-  subjectHumanities: z.number().optional(),
-  subjectBioChem: z.number().optional(),
-  digitalInterests: z.array(z.string()).default([]),
+  riasec: z.record(z.string(), z.number()), // тест RIASEC
+  hollandCode: z.string().optional(), // тест RIASEC
+  antiInterests: z.array(z.string()).default([]), // коуч (Д-7)
+  hobbies: z.array(z.string()).default([]), // коуч (Д-7, voluntaryHobbies)
+  // Ниже — нет источника данных (ни коуч, ни тесты не задают этот вопрос).
+  // Кандидаты на удаление или на будущий короткий тест: RIASEC уже покрывает
+  // "артистический"/"предметные предпочтения" на уровне, достаточном для MVP.
+  cabinVisualArt: z.number().optional(), // TODO: нет источника
+  cabinPerformingArt: z.number().optional(), // TODO: нет источника
+  subjectSTEM: z.number().optional(), // TODO: нет источника
+  subjectHumanities: z.number().optional(), // TODO: нет источника
+  subjectBioChem: z.number().optional(), // TODO: нет источника
+  digitalInterests: z.array(z.string()).default([]), // TODO: нет источника
 });
 
 export const PersonalityLayerSchema = z.object({
-  bigFive: z.record(z.string(), z.union([z.number(), z.boolean()])),
-  locusOfControl: z.number().optional(),
-  ambiguityTolerance: z.number().optional(),
-  honestyFlag: z.boolean().optional(),
-  teiqueSelfAwareness: z.number().optional(),
-  teiqueSelfRegulation: z.number().optional(),
-  teiqueSocialSkills: z.number().optional(),
-  teiqueMotivation: z.number().optional(),
-  grit: z.number().optional(),
-  proactivity: z.number().optional(),
-  selfControl: z.number().optional(),
-  stressEvaluation: z.number().optional(),
-  emotionalReactivity: z.number().optional(),
-  mindsetGrowth: z.number().optional(),
-  mindsetOptimism: z.number().optional(),
-  locusControlInternal: z.number().optional(),
+  bigFive: z.record(z.string(), z.union([z.number(), z.boolean()])), // тест BFI
+  locusOfControl: z.number().optional(), // тест BFI (LOC-пункты)
+  ambiguityTolerance: z.number().optional(), // тест BFI (AMB-пункты)
+  honestyFlag: z.boolean().optional(), // тест BFI (реверс-девиация)
+  teiqueSelfAwareness: z.number().optional(), // тест GROWTH ("Внутренний компас")
+  teiqueSelfRegulation: z.number().optional(), // тест GROWTH ("Внутренний компас")
+  teiqueMotivation: z.number().optional(), // TODO: нет источника
+  grit: z.number().optional(), // тест GROWTH ("Внутренний компас")
+  mindsetGrowth: z.number().optional(), // тест GROWTH ("Внутренний компас")
+  // Ниже — нет источника: TEIQue/Grit/Mindset выше уже покрывают ядро
+  // эмоционального интеллекта и настойчивости; эти доп. поля дублируют их
+  // детализацию без отдельного валидного инструмента — кандидаты на удаление.
+  teiqueSocialSkills: z.number().optional(), // TODO: нет источника
+  proactivity: z.number().optional(), // TODO: нет источника
+  selfControl: z.number().optional(), // TODO: нет источника
+  stressEvaluation: z.number().optional(), // TODO: нет источника
+  emotionalReactivity: z.number().optional(), // TODO: нет источника
+  mindsetOptimism: z.number().optional(), // TODO: нет источника
+  locusControlInternal: z.number().optional(), // TODO: дублирует locusOfControl выше
 });
 
 export const StrengthsLayerSchema = z.object({
-  via: z.record(z.string(), z.union([z.number(), z.array(z.string())])).optional(),
-  signatureStrengths: z.array(z.string()).default([]),
-  viaWisdom: z.number().optional(),
-  viaCourage: z.number().optional(),
-  viaHumanity: z.number().optional(),
-  viaJustice: z.number().optional(),
-  viaTemperance: z.number().optional(),
+  via: z.record(z.string(), z.union([z.number(), z.array(z.string())])).optional(), // тест VIA (24 подшкалы)
+  signatureStrengths: z.array(z.string()).default([]), // тест VIA
+  // Агрегаты по 6 добродетелям — считаются VIA-скорером как среднее по силам,
+  // входящим в добродетель (см. P0.1 fix, app/lib/diagnostic/scoring.ts).
+  viaWisdom: z.number().optional(), // тест VIA (агрегат)
+  viaCourage: z.number().optional(), // тест VIA (агрегат)
+  viaHumanity: z.number().optional(), // тест VIA (агрегат)
+  viaJustice: z.number().optional(), // тест VIA (агрегат)
+  viaTemperance: z.number().optional(), // тест VIA (агрегат)
+  viaTranscendence: z.number().optional(), // тест VIA (агрегат)
 });
 
 export const CognitiveLayerSchema = z.object({
@@ -52,83 +61,97 @@ export const CognitiveLayerSchema = z.object({
     raw: z.number(),
     bySubscale: z.record(z.string(), z.number()),
     band: z.string(),
-  }),
-  execInhibition: z.number().optional(),
-  execFlexibility: z.number().optional(),
-  learnDeep: z.number().optional(),
-  learnSurface: z.number().optional(),
-  selfEfficacyAcademic: z.number().optional(),
-  metacogPlanning: z.number().optional(),
-  metacogMonitoring: z.number().optional(),
-  curiosityEpistemic: z.number().optional(),
-  cogAiLiteracy: z.number().optional(),
+  }), // тест ICAR
+  // Ниже — нет источника. Это реальные и ценные конструкты (исполнительные
+  // функции, метакогниция), но требуют отдельного валидного инструмента
+  // (например, адаптации BRIEF или MSLQ) — не добавлять "на глазок" в
+  // существующие тесты. Оставлено как будущая работа, не кандидат на удаление.
+  execInhibition: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  execFlexibility: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  learnDeep: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  learnSurface: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  selfEfficacyAcademic: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  metacogPlanning: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  metacogMonitoring: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  curiosityEpistemic: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  cogAiLiteracy: z.number().optional(), // TODO: нет источника, нужен отдельный тест
 });
 
 export const MotivationLayerSchema = z.object({
-  coachValues: z.string().optional(),
-  dreams: z.string().optional(),
-  pvq: z.record(z.string(), z.number()).optional(),
-  topValues: z.array(z.string()).default([]),
+  coachValues: z.string().optional(), // коуч
+  dreams: z.string().optional(), // коуч
+  pvq: z.record(z.string(), z.number()).optional(), // тест PVQ
+  topValues: z.array(z.string()).default([]), // тест PVQ
 });
 
 export const SocialLayerSchema = z.object({
-  belbinLeader: z.number().optional(),
-  belbinDoer: z.number().optional(),
-  belbinCreator: z.number().optional(),
-  belbinPeacemaker: z.number().optional(),
-  assertiveness: z.number().optional(),
-  empatheticListening: z.number().optional(),
-  feedbackSkill: z.number().optional(),
-  conflictResolution: z.number().optional(),
-  peerFriendships: z.number().optional(),
-  groupBelonging: z.number().optional(),
-  bullyingResistance: z.number().optional(),
-  peerDependence: z.number().optional(),
-  parentalInfluence: z.number().optional(),
-  mentorInfluence: z.number().optional(),
-  socialCapital: z.number().optional(),
+  belbinLeader: z.number().optional(), // коуч
+  belbinDoer: z.number().optional(), // коуч
+  belbinCreator: z.number().optional(), // коуч
+  belbinPeacemaker: z.number().optional(), // коуч
+  // Ниже — нет источника. bullyingResistance/peerDependence — чувствительные
+  // конструкты о буллинге/зависимости от сверстников: оценивать их эвристикой
+  // ИИ-коуча по обрывку диалога методологически рискованно (ложный "диагноз").
+  // Не добавлять без консультации с психологом-методологом. Остальные —
+  // низкий приоритет, дублируют то, что уже видно из belbin-ролей и values.
+  assertiveness: z.number().optional(), // TODO: нет источника
+  empatheticListening: z.number().optional(), // TODO: нет источника
+  feedbackSkill: z.number().optional(), // TODO: нет источника
+  conflictResolution: z.number().optional(), // TODO: нет источника
+  peerFriendships: z.number().optional(), // TODO: нет источника
+  groupBelonging: z.number().optional(), // TODO: нет источника
+  bullyingResistance: z.number().optional(), // TODO: чувствительная тема, нужен психолог-методолог
+  peerDependence: z.number().optional(), // TODO: чувствительная тема, нужен психолог-методолог
+  parentalInfluence: z.number().optional(), // TODO: нет источника (частично дублирует familyPressure)
+  mentorInfluence: z.number().optional(), // TODO: нет источника
+  socialCapital: z.number().optional(), // TODO: нет источника
 });
 
 export const BehaviorLayerSchema = z.object({
-  procrastination: z.number(),
-  deepActions: z.string().optional(),
-  deepFirstStep: z.string().optional(),
-  savickasConcern: z.number().optional(),
-  savickasControl: z.number().optional(),
-  savickasCuriosity: z.number().optional(),
-  savickasConfidence: z.number().optional(),
-  perfectionismBarrier: z.number().optional(),
-  fearOfFailure: z.number().optional(),
-  decisionRational: z.number().optional(),
-  decisionIntuitive: z.number().optional(),
-  decisionDependent: z.number().optional(),
-  decisionImpulsive: z.number().optional(),
-  resilienceFailure: z.number().optional(),
-  learningFromMistakes: z.number().optional(),
-  timeManagement: z.number().optional(),
-  routineDiscipline: z.number().optional(),
-  balanceWorkRest: z.number().optional(),
-  digitalHygiene: z.number().optional(),
-  contentCreationStyle: z.number().optional(),
-  cyberSocialization: z.number().optional(),
-  aiCollaboration: z.number().optional(),
+  procrastination: z.number(), // тест PROCRASTINATION (шкала Лэя)
+  deepActions: z.string().optional(), // коуч (DEEP-сессия)
+  deepFirstStep: z.string().optional(), // коуч (DEEP-сессия)
+  savickasConcern: z.number().optional(), // коуч
+  savickasControl: z.number().optional(), // коуч
+  savickasCuriosity: z.number().optional(), // коуч
+  savickasConfidence: z.number().optional(), // коуч
+  // Ниже — нет источника. Каждое из этих полей — самостоятельный валидный
+  // конструкт (перфекционизм, стиль принятия решений, резилентность), который
+  // не стоит "досочинять" внутри уже длинной GROWTH-батареи — кандидаты на
+  // будущие отдельные короткие тесты, не на удаление.
+  perfectionismBarrier: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  fearOfFailure: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  decisionRational: z.number().optional(), // TODO: нет источника (частично — decisionStyle текстом от коуча)
+  decisionIntuitive: z.number().optional(), // TODO: нет источника (частично — decisionStyle текстом от коуча)
+  decisionDependent: z.number().optional(), // TODO: нет источника
+  decisionImpulsive: z.number().optional(), // TODO: нет источника
+  resilienceFailure: z.number().optional(), // TODO: нет источника, нужен отдельный тест
+  learningFromMistakes: z.number().optional(), // TODO: нет источника
+  timeManagement: z.number().optional(), // TODO: нет источника (частично пересекается с procrastination)
+  routineDiscipline: z.number().optional(), // TODO: нет источника
+  balanceWorkRest: z.number().optional(), // TODO: нет источника
+  digitalHygiene: z.number().optional(), // TODO: нет источника
+  contentCreationStyle: z.number().optional(), // TODO: нет источника
+  cyberSocialization: z.number().optional(), // TODO: нет источника
+  aiCollaboration: z.number().optional(), // TODO: нет источника
 });
 
 export const ContextLayerSchema = z.object({
-  age: z.number().optional(),
-  grade: z.string().optional(),
-  city: z.string().optional(),
-  idols: z.string().optional(),
-  barriers: z.string().optional(),
-  familyPressure: z.number().optional(),
-  familyFinance: z.number().optional(),
-  mobility: z.number().optional(),
-  health: z.number().optional(),
-  grades: z.number().optional(),
-  limitingBeliefs: z.number().optional(),
-  educationEnvAvail: z.number().optional(),
-  careerReadiness: z.number().optional(),
-  digitalDivide: z.number().optional(),
+  age: z.number().optional(), // коуч
+  grade: z.string().optional(), // коуч
+  city: z.string().optional(), // коуч
+  idols: z.string().optional(), // коуч
+  barriers: z.string().optional(), // коуч (fears)
+  familyPressure: z.number().optional(), // тест CONTEXT ("Карта ресурсов")
+  familyFinance: z.number().optional(), // тест CONTEXT ("Карта ресурсов")
+  mobility: z.number().optional(), // тест CONTEXT ("Карта ресурсов")
+  health: z.number().optional(), // тест CONTEXT ("Карта ресурсов")
+  educationEnvAvail: z.number().optional(), // тест CONTEXT ("Карта ресурсов")
+  careerReadiness: z.number().optional(), // тест CONTEXT ("Карта ресурсов")
+  digitalDivide: z.number().optional(), // тест CONTEXT ("Карта ресурсов")
+  // Ниже — нет источника.
+  grades: z.number().optional(), // TODO: нет источника (объективная успеваемость — не самоотчёт)
+  limitingBeliefs: z.number().optional(), // TODO: нет источника (частично пересекается с barriers/fears)
 });
 
 export const ConsistencyLayerSchema = z.object({

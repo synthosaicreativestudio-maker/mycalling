@@ -176,8 +176,24 @@ export const viaScorer: TestScorer = {
       .sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0))
       .slice(0, 5);
 
+    // Агрегаты по 6 добродетелям (среднее по силам, входящим в добродетель) —
+    // раньше эти значения нигде не считались, а в digitalProfile.summary
+    // читались из данных коуча, где их никогда не было (всегда undefined).
+    const virtueSums: Record<string, { sum: number; count: number }> = {};
+    viaStrengths.forEach((s) => {
+      const val = scores[s.code];
+      if (val === undefined) return;
+      if (!virtueSums[s.virtue]) virtueSums[s.virtue] = { sum: 0, count: 0 };
+      virtueSums[s.virtue].sum += val;
+      virtueSums[s.virtue].count += 1;
+    });
+    const virtueScores: Record<string, number> = {};
+    Object.entries(virtueSums).forEach(([virtue, { sum, count }]) => {
+      virtueScores[`virtue_${virtue}`] = average(sum, count);
+    });
+
     return {
-      scores: { ...scores, signatureStrengths },
+      scores: { ...scores, ...virtueScores, signatureStrengths },
       reliability: computeReliability(answers, qs),
     };
   },
@@ -219,6 +235,52 @@ export const pvqScorer: TestScorer = {
   },
 };
 
+/**
+ * "Внутренний компас": короткие адаптированные шкалы Grit-S (настойчивость),
+ * Growth Mindset (Dweck) и TEIQue-SF (само-осознанность/саморегуляция эмоций) —
+ * средний балл 1-5 по каждой подшкале, обратные пункты пересчитываются.
+ */
+export const growthScorer: TestScorer = {
+  testCode: 'GROWTH',
+  score(answers, questions) {
+    const qs = questionsFor('GROWTH', questions);
+    const sums: Record<string, number> = {};
+    const counts: Record<string, number> = {};
+    qs.forEach((q) => {
+      const value = answers[q.id];
+      if (value === undefined) return;
+      const finalVal = q.reverseScored ? 6 - value : value;
+      sums[q.scale] = (sums[q.scale] ?? 0) + finalVal;
+      counts[q.scale] = (counts[q.scale] ?? 0) + 1;
+    });
+    const scales = ['GRIT', 'MINDSET', 'TEIQUE_SA', 'TEIQUE_SR'];
+    const scores: Record<string, unknown> = Object.fromEntries(
+      scales.map((key) => [key, average(sums[key] ?? 0, counts[key] ?? 0)])
+    );
+    return { scores, reliability: computeReliability(answers, qs) };
+  },
+};
+
+/**
+ * "Карта ресурсов": контекстные/фактологические поля (семья, здоровье, среда) —
+ * один пункт на поле, средний балл 1-5 сохраняется как есть (не психометрическая
+ * шкала с несколькими пунктами, поэтому reliability здесь менее показателен,
+ * но считается тем же способом для единообразия).
+ */
+export const contextScorer: TestScorer = {
+  testCode: 'CONTEXT',
+  score(answers, questions) {
+    const qs = questionsFor('CONTEXT', questions);
+    const scores: Record<string, unknown> = {};
+    qs.forEach((q) => {
+      const value = answers[q.id];
+      if (value === undefined) return;
+      scores[q.scale] = q.reverseScored ? 6 - value : value;
+    });
+    return { scores, reliability: computeReliability(answers, qs) };
+  },
+};
+
 export const scorers: Record<string, TestScorer> = {
   RIASEC: riasecScorer,
   BFI: bfiScorer,
@@ -226,6 +288,8 @@ export const scorers: Record<string, TestScorer> = {
   PROCRASTINATION: procrastinationScorer,
   VIA: viaScorer,
   PVQ: pvqScorer,
+  GROWTH: growthScorer,
+  CONTEXT: contextScorer,
 };
 
 export function registerScorer(scorer: TestScorer): void {

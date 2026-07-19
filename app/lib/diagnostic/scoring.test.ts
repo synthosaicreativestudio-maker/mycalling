@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { diagnosticQuestions } from '../../data/questions';
-import { bfiScorer, icarScorer, procrastinationScorer, pvqScorer, riasecScorer, viaScorer } from './scoring';
+import { bfiScorer, contextScorer, growthScorer, icarScorer, procrastinationScorer, pvqScorer, riasecScorer, viaScorer } from './scoring';
 import { viaStrengths } from '../../data/viaStrengths';
 import { pvqValues } from '../../data/pvqValues';
 
@@ -141,6 +141,56 @@ describe('viaScorer', () => {
     });
     const result = viaScorer.score(answers, diagnosticQuestions);
     expect(result.reliability).toBe('low');
+  });
+
+  it('averages each virtue from its member strengths (P0.1 fix: was always undefined before)', () => {
+    const answers: Record<string, number> = {};
+    viaStrengths.forEach((s) => {
+      // wisdom strengths get 5, everything else gets 1 — virtue_wisdom should isolate that.
+      answers[`via-${s.code}`] = s.virtue === 'wisdom' ? 5 : 1;
+    });
+    const result = viaScorer.score(answers, diagnosticQuestions);
+    const scores = result.scores as Record<string, number>;
+    expect(scores.virtue_wisdom).toBe(5);
+    expect(scores.virtue_courage).toBe(1);
+    expect(scores.virtue_transcendence).toBe(1);
+  });
+});
+
+describe('growthScorer ("Внутренний компас": Grit/Mindset/TEIQue-SF)', () => {
+  it('averages each subscale and reverse-scores flagged items', () => {
+    const answers: Record<string, number> = {
+      'grit-1': 5, 'grit-2': 1, 'grit-3': 5, 'grit-4': 1, // reverse items -> 5,5
+      'mindset-1': 4, 'mindset-2': 2, 'mindset-3': 4, 'mindset-4': 2, // reverse -> 4,4
+      'teique-sa-1': 3, 'teique-sa-2': 3, // reverse -> 3
+      'teique-sr-1': 5, 'teique-sr-2': 1, // reverse -> 5
+    };
+    const result = growthScorer.score(answers, diagnosticQuestions);
+    expect(result.scores).toEqual({ GRIT: 5, MINDSET: 4, TEIQUE_SA: 3, TEIQUE_SR: 5 });
+  });
+});
+
+describe('contextScorer ("Карта ресурсов")', () => {
+  it('applies reverse-scoring per field and passes through raw fields untouched', () => {
+    const answers: Record<string, number> = {
+      'ctx-family-pressure': 5, // reverse -> 1 (low pressure is the healthy direction)
+      'ctx-family-finance': 4,
+      'ctx-mobility': 3,
+      'ctx-health': 1, // reverse -> 5
+      'ctx-edu-env': 2,
+      'ctx-career-readiness': 5,
+      'ctx-digital-divide': 5, // reverse -> 1
+    };
+    const result = contextScorer.score(answers, diagnosticQuestions);
+    expect(result.scores).toEqual({
+      familyPressure: 1,
+      familyFinance: 4,
+      mobility: 3,
+      health: 5,
+      educationEnvAvail: 2,
+      careerReadiness: 5,
+      digitalDivide: 1,
+    });
   });
 });
 

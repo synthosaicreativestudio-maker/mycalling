@@ -151,6 +151,13 @@ export async function GET(request: Request) {
       const pvqScores = results.PVQ.scores as { raw: Record<string, number>; centered: Record<string, number>; topValues: string[] };
       const topPvqNames = pvqScores.topValues.map((code) => pvqValueByCode[code]?.nameRu || code);
       const viaScores = results.VIA.scores as Record<string, number> & { signatureStrengths: string[] };
+      // "Внутренний компас" (Grit/Mindset/TEIQue) и "Карта ресурсов" (контекст) —
+      // короткие валидные шкалы вместо оценки этих же конструктов ИИ-коучем "на
+      // глазок" по диалогу. Опциональны: если подросток их не проходил, поля
+      // просто останутся undefined (не блокирует остальной отчёт).
+      const growthScores = (results.GROWTH?.scores ?? {}) as Record<string, number>;
+      const contextScores = (results.CONTEXT?.scores ?? {}) as Record<string, number>;
+
       const signatureStrengths = viaScores.signatureStrengths.map((code) => {
         const strength = viaStrengthByCode[code];
         return strength ? { code, nameRu: strength.nameRu, virtue: viaVirtueNames[strength.virtue] } : { code, nameRu: code, virtue: '' };
@@ -262,27 +269,34 @@ export async function GET(request: Request) {
           locusOfControl: typeof finalBigFive.LOC === 'number' ? finalBigFive.LOC : undefined,
           ambiguityTolerance: typeof finalBigFive.AMB === 'number' ? finalBigFive.AMB : undefined,
           honestyFlag: typeof finalBigFive.honestyFlag === 'boolean' ? finalBigFive.honestyFlag : undefined,
-          teiqueSelfAwareness: getNumberField('teiqueSelfAwareness'),
-          teiqueSelfRegulation: getNumberField('teiqueSelfRegulation'),
+          // Приоритет — валидная короткая шкала теста ("Внутренний компас"), а не
+          // догадка коуча по диалогу; getNumberField остаётся фолбэком для сессий,
+          // пройденных до появления этого теста.
+          teiqueSelfAwareness: growthScores.TEIQUE_SA ?? getNumberField('teiqueSelfAwareness'),
+          teiqueSelfRegulation: growthScores.TEIQUE_SR ?? getNumberField('teiqueSelfRegulation'),
           teiqueSocialSkills: getNumberField('teiqueSocialSkills'),
           teiqueMotivation: getNumberField('teiqueMotivation'),
-          grit: getNumberField('grit'),
+          grit: growthScores.GRIT ?? getNumberField('grit'),
           proactivity: getNumberField('proactivity'),
           selfControl: getNumberField('selfControl'),
           stressEvaluation: getNumberField('stressEvaluation'),
           emotionalReactivity: getNumberField('emotionalReactivity'),
-          mindsetGrowth: getNumberField('mindsetGrowth'),
+          mindsetGrowth: growthScores.MINDSET ?? getNumberField('mindsetGrowth'),
           mindsetOptimism: getNumberField('mindsetOptimism'),
           locusControlInternal: getNumberField('locusControlInternal'),
         },
         strengths: {
           via: viaScores,
           signatureStrengths: viaScores.signatureStrengths,
-          viaWisdom: getNumberField('viaWisdom'),
-          viaCourage: getNumberField('viaCourage'),
-          viaHumanity: getNumberField('viaHumanity'),
-          viaJustice: getNumberField('viaJustice'),
-          viaTemperance: getNumberField('viaTemperance'),
+          // Агрегаты по добродетелям считаются самим VIA-скорером (среднее по входящим
+          // в добродетель силам) — раньше здесь читалось поле из данных коуча, которое
+          // никогда не заполнялось, и агрегаты всегда были undefined.
+          viaWisdom: (viaScores as Record<string, number>).virtue_wisdom,
+          viaCourage: (viaScores as Record<string, number>).virtue_courage,
+          viaHumanity: (viaScores as Record<string, number>).virtue_humanity,
+          viaJustice: (viaScores as Record<string, number>).virtue_justice,
+          viaTemperance: (viaScores as Record<string, number>).virtue_temperance,
+          viaTranscendence: (viaScores as Record<string, number>).virtue_transcendence,
         },
         cognitive: {
           icar: icarScores,
@@ -349,15 +363,17 @@ export async function GET(request: Request) {
           city: getField('city') || undefined,
           idols: coachData.idols !== 'Не указано' ? coachData.idols : undefined,
           barriers: coachData.barriers !== 'Не указано' ? coachData.barriers : undefined,
-          familyPressure: getNumberField('familyPressure'),
-          familyFinance: getNumberField('familyFinance'),
-          mobility: getNumberField('mobility'),
-          health: getNumberField('health'),
+          // Приоритет — короткий самоотчёт теста ("Карта ресурсов"); getNumberField
+          // остаётся фолбэком для сессий, пройденных до появления этого теста.
+          familyPressure: contextScores.familyPressure ?? getNumberField('familyPressure'),
+          familyFinance: contextScores.familyFinance ?? getNumberField('familyFinance'),
+          mobility: contextScores.mobility ?? getNumberField('mobility'),
+          health: contextScores.health ?? getNumberField('health'),
           grades: getNumberField('grades'),
           limitingBeliefs: getNumberField('limitingBeliefs'),
-          educationEnvAvail: getNumberField('educationEnvAvail'),
-          careerReadiness: getNumberField('careerReadiness'),
-          digitalDivide: getNumberField('digitalDivide'),
+          educationEnvAvail: contextScores.educationEnvAvail ?? getNumberField('educationEnvAvail'),
+          careerReadiness: contextScores.careerReadiness ?? getNumberField('careerReadiness'),
+          digitalDivide: contextScores.digitalDivide ?? getNumberField('digitalDivide'),
         },
         consistency,
       });
@@ -591,6 +607,18 @@ export async function GET(request: Request) {
           deepSession: deepSessionForReport,
           innerConflicts: innerConflictsForReport,
           archetype: archetype ? { nameRu: archetype.nameRu, superpower: archetype.superpower, evidence: archetype.evidence } : null,
+          // P0.2 (аудит характеристик): раньше digitalProfile.summary считался и
+          // сохранялся в БД, но никогда не долетал до отчёта. Прокидываем сюда
+          // заполненность профиля по слоям и новые валидные шкалы (Grit/Mindset/
+          // TEIQue-SF, контекст), которых нет больше нигде в отчёте.
+          profileCoverage: summaryProfile.coverage,
+          innerCompass: {
+            grit: growthScores.GRIT,
+            mindsetGrowth: growthScores.MINDSET,
+            teiqueSelfAwareness: growthScores.TEIQUE_SA,
+            teiqueSelfRegulation: growthScores.TEIQUE_SR,
+          },
+          resourceMap: contextScores,
           isFallback: false
         });
       } catch (err) {
@@ -717,7 +745,15 @@ export async function GET(request: Request) {
           successFormula: { skills: skillFormulaSkills, applications: skillFormulaApplications },
           topValues: topPvqNames,
           topValueScores: topPvqValueScores,
-          icarSubscales: icarScores.bySubscale
+          icarSubscales: icarScores.bySubscale,
+          profileCoverage: summaryProfile.coverage,
+          innerCompass: {
+            grit: growthScores.GRIT,
+            mindsetGrowth: growthScores.MINDSET,
+            teiqueSelfAwareness: growthScores.TEIQUE_SA,
+            teiqueSelfRegulation: growthScores.TEIQUE_SR,
+          },
+          resourceMap: contextScores,
         });
       }
 

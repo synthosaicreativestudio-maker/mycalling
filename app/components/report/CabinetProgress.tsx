@@ -6,7 +6,7 @@ import { narrative, ASSESSMENT_CHAPTER_ORDER } from '../../data/narrative';
 
 // Показываем только главы, которые реально есть в тестовой батарее (app/data/questions.ts),
 // чтобы не обещать шаги, которых ещё нет.
-const EXISTING_TEST_CODES = new Set(['RIASEC', 'BFI', 'ICAR', 'VIA', 'PVQ', 'PROCRASTINATION']);
+const EXISTING_TEST_CODES = new Set(['RIASEC', 'BFI', 'ICAR', 'VIA', 'PVQ', 'PROCRASTINATION', 'GROWTH', 'CONTEXT']);
 const visibleChapters = ASSESSMENT_CHAPTER_ORDER.filter((code) => EXISTING_TEST_CODES.has(code)).map(
   (code) => narrative[code]
 );

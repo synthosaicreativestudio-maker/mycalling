@@ -60,12 +60,46 @@ type ReportData = {
   icarSubscales?: Record<string, number>;
   /** Раздел "Глубинная сессия" — присутствует только если пройдена DEEP-сессия коучинга. */
   deepSession?: DeepSessionData | null;
+  /** Заполненность 8-слойного цифрового профиля (0-1 по каждому слою) — из DigitalProfile.summary. */
+  profileCoverage?: Record<string, number>;
+  /** Grit / Growth Mindset / TEIQue-SF (1-5) — короткие валидные шкалы теста "Внутренний компас". */
+  innerCompass?: { grit?: number; mindsetGrowth?: number; teiqueSelfAwareness?: number; teiqueSelfRegulation?: number };
+  /** Контекстные поля (1-5) из теста "Карта ресурсов". */
+  resourceMap?: Record<string, number>;
 };
 
 const ICAR_SUBSCALE_LABELS: Record<string, string> = {
   verbal: 'Вербальная',
   numeric: 'Числовая',
   spatial: 'Пространственная'
+};
+
+const INNER_COMPASS_LABELS: Record<string, string> = {
+  grit: 'Настойчивость (Grit)',
+  mindsetGrowth: 'Установка на рост',
+  teiqueSelfAwareness: 'Осознанность эмоций',
+  teiqueSelfRegulation: 'Саморегуляция эмоций'
+};
+
+const RESOURCE_MAP_LABELS: Record<string, string> = {
+  familyPressure: 'Свобода от давления ожиданий семьи',
+  familyFinance: 'Финансовая опора семьи',
+  mobility: 'Готовность к переезду ради учёбы/работы',
+  health: 'Отсутствие ограничений по здоровью',
+  educationEnvAvail: 'Доступность нужной среды рядом',
+  careerReadiness: 'Готовность выбирать уже сейчас',
+  digitalDivide: 'Доступ к нужным цифровым инструментам'
+};
+
+const PROFILE_COVERAGE_LABELS: Record<string, string> = {
+  interests: 'Интересы и склонности',
+  personality: 'Личность и трейты',
+  strengths: 'Сильные стороны (VIA)',
+  cognitive: 'Когнитивный профиль',
+  motivation: 'Мотивация и ценности',
+  social: 'Социальное взаимодействие',
+  behavior: 'Поведенческие паттерны',
+  context: 'Контекст и опоры'
 };
 
 const defaultReport: ReportData = {
@@ -266,7 +300,10 @@ function ReportPageContent() {
           topValues: Array.isArray(rawData.topValues) ? rawData.topValues : undefined,
           topValueScores: Array.isArray(rawData.topValueScores) ? rawData.topValueScores : undefined,
           icarSubscales: rawData.icarSubscales && typeof rawData.icarSubscales === 'object' ? rawData.icarSubscales : undefined,
-          deepSession: rawData.deepSession && typeof rawData.deepSession === 'object' ? rawData.deepSession : null
+          deepSession: rawData.deepSession && typeof rawData.deepSession === 'object' ? rawData.deepSession : null,
+          profileCoverage: rawData.profileCoverage && typeof rawData.profileCoverage === 'object' ? rawData.profileCoverage : undefined,
+          innerCompass: rawData.innerCompass && typeof rawData.innerCompass === 'object' ? rawData.innerCompass : undefined,
+          resourceMap: rawData.resourceMap && typeof rawData.resourceMap === 'object' ? rawData.resourceMap : undefined
         };
         setReport(sanitizedReport);
         setIsDemo(false);
@@ -698,6 +735,58 @@ function ReportPageContent() {
                         value,
                         max: 3
                       }))}
+                    />
+                  )}
+
+                  {/* "Внутренний компас" — Grit/Mindset/TEIQue-SF, короткие валидные шкалы
+                      вместо оценки этих же конструктов ИИ-коучем "на глазок" по диалогу. */}
+                  {report.innerCompass && Object.values(report.innerCompass).some((v) => typeof v === 'number') && (
+                    <ValueBars
+                      title="Внутренний компас"
+                      subtitle="Настойчивость, установка на рост и эмоциональный интеллект"
+                      icon={<Compass className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      items={Object.entries(report.innerCompass)
+                        .filter(([, value]) => typeof value === 'number')
+                        .map(([key, value]) => ({
+                          label: INNER_COMPASS_LABELS[key] || key,
+                          value: value as number,
+                          max: 5,
+                          valueLabel: `${(value as number).toFixed(1)}/5`
+                        }))}
+                    />
+                  )}
+
+                  {/* "Карта ресурсов" — контекстные опоры (семья, среда, доступ), собранные
+                      коротким самоотчётом, а не додуманные из диалога с коучем. */}
+                  {report.resourceMap && Object.keys(report.resourceMap).length > 0 && (
+                    <ValueBars
+                      title="Карта ресурсов"
+                      subtitle="Опоры и ограничения вокруг тебя — не диагноз, а контекст для рекомендаций"
+                      icon={<Target className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      items={Object.entries(report.resourceMap).map(([key, value]) => ({
+                        label: RESOURCE_MAP_LABELS[key] || key,
+                        value,
+                        max: 5,
+                        valueLabel: `${value.toFixed(1)}/5`
+                      }))}
+                    />
+                  )}
+
+                  {/* Заполненность 8-слойного цифрового профиля (DigitalProfile.summary,
+                      см. app/lib/profile/layers.ts) — раньше считалась и нигде не показывалась. */}
+                  {report.profileCoverage && Object.keys(report.profileCoverage).length > 0 && (
+                    <ValueBars
+                      title="Карта заполненности профиля"
+                      subtitle="Насколько подробно собран каждый слой цифрового профиля"
+                      icon={<Gauge className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      items={Object.entries(report.profileCoverage)
+                        .filter(([key]) => key !== 'overall' && PROFILE_COVERAGE_LABELS[key])
+                        .map(([key, value]) => ({
+                          label: PROFILE_COVERAGE_LABELS[key] || key,
+                          value: Math.round(value * 100),
+                          max: 100,
+                          valueLabel: `${Math.round(value * 100)}%`
+                        }))}
                     />
                   )}
                 </div>
