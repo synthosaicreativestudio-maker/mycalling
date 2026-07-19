@@ -601,16 +601,19 @@ a:focus-visible {
   background-color: var(--bg-surface) !important;
 }
 [data-theme="light"] .bg-\[\#080C14\]\/70 {
-  background-color: rgba(253, 251, 247, 0.30) !important;
+  background-color: rgba(253, 251, 247, 0.15) !important;
 }
 [data-theme="light"] .bg-\[\#080C14\]\/30 {
-  background-color: rgba(253, 251, 247, 0.30) !important;
+  background-color: rgba(253, 251, 247, 0.15) !important;
 }
 [data-theme="light"] .bg-white\/30 {
-  background-color: rgba(253, 251, 247, 0.30) !important;
+  background-color: rgba(253, 251, 247, 0.15) !important;
+}
+[data-theme="light"] .bg-white\/15 {
+  background-color: rgba(253, 251, 247, 0.15) !important;
 }
 [data-theme="light"] .bg-\[\#080C14\]\/40 {
-  background-color: rgba(245, 239, 235, 0.30) !important;
+  background-color: rgba(245, 239, 235, 0.15) !important;
 }
 [data-theme="light"] .bg-\[\#080C14\] {
   background-color: var(--bg-surface) !important;
@@ -687,21 +690,21 @@ a:focus-visible {
 
 /* Настройки контурного свечения и панелей в светлой теме */
 [data-theme="light"] .glass-panel {
-  background: rgba(253, 251, 247, 0.30) !important;
+  background: rgba(253, 251, 247, 0.15) !important;
   border-color: rgba(141, 91, 76, 0.18) !important;
   box-shadow: 0 16px 48px rgba(141, 91, 76, 0.06) !important;
   backdrop-filter: blur(40px) !important;
   -webkit-backdrop-filter: blur(40px) !important;
 }
 [data-theme="light"] .glass-card {
-  background: rgba(253, 251, 247, 0.30) !important;
+  background: rgba(253, 251, 247, 0.15) !important;
   border-color: rgba(141, 91, 76, 0.15) !important;
   box-shadow: 0 10px 30px rgba(141, 91, 76, 0.06) !important;
   backdrop-filter: blur(40px) !important;
   -webkit-backdrop-filter: blur(40px) !important;
 }
 [data-theme="light"] .glass-card:hover {
-  background: rgba(253, 251, 247, 0.38) !important;
+  background: rgba(253, 251, 247, 0.22) !important;
   border-color: rgba(141, 91, 76, 0.3) !important;
   box-shadow: 0 12px 40px rgba(141, 91, 76, 0.10) !important;
 }
