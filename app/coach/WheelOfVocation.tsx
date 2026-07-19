@@ -325,9 +325,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
   }
 
   // 2. СТАНДАРТНЫЙ РЕЖИМ (Карточка на главном экране в боковой панели)
-  const cx = 200;
-  const cy = 200;
-  const maxRadius = 175; // ОГРОМНОЕ КОЛЕСО (занимает 87.5% холста 400x400)
+  const cx = 250;
+  const cy = 250;
+  const maxRadius = 210; // УВЕЛИЧЕНИЕ ДИАМЕТРА РОВНО НА +20% (со 175px до 210px!)
 
   return (
     <div className="flex flex-col items-center justify-between p-3 glass-panel rounded-3xl w-full h-full space-y-2 border border-[#D4AF37]/35 shadow-2xl bg-white/50 dark:bg-[#080C14]/85 backdrop-blur-2xl">
@@ -339,9 +339,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
         </div>
       </div>
 
-      {/* Основной SVG Холст с максимальным заполнением */}
+      {/* Основной SVG Холст с +20% увеличенным Колесом */}
       <div className="relative w-full flex-1 flex items-center justify-center min-h-0">
-        <svg width="100%" height="100%" viewBox="0 0 400 400" className="overflow-visible w-full h-full max-h-[360px]">
+        <svg width="100%" height="100%" viewBox="0 0 500 500" className="overflow-visible w-full h-full max-h-[440px]">
           <defs>
             {sectors.map((sector, idx) => (
               <radialGradient id={`grad-card-${idx}`} key={idx} cx="50%" cy="50%" r="50%" fx="35%" fy="35%">
@@ -365,7 +365,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
             </radialGradient>
 
             <filter id="gold-3d-shadow-card" x="-30%" y="-30%" width="160%" height="160%">
-              <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#7A5210" floodOpacity="0.35" />
+              <feDropShadow dx="0" dy="3.5" stdDeviation="4" floodColor="#7A5210" floodOpacity="0.35" />
             </filter>
           </defs>
 
@@ -378,7 +378,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
               r={maxRadius * scale}
               fill="none"
               stroke="#D4AF37"
-              strokeWidth="1"
+              strokeWidth="1.2"
               strokeDasharray={scale === 1.0 ? 'none' : '4 4'}
               className="opacity-30"
             />
@@ -396,7 +396,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 x2={target.x}
                 y2={target.y}
                 stroke="#D4AF37"
-                strokeWidth="1.2"
+                strokeWidth="1.3"
                 className="opacity-35"
               />
             );
@@ -437,7 +437,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   stroke={sector.rawScore > 0 ? sector.color : 'none'}
                   strokeWidth="1.5"
                   style={{
-                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 10px ${sector.glowColor})` : 'none',
+                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 12px ${sector.glowColor})` : 'none',
                   }}
                   className="cursor-pointer"
                 />
@@ -457,54 +457,54 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 <circle
                   cx={iconPos.x}
                   cy={iconPos.y}
-                  r="21"
+                  r="23"
                   fill="url(#gold-coin-face-card)"
                   stroke="url(#gold-metallic-ring-card)"
-                  strokeWidth="2.2"
+                  strokeWidth="2.5"
                   filter="url(#gold-3d-shadow-card)"
                 />
                 <circle
                   cx={iconPos.x}
                   cy={iconPos.y}
-                  r="17"
+                  r="19"
                   fill="none"
                   stroke={sector.rawScore > 0 ? sector.color : '#B8860B'}
                   strokeWidth="1"
                   strokeDasharray="2 2"
-                  opacity="0.7"
+                  opacity="0.75"
                 />
 
                 {/* Векторная иконка в монете */}
                 <foreignObject
-                  x={iconPos.x - 11}
-                  y={iconPos.y - 11}
-                  width="22"
-                  height="22"
+                  x={iconPos.x - 12}
+                  y={iconPos.y - 12}
+                  width="24"
+                  height="24"
                 >
                   <div className="flex items-center justify-center w-full h-full" style={{ color: sector.rawScore > 0 ? sector.color : '#7A5210' }}>
-                    <IconComponent className="h-4.5 w-4.5 stroke-[2.3]" />
+                    <IconComponent className="h-5 w-5 stroke-[2.4]" />
                   </div>
                 </foreignObject>
 
                 {/* Драгоценная золотая капсула с процентом под монетой */}
-                <g transform={`translate(${iconPos.x}, ${iconPos.y + 24})`}>
+                <g transform={`translate(${iconPos.x}, ${iconPos.y + 26})`}>
                   <rect
-                    x="-18"
-                    y="-7"
-                    width="36"
-                    height="14"
-                    rx="7"
+                    x="-19"
+                    y="-8"
+                    width="38"
+                    height="16"
+                    rx="8"
                     fill="#FFFBF2"
                     stroke="url(#gold-metallic-ring-card)"
-                    strokeWidth="1"
-                    filter="drop-shadow(0 2px 4px rgba(0,0,0,0.12))"
+                    strokeWidth="1.1"
+                    filter="drop-shadow(0 2px 4px rgba(0,0,0,0.15))"
                   />
                   <text
                     x="0"
                     y="0.5"
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fontSize="9.5"
+                    fontSize="10"
                     fontWeight="900"
                     fontFamily="sans-serif"
                     fill={sector.rawScore > 0 ? sector.color : '#7A6B5D'}
@@ -517,8 +517,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
           })}
 
           {/* Центр Колеса */}
-          <circle cx={cx} cy={cy} r="20" fill="#FFFBF2" stroke="url(#gold-metallic-ring-card)" strokeWidth="3" filter="url(#gold-3d-shadow-card)" />
-          <circle cx={cx} cy={cy} r="7" fill="#D4AF37" />
+          <circle cx={cx} cy={cy} r="22" fill="#FFFBF2" stroke="url(#gold-metallic-ring-card)" strokeWidth="3" filter="url(#gold-3d-shadow-card)" />
+          <circle cx={cx} cy={cy} r="8" fill="#D4AF37" />
         </svg>
       </div>
 
