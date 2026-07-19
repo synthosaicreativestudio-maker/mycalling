@@ -441,18 +441,6 @@ a:focus-visible {
   --riasec-goal: #8D5B4C; /* капучино-коричневый */
 }
 
-/* Скрытие видеофона в светлой теме и показ градиента */
-.theme-light-only {
-  display: none !important;
-}
-[data-theme="light"] .theme-dark-only {
-  display: none !important;
-}
-[data-theme="light"] .theme-light-only {
-  display: block !important;
-  opacity: 1 !important;
-}
-
 /* Оверрайды для контрастности второстепенных красных кнопок и ошибок в светлой теме */
 [data-theme="light"] .text-red-400 {
   color: #8C2D19 !important; /* глубокий терракотово-красный */
