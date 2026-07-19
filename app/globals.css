@@ -477,6 +477,12 @@ a:focus-visible {
 [data-theme="light"] .text-\[\#60A5FA\]\/70 {
   color: rgba(141, 91, 76, 0.7) !important;
 }
+[data-theme="light"] .text-\[\#60A5FA\]\/90 {
+  color: rgba(141, 91, 76, 0.9) !important;
+}
+[data-theme="light"] .text-\[\#93A3B8\] {
+  color: var(--text-muted) !important;
+}
 [data-theme="light"] .text-sky {
   color: var(--accent-brown) !important;
 }

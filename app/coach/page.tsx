@@ -223,7 +223,7 @@ export default function CoachPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [linkCode, isAuthenticated, sessionId]);
 
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const chatScrollRef = useRef<HTMLDivElement | null>(null);
 
   // Инициализация первой реплики коуча
   useEffect(() => {
@@ -302,9 +302,18 @@ export default function CoachPage() {
     initSession();
   }, []);
 
-  // Скролл вниз при добавлении сообщений
+  // Скролл вниз при добавлении сообщений.
+  // scrollIntoView() поднимается по ВСЕМ скроллящимся предкам — после того,
+  // как внешняя колонка (grid-обёртка) стала overflow-y-auto (см. фикс
+  // Колеса/Пирамиды), это утаскивало вниз всю страницу целиком, а не только
+  // внутренний список сообщений: пропадала верхняя часть карточки чата
+  // (сообщения), в видимой области оставалась только строка ввода + карточка
+  // Колеса под ней. Скроллим напрямую только сам контейнер истории чата.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = chatScrollRef.current;
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
   }, [messages, isTyping, extractedData.sessionMode]);
 
   // Выход на главную по кнопке Escape
@@ -755,6 +764,7 @@ export default function CoachPage() {
 
           {/* Chat message history */}
           <div
+            ref={chatScrollRef}
             className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4"
             tabIndex={0}
             role="log"
@@ -930,8 +940,6 @@ export default function CoachPage() {
                 </div>
               </div>
             )}
-
-            <div ref={messagesEndRef} />
           </div>
 
           {/* Input area */}
