@@ -35,8 +35,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       value: sectorValue(getScore('creative')),
       rawScore: getScore('creative'),
       color: '#E07A5F', // Rose Copper Gold
-      glowColor: 'rgba(224, 122, 95, 0.5)',
-      gradStops: ['#FFF2D7', '#E07A5F', '#9E4733'],
+      glowColor: 'rgba(224, 122, 95, 0.65)',
+      gradStops: ['#FFF5E4', '#E07A5F', '#9E4733'],
     },
     {
       id: 'tech',
@@ -47,7 +47,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       value: sectorValue(getScore('tech')),
       rawScore: getScore('tech'),
       color: '#4A90E2', // Platinum Sapphire Gold
-      glowColor: 'rgba(74, 144, 226, 0.5)',
+      glowColor: 'rgba(74, 144, 226, 0.65)',
       gradStops: ['#EBF3FF', '#4A90E2', '#1C4A86'],
     },
     {
@@ -59,7 +59,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       value: sectorValue(getScore('analytical')),
       rawScore: getScore('analytical'),
       color: '#9B5DE5', // Royal Amethyst Gold
-      glowColor: 'rgba(155, 93, 229, 0.5)',
+      glowColor: 'rgba(155, 93, 229, 0.65)',
       gradStops: ['#F7EEFF', '#9B5DE5', '#5E2893'],
     },
     {
@@ -71,7 +71,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       value: sectorValue(getScore('social')),
       rawScore: getScore('social'),
       color: '#E5BA73', // Honey Amber Gold
-      glowColor: 'rgba(229, 186, 115, 0.5)',
+      glowColor: 'rgba(229, 186, 115, 0.65)',
       gradStops: ['#FFF8EB', '#E5BA73', '#A4742B'],
     },
     {
@@ -83,7 +83,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       value: sectorValue(getScore('organizational')),
       rawScore: getScore('organizational'),
       color: '#2A9D8F', // Emerald Bronze
-      glowColor: 'rgba(42, 157, 143, 0.5)',
+      glowColor: 'rgba(42, 157, 143, 0.65)',
       gradStops: ['#E6F8F6', '#2A9D8F', '#175951'],
     },
     {
@@ -95,7 +95,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       value: sectorValue(getScore('startup')),
       rawScore: getScore('startup'),
       color: '#F4A261', // Fiery Warm Copper
-      glowColor: 'rgba(244, 162, 97, 0.5)',
+      glowColor: 'rgba(244, 162, 97, 0.65)',
       gradStops: ['#FFF3EA', '#F4A261', '#B35315'],
     },
   ];
@@ -123,36 +123,43 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     ].join(' ');
   };
 
-  // Режим Standalone (развернутое модальное окно с большими полями canvas)
+  // 1. РЕЖИМ STANDALONE (Развернутое крупное модальное окно)
   if (standalone) {
-    const cx = 270;
-    const cy = 270;
-    const maxRadius = 195; // Увеличенное крупное колесо
+    const cx = 300;
+    const cy = 300;
+    const maxRadius = 220; // Максимально огромное колесо
 
     return (
-      <div className="relative w-full h-full flex items-center justify-center p-2">
-        <svg width="100%" height="100%" viewBox="0 0 540 540" className="overflow-visible max-w-[620px]">
+      <div className="relative w-full h-full flex items-center justify-center p-1">
+        <svg width="100%" height="100%" viewBox="0 0 600 600" className="overflow-visible w-full h-full">
           <defs>
-            {/* Медно-золотые градиенты для каждого сектора */}
+            {/* Медно-золотые градиенты секторов */}
             {sectors.map((sector, idx) => (
               <radialGradient id={`grad-standalone-${idx}`} key={idx} cx="50%" cy="50%" r="50%" fx="35%" fy="35%">
-                <stop offset="0%" stopColor={sector.gradStops[0]} stopOpacity={0.8} />
-                <stop offset="65%" stopColor={sector.gradStops[1]} stopOpacity={0.85} />
-                <stop offset="100%" stopColor={sector.gradStops[2]} stopOpacity={0.95} />
+                <stop offset="0%" stopColor={sector.gradStops[0]} stopOpacity={0.85} />
+                <stop offset="60%" stopColor={sector.gradStops[1]} stopOpacity={0.9} />
+                <stop offset="100%" stopColor={sector.gradStops[2]} stopOpacity={0.98} />
               </radialGradient>
             ))}
 
-            {/* Металлический градиент рамки драгоценного медальона */}
-            <linearGradient id="gold-border-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFF2D7" />
-              <stop offset="50%" stopColor="#D4AF37" />
-              <stop offset="100%" stopColor="#8D5B4C" />
+            {/* Металлический ободок из золотого шелка */}
+            <linearGradient id="gold-metallic-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FFF8E7" />
+              <stop offset="30%" stopColor="#E6C280" />
+              <stop offset="70%" stopColor="#B8860B" />
+              <stop offset="100%" stopColor="#7A5210" />
             </linearGradient>
 
-            {/* Эффект свечения золота */}
-            <filter id="gold-glow-filter" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            {/* Драгоценое литое лицо монеты */}
+            <radialGradient id="gold-coin-face" cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stopColor="#FFFFFF" />
+              <stop offset="55%" stopColor="#FFF5DC" />
+              <stop offset="100%" stopColor="#E6C280" />
+            </radialGradient>
+
+            {/* Объемная тень 3D золота */}
+            <filter id="gold-3d-shadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#7A5210" floodOpacity="0.3" />
             </filter>
           </defs>
 
@@ -165,9 +172,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
               r={maxRadius * scale}
               fill="none"
               stroke="#D4AF37"
-              strokeWidth="1"
+              strokeWidth="1.2"
               strokeDasharray={scale === 1.0 ? 'none' : '4 4'}
-              className="opacity-25"
+              className="opacity-30"
             />
           ))}
 
@@ -183,8 +190,8 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 x2={target.x}
                 y2={target.y}
                 stroke="#D4AF37"
-                strokeWidth="1.2"
-                className="opacity-30"
+                strokeWidth="1.5"
+                className="opacity-35"
               />
             );
           })}
@@ -200,7 +207,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 key={`bg-${idx}`}
                 d={path}
                 fill="rgba(212, 175, 55, 0.03)"
-                stroke="rgba(212, 175, 55, 0.2)"
+                stroke="rgba(212, 175, 55, 0.25)"
                 strokeWidth="1"
                 className="transition duration-300 hover:fill-amber-500/10 cursor-pointer"
               />
@@ -222,9 +229,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   transition={{ type: 'spring', stiffness: 60, damping: 15 }}
                   fill={`url(#grad-standalone-${idx})`}
                   stroke={sector.rawScore > 0 ? sector.color : 'none'}
-                  strokeWidth="1.5"
+                  strokeWidth="1.8"
                   style={{
-                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 8px ${sector.glowColor})` : 'none',
+                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 12px ${sector.glowColor})` : 'none',
                   }}
                   className="cursor-pointer"
                 />
@@ -232,44 +239,55 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
             );
           })}
 
-          {/* Медальоны и текстовые подписи (расширенная безопасная область 540x540) */}
+          {/* ЮВЕЛИРНЫЕ 3D-МОНЕТЫ И ТЕКСТОВЫЕ ПОДПИСИ */}
           {sectors.map((sector, idx) => {
             const angle = idx * angleStep + angleStep / 2;
-            const labelPos = polarToCartesian(cx, cy, maxRadius + 42, angle);
-            const isRightSide = labelPos.x >= cx;
+            const iconPos = polarToCartesian(cx, cy, maxRadius + 38, angle);
+            const isRightSide = iconPos.x >= cx;
             const IconComponent = sector.icon;
 
             return (
               <g key={`label-${idx}`} className="select-none">
-                {/* 3D Роскошный Медальон с иконкой */}
+                {/* 3D Литая Золотая Монета */}
+                <circle
+                  cx={iconPos.x}
+                  cy={iconPos.y}
+                  r="25"
+                  fill="url(#gold-coin-face)"
+                  stroke="url(#gold-metallic-ring)"
+                  strokeWidth="2.8"
+                  filter="url(#gold-3d-shadow)"
+                />
+                <circle
+                  cx={iconPos.x}
+                  cy={iconPos.y}
+                  r="21"
+                  fill="none"
+                  stroke={sector.rawScore > 0 ? sector.color : '#B8860B'}
+                  strokeWidth="1"
+                  strokeDasharray="2 2"
+                  opacity="0.6"
+                />
+
+                {/* Иконка внутри монеты */}
                 <foreignObject
-                  x={labelPos.x - 22}
-                  y={labelPos.y - 22}
-                  width="44"
-                  height="44"
+                  x={iconPos.x - 13}
+                  y={iconPos.y - 13}
+                  width="26"
+                  height="26"
                 >
-                  <div 
-                    className="flex items-center justify-center w-full h-full rounded-2xl transition-all duration-300 shadow-md border"
-                    style={{
-                      background: sector.rawScore > 0 
-                        ? `linear-gradient(135deg, rgba(255,242,215,0.9), ${sector.color}44)` 
-                        : 'rgba(255, 255, 255, 0.7)',
-                      borderColor: sector.rawScore > 0 ? sector.color : 'rgba(212, 175, 55, 0.3)',
-                      boxShadow: sector.rawScore > 0 ? `0 4px 14px ${sector.glowColor}` : '0 2px 6px rgba(0,0,0,0.05)',
-                      color: sector.rawScore > 0 ? sector.color : '#8D5B4C',
-                    }}
-                  >
-                    <IconComponent className="h-6 w-6 stroke-[2.2]" />
+                  <div className="flex items-center justify-center w-full h-full" style={{ color: sector.rawScore > 0 ? sector.color : '#7A5210' }}>
+                    <IconComponent className="h-5 w-5 stroke-[2.4]" />
                   </div>
                 </foreignObject>
 
-                {/* Название сектора (с безопасным отступом) */}
+                {/* Текст названия сектора */}
                 <text
-                  x={isRightSide ? labelPos.x + 28 : labelPos.x - 28}
-                  y={labelPos.y - 7}
+                  x={isRightSide ? iconPos.x + 34 : iconPos.x - 34}
+                  y={iconPos.y - 8}
                   textAnchor={isRightSide ? 'start' : 'end'}
                   dominantBaseline="middle"
-                  fontSize="13 font-sans"
+                  fontSize="14 font-sans"
                   fontWeight="800"
                   fill={sector.rawScore > 0 ? '#2D1F17' : '#7A6B5D'}
                   className="tracking-wide"
@@ -277,26 +295,28 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   {sector.name}
                 </text>
 
-                {/* Процентный показатель */}
-                <text
-                  x={isRightSide ? labelPos.x + 28 : labelPos.x - 28}
-                  y={labelPos.y + 11}
-                  textAnchor={isRightSide ? 'start' : 'end'}
-                  dominantBaseline="middle"
-                  fill={sector.rawScore > 0 ? sector.color : '#A49383'}
-                  fontSize="12"
-                  fontWeight="bold"
-                >
-                  {sector.rawScore}%
-                </text>
+                {/* Драгоценная золотая капсула с процентом */}
+                <g transform={`translate(${isRightSide ? iconPos.x + 34 : iconPos.x - 34}, ${iconPos.y + 12})`}>
+                  <text
+                    x={isRightSide ? '0' : '0'}
+                    y="0"
+                    textAnchor={isRightSide ? 'start' : 'end'}
+                    dominantBaseline="middle"
+                    fill={sector.rawScore > 0 ? sector.color : '#9E8570'}
+                    fontSize="13"
+                    fontWeight="900"
+                  >
+                    {sector.rawScore}%
+                  </text>
+                </g>
               </g>
             );
           })}
 
-          {/* Центральный Ювелирный Компас */}
-          <circle cx={cx} cy={cy} r="22" fill="#FFFBF2" stroke="url(#gold-border-grad)" strokeWidth="3" filter="url(#gold-glow-filter)" />
-          <circle cx={cx} cy={cy} r="8" fill="#D4AF37" />
-          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize="10" fontWeight="bold">
+          {/* Центральный Драгоценный Компас */}
+          <circle cx={cx} cy={cy} r="26" fill="#FFFBF2" stroke="url(#gold-metallic-ring)" strokeWidth="3.5" filter="url(#gold-3d-shadow)" />
+          <circle cx={cx} cy={cy} r="10" fill="#D4AF37" />
+          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fill="#FFFFFF" fontSize="12" fontWeight="bold">
             🎯
           </text>
         </svg>
@@ -304,41 +324,52 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     );
   }
 
-  // Стандартный режим (Карточка в боковой панели)
-  const cx = 230;
+  // 2. СТАНДАРТНЫЙ РЕЖИМ (Карточка на главном экране в боковой панели)
+  const cx = 200;
   const cy = 200;
-  const maxRadius = 158; // Крупное заполняющее колесо
+  const maxRadius = 175; // ОГРОМНОЕ КОЛЕСО (занимает 87.5% холста 400x400)
 
   return (
-    <div className="flex flex-col items-center justify-between p-5 glass-panel rounded-3xl w-full h-full space-y-4 border border-[#D4AF37]/30 shadow-xl bg-white/40 dark:bg-[#080C14]/80 backdrop-blur-xl">
+    <div className="flex flex-col items-center justify-between p-3 glass-panel rounded-3xl w-full h-full space-y-2 border border-[#D4AF37]/35 shadow-2xl bg-white/50 dark:bg-[#080C14]/85 backdrop-blur-2xl">
       {/* Шапка карточки */}
-      <div className="w-full flex items-center justify-between px-1">
+      <div className="w-full flex items-center justify-between px-2 pt-1">
         <div className="text-left space-y-0.5">
           <h3 className="text-base font-extrabold font-sans text-gray-900 dark:text-white tracking-wide">Карта Талантов</h3>
-          <p className="text-xs text-[#7A8A9E] font-medium">Живой профиль ваших интересов</p>
+          <p className="text-[11px] text-[#7A8A9E] font-medium">Живой профиль ваших интересов</p>
         </div>
       </div>
 
-      {/* Основной SVG Холст с увеличенным Колесом */}
-      <div className="relative w-full aspect-square flex items-center justify-center max-w-[380px]">
-        <svg width="100%" height="100%" viewBox="0 0 460 430" className="overflow-visible">
+      {/* Основной SVG Холст с максимальным заполнением */}
+      <div className="relative w-full flex-1 flex items-center justify-center min-h-0">
+        <svg width="100%" height="100%" viewBox="0 0 400 400" className="overflow-visible w-full h-full max-h-[360px]">
           <defs>
             {sectors.map((sector, idx) => (
               <radialGradient id={`grad-card-${idx}`} key={idx} cx="50%" cy="50%" r="50%" fx="35%" fy="35%">
-                <stop offset="0%" stopColor={sector.gradStops[0]} stopOpacity={0.8} />
-                <stop offset="65%" stopColor={sector.gradStops[1]} stopOpacity={0.85} />
-                <stop offset="100%" stopColor={sector.gradStops[2]} stopOpacity={0.95} />
+                <stop offset="0%" stopColor={sector.gradStops[0]} stopOpacity={0.85} />
+                <stop offset="60%" stopColor={sector.gradStops[1]} stopOpacity={0.9} />
+                <stop offset="100%" stopColor={sector.gradStops[2]} stopOpacity={0.98} />
               </radialGradient>
             ))}
 
-            <linearGradient id="card-gold-border" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFF2D7" />
-              <stop offset="50%" stopColor="#D4AF37" />
-              <stop offset="100%" stopColor="#8D5B4C" />
+            <linearGradient id="gold-metallic-ring-card" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FFF8E7" />
+              <stop offset="30%" stopColor="#E6C280" />
+              <stop offset="70%" stopColor="#B8860B" />
+              <stop offset="100%" stopColor="#7A5210" />
             </linearGradient>
+
+            <radialGradient id="gold-coin-face-card" cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stopColor="#FFFFFF" />
+              <stop offset="55%" stopColor="#FFF5DC" />
+              <stop offset="100%" stopColor="#E6C280" />
+            </radialGradient>
+
+            <filter id="gold-3d-shadow-card" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#7A5210" floodOpacity="0.35" />
+            </filter>
           </defs>
 
-          {/* Тонкие линии сетки */}
+          {/* Тонкие золотистые сетки */}
           {[0.25, 0.5, 0.75, 1.0].map((scale, i) => (
             <circle
               key={i}
@@ -349,7 +380,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
               stroke="#D4AF37"
               strokeWidth="1"
               strokeDasharray={scale === 1.0 ? 'none' : '4 4'}
-              className="opacity-25"
+              className="opacity-30"
             />
           ))}
 
@@ -366,12 +397,12 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 y2={target.y}
                 stroke="#D4AF37"
                 strokeWidth="1.2"
-                className="opacity-30"
+                className="opacity-35"
               />
             );
           })}
 
-          {/* Фоновые сектора */}
+          {/* Фоновые пустые сегменты */}
           {sectors.map((sector, idx) => {
             const startAngle = idx * angleStep;
             const endAngle = startAngle + angleStep;
@@ -382,7 +413,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                 key={`bg-${idx}`}
                 d={path}
                 fill="rgba(212, 175, 55, 0.03)"
-                stroke="rgba(212, 175, 55, 0.2)"
+                stroke="rgba(212, 175, 55, 0.25)"
                 strokeWidth="1"
                 className="transition duration-300 hover:fill-amber-500/10 cursor-pointer"
               />
@@ -406,7 +437,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
                   stroke={sector.rawScore > 0 ? sector.color : 'none'}
                   strokeWidth="1.5"
                   style={{
-                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 6px ${sector.glowColor})` : 'none',
+                    filter: sector.rawScore > 0 ? `drop-shadow(0 0 10px ${sector.glowColor})` : 'none',
                   }}
                   className="cursor-pointer"
                 />
@@ -414,66 +445,102 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
             );
           })}
 
-          {/* Иконки-Медальоны талантов и процентные метки */}
+          {/* 3D ЮВЕЛИРНЫЕ МОНЕТЫ ТАЛАНТОВ НА КАРТОЧКЕ */}
           {sectors.map((sector, idx) => {
             const angle = idx * angleStep + angleStep / 2;
-            const iconPos = polarToCartesian(cx, cy, maxRadius + 28, angle);
+            const iconPos = polarToCartesian(cx, cy, maxRadius, angle);
             const IconComponent = sector.icon;
 
             return (
               <g key={`label-${idx}`} className="select-none">
+                {/* Внешняя 3D Литая Золотая Монета */}
+                <circle
+                  cx={iconPos.x}
+                  cy={iconPos.y}
+                  r="21"
+                  fill="url(#gold-coin-face-card)"
+                  stroke="url(#gold-metallic-ring-card)"
+                  strokeWidth="2.2"
+                  filter="url(#gold-3d-shadow-card)"
+                />
+                <circle
+                  cx={iconPos.x}
+                  cy={iconPos.y}
+                  r="17"
+                  fill="none"
+                  stroke={sector.rawScore > 0 ? sector.color : '#B8860B'}
+                  strokeWidth="1"
+                  strokeDasharray="2 2"
+                  opacity="0.7"
+                />
+
+                {/* Векторная иконка в монете */}
                 <foreignObject
-                  x={iconPos.x - 20}
-                  y={iconPos.y - 20}
-                  width="40"
-                  height="40"
+                  x={iconPos.x - 11}
+                  y={iconPos.y - 11}
+                  width="22"
+                  height="22"
                 >
-                  <div 
-                    className="flex flex-col items-center justify-center w-full h-full rounded-xl transition-all duration-300 shadow-sm border"
-                    style={{
-                      background: sector.rawScore > 0 
-                        ? `linear-gradient(135deg, rgba(255,242,215,0.95), ${sector.color}33)` 
-                        : 'rgba(255, 255, 255, 0.8)',
-                      borderColor: sector.rawScore > 0 ? sector.color : 'rgba(212, 175, 55, 0.3)',
-                      boxShadow: sector.rawScore > 0 ? `0 3px 10px ${sector.glowColor}` : 'none',
-                      color: sector.rawScore > 0 ? sector.color : '#8D5B4C',
-                    }}
-                  >
-                    <IconComponent className="h-5 w-5 stroke-[2.2]" />
-                    <span className="text-[9px] font-bold leading-none mt-0.5" style={{ color: sector.rawScore > 0 ? sector.color : '#7A6B5D' }}>
-                      {sector.rawScore}%
-                    </span>
+                  <div className="flex items-center justify-center w-full h-full" style={{ color: sector.rawScore > 0 ? sector.color : '#7A5210' }}>
+                    <IconComponent className="h-4.5 w-4.5 stroke-[2.3]" />
                   </div>
                 </foreignObject>
+
+                {/* Драгоценная золотая капсула с процентом под монетой */}
+                <g transform={`translate(${iconPos.x}, ${iconPos.y + 24})`}>
+                  <rect
+                    x="-18"
+                    y="-7"
+                    width="36"
+                    height="14"
+                    rx="7"
+                    fill="#FFFBF2"
+                    stroke="url(#gold-metallic-ring-card)"
+                    strokeWidth="1"
+                    filter="drop-shadow(0 2px 4px rgba(0,0,0,0.12))"
+                  />
+                  <text
+                    x="0"
+                    y="0.5"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize="9.5"
+                    fontWeight="900"
+                    fontFamily="sans-serif"
+                    fill={sector.rawScore > 0 ? sector.color : '#7A6B5D'}
+                  >
+                    {sector.rawScore}%
+                  </text>
+                </g>
               </g>
             );
           })}
 
           {/* Центр Колеса */}
-          <circle cx={cx} cy={cy} r="18" fill="#FFFBF2" stroke="url(#card-gold-border)" strokeWidth="2.5" />
-          <circle cx={cx} cy={cy} r="6" fill="#D4AF37" />
+          <circle cx={cx} cy={cy} r="20" fill="#FFFBF2" stroke="url(#gold-metallic-ring-card)" strokeWidth="3" filter="url(#gold-3d-shadow-card)" />
+          <circle cx={cx} cy={cy} r="7" fill="#D4AF37" />
         </svg>
       </div>
 
-      {/* Компактный 2-колоночный список секторов с подсказками */}
-      <div className="w-full grid grid-cols-2 gap-x-3 gap-y-2 max-h-[200px] overflow-y-auto pr-1 pt-1 border-t border-[#D4AF37]/20">
+      {/* Компактный 2-колоночный список секторов с яркими медальонами */}
+      <div className="w-full grid grid-cols-2 gap-x-2.5 gap-y-1.5 max-h-[180px] overflow-y-auto pr-1 pt-1.5 border-t border-[#D4AF37]/25">
         {sectors.map((sector, idx) => (
-          <div key={idx} className="flex items-center justify-between text-xs py-1 px-1.5 rounded-lg hover:bg-white/40 dark:hover:bg-white/5 transition">
+          <div key={idx} className="flex items-center justify-between text-xs py-1 px-2 rounded-xl bg-white/40 dark:bg-white/5 border border-[#D4AF37]/15 hover:border-[#D4AF37]/40 transition">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: sector.color }} />
               <div className="flex flex-col min-w-0">
-                <span className="text-gray-900 dark:text-white/90 font-bold tracking-wide font-sans truncate text-[10.5px] leading-tight">{sector.name}</span>
-                <span className="text-[8.5px] text-[#7A8A9E] truncate leading-tight">{sector.description}</span>
+                <span className="text-gray-900 dark:text-white/90 font-bold tracking-wide font-sans truncate text-[10px] leading-tight">{sector.name}</span>
+                <span className="text-[8px] text-[#7A8A9E] truncate leading-tight">{sector.description}</span>
               </div>
             </div>
-            <span className="font-extrabold font-sans text-[11px] ml-1 shrink-0" style={{ color: sector.rawScore > 0 ? sector.color : '#7A6B5D' }}>
+            <span className="font-extrabold font-sans text-[10.5px] ml-1 shrink-0" style={{ color: sector.rawScore > 0 ? sector.color : '#7A6B5D' }}>
               {sector.rawScore}%
             </span>
           </div>
         ))}
       </div>
 
-      <div className="text-[9.5px] text-[#7A8A9E] italic font-sans text-center">
+      <div className="text-[9px] text-[#7A8A9E] italic font-sans text-center">
         * Оценки обновляются в реальном времени из диалога.
       </div>
     </div>
