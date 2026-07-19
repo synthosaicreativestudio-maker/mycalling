@@ -673,7 +673,7 @@ export async function POST(req: Request) {
       if (fromLoginError) {
         greeting = 'Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник. Я вижу, ты хотел зайти в Личный кабинет, но для этого нужно сначала пройти нашу короткую сессию. Не переживай — это не скучный тест, а увлекательное исследование твоих талантов. Давай сначала познакомимся. Как мне к тебе обращаться? Напиши свое имя. 😊';
       } else if (isDeepMode && hasPersonalInfo && hasPhone) {
-        greeting = 'Отличный выбор! Мы начинаем Глубокий самокоучинг по методологии «Что хочу → Действие». Наш путь состоит из 6 важных шагов: мы найдем твое истинное желание, оцифруем образ результата, подключим эмоции, сформулируем твою идентичность («Кто я?»), составим план с KPI и зафиксируем первый шаг. \n\nДавай начнем: Что именно ты хочешь изменить, достичь или в чем реализоваться в плане будущей профессии?';
+        greeting = 'Отличный выбор! Мы начинаем Глубокий самокоучинг по методологии «Что хочу → Действие». Наш путь состоит из 6 важных шагов: мы найдем твое истинное желание, оцифруем образ результата, подключим эмоции, поймём, каким героем этой истории ты становишься, составим план с KPI и зафиксируем первый шаг. \n\nДавай начнем: Что именно ты хочешь изменить, достичь или в чем реализоваться в плане будущей профессии?';
       }
       
       const newMsg = { role: 'assistant', content: greeting, timestamp: new Date().toISOString() };
@@ -682,7 +682,7 @@ export async function POST(req: Request) {
       
       sessionVersion = await saveCoachSession(coachSession.id, sessionVersion, {
         transcript: { EXPRESS: expressTranscript, DEEP: deepTranscript },
-        extractedData: { ...extractedData, currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 10 : 0 },
+        extractedData: { ...extractedData, currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 16 : 0 },
         status: 'IN_PROGRESS'
       });
 
@@ -690,7 +690,7 @@ export async function POST(req: Request) {
         reply: greeting,
         sessionId: coachSession.id,
         userId: coachSession.userId,
-        currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 10 : 0,
+        currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 16 : 0,
         phoneConfirmed: hasPhone,
         sessionStatus: 'IN_PROGRESS',
         extracted: extractedData,
