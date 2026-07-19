@@ -422,6 +422,31 @@ export async function GET(request: Request) {
         }
       });
 
+      // docs/20 (4a): поля, которые уже собираются коучем и лежат в
+      // digitalProfile.summary, но раньше НЕ долетали до отчёта. Прокидываем
+      // детерминированно (как innerCompass/resourceMap), рисуем условно — только
+      // непустые значения (данные бывают частичными).
+      const methodologyProfile = {
+        // Роль в команде по Белбину (0-100, оценка коуча).
+        belbin: {
+          leader: getNumberField('belbinLeader'),
+          doer: getNumberField('belbinDoer'),
+          creator: getNumberField('belbinCreator'),
+          peacemaker: getNumberField('belbinPeacemaker'),
+        },
+        // Карьерная адаптивность по Савикасу (0-100).
+        savickas: {
+          concern: getNumberField('savickasConcern'),
+          control: getNumberField('savickasControl'),
+          curiosity: getNumberField('savickasCuriosity'),
+          confidence: getNumberField('savickasConfidence'),
+        },
+        antiInterests: getArrayField('antiInterests'),
+        hobbies: getArrayField('voluntaryHobbies'),
+        // Прокрастинация по Лэй (4-20), уже посчитана скорером.
+        procrastination: procrastinationScore,
+      };
+
       // 3. Генерация ИИ-отчета через ProxyAPI
       const apiKey = env.PROXYAPI_KEY;
       const apiUrl = env.PROXYAPI_URL;
@@ -655,6 +680,7 @@ ${professionCandidatesForLlm}
             teiqueSelfRegulation: growthScores.TEIQUE_SR,
           },
           resourceMap: contextScores,
+          methodologyProfile,
           isFallback: false
         });
       } catch (err) {
@@ -781,6 +807,7 @@ ${professionCandidatesForLlm}
             teiqueSelfRegulation: growthScores.TEIQUE_SR,
           },
           resourceMap: contextScores,
+          methodologyProfile,
         });
       }
 

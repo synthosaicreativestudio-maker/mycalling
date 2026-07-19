@@ -330,7 +330,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
   const maxRadius = 210; // УВЕЛИЧЕНИЕ ДИАМЕТРА РОВНО НА +20% (со 175px до 210px!)
 
   return (
-    <div className="flex flex-col items-center justify-between p-3 glass-panel rounded-3xl w-full h-full space-y-2 border border-[#D4AF37]/35 shadow-2xl bg-white/50 dark:bg-[#080C14]/85 backdrop-blur-2xl">
+    <div className="flex flex-col items-center justify-between p-3 glass-panel rounded-3xl w-full h-full space-y-2 border border-[#D4AF37]/20 dark:border-[#D4AF37]/35 shadow-2xl bg-white/70 dark:bg-[#080C14]/70 backdrop-blur-2xl">
       {/* Шапка карточки */}
       <div className="w-full flex items-center justify-between px-2 pt-1">
         <div className="text-left space-y-0.5">

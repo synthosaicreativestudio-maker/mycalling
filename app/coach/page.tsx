@@ -707,7 +707,7 @@ export default function CoachPage() {
       <div className="w-full max-w-7xl flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-12 gap-6 relative">
         
         {/* Left column: Chat History & Input */}
-        <div className="col-span-1 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 border border-white/5 relative bg-[#040506]/35 backdrop-blur-xl">
+        <div className="col-span-1 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 border border-[#D4AF37]/15 dark:border-white/10 relative bg-white/70 dark:bg-[#080C14]/70 backdrop-blur-2xl shadow-xl">
           
           {/* Horizontal Stepper for DEEP mode */}
           {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 22 && (
@@ -997,7 +997,7 @@ export default function CoachPage() {
 
         {/* Right column: Wheel of Vocation or Pyramid of Alignment (Desktop only) */}
         <div
-          className="lg:col-span-5 hidden lg:flex flex-col h-full min-h-0 relative select-none glass-card rounded-3xl overflow-hidden border border-white/5 bg-[#040506]/35 backdrop-blur-xl"
+          className="lg:col-span-5 hidden lg:flex flex-col h-full min-h-0 relative select-none glass-card rounded-3xl overflow-hidden border border-[#D4AF37]/15 dark:border-white/10 bg-white/70 dark:bg-[#080C14]/70 backdrop-blur-2xl shadow-xl"
         >
         {/* Tabs and Zoom-in buttons for desktop */}
         {extractedData.sessionMode === 'DEEP' ? (

@@ -66,6 +66,14 @@ type ReportData = {
   innerCompass?: { grit?: number; mindsetGrowth?: number; teiqueSelfAwareness?: number; teiqueSelfRegulation?: number };
   /** Контекстные поля (1-5) из теста "Карта ресурсов". */
   resourceMap?: Record<string, number>;
+  /** docs/20 (4a): поля, что собирались коучем, но не долетали до отчёта. */
+  methodologyProfile?: {
+    belbin?: { leader?: number; doer?: number; creator?: number; peacemaker?: number };
+    savickas?: { concern?: number; control?: number; curiosity?: number; confidence?: number };
+    antiInterests?: string[];
+    hobbies?: string[];
+    procrastination?: number;
+  };
 };
 
 const ICAR_SUBSCALE_LABELS: Record<string, string> = {
@@ -79,6 +87,20 @@ const INNER_COMPASS_LABELS: Record<string, string> = {
   mindsetGrowth: 'Установка на рост',
   teiqueSelfAwareness: 'Осознанность эмоций',
   teiqueSelfRegulation: 'Саморегуляция эмоций'
+};
+
+const BELBIN_LABELS: Record<string, string> = {
+  leader: 'Координатор / лидер',
+  doer: 'Исполнитель / реализатор',
+  creator: 'Генератор идей',
+  peacemaker: 'Миротворец / командный игрок'
+};
+
+const SAVICKAS_LABELS: Record<string, string> = {
+  concern: 'Забота о будущем (Concern)',
+  control: 'Контроль над выбором (Control)',
+  curiosity: 'Любопытство к вариантам (Curiosity)',
+  confidence: 'Уверенность в себе (Confidence)'
 };
 
 const RESOURCE_MAP_LABELS: Record<string, string> = {
@@ -303,7 +325,8 @@ function ReportPageContent() {
           deepSession: rawData.deepSession && typeof rawData.deepSession === 'object' ? rawData.deepSession : null,
           profileCoverage: rawData.profileCoverage && typeof rawData.profileCoverage === 'object' ? rawData.profileCoverage : undefined,
           innerCompass: rawData.innerCompass && typeof rawData.innerCompass === 'object' ? rawData.innerCompass : undefined,
-          resourceMap: rawData.resourceMap && typeof rawData.resourceMap === 'object' ? rawData.resourceMap : undefined
+          resourceMap: rawData.resourceMap && typeof rawData.resourceMap === 'object' ? rawData.resourceMap : undefined,
+          methodologyProfile: rawData.methodologyProfile && typeof rawData.methodologyProfile === 'object' ? rawData.methodologyProfile : undefined
         };
         setReport(sanitizedReport);
         setIsDemo(false);
@@ -794,6 +817,100 @@ function ReportPageContent() {
                           valueLabel: `${Math.round(value * 100)}%`
                         }))}
                     />
+                  )}
+
+                  {/* docs/20 (4a): роль в команде по Белбину — раньше собиралась
+                      коучем, но не долетала до отчёта. Рисуем только непустые шкалы. */}
+                  {report.methodologyProfile?.belbin &&
+                    Object.values(report.methodologyProfile.belbin).some((v) => typeof v === 'number' && v > 0) && (
+                    <ValueBars
+                      title="Роль в команде (Белбин)"
+                      subtitle="Как ты естественнее всего проявляешь себя в совместной работе"
+                      icon={<User className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      items={Object.entries(report.methodologyProfile.belbin)
+                        .filter(([, value]) => typeof value === 'number' && value > 0)
+                        .map(([key, value]) => ({
+                          label: BELBIN_LABELS[key] || key,
+                          value: value as number,
+                          max: 100,
+                          valueLabel: `${Math.round(value as number)}%`
+                        }))}
+                    />
+                  )}
+
+                  {/* docs/20 (4a): карьерная адаптивность по Савикасу. */}
+                  {report.methodologyProfile?.savickas &&
+                    Object.values(report.methodologyProfile.savickas).some((v) => typeof v === 'number' && v > 0) && (
+                    <ValueBars
+                      title="Карьерная адаптивность (Савикас)"
+                      subtitle="Четыре ресурса, которые помогают уверенно строить свой путь"
+                      icon={<TrendingUp className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      items={Object.entries(report.methodologyProfile.savickas)
+                        .filter(([, value]) => typeof value === 'number' && value > 0)
+                        .map(([key, value]) => ({
+                          label: SAVICKAS_LABELS[key] || key,
+                          value: value as number,
+                          max: 100,
+                          valueLabel: `${Math.round(value as number)}%`
+                        }))}
+                    />
+                  )}
+
+                  {/* docs/20 (4a): прокрастинация (шкала Лэй, 4-20) — раньше влияла
+                      только на совет ИИ, сам балл не показывался. */}
+                  {typeof report.methodologyProfile?.procrastination === 'number' && (
+                    <div className="glass-card rounded-[28px] p-8">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Clock className="h-5 w-5 text-[#3B82F6] theme-accent-text" />
+                        <h2 className="text-lg font-bold text-white">Склонность к прокрастинации</h2>
+                        <span className="ml-auto rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[#3B82F6]">
+                          {report.methodologyProfile.procrastination}/20
+                        </span>
+                      </div>
+                      <p className="text-[#7A8A9E] text-sm leading-relaxed">
+                        {report.methodologyProfile.procrastination <= 8
+                          ? 'Низкая: ты обычно берёшься за дело без долгих раскачек — это сильная опора для любых целей.'
+                          : report.methodologyProfile.procrastination <= 14
+                          ? 'Умеренная: иногда старт даётся тяжело. Помогает правило «первого двухминутного шага» — начать с малого.'
+                          : 'Заметная: откладывать бывает трудно преодолеть. Разбивай задачи на крошечные шаги и убирай отвлечения на старте — это тренируется.'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* docs/20 (4a): добровольные хобби и анти-интересы — качественные
+                      сигналы интересов, собранные коучем. */}
+                  {((report.methodologyProfile?.hobbies?.length ?? 0) > 0 ||
+                    (report.methodologyProfile?.antiInterests?.length ?? 0) > 0) && (
+                    <div className="glass-card rounded-[28px] p-8 space-y-5">
+                      <div className="flex items-center gap-3">
+                        <Heart className="h-5 w-5 text-[#3B82F6] theme-accent-text" />
+                        <h2 className="text-lg font-bold text-white">Увлечения и анти-интересы</h2>
+                      </div>
+                      {(report.methodologyProfile?.hobbies?.length ?? 0) > 0 && (
+                        <div className="space-y-2">
+                          <span className="text-xs uppercase tracking-widest font-extrabold text-[#7A8A9E]">Чем увлекаешься по своей воле</span>
+                          <div className="flex flex-wrap gap-2">
+                            {report.methodologyProfile!.hobbies!.map((h, i) => (
+                              <span key={i} className="rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/10 px-3 py-1 text-xs font-semibold text-[#3B82F6]">
+                                {h}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {(report.methodologyProfile?.antiInterests?.length ?? 0) > 0 && (
+                        <div className="space-y-2">
+                          <span className="text-xs uppercase tracking-widest font-extrabold text-[#7A8A9E]">Что точно не откликается</span>
+                          <div className="flex flex-wrap gap-2">
+                            {report.methodologyProfile!.antiInterests!.map((a, i) => (
+                              <span key={i} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[#7A8A9E]">
+                                {a}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 
