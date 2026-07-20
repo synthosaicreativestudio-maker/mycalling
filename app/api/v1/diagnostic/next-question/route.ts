@@ -8,7 +8,7 @@ import { generateJson } from '../../../../lib/gemini';
 import { scorers, type ScoreResult } from '../../../../lib/diagnostic/scoring';
 import { viaStrengthByCode, viaVirtueNames } from '../../../../data/viaStrengths';
 import { computeConsistency } from '../../../../lib/profile/consistency';
-import { topProfessions, type ProfessionMatch } from '../../../../lib/profile/professionMatch';
+import { topArchetypes, type ArchetypeGroup } from '../../../../lib/profile/professionMatch';
 import { deriveArchetype } from '../../../../lib/profile/archetype';
 import { deriveSkillFormula } from '../../../../lib/profile/skillFormula';
 import { buildSummaryProfile } from '../../../../lib/profile/layers';
@@ -152,18 +152,24 @@ export async function GET(request: Request) {
       // карточка в отчёте (RpgProfessionCard) гарантированно обогащается
       // RIASEC-статами. why персонализируется моделью для верхних кандидатов
       // (см. buildReportProfessions), для остальных берётся текст из базы.
-      const rankedProfessions: ProfessionMatch[] = topProfessions(finalRiasec, finalBigFive, 20);
+      // Топ-20 архетипов (docs/22 §5, «подача архетипами»): совпавшие
+      // специализации свёрнуты в один архетип — лучшая наверх, остальные в
+      // variants («веер»). Так отчёт группируется по слоям tier 🟢/🔵/🟣 и не
+      // засоряется однотипными ролями.
+      const rankedProfessions: ArchetypeGroup[] = topArchetypes(finalRiasec, finalBigFive, 20);
       // Топ-8 названий передаём модели как кандидатов для персонального why.
       const professionCandidatesForLlm = rankedProfessions
         .slice(0, 8)
         .map((m) => `- ${m.profession.name}: ${m.profession.summary}`)
         .join('\n');
-      // Собирает финальный массив из 20 профессий: имя+score детерминированные,
-      // why — от модели, если она написала про это же название (дословно),
-      // иначе готовый текст из базы.
-      const buildReportProfessions = (llmProfessions: unknown): { name: string; score: number; why: string }[] => {
+      // Собирает финальный массив из 20 профессий: имя+score+tier+веер
+      // детерминированные, why — от модели, если она написала про это же
+      // название (дословно), иначе готовый текст из базы.
+      const buildReportProfessions = (
+        llmProfessions: unknown,
+      ): { name: string; score: number; why: string; tier?: string; variants?: string[] }[] => {
         const llmList = Array.isArray(llmProfessions) ? llmProfessions : [];
-        return rankedProfessions.map(({ profession, matchScore }) => {
+        return rankedProfessions.map(({ profession, matchScore, variants }) => {
           const match = llmList.find(
             (p: any) => p && typeof p.name === 'string' && p.name.trim() === profession.name,
           ) as { why?: unknown } | undefined;
@@ -172,6 +178,9 @@ export async function GET(request: Request) {
             name: profession.name,
             score: matchScore,
             why: llmWhy.length > 10 ? llmWhy : profession.why,
+            tier: profession.tier,
+            // «Веер» родственных специализаций того же архетипа (до 4 имён).
+            variants: variants.slice(0, 4).map((v) => v.profession.name),
           };
         });
       };

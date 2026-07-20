@@ -24,6 +24,10 @@ type Profession = {
   name: string;
   score: number;
   why: string;
+  /** Слой каталога для группировки в отчёте (docs/22 §5). */
+  tier?: 'everyday' | 'future' | 'dream';
+  /** «Веер» родственных специализаций того же архетипа. */
+  variants?: string[];
 };
 
 type ReportData = {
@@ -977,15 +981,52 @@ function ReportPageContent() {
                   />
                 )}
 
-                {/* Рекомендуемые профессии */}
-                <div className="glass-card rounded-[28px] p-8">
-                  <h2 className="text-lg font-bold text-white mb-6">Подходящие профессии для развития</h2>
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {report.professions.map((prof, idx) => (
-                      <RpgProfessionCard key={idx} name={prof.name} score={prof.score} why={prof.why} />
-                    ))}
-                  </div>
-                </div>
+                {/* Рекомендуемые профессии — сгруппированы по слоям каталога
+                    (docs/22 §5): 🟢 прочный путь / 🔵 профессии будущего /
+                    🟣 смелая мечта. Старые отчёты без tier показываются одним
+                    общим блоком (фолбэк). */}
+                {(() => {
+                  const TIER_SECTIONS: { key: 'everyday' | 'future' | 'dream'; emoji: string; title: string; note: string }[] = [
+                    { key: 'everyday', emoji: '🟢', title: 'Твой прочный путь', note: 'Массовые, востребованные направления с понятной дорогой.' },
+                    { key: 'future', emoji: '🔵', title: 'Профессии будущего для тебя', note: 'Растущие сферы — куда смещается рынок и доход.' },
+                    { key: 'dream', emoji: '🟣', title: 'Смелая мечта', note: 'Конкурсные направления. Честно: длинный путь и высокая конкуренция — держи план Б через смежные роли.' },
+                  ];
+                  const hasTiers = report.professions.some((p) => p.tier);
+                  return (
+                    <div className="glass-card rounded-[28px] p-8">
+                      <h2 className="text-lg font-bold text-white mb-6">Подходящие профессии для развития</h2>
+                      {hasTiers ? (
+                        <div className="space-y-8">
+                          {TIER_SECTIONS.map((section) => {
+                            const items = report.professions.filter((p) => (p.tier ?? 'everyday') === section.key);
+                            if (items.length === 0) return null;
+                            return (
+                              <div key={section.key}>
+                                <div className="mb-4">
+                                  <h3 className="text-base font-bold text-white">
+                                    <span className="mr-2">{section.emoji}</span>{section.title}
+                                  </h3>
+                                  <p className="text-xs text-[#7A8A9E] mt-1 leading-relaxed">{section.note}</p>
+                                </div>
+                                <div className="grid gap-6 md:grid-cols-2">
+                                  {items.map((prof, idx) => (
+                                    <RpgProfessionCard key={idx} name={prof.name} score={prof.score} why={prof.why} variants={prof.variants} />
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="grid gap-6 md:grid-cols-2">
+                          {report.professions.map((prof, idx) => (
+                            <RpgProfessionCard key={idx} name={prof.name} score={prof.score} why={prof.why} variants={prof.variants} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>

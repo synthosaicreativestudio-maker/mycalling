@@ -6,6 +6,8 @@ interface RpgProfessionCardProps {
   name: string;
   score: number;
   why: string;
+  /** «Веер» родственных специализаций того же архетипа (docs/22 §5). */
+  variants?: string[];
 }
 
 // Раньше "RPG-статы" считались наивным сопоставлением ключевых слов в НАЗВАНИИ
@@ -31,8 +33,9 @@ function getRiasecStats(name: string): { analytic: number; creative: number; pra
   };
 }
 
-export default function RpgProfessionCard({ name, score, why }: RpgProfessionCardProps) {
+export default function RpgProfessionCard({ name, score, why, variants }: RpgProfessionCardProps) {
   const stats = getRiasecStats(name);
+  const fan = (variants ?? []).filter((v) => v && v !== name);
 
   return (
     <div className="relative group overflow-hidden rounded-[24px] border border-white/5 bg-[#080C14]/40 p-5 space-y-4 hover:border-[#3B82F6]/30 hover:bg-[#3B82F6]/5 hover:shadow-[0_8px_30px_rgba(59,130,246,0.03)] transition-all duration-300 text-left">
@@ -90,6 +93,24 @@ export default function RpgProfessionCard({ name, score, why }: RpgProfessionCar
             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
               <div className="h-full bg-green-500 rounded-full transition-all duration-1000" style={{ width: `${stats.practical}%` }} />
             </div>
+          </div>
+        </div>
+      )}
+
+      {fan.length > 0 && (
+        <div className="border-t border-white/5 pt-3">
+          <span className="text-[8px] uppercase tracking-widest font-extrabold text-[#7A8A9E] block mb-1.5 font-sans">
+            Близкие специализации
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {fan.map((v, i) => (
+              <span
+                key={i}
+                className="text-[9px] font-semibold text-[#7A8A9E] bg-white/5 border border-white/5 rounded-full px-2 py-0.5"
+              >
+                {v}
+              </span>
+            ))}
           </div>
         </div>
       )}
