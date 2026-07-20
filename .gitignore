@@ -27,3 +27,6 @@ playwright-report/
 /Моё_Призвание_Полная_дорожная_карта.md
 /советы по продвижению.txt
 prakticheskoe_posobie_po_crowdfundingu_planeta.ru.pdf
+
+# Вывод Graphify (граф кода) — не коммитить
+graphify-out/

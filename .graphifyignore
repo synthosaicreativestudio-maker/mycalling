@@ -1,0 +1,15 @@
+# Секреты — НИКОГДА не сканировать (даже при --no-gitignore)
+.env
+.env.*
+!.env.example
+
+# Личные материалы владельца
+/скрины/
+Моё_Призвание_Полная_дорожная_карта.md
+советы по продвижению.txt
+prakticheskoe_posobie_po_crowdfundingu_planeta.ru.pdf
+
+# Служебное / вывод
+graphify-out/
+node_modules/
+.next/
