@@ -238,7 +238,7 @@ function ReportPageContent() {
   const [activeTab, setActiveTab] = useState<'talents' | 'career' | 'parent'>('talents');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState<{ coachCompleted: boolean; testCompleted: boolean; sessionId: string | null } | null>(null);
+  const [progress, setProgress] = useState<{ coachCompleted: boolean; testCompleted: boolean; sessionId: string | null; coachSessionMode?: string | null; deepSessionCompleted?: boolean } | null>(null);
   const { data: session } = authClient.useSession();
 
   const handleLogout = async () => {
@@ -283,7 +283,9 @@ function ReportPageContent() {
           setProgress({
             coachCompleted: progressData.coachCompleted,
             testCompleted: progressData.testCompleted,
-            sessionId: progressData.sessionId
+            sessionId: progressData.sessionId,
+            coachSessionMode: progressData.coachSessionMode,
+            deepSessionCompleted: progressData.deepSessionCompleted
           });
 
           if (!progressData.coachCompleted || !progressData.testCompleted) {
@@ -486,6 +488,17 @@ function ReportPageContent() {
                 <Download className="h-4 w-4" />
                 Распечатать / PDF
               </button>
+              {/* Постоянный вход в глубокую коуч-сессию (docs/25 Трек C):
+                  показываем, пока пройдена только экспресс-сессия и глубокая ещё нет. */}
+              {!isDemo && progress?.coachSessionMode === 'EXPRESS' && !progress?.deepSessionCompleted && (
+                <button
+                  onClick={() => router.push('/coach?forceDeep=1')}
+                  className="inline-flex items-center gap-2 rounded-xl border border-[var(--accent-wash-30)] bg-[var(--accent-wash-10)] px-5 py-3 text-sm font-semibold text-[var(--accent-brown)] transition hover:bg-[var(--accent-wash-20)]"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Пройти глубокую сессию
+                </button>
+              )}
               <Link
                 href="/"
                 className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.06]"
@@ -1119,6 +1132,74 @@ function ReportPageContent() {
             <h2>Логическое мышление (ICAR)</h2>
             <ul>{Object.entries(report.icarSubscales).map(([key, value], i) => (
               <li key={i}>{ICAR_SUBSCALE_LABELS[key] || key} — {value}/3</li>
+            ))}</ul>
+          </div>
+        )}
+
+        {/* Ниже — секции, которые были на экране, но не попадали в PDF (docs/25 Трек C). */}
+        {report.archetype && (
+          <div className="print-card">
+            <h2>Метафора роли (архетип)</h2>
+            <p><strong>{report.archetype.nameRu}.</strong> {report.archetype.superpower}</p>
+          </div>
+        )}
+
+        {report.signatureStrengths && report.signatureStrengths.length > 0 && (
+          <div className="print-card">
+            <h2>Сигнатурные сильные стороны (VIA)</h2>
+            <ul>{report.signatureStrengths.map((s, i) => <li key={i}>{s.nameRu} — {s.description}</li>)}</ul>
+          </div>
+        )}
+
+        {report.personalityTraits && report.personalityTraits.length > 0 && (
+          <div className="print-card">
+            <h2>Личностные особенности (Big Five)</h2>
+            <ul>{report.personalityTraits.map((t, i) => <li key={i}>{t.name} — {t.score}%. {t.description}</li>)}</ul>
+          </div>
+        )}
+
+        {report.innerCompass && Object.values(report.innerCompass).some((v) => typeof v === 'number') && (
+          <div className="print-card">
+            <h2>Внутренний компас</h2>
+            <ul>{Object.entries(report.innerCompass).map(([key, value], i) => (
+              typeof value === 'number' ? <li key={i}>{INNER_COMPASS_LABELS[key] || key} — {value}/5</li> : null
+            ))}</ul>
+          </div>
+        )}
+
+        {report.methodologyProfile?.savickas && Object.values(report.methodologyProfile.savickas).some((v) => typeof v === 'number') && (
+          <div className="print-card">
+            <h2>Карьерная адаптивность (Савикас)</h2>
+            <ul>{Object.entries(report.methodologyProfile.savickas).map(([key, value], i) => (
+              typeof value === 'number' ? <li key={i}>{SAVICKAS_LABELS[key] || key} — {value}%</li> : null
+            ))}</ul>
+          </div>
+        )}
+
+        {report.methodologyProfile?.procrastination !== undefined && (
+          <div className="print-card">
+            <h2>Склонность к прокрастинации</h2>
+            <p>{report.methodologyProfile.procrastination}/20</p>
+          </div>
+        )}
+
+        {report.methodologyProfile && ((report.methodologyProfile.hobbies && report.methodologyProfile.hobbies.length > 0) || (report.methodologyProfile.antiInterests && report.methodologyProfile.antiInterests.length > 0)) && (
+          <div className="print-card">
+            <h2>Увлечения и анти-интересы</h2>
+            {report.methodologyProfile.hobbies && report.methodologyProfile.hobbies.length > 0 && (
+              <p><strong>Чем увлекаешься по своей воле:</strong> {report.methodologyProfile.hobbies.join(', ')}</p>
+            )}
+            {report.methodologyProfile.antiInterests && report.methodologyProfile.antiInterests.length > 0 && (
+              <p><strong>Что точно не откликается:</strong> {report.methodologyProfile.antiInterests.join(', ')}</p>
+            )}
+          </div>
+        )}
+
+        {report.profileCoverage && Object.keys(report.profileCoverage).length > 0 && (
+          <div className="print-card">
+            <h2>Полнота цифрового профиля</h2>
+            <ul>{Object.entries(report.profileCoverage).map(([key, value], i) => (
+              <li key={i}>{PROFILE_COVERAGE_LABELS[key] || key} — {Math.round((value as number) * 100)}%</li>
             ))}</ul>
           </div>
         )}
