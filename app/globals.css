@@ -138,11 +138,13 @@ button {
 }
 
 .site-header-inner {
-  background: rgba(4, 5, 6, 0.75);
+  /* Матовое стекло: непрозрачность фона 30% (прозрачность 70%),
+     сильный blur + saturate для «морозного» матового эффекта. */
+  background: rgba(4, 5, 6, 0.30);
   border-bottom: 1px solid var(--border-subtle);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
 }
 
 /* ─── Content Layer (scrolls over fixed bg) ─── */
@@ -976,9 +978,12 @@ a:focus-visible {
 }
 
 [data-theme="light"] .site-header-inner {
-  background: rgba(253, 251, 247, 0.85) !important;
+  /* Матовое стекло, светлая тема: фон 30% непрозрачности. */
+  background: rgba(253, 251, 247, 0.30) !important;
   border-bottom: 1px solid rgba(141, 91, 76, 0.15) !important;
   box-shadow: 0 4px 20px rgba(141, 91, 76, 0.05) !important;
+  backdrop-filter: blur(28px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(140%) !important;
 }
 [data-theme="light"] .input-shell {
   background: rgba(245, 239, 235, 0.7) !important;
