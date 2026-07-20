@@ -733,17 +733,17 @@ export default function CoachPage() {
                       <div className="w-full flex items-center justify-center relative">
                         {idx > 0 && (
                           <div className={`absolute right-[50%] left-[-50%] top-[4px] h-[2px] transition-all duration-300 ${
-                            isCompleted ? 'bg-[#EAB308]' : 'bg-white/10'
+                            isCompleted ? 'bg-[var(--accent-brown)]' : 'bg-white/10'
                           }`} />
                         )}
                         <div className={`h-2.5 w-2.5 rounded-full z-10 transition-all duration-300 ${
-                          isActive 
-                            ? 'bg-[#EAB308] ring-4 ring-[#EAB308]/20 scale-125' 
-                            : (isCompleted ? 'bg-[#EAB308]' : 'bg-white/20')
+                          isActive
+                            ? 'bg-[var(--accent-brown)] ring-4 ring-[var(--accent-wash-20)] scale-125'
+                            : (isCompleted ? 'bg-[var(--accent-brown)]' : 'bg-white/20')
                         }`} />
                       </div>
                       <span className={`text-[9px] font-bold font-sans transition-colors duration-300 ${
-                        isActive ? 'text-[#EAB308]' : 'text-slate-500'
+                        isActive ? 'text-[var(--accent-brown)]' : 'text-slate-500'
                       }`}>
                         {s.label}
                       </span>
@@ -903,11 +903,11 @@ export default function CoachPage() {
                       disabled={loading}
                       className="p-3.5 rounded-xl border border-[#C4A484]/30 bg-[#C4A484]/5 hover:bg-[#C4A484]/15 transition text-left space-y-1.5 group relative overflow-hidden"
                     >
-                      <div className="absolute top-0 right-0 bg-[#EAB308]/20 text-[#EAB308] text-[8px] font-extrabold px-1.5 py-0.5 rounded-bl uppercase tracking-wider">
+                      <div className="absolute top-0 right-0 bg-[var(--accent-wash-20)] text-[var(--accent-brown)] text-[8px] font-extrabold px-1.5 py-0.5 rounded-bl uppercase tracking-wider">
                         Рекомендуем
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-[#EAD5C3] group-hover:text-[#EAB308] transition">Глубокий коучинг</span>
+                        <span className="text-[11px] font-bold text-[#EAD5C3] group-hover:text-[var(--accent-brown)] transition">Глубокий коучинг</span>
                         <span className="text-[9px] text-[#C4A484] px-1.5 py-0.5 rounded bg-[#C4A484]/15">22 шага</span>
                       </div>
                       <p className="text-[10px] text-[#C4A484]/85 leading-normal">
@@ -1001,7 +1001,7 @@ export default function CoachPage() {
         >
         {/* Tabs and Zoom-in buttons for desktop */}
         {extractedData.sessionMode === 'DEEP' ? (
-          <div className="absolute top-4 left-4 right-4 z-20 flex gap-2 p-1.5 rounded-2xl bg-[#090D1A]/70 backdrop-blur-xl border border-white/5 shadow-inner items-center">
+          <div className="absolute top-4 left-4 right-4 z-20 flex gap-2 p-1.5 rounded-2xl bg-black/5 dark:bg-[#090D1A]/70 backdrop-blur-xl border border-black/10 dark:border-white/5 shadow-inner items-center">
             <button
               onClick={() => setActiveTab('wheel')}
               className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
@@ -1017,7 +1017,7 @@ export default function CoachPage() {
               onClick={() => setActiveTab('pyramid')}
               className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
                 activeTab === 'pyramid'
-                  ? 'bg-[#EAB308] text-white shadow-lg shadow-[#EAB308]/30 border border-white/10'
+                  ? 'bg-[var(--accent-brown)] text-white shadow-lg shadow-[var(--accent-wash-30)] border border-white/10'
                   : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
               }`}
             >
@@ -1109,7 +1109,7 @@ export default function CoachPage() {
                       onClick={() => setActiveTab('pyramid')}
                       className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
                         activeTab === 'pyramid'
-                          ? 'bg-[#EAB308] text-white shadow-sm'
+                          ? 'bg-[var(--accent-brown)] text-white shadow-sm'
                           : 'text-[var(--text-muted)] hover:text-white'
                       }`}
                     >

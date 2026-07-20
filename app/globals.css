@@ -642,6 +642,9 @@ a:focus-visible {
 [data-theme="light"] .text-slate-300 {
   color: var(--text-primary) !important;
 }
+[data-theme="light"] .text-slate-500 {
+  color: var(--text-muted) !important;
+}
 [data-theme="light"] .hover\:text-white:hover {
   color: var(--text-primary) !important;
 }
