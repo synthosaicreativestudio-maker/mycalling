@@ -147,16 +147,24 @@ export async function GET(request: Request) {
       ) as Record<string, number>;
       const finalBigFive = results.BFI.scores as Record<string, number | boolean>;
 
-      // §11.6: детерминированный топ-20 профессий из базы (ранжируется ВСЯ база
-      // 119 профессий по RIASEC + Big Five). Названия всегда из базы, поэтому
-      // карточка в отчёте (RpgProfessionCard) гарантированно обогащается
-      // RIASEC-статами. why персонализируется моделью для верхних кандидатов
-      // (см. buildReportProfessions), для остальных берётся текст из базы.
+      // §11.6 + docs/25 Трек A: детерминированный топ-20 профессий из базы,
+      // ранжированной по МНОГОМЕРНОМУ соответствию — интересы (RIASEC), личность
+      // (Big Five), ценности (PVQ), сильные стороны (VIA), когнитивная нагрузка
+      // (ICAR). Названия всегда из базы, поэтому карточка в отчёте гарантированно
+      // обогащается. why персонализируется моделью для верхних кандидатов (см.
+      // buildReportProfessions), для остальных берётся текст из базы.
       // Топ-20 архетипов (docs/22 §5, «подача архетипами»): совпавшие
       // специализации свёрнуты в один архетип — лучшая наверх, остальные в
       // variants («веер»). Так отчёт группируется по слоям tier 🟢/🔵/🟣 и не
       // засоряется однотипными ролями.
-      const rankedProfessions: ArchetypeGroup[] = topArchetypes(finalRiasec, finalBigFive, 20);
+      const matchProfile = {
+        riasec: finalRiasec,
+        bigFive: finalBigFive,
+        topValues: (results.PVQ?.scores as { topValues?: string[] } | undefined)?.topValues,
+        signatureStrengths: (results.VIA?.scores as { signatureStrengths?: string[] } | undefined)?.signatureStrengths,
+        icarBand: (results.ICAR?.scores as { band?: string } | undefined)?.band,
+      };
+      const rankedProfessions: ArchetypeGroup[] = topArchetypes(matchProfile, 20);
       // Топ-8 названий передаём модели как кандидатов для персонального why.
       const professionCandidatesForLlm = rankedProfessions
         .slice(0, 8)
@@ -167,9 +175,9 @@ export async function GET(request: Request) {
       // название (дословно), иначе готовый текст из базы.
       const buildReportProfessions = (
         llmProfessions: unknown,
-      ): { name: string; score: number; why: string; tier?: string; variants?: string[] }[] => {
+      ): { name: string; score: number; why: string; tier?: string; variants?: string[]; breakdown?: { axis: string; label: string; score: number; weight: number }[] }[] => {
         const llmList = Array.isArray(llmProfessions) ? llmProfessions : [];
-        return rankedProfessions.map(({ profession, matchScore, variants }) => {
+        return rankedProfessions.map(({ profession, matchScore, variants, breakdown }) => {
           const match = llmList.find(
             (p: any) => p && typeof p.name === 'string' && p.name.trim() === profession.name,
           ) as { why?: unknown } | undefined;
@@ -181,6 +189,8 @@ export async function GET(request: Request) {
             tier: profession.tier,
             // «Веер» родственных специализаций того же архетипа (до 4 имён).
             variants: variants.slice(0, 4).map((v) => v.profession.name),
+            // docs/25 Трек A: разбивка совпадения по осям — для «почему подходит».
+            breakdown,
           };
         });
       };

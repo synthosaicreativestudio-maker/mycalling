@@ -14,6 +14,42 @@ export interface ProfessionMatch {
   profession: Profession;
   /** Итоговый процент совпадения для отображения (58–99, монотонно по fit). */
   matchScore: number;
+  /**
+   * Разбивка совпадения по осям (docs/25, Трек A, «объяснимость»): по каким
+   * характеристикам профессия подошла. Только активные оси (по которым есть
+   * данные и у ученика, и у профессии). Для карточки в отчёте — «Интересы 92% ·
+   * Ценности 80% · …».
+   */
+  breakdown: MatchAxis[];
+}
+
+export interface MatchAxis {
+  /** Машинный ключ оси. */
+  axis: 'interests' | 'personality' | 'values' | 'strengths' | 'cognitive';
+  /** Человекочитаемая подпись для отчёта. */
+  label: string;
+  /** Балл по оси, 0–100. */
+  score: number;
+  /** Доля оси в итоговом совпадении после ре-нормировки (0–1). */
+  weight: number;
+}
+
+/**
+ * Профиль ученика для многомерного матчинга (docs/25, Трек A). Симметричен осям
+ * паспорта профессии. Все поля, кроме riasec/bigFive, опциональны — если данных
+ * нет (короткий экспресс-путь), ось просто исключается, а веса ре-нормируются по
+ * оставшимся. Величины уже вычисляются в next-question/route.ts (finalRiasec,
+ * finalBigFive, pvqScores.topValues, viaScores.signatureStrengths, icarScores.band).
+ */
+export interface MatchProfile {
+  riasec: Record<string, number>;
+  bigFive: Record<string, number | boolean>;
+  /** Топ-ценности ученика, коды PVQ Шварца (см. pvqScores.topValues). */
+  topValues?: string[];
+  /** Сигнатурные силы характера ученика, коды VIA (см. viaScores.signatureStrengths). */
+  signatureStrengths?: string[];
+  /** Диапазон ICAR ученика: 'developing' | 'solid' | 'strong' (см. icarBand). */
+  icarBand?: string;
 }
 
 // RIASEC-скорер отдаёт короткие ключи R/I/A/S/E/C, а база — полные названия.
@@ -57,7 +93,11 @@ function studentTraitNorm(trait: BigFiveTrait, bigFive: Record<string, number | 
   }
 }
 
-function riasecFit(profession: Profession, riasec: Record<string, number>): number {
+// Каждый под-фит возвращает 0–1 при наличии данных ИЛИ null, если оси нет (у
+// ученика нет замера ИЛИ у профессии не заполнено поле). null → ось исключается
+// из взвешенной суммы, а веса ре-нормируются по оставшимся (graceful degradation).
+
+function riasecFit(profession: Profession, riasec: Record<string, number>): number | null {
   // Нормируем баллы ученика (0–5) в 0–1 по полным названиям RIASEC.
   const studentByFull: Record<string, number> = {};
   for (const [letter, full] of Object.entries(RIASEC_LETTER_TO_FULL)) {
@@ -66,6 +106,8 @@ function riasecFit(profession: Profession, riasec: Record<string, number>): numb
       studentByFull[full] = Math.max(0, Math.min(1, raw / 5));
     }
   }
+  // Нет ни одного RIASEC-балла ученика — оси нет.
+  if (Object.keys(studentByFull).length === 0) return null;
   let weighted = 0;
   let weightSum = 0;
   profession.riasec.forEach((code, idx) => {
@@ -73,10 +115,10 @@ function riasecFit(profession: Profession, riasec: Record<string, number>): numb
     weighted += w * (studentByFull[code] ?? 0);
     weightSum += w;
   });
-  return weightSum > 0 ? weighted / weightSum : 0.5;
+  return weightSum > 0 ? weighted / weightSum : null;
 }
 
-function bigFiveFit(profession: Profession, bigFive: Record<string, number | boolean>): number {
+function bigFiveFit(profession: Profession, bigFive: Record<string, number | boolean>): number | null {
   const traits = profession.bigFive?.traits ?? {};
   const fits: number[] = [];
   (Object.entries(traits) as [BigFiveTrait, 'high' | 'low' | 'any' | undefined][]).forEach(([trait, expectation]) => {
@@ -85,30 +127,98 @@ function bigFiveFit(profession: Profession, bigFive: Record<string, number | boo
     if (norm === null) return;
     fits.push(expectation === 'high' ? norm : 1 - norm);
   });
-  // Нет ограничений или нет данных по чертам — нейтрально.
-  return fits.length > 0 ? fits.reduce((s, f) => s + f, 0) / fits.length : 0.5;
+  // Нет сопоставимых черт (у профессии нет ограничений ИЛИ у ученича нет данных).
+  return fits.length > 0 ? fits.reduce((s, f) => s + f, 0) / fits.length : null;
 }
 
-const RIASEC_WEIGHT = 0.7;
-const BIG_FIVE_WEIGHT = 0.3;
+// Доля кодов профессии, попавших в набор ученика. Общий словарь кодов (PVQ/VIA)
+// гарантирует сопоставимость. null — если у профессии не заполнено поле ИЛИ у
+// ученика нет замера.
+function overlapFit(professionCodes: string[] | undefined, studentCodes: string[] | undefined): number | null {
+  if (!professionCodes || professionCodes.length === 0) return null;
+  if (!studentCodes || studentCodes.length === 0) return null;
+  const set = new Set(studentCodes);
+  const hits = professionCodes.filter((c) => set.has(c)).length;
+  return hits / professionCodes.length;
+}
+
+// Когнитивная нагрузка профессии ↔ ICAR-диапазон ученика. Мягкий guard-rail:
+// если требования не выше возможностей — полное соответствие; если выше —
+// штрафуем пропорционально разрыву, но НЕ обнуляем (пол 0.5), чтобы «не отрезать
+// мечту» (docs/25, Трек A).
+const ICAR_CAPACITY: Record<string, number> = { developing: 0, solid: 0.5, strong: 1 };
+const DEMAND_LEVEL: Record<string, number> = { low: 0, medium: 0.5, high: 1 };
+
+function cognitiveFit(profession: Profession, icarBand: string | undefined): number | null {
+  const demand = profession.cognitiveDemand ? DEMAND_LEVEL[profession.cognitiveDemand] : undefined;
+  const capacity = icarBand ? ICAR_CAPACITY[icarBand] : undefined;
+  if (demand === undefined || capacity === undefined) return null;
+  const gap = demand - capacity; // >0 → профессия требует больше, чем показал ученик
+  if (gap <= 0) return 1;
+  return Math.max(0.5, 1 - gap * 0.5); // gap 0.5 → 0.75; gap 1 → 0.5
+}
+
+// Базовые веса осей (docs/25, Трек A). Активные оси ре-нормируются к сумме 1,
+// поэтому отсутствие части осей (экспресс-путь) не ломает шкалу.
+const AXIS_WEIGHTS = {
+  interests: 0.30,
+  personality: 0.15,
+  values: 0.15,
+  strengths: 0.15,
+  cognitive: 0.10,
+} as const;
+
+const AXIS_LABELS: Record<MatchAxis['axis'], string> = {
+  interests: 'Интересы',
+  personality: 'Личность',
+  values: 'Ценности',
+  strengths: 'Сильные стороны',
+  cognitive: 'Мышление',
+};
+
+interface FitResult {
+  fit: number;
+  breakdown: MatchAxis[];
+}
+
+// Взвешенная сумma активных осей с ре-нормировкой. Если активных осей нет вовсе
+// (пустой профиль) — нейтральные 0.5 без разбивки.
+function computeFit(profession: Profession, profile: MatchProfile): FitResult {
+  const raw: { axis: MatchAxis['axis']; value: number | null }[] = [
+    { axis: 'interests', value: riasecFit(profession, profile.riasec) },
+    { axis: 'personality', value: bigFiveFit(profession, profile.bigFive) },
+    { axis: 'values', value: overlapFit(profession.values, profile.topValues) },
+    { axis: 'strengths', value: overlapFit(profession.viaFit, profile.signatureStrengths) },
+    { axis: 'cognitive', value: cognitiveFit(profession, profile.icarBand) },
+  ];
+  const active = raw.filter((a): a is { axis: MatchAxis['axis']; value: number } => a.value !== null);
+  const weightSum = active.reduce((s, a) => s + AXIS_WEIGHTS[a.axis], 0);
+  if (weightSum === 0) return { fit: 0.5, breakdown: [] };
+  let fit = 0;
+  const breakdown: MatchAxis[] = active.map((a) => {
+    const w = AXIS_WEIGHTS[a.axis] / weightSum;
+    fit += w * a.value;
+    return { axis: a.axis, label: AXIS_LABELS[a.axis], score: Math.round(a.value * 100), weight: parseFloat(w.toFixed(2)) };
+  });
+  return { fit, breakdown };
+}
 
 /**
- * Ранжирует ВСЕ профессии базы по соответствию профилю. Результат отсортирован
- * по убыванию совпадения (лучшие — первыми).
+ * Ранжирует ВСЕ профессии базы по многомерному соответствию профилю (docs/25,
+ * Трек A): интересы (RIASEC), личность (Big Five), ценности (PVQ), сильные
+ * стороны (VIA), когнитивная нагрузка (ICAR). Результат отсортирован по убыванию
+ * совпадения (лучшие — первыми).
  */
-export function matchProfessions(
-  riasec: Record<string, number>,
-  bigFive: Record<string, number | boolean>,
-): ProfessionMatch[] {
+export function matchProfessions(profile: MatchProfile): ProfessionMatch[] {
   const scored = professionsDb.map((profession) => {
-    const fit = RIASEC_WEIGHT * riasecFit(profession, riasec) + BIG_FIVE_WEIGHT * bigFiveFit(profession, bigFive);
+    const { fit, breakdown } = computeFit(profession, profile);
     // Монотонное отображение fit(0–1) → 58–99%: сохраняет порядок, но не даёт
     // ведущей профессии выглядеть как «40%» в отчёте для подростка.
     const matchScore = Math.max(58, Math.min(99, Math.round(58 + fit * 41)));
-    return { profession, matchScore, fit };
+    return { profession, matchScore, breakdown, fit };
   });
   scored.sort((a, b) => b.fit - a.fit || a.profession.name.localeCompare(b.profession.name));
-  return scored.map(({ profession, matchScore }) => ({ profession, matchScore }));
+  return scored.map(({ profession, matchScore, breakdown }) => ({ profession, matchScore, breakdown }));
 }
 
 /**
@@ -120,11 +230,10 @@ export function matchProfessions(
  * поведение обратно совместимо, пока поле не заполнено.
  */
 export function topProfessions(
-  riasec: Record<string, number>,
-  bigFive: Record<string, number | boolean>,
+  profile: MatchProfile,
   n = 20,
 ): ProfessionMatch[] {
-  const ranked = matchProfessions(riasec, bigFive);
+  const ranked = matchProfessions(profile);
   const seen = new Set<string>();
   const collapsed: ProfessionMatch[] = [];
   for (const match of ranked) {
@@ -148,11 +257,10 @@ export interface ArchetypeGroup extends ProfessionMatch {
 }
 
 export function topArchetypes(
-  riasec: Record<string, number>,
-  bigFive: Record<string, number | boolean>,
+  profile: MatchProfile,
   n = 20,
 ): ArchetypeGroup[] {
-  const ranked = matchProfessions(riasec, bigFive);
+  const ranked = matchProfessions(profile);
   const byKey = new Map<string, ArchetypeGroup>();
   const order: string[] = [];
   for (const match of ranked) {
