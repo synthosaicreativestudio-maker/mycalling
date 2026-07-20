@@ -11,6 +11,7 @@ import { CookieBanner } from './components/CookieBanner';
 import logger from './lib/logger';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import { ThemeToggle } from './components/ThemeToggle';
+import DonateButton from './components/DonateButton';
 import dynamic from 'next/dynamic';
 const HeaderAuth = dynamic(() => import('./components/HeaderAuth'), { ssr: false });
 
@@ -148,7 +149,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     />
                   </div>
                   
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <DonateButton compact />
                     <HeaderAuth />
                     <ThemeToggle />
                   </div>

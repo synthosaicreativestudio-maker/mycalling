@@ -5,7 +5,6 @@ import { ArrowRight, Users, HelpCircle, Shield, Brain, FileCheck, Lock, Unlock, 
 import { useEffect, useState } from 'react';
 import { AnimatedLogo } from './components/AnimatedLogo';
 import { IconTimer, IconScience, IconReport, UspCard, ForWhomCard, TrustCard, FaqItem, ReviewCard } from './components/landing/LandingUI';
-import DonateButton from './components/DonateButton';
 import { m } from 'framer-motion';
 import { sectionVariants, fadeUpVariants, heroVariants } from './lib/animations';
 
@@ -137,7 +136,6 @@ export default function HomePage() {
                   <ArrowRight className="h-5 w-5" />
                 </Link>
               </div>
-              <DonateButton />
             </m.div>
             <m.span
               custom={1.0}

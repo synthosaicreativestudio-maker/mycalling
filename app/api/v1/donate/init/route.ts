@@ -3,7 +3,7 @@ import { getTinkoffConfig, tinkoffInit } from '../../../../lib/tinkoff';
 
 export const dynamic = 'force-dynamic';
 
-const MIN_RUB = 10;
+const MIN_RUB = 1;
 const MAX_RUB = 100000;
 
 /**

@@ -1,22 +1,33 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Heart, X, Loader2, CheckCircle2, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const PRESETS = [100, 300, 500, 1000];
+const MIN_RUB = 1;
 
 type Phase = 'amount' | 'loading' | 'qr' | 'success' | 'error';
 
 /**
- * Кнопка «Пожертвовать на развитие проекта» + модалка с оплатой по СБП QR-коду
- * через Т-Банк. Проект бесплатный для школьников/родителей/школ — это
+ * Кнопка «Поддержать проект» + модалка с оплатой через Т-Банк (QR платёжной
+ * страницы + переход). Проект бесплатный для школьников/родителей/школ — это
  * добровольная поддержка, ничего не гейтит. Секрет терминала живёт на сервере;
- * клиент лишь запрашивает QR (/api/v1/donate/init) и опрашивает статус
+ * клиент лишь создаёт платёж (/api/v1/donate/init) и опрашивает статус
  * (/api/v1/donate/status).
+ *
+ * @param compact  компактный вид для верхней плашки (рядом с «Личный кабинет»).
+ *
+ * ВАЖНО: модалка рендерится через портал в document.body. Кнопка стоит в
+ * шапке/hero, обёрнутых в CSS `transform` (framer-motion) — а `position: fixed`
+ * внутри трансформированного предка позиционируется относительно него, а не
+ * вьюпорта, из-за чего оверлей не перекрывал страницу и текст «просвечивал».
  */
-export default function DonateButton() {
+export default function DonateButton({ compact = false }: { compact?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [phase, setPhase] = useState<Phase>('amount');
   const [amount, setAmount] = useState<number>(300);
   const [custom, setCustom] = useState('');
@@ -62,8 +73,8 @@ export default function DonateButton() {
   useEffect(() => () => stopPolling(), [stopPolling]);
 
   const startDonation = useCallback(async () => {
-    if (!Number.isFinite(effectiveAmount) || effectiveAmount < 10) {
-      setError('Минимальная сумма — 10 ₽.');
+    if (!Number.isFinite(effectiveAmount) || effectiveAmount < MIN_RUB) {
+      setError(`Минимальная сумма — ${MIN_RUB} ₽.`);
       return;
     }
     setError(null);
@@ -114,16 +125,28 @@ export default function DonateButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="donate-cta group inline-flex h-[62px] items-center justify-center gap-2 rounded-full px-7 text-base font-semibold sm:text-lg"
-      >
-        <Heart className="h-5 w-5 transition-transform group-hover:scale-110" />
-        Поддержать проект
-      </button>
+      {compact ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Поддержать проект"
+          className="donate-cta group inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-3.5 text-sm font-semibold"
+        >
+          <Heart className="h-4 w-4 transition-transform group-hover:scale-110" />
+          <span className="hidden sm:inline">Поддержать</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="donate-cta group inline-flex h-[62px] items-center justify-center gap-2 rounded-full px-7 text-base font-semibold sm:text-lg"
+        >
+          <Heart className="h-5 w-5 transition-transform group-hover:scale-110" />
+          Поддержать проект
+        </button>
+      )}
 
-      {open && (
+      {mounted && open && createPortal(
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           role="dialog"
@@ -193,14 +216,14 @@ export default function DonateButton() {
                   <input
                     type="number"
                     inputMode="numeric"
-                    min={10}
-                    placeholder="Другая сумма, ₽"
+                    min={MIN_RUB}
+                    placeholder="Другая сумма, ₽ (от 1 ₽)"
                     value={custom}
                     onChange={(e) => {
                       setCustom(e.target.value);
                       setError(null);
                     }}
-                    className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white placeholder:text-[var(--text-muted)] focus:border-[var(--accent-brown)] focus:outline-none"
+                    className="w-full rounded-xl border border-black/10 bg-black/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-[var(--text-muted)] focus:border-[var(--accent-brown)] focus:outline-none dark:border-white/10 dark:bg-white/5"
                   />
                 </div>
 
@@ -300,7 +323,8 @@ export default function DonateButton() {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

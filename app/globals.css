@@ -313,14 +313,12 @@ h1, h2, h3, .font-title {
 }
 
 .donate-modal {
-  background: rgba(10, 15, 26, 0.96);
+  background: #0b1018; /* полностью непрозрачно — контент за модалкой не просвечивает */
   border: 1px solid var(--accent-wash-20);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px var(--cta-glow-color);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
 }
 [data-theme="light"] .donate-modal {
-  background: rgba(250, 246, 240, 0.98);
+  background: #faf6f0;
   border-color: var(--accent-wash-25);
   box-shadow: 0 30px 80px rgba(62, 39, 35, 0.22);
 }
