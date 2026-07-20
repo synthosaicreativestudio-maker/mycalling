@@ -145,6 +145,20 @@ const PROFILE_COVERAGE_LABELS: Record<string, string> = {
   context: 'Контекст и опоры'
 };
 
+// docs/25 Трек D: «главы» разбивают длинный стек секций отчёта на понятные
+// смысловые части, чтобы он читался как история о себе, а не как портянка.
+function ReportChapter({ emoji, title, subtitle }: { emoji: string; title: string; subtitle: string }) {
+  return (
+    <div className="flex items-center gap-3 pt-2">
+      <span className="text-2xl shrink-0" aria-hidden>{emoji}</span>
+      <div className="min-w-0">
+        <h2 className="text-xl font-extrabold text-white leading-tight font-sans">{title}</h2>
+        <p className="text-xs text-[var(--text-muted)] leading-snug">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
 const defaultReport: ReportData = {
   studentName: 'Демо-профиль',
   heroSummary: [
@@ -757,6 +771,8 @@ function ReportPageContent() {
                   )}
 
                   {/* Силы и Зоны развития */}
+                  <ReportChapter emoji="💪" title="Твои сильные стороны" subtitle="Что у тебя получается лучше всего — и что стоит подтянуть" />
+
                   <div className="glass-card rounded-[28px] p-8">
                     <h2 className="text-lg font-bold text-white mb-4">Сильные стороны и зоны развития</h2>
                     <div className="space-y-5">
@@ -785,6 +801,10 @@ function ReportPageContent() {
                     </div>
                   </div>
 
+                  {report.topValueScores && report.topValueScores.length > 0 && (
+                    <ReportChapter emoji="🧭" title="Что тебя двигает" subtitle="Ценности и внутренние опоры, которые влияют на твой выбор" />
+                  )}
+
                   {/* Ведущие ценности PVQ Шварца — горизонтальные бары */}
                   {report.topValueScores && report.topValueScores.length > 0 && (
                     <ValueBars
@@ -798,6 +818,12 @@ function ReportPageContent() {
                         valueLabel: `${v.score.toFixed(1)}/5`
                       }))}
                     />
+                  )}
+
+                  {((report.icarSubscales && Object.keys(report.icarSubscales).length > 0) ||
+                    (report.innerCompass && Object.values(report.innerCompass).some((v) => typeof v === 'number')) ||
+                    (report.methodologyProfile?.cognitiveStyle && Object.values(report.methodologyProfile.cognitiveStyle).some((v) => typeof v === 'number' && v > 0))) && (
+                    <ReportChapter emoji="🧠" title="Как устроено твоё мышление" subtitle="Логика, внимание и стиль обучения — простыми словами" />
                   )}
 
                   {/* Субшкалы логического теста ICAR — горизонтальные бары */}
