@@ -294,6 +294,44 @@ h1, h2, h3, .font-title {
   transform: translateY(0) scale(0.98);
 }
 
+/* ─── Кнопка «Поддержать проект» (вторичная CTA) + модалка пожертвования ─── */
+.donate-cta {
+  color: var(--accent-brown);
+  background: var(--accent-wash-10);
+  border: 1.5px solid var(--accent-wash-30);
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.donate-cta:hover {
+  background: var(--accent-wash-20);
+  border-color: var(--accent-brown);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px var(--cta-glow-color-active);
+}
+.donate-cta:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.donate-modal {
+  background: rgba(10, 15, 26, 0.96);
+  border: 1px solid var(--accent-wash-20);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px var(--cta-glow-color);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+[data-theme="light"] .donate-modal {
+  background: rgba(250, 246, 240, 0.98);
+  border-color: var(--accent-wash-25);
+  box-shadow: 0 30px 80px rgba(62, 39, 35, 0.22);
+}
+[data-theme="light"] .donate-modal h3,
+[data-theme="light"] .donate-modal h4 {
+  color: var(--text-primary);
+}
+[data-theme="light"] .donate-modal .text-white {
+  color: var(--text-primary) !important;
+}
+
 /* ─── Glass Panel (для форм, карточек) ─── */
 .glass-panel {
   background: rgba(8, 12, 20, 0.30);

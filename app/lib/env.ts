@@ -54,4 +54,8 @@ export const env = {
   /** Т-Банк (Тинькофф) Интернет-эквайринг / Биллинг */
   TINKOFF_TERMINAL_KEY: getEnvOptional('TINKOFF_TERMINAL_KEY'),
   TINKOFF_SECRET_KEY: getEnvOptional('TINKOFF_SECRET_KEY'),
+  /** Пароль терминала Т-Банка для подписи запросов (токен). Отдельный секрет,
+   *  задаётся владельцем в окружении хостинга. Fallback на SECRET_KEY, если
+   *  владелец сохранил пароль под этим именем. */
+  TINKOFF_PASSWORD: getEnvOptional('TINKOFF_PASSWORD') || getEnvOptional('TINKOFF_SECRET_KEY'),
 } as const;
