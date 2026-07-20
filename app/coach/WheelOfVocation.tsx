@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Cpu, Microscope, Users, ClipboardList, Rocket } from 'lucide-react';
+import { Palette, Cpu, Microscope, BarChart3, Users, ClipboardList, Rocket } from 'lucide-react';
 
 interface WheelOfVocationProps {
   extractedData: Record<string, any>;
@@ -16,6 +16,12 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
     let scoresObj = extractedData.expressExtracted?.talentScores || extractedData.talentScores;
     if (scoresObj && typeof scoresObj === 'object') {
       const val = scoresObj[key];
+      if (typeof val === 'number' && val > 0) return val;
+      // Совместимость со старыми сессиями: единая шкала `analytical` расщеплена
+      // на `science` и `data` — если новых значений нет, берём старое.
+      if ((key === 'science' || key === 'data') && typeof scoresObj.analytical === 'number') {
+        return scoresObj.analytical;
+      }
       if (typeof val === 'number') return val;
     }
     return 0;
@@ -51,16 +57,28 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       gradStops: ['#EBF3FF', '#4A90E2', '#1C4A86'],
     },
     {
-      id: 'analytical',
-      name: 'Наука & Аналитика',
+      id: 'science',
+      name: 'Наука & Исследования',
       emoji: '🔬',
       icon: Microscope,
-      description: 'Логика, формулы, исследования',
-      value: sectorValue(getScore('analytical')),
-      rawScore: getScore('analytical'),
+      description: 'Естественные науки, эксперименты',
+      value: sectorValue(getScore('science')),
+      rawScore: getScore('science'),
       color: '#9B5DE5', // Royal Amethyst Gold
       glowColor: 'rgba(155, 93, 229, 0.65)',
       gradStops: ['#F7EEFF', '#9B5DE5', '#5E2893'],
+    },
+    {
+      id: 'data',
+      name: 'Данные & Аналитика',
+      emoji: '📈',
+      icon: BarChart3,
+      description: 'Математика, статистика, метрики',
+      value: sectorValue(getScore('data')),
+      rawScore: getScore('data'),
+      color: '#5D8BE5', // Deep Indigo Gold — родственный науке, но холоднее
+      glowColor: 'rgba(93, 139, 229, 0.65)',
+      gradStops: ['#EEF3FF', '#5D8BE5', '#28417D'],
     },
     {
       id: 'social',

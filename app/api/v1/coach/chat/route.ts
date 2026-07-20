@@ -217,7 +217,8 @@ export async function POST(req: Request) {
                 talentScores: {
                   creative: 0,
                   tech: 0,
-                  analytical: 0,
+                  science: 0,
+                  data: 0,
                   social: 0,
                   organizational: 0,
                   startup: 0
@@ -787,7 +788,8 @@ export async function POST(req: Request) {
           properties: {
             creative: { type: "INTEGER", description: "Оценка склонности к творчеству от 0 до 100." },
             tech: { type: "INTEGER", description: "Оценка склонности к технологиям от 0 до 100." },
-            analytical: { type: "INTEGER", description: "Оценка склонности к аналитике от 0 до 100." },
+            science: { type: "INTEGER", description: "Оценка склонности к науке и исследованиям (естественные науки, эксперименты, любознательность к устройству мира) от 0 до 100." },
+            data: { type: "INTEGER", description: "Оценка склонности к работе с данными и аналитикой (статистика, метрики, закономерности, финансовый расчёт) от 0 до 100." },
             social: { type: "INTEGER", description: "Оценка склонности к коммуникации от 0 до 100." },
             organizational: { type: "INTEGER", description: "Оценка склонности к организации от 0 до 100." },
             startup: { type: "INTEGER", description: "Оценка склонности к лидерству и продажам от 0 до 100." }
@@ -871,7 +873,8 @@ export async function POST(req: Request) {
           properties: {
             creative: { type: "INTEGER", description: "Оценка склонности к творчеству от 0 до 100." },
             tech: { type: "INTEGER", description: "Оценка склонности к технологиям от 0 до 100." },
-            analytical: { type: "INTEGER", description: "Оценка склонности к аналитике от 0 до 100." },
+            science: { type: "INTEGER", description: "Оценка склонности к науке и исследованиям (естественные науки, эксперименты, любознательность к устройству мира) от 0 до 100." },
+            data: { type: "INTEGER", description: "Оценка склонности к работе с данными и аналитикой (статистика, метрики, закономерности, финансовый расчёт) от 0 до 100." },
             social: { type: "INTEGER", description: "Оценка склонности к коммуникации от 0 до 100." },
             organizational: { type: "INTEGER", description: "Оценка склонности к организации от 0 до 100." },
             startup: { type: "INTEGER", description: "Оценка склонности к лидерству и продажам от 0 до 100." }
@@ -892,10 +895,11 @@ ${dialogHistory}
 Последнее сообщение пользователя: "${message}"
 Текущий шаг диалога: ${currentStepBefore} (где шаги 3-15 — сбор склонностей/интересов, а 16=Что хочу/Цель, 17=Результат/Образ, 18=Эмоции, 19=Идентичность, 20=Действия/Навыки/KPI, 21=Первый шаг).
 Для shouldAdvanceStep: установи true, если пользователь дал осмысленный ответ по сути текущего шага. Если пользователь уклоняется от ответа или задает встречный вопрос, установи false.
-Если в схеме присутствует поле talentScores (Экспресс-коучинг, первая фаза Глубокого 3..15, а также глубокие шаги 16..21), оцени склонности пользователя по 6 шкалам (0-100) по ВСЕМУ диалогу, включая рассказ о цели, идентичности и планах. Шкалы и что на них указывает:
+Если в схеме присутствует поле talentScores (Экспресс-коучинг, первая фаза Глубокого 3..15, а также глубокие шаги 16..22), оцени склонности пользователя по 7 шкалам (0-100) по ВСЕМУ диалогу, включая рассказ о цели, идентичности и планах. Шкалы и что на них указывает:
 - creative (Креатив & Искусство): дизайн, рисование, музыка, тексты, видео, фото, мода, творчество.
 - tech (Технологии & Код): программирование, IT, разработка, «своя IT-компания», сайты, приложения, роботы, гейм-дев, инженерия, компьютеры.
-- analytical (Наука & Аналитика): математика, физика, химия, биология, исследования, данные, логика, формулы, анализ.
+- science (Наука & Исследования): естественные науки, физика, химия, биология, астрономия, эксперименты, любознательность к устройству мира, научные открытия.
+- data (Данные & Аналитика): математика, статистика, работа с данными, метрики, закономерности, финансовый расчёт, логика, формулы, анализ информации.
 - social (Коммуникация & Люди): общение, помощь людям, обучение/преподавание, продажи, психология, медицина, блогинг, работа с людьми.
 - organizational (Организация & Системы): менеджмент, порядок, процессы, планирование, администрирование, операционное руководство.
 - startup (Стартап & Лидерство): своя компания/бизнес, предпринимательство, стартап, лидерство, влияние, масштаб, «создавать новое», амбиции роста и признания.
@@ -983,10 +987,17 @@ ${dialogHistory}
       if (parsedData.talentScores) {
         if (!extractedData.expressExtracted.talentScores) {
           extractedData.expressExtracted.talentScores = {
-            creative: 0, tech: 0, analytical: 0, social: 0, organizational: 0, startup: 0
+            creative: 0, tech: 0, science: 0, data: 0, social: 0, organizational: 0, startup: 0
           };
         }
         const prevScores = extractedData.expressExtracted.talentScores;
+        // Совместимость: старые сессии хранили единую шкалу `analytical`. Если
+        // модель ещё не вернула новые шкалы, но есть старое значение — переносим
+        // его в «Наука» и «Данные», чтобы колесо не обнулялось при расщеплении.
+        if (typeof prevScores.analytical === 'number' && prevScores.analytical > 0) {
+          if (!prevScores.science) prevScores.science = prevScores.analytical;
+          if (!prevScores.data) prevScores.data = prevScores.analytical;
+        }
         const newScores = parsedData.talentScores;
         const updateScore = (key: string) => {
           if (typeof newScores[key] === 'number') {
@@ -995,7 +1006,8 @@ ${dialogHistory}
         };
         updateScore('creative');
         updateScore('tech');
-        updateScore('analytical');
+        updateScore('science');
+        updateScore('data');
         updateScore('social');
         updateScore('organizational');
         updateScore('startup');
@@ -1421,7 +1433,7 @@ ${dialogHistory}
           { key: 'creative', val: -1 }
         ).key;
 
-        if (maxScoreKey === 'tech' || maxScoreKey === 'analytical') {
+        if (maxScoreKey === 'tech' || maxScoreKey === 'science' || maxScoreKey === 'data' || maxScoreKey === 'analytical') {
           narrativeTheme = 'SPACE';
         } else if (maxScoreKey === 'startup' || maxScoreKey === 'organizational') {
           narrativeTheme = 'BUSINESS';
