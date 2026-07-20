@@ -104,7 +104,7 @@ export default function HomePage() {
             <m.p
               custom={0.2}
               variants={heroVariants}
-              className="mb-5 text-[11px] font-bold uppercase tracking-[0.24em] text-[#3B82F6] font-sans"
+              className="mb-5 text-[11px] font-bold uppercase tracking-[0.24em] text-[var(--accent-brown)] font-sans"
             >
               Диагностика потенциала для школьников и родителей
             </m.p>
@@ -184,13 +184,13 @@ export default function HomePage() {
             className="space-y-16"
           >
             <m.div variants={fadeUpVariants} className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-brown)] font-sans">
                 Интерактивная карта
               </p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans">
                 Шаги к вашему цифровому профилю
               </h2>
-              <p className="text-sm text-[#7A8A9E] max-w-xl mx-auto">
+              <p className="text-sm text-[var(--text-muted)] max-w-xl mx-auto">
                 Последовательно пройдите все этапы. Доступ к следующему шагу открывается автоматически по завершении предыдущего.
               </p>
             </m.div>
@@ -203,17 +203,17 @@ export default function HomePage() {
               >
                 <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">01</div>
                 <div className="space-y-4">
-                  <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 flex items-center justify-center text-[#3B82F6]">
+                  <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 flex items-center justify-center text-[var(--accent-brown)]">
                     <Brain className="h-6 w-6" />
                   </div>
                   <h3 className="text-xl font-bold text-white">Нейрокоуч-сессия</h3>
-                  <p className="text-sm text-[#7A8A9E] leading-relaxed">
+                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                     Доверительный диалог о мечтах, увлечениях и ценностях. Нативная регистрация.
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">Открыто</span>
-                  <Link href="/coach" className="text-sm font-semibold text-[#3B82F6] hover:underline flex items-center gap-1">
+                  <span className="text-xs font-bold text-[var(--accent-brown)] uppercase tracking-wider">Открыто</span>
+                  <Link href="/coach" className="text-sm font-semibold text-[var(--accent-brown)] hover:underline flex items-center gap-1">
                     Войти <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
@@ -227,21 +227,21 @@ export default function HomePage() {
               >
                 <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">02</div>
                 <div className="space-y-4">
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-white/5 text-[#7A8A9E]'
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted ? 'bg-[#3B82F6]/10 text-[var(--accent-brown)]' : 'bg-white/5 text-[var(--text-muted)]'
                     }`}>
-                    {coachCompleted ? <Compass className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[#7A8A9E]" />}
+                    {coachCompleted ? <Compass className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[var(--text-muted)]" />}
                   </div>
                   <h3 className="text-xl font-bold text-white">Интерактивная диагностика</h3>
-                  <p className="text-sm text-[#7A8A9E] leading-relaxed">
+                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                     Валидированные тесты интересов (RIASEC), личности (Big Five), когнитивного профиля (ICAR), сильных сторон (VIA) и ценностей (PVQ).
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#7A8A9E]">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
                     {coachCompleted ? 'Открыто' : 'Заблокировано'}
                   </span>
                   {coachCompleted ? (
-                    <Link href="/assessment" className="text-sm font-semibold text-[#3B82F6] hover:underline flex items-center gap-1">
+                    <Link href="/assessment" className="text-sm font-semibold text-[var(--accent-brown)] hover:underline flex items-center gap-1">
                       Войти <ArrowRight className="h-4 w-4" />
                     </Link>
                   ) : (
@@ -258,21 +258,21 @@ export default function HomePage() {
               >
                 <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">03</div>
                 <div className="space-y-4">
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted && testCompleted ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-white/5 text-[#7A8A9E]'
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted && testCompleted ? 'bg-[#3B82F6]/10 text-[var(--accent-brown)]' : 'bg-white/5 text-[var(--text-muted)]'
                     }`}>
-                    {coachCompleted && testCompleted ? <FileCheck className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[#7A8A9E]" />}
+                    {coachCompleted && testCompleted ? <FileCheck className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[var(--text-muted)]" />}
                   </div>
                   <h3 className="text-xl font-bold text-white">Персональный отчёт</h3>
-                  <p className="text-sm text-[#7A8A9E] leading-relaxed">
+                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                     Готовый цифровой профиль, рекомендации по развитию и выбору направлений обучения. Web + PDF.
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#7A8A9E]">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
                     {coachCompleted && testCompleted ? 'Открыто' : 'Заблокировано'}
                   </span>
                   {coachCompleted && testCompleted ? (
-                    <Link href="/report" className="text-sm font-semibold text-[#3B82F6] hover:underline flex items-center gap-1">
+                    <Link href="/report" className="text-sm font-semibold text-[var(--accent-brown)] hover:underline flex items-center gap-1">
                       Открыть отчёт <ArrowRight className="h-4 w-4" />
                     </Link>
                   ) : (
@@ -296,7 +296,7 @@ export default function HomePage() {
             className="space-y-12"
           >
             <m.div variants={fadeUpVariants} className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-brown)] font-sans">
                 Для кого
               </p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans">
@@ -307,7 +307,7 @@ export default function HomePage() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <m.div variants={fadeUpVariants} className="h-full">
                 <ForWhomCard
-                  icon={<Users className="h-6 w-6 text-[#3B82F6]" />}
+                  icon={<Users className="h-6 w-6 text-[var(--accent-brown)]" />}
                   title="Школьникам 8–11 классов"
                   text="Идеальный возраст для осознанного выбора направления: от 13 до 18 лет"
                 />
@@ -342,7 +342,7 @@ export default function HomePage() {
             className="space-y-12"
           >
             <m.div variants={fadeUpVariants} className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-brown)] font-sans">
                 Почему нам доверяют
               </p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans">
@@ -375,9 +375,9 @@ export default function HomePage() {
             </div>
 
             <m.div variants={fadeUpVariants} className="glass-card rounded-[22px] p-8 text-center space-y-4">
-              <Shield className="h-8 w-8 text-[#3B82F6] mx-auto" />
+              <Shield className="h-8 w-8 text-[var(--accent-brown)] mx-auto" />
               <h3 className="text-lg font-bold text-white">Безопасность данных</h3>
-              <p className="text-sm text-[#7A8A9E] leading-relaxed max-w-2xl mx-auto">
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-2xl mx-auto">
                 Мы собираем минимум информации, не передаём её третьим лицам и используем исключительно для формирования персонального отчёта. Все данные защищены.
               </p>
             </m.div>
@@ -396,7 +396,7 @@ export default function HomePage() {
             className="space-y-12"
           >
             <m.div variants={fadeUpVariants} className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-brown)] font-sans">
                 Реальные истории
               </p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-sans">
@@ -439,7 +439,7 @@ export default function HomePage() {
             className="space-y-12"
           >
             <m.div variants={fadeUpVariants} className="text-center space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] font-sans">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent-brown)] font-sans">
                 Частые вопросы
               </p>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-sans">
@@ -474,12 +474,12 @@ export default function HomePage() {
                 showText={true}
                 className="h-8 w-auto opacity-90"
               />
-              <span className="text-xs text-[#7A8A9E] font-sans">
+              <span className="text-xs text-[var(--text-muted)] font-sans">
                 © {new Date().getFullYear()} SynthosAI Creative Studio
               </span>
             </div>
 
-            <nav className="flex items-center gap-6 text-xs text-[#7A8A9E] font-sans">
+            <nav className="flex items-center gap-6 text-xs text-[var(--text-muted)] font-sans">
               <Link href="/privacy" className="inline-flex items-center min-h-[32px] py-1.5">
                 <span className="hover:text-white transition cursor-pointer">Политика конфиденциальности</span>
               </Link>
