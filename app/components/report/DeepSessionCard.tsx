@@ -1,11 +1,12 @@
 'use client';
 
-import { Compass as Target, Sparkles, Zap } from 'lucide-react';
+import { Compass as Target, Sparkles, Zap, Shield } from 'lucide-react';
 
 export interface DeepSessionData {
   synthesis: string;
   goal: string;
   identity: string;
+  barriers?: string;
   firstStep: string;
 }
 
@@ -52,6 +53,15 @@ export default function DeepSessionCard({ deepSession }: DeepSessionCardProps) {
               <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#C4A484] theme-deep-session-title font-sans">Идентичность</h4>
             </div>
             <p className="text-xs text-[var(--text-muted)] leading-relaxed theme-subcard-text font-bold italic">{deepSession.identity}</p>
+          </div>
+        )}
+        {deepSession.barriers && (
+          <div className="p-4 bg-[#C4A484]/5 border border-[#C4A484]/20 rounded-2xl theme-deep-session-sub">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Shield className="h-3.5 w-3.5 text-[#C4A484] theme-deep-session-icon" />
+              <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#C4A484] theme-deep-session-title font-sans">Барьеры</h4>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed theme-subcard-text font-medium">{deepSession.barriers}</p>
           </div>
         )}
         {deepSession.firstStep && (

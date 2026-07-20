@@ -81,16 +81,16 @@ function buildStepPrompt(
   allPsychologyCollected: boolean,
   isRefusalOrEmpty: boolean
 ): string {
-  const isFinalStateNow = isDeepMode 
-    ? (extractedData.fullName && extractedData.fullName !== 'Гость' && hasPhone && !!extractedData.age && !!extractedData.grade && !!extractedData.city && getStrLen(extractedData.deepExtracted?.deepGoal) > 1 && getStrLen(extractedData.deepExtracted?.deepOutcome) > 1 && getStrLen(extractedData.deepExtracted?.deepEmotions) > 1 && getStrLen(extractedData.deepExtracted?.deepIdentity) > 1 && getStrLen(extractedData.deepExtracted?.deepActions) > 1 && getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1)
+  const isFinalStateNow = isDeepMode
+    ? (extractedData.fullName && extractedData.fullName !== 'Гость' && hasPhone && !!extractedData.age && !!extractedData.grade && !!extractedData.city && getStrLen(extractedData.deepExtracted?.deepGoal) > 1 && getStrLen(extractedData.deepExtracted?.deepOutcome) > 1 && getStrLen(extractedData.deepExtracted?.deepEmotions) > 1 && getStrLen(extractedData.deepExtracted?.deepIdentity) > 1 && getStrLen(extractedData.deepExtracted?.deepBarriers) > 1 && getStrLen(extractedData.deepExtracted?.deepActions) > 1 && getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1)
     : (extractedData.fullName && extractedData.fullName !== 'Гость' && hasPhone && !!extractedData.age && !!extractedData.grade && !!extractedData.city && allPsychologyCollected);
 
-  // Финальный шаг: в EXPRESS это 16, в DEEP — 22 (в DEEP шаг 16 = «Глубинная
-  // цель», и раньше он ошибочно попадал в финальную ветку из-за общей проверки === 16).
-  if (isFinalStateNow || (isDeepMode ? currentVirtualStep === 22 : currentVirtualStep === 16)) {
+  // Финальный шаг: в EXPRESS это 16, в DEEP — 23 (docs/27 Трек 2: добавлен этап
+  // «Барьеры/убеждения» на шаге 20, финал сдвинут 22 → 23).
+  if (isFinalStateNow || (isDeepMode ? currentVirtualStep === 23 : currentVirtualStep === 16)) {
     if (isDeepMode) {
       return `Ты — Роман, поддерживающий, мудрый коуч и наставник профориентационной платформы «МоёПризвание».
-Все шаги глубокой коуч-сессии («Что хочу → Результат → Образ → Эмоции → Идентичность → Действие») успешно пройдены!
+Все шаги глубокой коуч-сессии («Что хочу → Результат → Образ → Эмоции → Идентичность → Барьеры → Действие») успешно пройдены!
 
 Твоя единственная задача на этом финальном шаге:
 1. Выдать глубокое, вдохновляющее и теплое резюме проделанной работы (4-5 предложений), начав со слов: «Слушай, я проанализировал наш диалог...».
@@ -207,6 +207,19 @@ ${missingFields.join('\n')}
     }
     if (currentVirtualStep === 20) {
       return `Ты — Роман, поддерживающий наставник и коуч профориентации подростков на платформе «МоёПризвание».
+Мы находимся на шаге глубокого коучинга: «Что мешает? (Барьеры и убеждения)» — это WOOP-препятствие по методике Габриэль Эттинген и «Внутренняя игра» Тимоти Голви.
+Твоя цель — помочь подростку увидеть свои страхи и ограничивающие убеждения на пути к цели, без осуждения.
+
+ВАЖНО: спрашивай мягко и конкретно, а не абстрактно. Подростку легче назвать «что может пойти не так» или «что останавливает», чем признать «страх».
+
+Инструкция:
+1. Задай вопрос про внутреннее препятствие: «Что внутри может остановить тебя на пути к этой цели — сомнение, страх ошибиться, мысль „у меня не получится“, чужое мнение?» или «Какая мысль о себе мешает поверить, что это реально?».
+2. Если ответ шаблонный («ничего не мешает») — мягко предложи выбор: «Часто мешает страх ошибки, нехватка знаний или мнение окружающих — что из этого ближе?».
+3. Прими ответ без осуждения и коротко поддержи (барьер — это нормально и преодолимо).
+4. Твоя реплика ОБЯЗАТЕЛЬНО должна заканчиваться понятным, вовлекающим открытым вопросом. Будь краток (до 3 предложений).`;
+    }
+    if (currentVirtualStep === 21) {
+      return `Ты — Роман, поддерживающий наставник и коуч профориентации подростков на платформе «МоёПризвание».
 Мы находимся на шаге глубокого коучинга: «Как достигну? (Действия, навыки, показатели)».
 Твоя цель — помочь перевести идентичность в практический план действий на 90 дней.
 
@@ -215,7 +228,7 @@ ${missingFields.join('\n')}
 2. Твоя реплика ОБЯЗАТЕЛЬНО должна заканчиваться понятным, вовлекающим открытым вопросом о действиях или навыках.
 3. Будь краток, структурируй беседу, задавай строго один вопрос за раз.`;
     }
-    if (currentVirtualStep === 21) {
+    if (currentVirtualStep === 22) {
       return `Ты — Роман, поддерживающий наставник и коуч профориентации подростков на платформе «МоёПризвание».
 Мы находимся на финальном шаге глубокого коучинга: «С чего начать? (Первый шаг)».
 Твоя цель — зафиксировать первое микро-действие, которое запустит процесс.

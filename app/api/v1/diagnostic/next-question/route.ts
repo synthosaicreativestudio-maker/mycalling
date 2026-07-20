@@ -235,7 +235,7 @@ export async function GET(request: Request) {
       const deepReportSummary = coachExtracted.deepReportSummary && typeof coachExtracted.deepReportSummary === 'object'
         ? (coachExtracted.deepReportSummary as {
             id: string; completedAt: string; goal: string; outcome: string; emotions: string;
-            identity: string; actions: string; firstStep: string; synthesis: string;
+            identity: string; barriers?: string; actions: string; firstStep: string; synthesis: string;
           })
         : null;
       const deepSessionForReport = deepReportSummary && deepReportSummary.synthesis
@@ -243,6 +243,7 @@ export async function GET(request: Request) {
             synthesis: deepReportSummary.synthesis,
             goal: deepReportSummary.goal || '',
             identity: deepReportSummary.identity || '',
+            barriers: deepReportSummary.barriers || '',
             firstStep: deepReportSummary.firstStep || ''
           }
         : null;

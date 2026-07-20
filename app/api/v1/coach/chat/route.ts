@@ -228,6 +228,7 @@ export async function POST(req: Request) {
                 deepOutcome: "",
                 deepEmotions: "",
                 deepIdentity: "",
+                deepBarriers: "",
                 deepActions: "",
                 deepFirstStep: ""
               },
@@ -338,7 +339,7 @@ export async function POST(req: Request) {
         'energySources', 'teamRole', 'autonomyStyle', 'values', 'decisionStyle'
       ];
       const deepKeys = [
-        'deepGoal', 'deepOutcome', 'deepEmotions', 'deepIdentity', 'deepActions', 'deepFirstStep'
+        'deepGoal', 'deepOutcome', 'deepEmotions', 'deepIdentity', 'deepBarriers', 'deepActions', 'deepFirstStep'
       ];
       
       for (const k of expressKeys) {
@@ -425,6 +426,7 @@ export async function POST(req: Request) {
       const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 1;
       const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 1;
       const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 1;
+      const hasDeepBarriers = getStrLen(extractedData.deepExtracted?.deepBarriers) > 1;
       const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 1;
       const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1;
 
@@ -478,15 +480,18 @@ export async function POST(req: Request) {
       } else if (!hasDeepIdentity) {
         currentStepBefore = 19;
         nextStep = 19;
-      } else if (!hasDeepActions) {
+      } else if (!hasDeepBarriers) {
         currentStepBefore = 20;
         nextStep = 20;
-      } else if (!hasDeepFirstStep) {
+      } else if (!hasDeepActions) {
         currentStepBefore = 21;
         nextStep = 21;
-      } else {
+      } else if (!hasDeepFirstStep) {
         currentStepBefore = 22;
         nextStep = 22;
+      } else {
+        currentStepBefore = 23;
+        nextStep = 23;
       }
     } else {
       if (!hasName) {
@@ -585,15 +590,16 @@ export async function POST(req: Request) {
             }
             stepAttempts = 0;
           }
-        } else if (isDeepMode && nextStep >= 16 && nextStep <= 21) {
+        } else if (isDeepMode && nextStep >= 16 && nextStep <= 22) {
           if (stepAttempts >= 2) {
             const deepFields = [
               { key: 'deepGoal', step: 16, val: 'Сформулировано наставником' },
               { key: 'deepOutcome', step: 17, val: 'Образ результата принят' },
               { key: 'deepEmotions', step: 18, val: 'Вдохновение и радость' },
               { key: 'deepIdentity', step: 19, val: 'Человек, идущий к цели' },
-              { key: 'deepActions', step: 20, val: 'План действий составлен' },
-              { key: 'deepFirstStep', step: 21, val: 'Первый шаг запланирован' }
+              { key: 'deepBarriers', step: 20, val: 'Барьер осознан и принят' },
+              { key: 'deepActions', step: 21, val: 'План действий составлен' },
+              { key: 'deepFirstStep', step: 22, val: 'Первый шаг запланирован' }
             ];
             const currentField = deepFields.find(f => f.step === nextStep);
             if (currentField) {
@@ -605,6 +611,7 @@ export async function POST(req: Request) {
               else if (nextStep === 19) finalNextStep = 20;
               else if (nextStep === 20) finalNextStep = 21;
               else if (nextStep === 21) finalNextStep = 22;
+              else if (nextStep === 22) finalNextStep = 23;
             }
             stepAttempts = 0;
           }
@@ -673,7 +680,7 @@ export async function POST(req: Request) {
       if (fromLoginError) {
         greeting = 'Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник. Я вижу, ты хотел зайти в Личный кабинет, но для этого нужно сначала пройти нашу короткую сессию. Не переживай — это не скучный тест, а увлекательное исследование твоих талантов. Давай сначала познакомимся. Как мне к тебе обращаться? Напиши свое имя. 😊';
       } else if (isDeepMode && hasPersonalInfo && hasPhone) {
-        greeting = 'Отличный выбор! Мы начинаем Глубокий самокоучинг по методологии «Что хочу → Действие». Наш путь состоит из 6 важных шагов: мы найдем твое истинное желание, оцифруем образ результата, подключим эмоции, поймём, каким героем этой истории ты становишься, составим план с KPI и зафиксируем первый шаг. \n\nДавай начнем: Что именно ты хочешь изменить, достичь или в чем реализоваться в плане будущей профессии?';
+        greeting = 'Отличный выбор! Мы начинаем Глубокий самокоучинг по методологии «Что хочу → Действие». Наш путь состоит из 7 важных шагов: мы найдем твое истинное желание, оцифруем образ результата, подключим эмоции, поймём, каким героем этой истории ты становишься, честно назовём внутренние барьеры, составим план с KPI и зафиксируем первый шаг. \n\nДавай начнем: Что именно ты хочешь изменить, достичь или в чем реализоваться в плане будущей профессии?';
       }
       
       const newMsg = { role: 'assistant', content: greeting, timestamp: new Date().toISOString() };
@@ -829,7 +836,7 @@ export async function POST(req: Request) {
         properties.grade = { type: "STRING" };
         properties.city = { type: "STRING" };
         fieldsToExtract += ", fullName, age, grade, city";
-      } else if (isDeepMode && currentStepBefore >= 16 && currentStepBefore <= 21) {
+      } else if (isDeepMode && currentStepBefore >= 16 && currentStepBefore <= 22) {
         if (currentStepBefore === 16) {
           properties.deepGoal = { type: "STRING" };
           properties.motivationTested = { type: "BOOLEAN", description: "true, только если коуч оспаривал шаблонный ответ про цель." };
@@ -845,9 +852,12 @@ export async function POST(req: Request) {
           properties.deepIdentity = { type: "STRING" };
           fieldsToExtract += ", deepIdentity";
         } else if (currentStepBefore === 20) {
+          properties.deepBarriers = { type: "STRING", description: "Внутреннее препятствие/ограничивающее убеждение подростка на пути к цели (WOOP Obstacle, «Внутренняя игра» Голви)." };
+          fieldsToExtract += ", deepBarriers";
+        } else if (currentStepBefore === 21) {
           properties.deepActions = { type: "STRING" };
           fieldsToExtract += ", deepActions";
-        } else if (currentStepBefore === 21) {
+        } else if (currentStepBefore === 22) {
           properties.deepFirstStep = { type: "STRING" };
           fieldsToExtract += ", deepFirstStep";
         }
@@ -1021,6 +1031,7 @@ ${dialogHistory}
       if (parsedData.deepOutcome) extractedData.deepExtracted.deepOutcome = parsedData.deepOutcome;
       if (parsedData.deepEmotions) extractedData.deepExtracted.deepEmotions = parsedData.deepEmotions;
       if (parsedData.deepIdentity) extractedData.deepExtracted.deepIdentity = parsedData.deepIdentity;
+      if (parsedData.deepBarriers) extractedData.deepExtracted.deepBarriers = parsedData.deepBarriers;
       if (parsedData.deepActions) extractedData.deepExtracted.deepActions = parsedData.deepActions;
       if (parsedData.deepFirstStep) extractedData.deepExtracted.deepFirstStep = parsedData.deepFirstStep;
     }
@@ -1078,6 +1089,7 @@ ${dialogHistory}
       const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 1;
       const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 1;
       const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 1;
+      const hasDeepBarriers = getStrLen(extractedData.deepExtracted?.deepBarriers) > 1;
       const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 1;
       const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1;
 
@@ -1097,7 +1109,7 @@ ${dialogHistory}
       } else if (!hasDeepGoal) {
         // Шкала DEEP-шагов едина с фронтендом (STEP_NAMES/степпер пирамиды):
         // 16 = Запрос, 17 = Результат, 18 = Эмоции, 19 = Идентичность,
-        // 20 = План, 21 = Микро-шаг, 22 = Финал.
+        // 20 = Барьеры, 21 = План, 22 = Микро-шаг, 23 = Финал.
         currentVirtualStep = 16;
       } else if (!hasDeepOutcome) {
         currentVirtualStep = 17;
@@ -1105,14 +1117,16 @@ ${dialogHistory}
         currentVirtualStep = 18;
       } else if (!hasDeepIdentity) {
         currentVirtualStep = 19;
-      } else if (!hasDeepActions) {
+      } else if (!hasDeepBarriers) {
         currentVirtualStep = 20;
-      } else if (!hasDeepFirstStep) {
+      } else if (!hasDeepActions) {
         currentVirtualStep = 21;
-      } else {
+      } else if (!hasDeepFirstStep) {
         currentVirtualStep = 22;
+      } else {
+        currentVirtualStep = 23;
       }
-      isFinalStateNow = hasPersonalInfo && hasPhone && hasDeepGoal && hasDeepOutcome && hasDeepEmotions && hasDeepIdentity && hasDeepActions && hasDeepFirstStep;
+      isFinalStateNow = hasPersonalInfo && hasPhone && hasDeepGoal && hasDeepOutcome && hasDeepEmotions && hasDeepIdentity && hasDeepBarriers && hasDeepActions && hasDeepFirstStep;
     } else {
       if (!hasName) {
         currentVirtualStep = 1; // Шаг знакомства (Имя)
@@ -1334,7 +1348,7 @@ ${dialogHistory}
     let replyContent = '';
     
     // Использовать ли ИИ-генерацию на текущем шаге
-    const useAI = (currentVirtualStep >= 2 && currentVirtualStep <= 21 && hasPhone) || (currentVirtualStep >= 3 && currentVirtualStep <= 21) || currentVirtualStep === 22 || currentVirtualStep === 16;
+    const useAI = (currentVirtualStep >= 2 && currentVirtualStep <= 22 && hasPhone) || (currentVirtualStep >= 3 && currentVirtualStep <= 22) || currentVirtualStep === 23 || currentVirtualStep === 16;
 
     if (!useAI) {
       if (currentVirtualStep === 0) {
@@ -1377,7 +1391,7 @@ ${dialogHistory}
         let deepSynthesis = replyContent;
         try {
           const deepSummarySystem = 'Ты — экспертный психолог-коуч. На основе глубинной коуч-сессии подростка по методологии «Хочу → Действие» напиши краткое профессиональное резюме (4-6 предложений) от третьего лица: синтезируй инсайт, не цитируй пользователя дословно, без markdown-разметки.';
-          const deepSummaryUser = `Глубинная цель: ${deep.deepGoal || '—'}\nЖелаемый результат: ${deep.deepOutcome || '—'}\nЭмоциональный отклик: ${deep.deepEmotions || '—'}\nНовая идентичность: ${deep.deepIdentity || '—'}\nПлан действий: ${deep.deepActions || '—'}\nПервый микро-шаг: ${deep.deepFirstStep || '—'}`;
+          const deepSummaryUser = `Глубинная цель: ${deep.deepGoal || '—'}\nЖелаемый результат: ${deep.deepOutcome || '—'}\nЭмоциональный отклик: ${deep.deepEmotions || '—'}\nНовая идентичность: ${deep.deepIdentity || '—'}\nВнутренние барьеры: ${deep.deepBarriers || '—'}\nПлан действий: ${deep.deepActions || '—'}\nПервый микро-шаг: ${deep.deepFirstStep || '—'}`;
           deepSynthesis = await generateText(deepSummarySystem, [{ role: 'user', content: deepSummaryUser }], 0.6);
         } catch (e) {
           console.warn('Failed to generate deep session synthesis, using raw reply as fallback:', e);
@@ -1389,6 +1403,7 @@ ${dialogHistory}
           outcome: deep.deepOutcome || '',
           emotions: deep.deepEmotions || '',
           identity: deep.deepIdentity || '',
+          barriers: deep.deepBarriers || '',
           actions: deep.deepActions || '',
           firstStep: deep.deepFirstStep || '',
           synthesis: deepSynthesis

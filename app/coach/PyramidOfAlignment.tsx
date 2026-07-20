@@ -32,80 +32,41 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
     return typeof val === 'string' ? val : String(val ?? '');
   };
 
-  const levels = [
-    {
-      idx: 5,
-      key: 'deepFirstStep',
-      name: 'Микрошаг (Действие)',
-      emoji: '⚡',
-      description: 'Простое двухминутное действие для запуска цели',
-      val: getField('deepFirstStep'),
-      color: 'var(--riasec-startup)',
-      glowColor: 'var(--riasec-startup)',
-      points: '200,40 224,80 176,80', // Вершина
-      textPos: { x: 200, y: 66 }
-    },
-    {
-      idx: 4,
-      key: 'deepActions',
-      name: 'План & Навыки',
-      emoji: '🚀',
-      description: 'Ключевые действия и навыки на 90 дней',
-      val: getField('deepActions'),
-      color: 'var(--riasec-organizational)',
-      glowColor: 'var(--riasec-organizational)',
-      points: '172,86 228,86 250,126 150,126',
-      textPos: { x: 200, y: 108 }
-    },
-    {
-      idx: 3,
-      key: 'deepIdentity',
-      name: 'Идентичность (Кто Я)',
-      emoji: '👑',
-      description: 'Манифест вашей новой роли и качеств',
-      val: getField('deepIdentity'),
-      color: 'var(--riasec-analytical)',
-      glowColor: 'var(--riasec-analytical)',
-      points: '146,132 254,132 276,172 124,172',
-      textPos: { x: 200, y: 154 }
-    },
-    {
-      idx: 2,
-      key: 'deepEmotions',
-      name: 'Эмоции (Тело)',
-      emoji: '🔥',
-      description: 'Эмоциональный отклик и энергия',
-      val: getField('deepEmotions'),
-      color: 'var(--riasec-social)',
-      glowColor: 'var(--riasec-social)',
-      points: '120,178 280,178 302,218 98,218',
-      textPos: { x: 200, y: 200 }
-    },
-    {
-      idx: 1,
-      key: 'deepOutcome',
-      name: 'Результат (Образ)',
-      emoji: '🌟',
-      description: 'Детальная визуализация успеха',
-      val: getField('deepOutcome'),
-      color: 'var(--riasec-outcome)',
-      glowColor: 'var(--riasec-outcome)',
-      points: '94,224 306,224 328,264 72,264',
-      textPos: { x: 200, y: 246 }
-    },
-    {
-      idx: 0,
-      key: 'deepGoal',
-      name: 'Запрос (Хочу)',
-      emoji: '🎯',
-      description: 'Ваша главная цель самореализации',
-      val: getField('deepGoal'),
-      color: 'var(--riasec-goal)',
-      glowColor: 'var(--riasec-goal)',
-      points: '68,270 332,270 354,310 46,310', // Основание
-      textPos: { x: 200, y: 292 }
-    }
+  // Геометрия пирамиды считается из позиции яруса (0 = вершина, 6 = основание),
+  // чтобы 7 ярусов (добавлен «Барьеры/убеждения», docs/27 Трек 2) ровно
+  // помещались в тот же viewBox без ручного подбора координат.
+  const BAND_H = 30;
+  const GAP = 6;
+  const APEX_Y = 42;
+  const CX = 200;
+  const SLOPE = 0.57; // полуширина на пиксель высоты (от вершины)
+  const hw = (y: number) => Math.max(0, (y - APEX_Y) * SLOPE);
+  const geom = (posFromApex: number) => {
+    const yTop = APEX_Y + posFromApex * (BAND_H + GAP);
+    const yBot = yTop + BAND_H;
+    const hwTop = hw(yTop);
+    const hwBot = hw(yBot);
+    const points = hwTop < 1
+      ? `${CX},${yTop} ${(CX + hwBot).toFixed(0)},${yBot} ${(CX - hwBot).toFixed(0)},${yBot}`
+      : `${(CX - hwTop).toFixed(0)},${yTop} ${(CX + hwTop).toFixed(0)},${yTop} ${(CX + hwBot).toFixed(0)},${yBot} ${(CX - hwBot).toFixed(0)},${yBot}`;
+    return { points, textPos: { x: CX, y: (yTop + yBot) / 2 } };
+  };
+
+  // Порядок снизу вверх: Запрос → … → Микрошаг (idx = семантический уровень,
+  // 0 — основание, 6 — вершина). posFromApex = 6 - idx.
+  const levelDefs = [
+    { idx: 6, key: 'deepFirstStep', name: 'Микрошаг (Действие)', emoji: '⚡', description: 'Простое двухминутное действие для запуска цели', color: 'var(--riasec-startup)' },
+    { idx: 5, key: 'deepActions', name: 'План & Навыки', emoji: '🚀', description: 'Ключевые действия и навыки на 90 дней', color: 'var(--riasec-organizational)' },
+    { idx: 4, key: 'deepBarriers', name: 'Барьеры (Что мешает)', emoji: '🛡️', description: 'Внутренние препятствия и ограничивающие убеждения', color: 'var(--riasec-creative)' },
+    { idx: 3, key: 'deepIdentity', name: 'Идентичность (Кто Я)', emoji: '👑', description: 'Манифест вашей новой роли и качеств', color: 'var(--riasec-analytical)' },
+    { idx: 2, key: 'deepEmotions', name: 'Эмоции (Тело)', emoji: '🔥', description: 'Эмоциональный отклик и энергия', color: 'var(--riasec-social)' },
+    { idx: 1, key: 'deepOutcome', name: 'Результат (Образ)', emoji: '🌟', description: 'Детальная визуализация успеха', color: 'var(--riasec-outcome)' },
+    { idx: 0, key: 'deepGoal', name: 'Запрос (Хочу)', emoji: '🎯', description: 'Ваша главная цель самореализации', color: 'var(--riasec-goal)' },
   ];
+  const levels = levelDefs.map((l) => {
+    const g = geom(6 - l.idx);
+    return { ...l, val: getField(l.key), glowColor: l.color, points: g.points, textPos: g.textPos };
+  });
 
   const activeIndex = hoveredIdx !== null ? hoveredIdx : selectedIdx;
   const activeLevel = activeIndex !== null ? levels.find(l => l.idx === activeIndex) : null;
@@ -129,8 +90,8 @@ export default function PyramidOfAlignment({ extractedData }: PyramidOfAlignment
           </defs>
 
           {/* Фоновая разметка сетки */}
-          <line x1="200" y1="20" x2="200" y2="330" stroke="var(--border-subtle)" strokeDasharray="3 3" />
-          <line x1="30" y1="310" x2="370" y2="310" stroke="var(--border-subtle)" />
+          <line x1="200" y1="24" x2="200" y2="300" stroke="var(--border-subtle)" strokeDasharray="3 3" />
+          <line x1="40" y1="294" x2="360" y2="294" stroke="var(--border-subtle)" />
 
           {/* Отрисовка уровней пирамиды */}
           {levels.map((lvl) => {

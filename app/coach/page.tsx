@@ -36,9 +36,10 @@ const STEP_NAMES: Record<number, string> = {
   17: 'Желаемый результат',
   18: 'Эмоциональный отклик',
   19: 'Новая идентичность',
-  20: 'План действий',
-  21: 'Первый микро-шаг',
-  22: 'Подведение итогов наставника'
+  20: 'Барьеры и убеждения',
+  21: 'План действий',
+  22: 'Первый микро-шаг',
+  23: 'Подведение итогов наставника'
 };
 
 const getStepName = (step: number, isDeep: boolean) => {
@@ -50,9 +51,10 @@ const getStepName = (step: number, isDeep: boolean) => {
     if (step === 17) return 'Желаемый результат';
     if (step === 18) return 'Эмоциональный отклик';
     if (step === 19) return 'Новая идентичность';
-    if (step === 20) return 'План действий';
-    if (step === 21) return 'Первый микро-шаг';
-    if (step === 22) return 'Подведение итогов наставника';
+    if (step === 20) return 'Барьеры и убеждения';
+    if (step === 21) return 'План действий';
+    if (step === 22) return 'Первый микро-шаг';
+    if (step === 23) return 'Подведение итогов наставника';
     return STEP_NAMES[step] || 'Знакомство';
   }
 };
@@ -77,9 +79,9 @@ export default function CoachPage() {
 
   useEffect(() => {
     if (extractedData.sessionMode === 'DEEP') {
-      if (step >= 16 && step <= 21) {
+      if (step >= 16 && step <= 22) {
         setActiveTab('pyramid');
-      } else if (step === 22) {
+      } else if (step === 23) {
         setActiveTab('wheel');
       }
     }
@@ -507,6 +509,8 @@ export default function CoachPage() {
           <p>${getField('deepEmotions') || 'Не указано'}</p>
           <h3 style="color: #8B5A2B;">👑 Моя идентичность:</h3>
           <p><b>${getField('deepIdentity') || 'Не указано'}</b></p>
+          <h3 style="color: #8B5A2B;">🛡️ Барьеры и убеждения:</h3>
+          <p>${getField('deepBarriers') || 'Не указано'}</p>
           <h3 style="color: #8B5A2B;">🚀 План действий:</h3>
           <p style="white-space: pre-wrap;">${getField('deepActions') || 'Не указано'}</p>
           <h3 style="color: #8B5A2B;">⚡ Первый шаг (2 минуты):</h3>
@@ -644,7 +648,7 @@ export default function CoachPage() {
 
 
   const isDeep = extractedData.sessionMode === 'DEEP';
-  const maxSteps = isDeep ? 22 : 16;
+  const maxSteps = isDeep ? 23 : 16;
   const isFinalStep = step === maxSteps;
   const progressPercent = Math.round((step / maxSteps) * 100);
 
@@ -710,11 +714,11 @@ export default function CoachPage() {
         <div className="col-span-1 lg:col-span-7 glass-card rounded-3xl overflow-hidden flex flex-col h-full min-h-0 border border-[#D4AF37]/15 dark:border-white/10 relative bg-white/15 dark:bg-[#080C14]/15 backdrop-blur-2xl shadow-xl">
           
           {/* Horizontal Stepper for DEEP mode */}
-          {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 22 && (
+          {extractedData.sessionMode === 'DEEP' && step >= 16 && step <= 23 && (
             <div className="px-6 py-4 border-b border-white/5 bg-[#080c14]/40 flex flex-col gap-2">
               <div className="flex items-center justify-between text-[11px] font-sans font-bold text-[#C4A484]">
                 <span>Глубокий коучинг Романа</span>
-                <span>Шаг {step === 22 ? 7 : step - 15} из 7</span>
+                <span>Шаг {step - 15} из 8</span>
               </div>
               <div className="flex items-center justify-between gap-1.5">
                 {[
@@ -722,9 +726,10 @@ export default function CoachPage() {
                   { step: 17, label: 'Результат' },
                   { step: 18, label: 'Эмоции' },
                   { step: 19, label: 'Кто Я' },
-                  { step: 20, label: 'План' },
-                  { step: 21, label: 'Действие' },
-                  { step: 22, label: 'Финал' }
+                  { step: 20, label: 'Барьеры' },
+                  { step: 21, label: 'План' },
+                  { step: 22, label: 'Действие' },
+                  { step: 23, label: 'Финал' }
                 ].map((s, idx) => {
                   const isActive = step === s.step;
                   const isCompleted = step > s.step;

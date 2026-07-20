@@ -1128,6 +1128,7 @@ function ReportPageContent() {
             <p>{report.deepSession.synthesis}</p>
             {report.deepSession.goal && <p><strong>Цель:</strong> {report.deepSession.goal}</p>}
             {report.deepSession.identity && <p><strong>Идентичность:</strong> {report.deepSession.identity}</p>}
+            {report.deepSession.barriers && <p><strong>Барьеры:</strong> {report.deepSession.barriers}</p>}
             {report.deepSession.firstStep && <p><strong>Первый шаг:</strong> {report.deepSession.firstStep}</p>}
           </div>
         )}
