@@ -28,6 +28,8 @@ type Profession = {
   tier?: 'everyday' | 'future' | 'dream';
   /** «Веер» родственных специализаций того же архетипа. */
   variants?: string[];
+  /** Разбивка совпадения по осям (docs/25 Трек A) — «почему подходит». */
+  breakdown?: { axis: string; label: string; score: number; weight: number }[];
 };
 
 type ReportData = {
@@ -1010,7 +1012,7 @@ function ReportPageContent() {
                                 </div>
                                 <div className="grid gap-6 md:grid-cols-2">
                                   {items.map((prof, idx) => (
-                                    <RpgProfessionCard key={idx} name={prof.name} score={prof.score} why={prof.why} variants={prof.variants} />
+                                    <RpgProfessionCard key={idx} name={prof.name} score={prof.score} why={prof.why} variants={prof.variants} breakdown={prof.breakdown} />
                                   ))}
                                 </div>
                               </div>
@@ -1020,7 +1022,7 @@ function ReportPageContent() {
                       ) : (
                         <div className="grid gap-6 md:grid-cols-2">
                           {report.professions.map((prof, idx) => (
-                            <RpgProfessionCard key={idx} name={prof.name} score={prof.score} why={prof.why} variants={prof.variants} />
+                            <RpgProfessionCard key={idx} name={prof.name} score={prof.score} why={prof.why} variants={prof.variants} breakdown={prof.breakdown} />
                           ))}
                         </div>
                       )}

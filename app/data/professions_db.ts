@@ -1,3 +1,5 @@
+import { professionExtras } from './professionExtras';
+
 export interface Profession {
   id: string;
   name: string;
@@ -46,6 +48,19 @@ export interface Profession {
   values?: string[];
   /** Сильные стороны характера (коды VIA), которые профессия задействует. */
   viaFit?: string[];
+  /**
+   * Поля каталога профессий (docs/26, Этап 8) + удивительный факт (Трек B).
+   * Опциональны; наполняются курировано батчами. Текст fact — по правилу
+   * why/summary: без «ИИ»/«искусственный интеллект».
+   */
+  /** Короткий удивительный/цепляющий факт о профессии (для карточки-аккордеона). */
+  fact?: string;
+  /** Ориентировочная вилка дохода в РФ, текстом (напр. «60–150 тыс ₽/мес»). */
+  salary?: string;
+  /** Путь в профессию: что сдавать / куда поступать (кратко). */
+  educationPath?: string;
+  /** Перспективы/тренд востребованности, короткой строкой. */
+  outlook?: string;
 }
 
 export const industries = [
@@ -4828,3 +4843,32 @@ export const professionsDb: Profession[] = [
     why: 'Для точных и любящих природу (Realistic/Investigative), кому нравится работа в поле и с координатами.'
   }
 ];
+
+// docs/26 Этап 8 + Трек B: обогащаем паспорта полями каталога. Курируемые
+// fact/salary — из professionExtras (батчами). outlook/educationPath — выводим
+// программно из уже собранных полей, чтобы у ВСЕХ профессий сразу была польза;
+// курируемый override из extras имеет приоритет.
+function deriveOutlook(p: Profession): string {
+  if (p.tier === 'future') return 'Растущее направление — спрос на специалистов увеличивается.';
+  if (p.tier === 'dream') return 'Высокая конкуренция, но и высокий потолок для лучших.';
+  if (p.demand === 'high') return 'Высокий и стабильный спрос на рынке труда.';
+  if (p.demand === 'low') return 'Нишевый спрос — многое решают специализация и репутация.';
+  return 'Устойчивый спрос на рынке труда.';
+}
+
+function deriveEducationPath(p: Profession): string {
+  const subj = p.subjects.slice(0, 3).join(', ');
+  return `Сдавать: ${subj}. Путь: колледж или профильный ВУЗ по направлению «${p.industry}».`;
+}
+
+for (const p of professionsDb) {
+  const extra = professionExtras[p.id];
+  if (extra) {
+    if (extra.fact && !p.fact) p.fact = extra.fact;
+    if (extra.salary && !p.salary) p.salary = extra.salary;
+    if (extra.educationPath && !p.educationPath) p.educationPath = extra.educationPath;
+    if (extra.outlook && !p.outlook) p.outlook = extra.outlook;
+  }
+  if (!p.outlook) p.outlook = deriveOutlook(p);
+  if (!p.educationPath) p.educationPath = deriveEducationPath(p);
+}
