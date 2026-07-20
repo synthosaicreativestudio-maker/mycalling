@@ -12,6 +12,7 @@ import logger from './lib/logger';
 import { LazyMotion, domAnimation } from 'framer-motion';
 import { ThemeToggle } from './components/ThemeToggle';
 import DonateButton from './components/DonateButton';
+import { FreeRibbon } from './components/FreeRibbon';
 import dynamic from 'next/dynamic';
 const HeaderAuth = dynamic(() => import('./components/HeaderAuth'), { ssr: false });
 
@@ -133,8 +134,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Слой 1: Космический фон (самый нижний) */}
           <DarkCosmicBackground />
           
-          {/* Sticky Header */}
+          {/* Sticky Header (лента «навсегда бесплатно» — первой строкой) */}
           <header className="site-header print:hidden">
+            <FreeRibbon />
             <div className="site-header-inner">
               <div className="mx-auto max-w-7xl px-6 lg:px-10">
                 <div className="flex items-center justify-between py-2">

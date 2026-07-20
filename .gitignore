@@ -21,3 +21,9 @@ public/assets/tree_test/
 .claude/
 test-results/
 playwright-report/
+
+# Личные материалы владельца — не публиковать в публичный репозиторий
+/скрины/
+/Моё_Призвание_Полная_дорожная_карта.md
+/советы по продвижению.txt
+prakticheskoe_posobie_po_crowdfundingu_planeta.ru.pdf
