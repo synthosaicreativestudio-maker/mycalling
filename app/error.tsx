@@ -24,7 +24,7 @@ export default function Error({
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500/5 opacity-75"></span>
       </div>
       
-      <h1 className="font-serif text-3xl md:text-4xl text-[#E8ECF0] mb-4">
+      <h1 className="font-serif text-3xl md:text-4xl text-[var(--text-primary)] mb-4">
         Что-то пошло не так
       </h1>
       
@@ -43,7 +43,7 @@ export default function Error({
         
         <Link
           href="/"
-          className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition font-medium shadow-lg shadow-[#3B82F6]/20"
+          className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent-brown)] hover:bg-[#2563EB] text-white transition font-medium shadow-lg shadow-[#3B82F6]/20"
         >
           <Home className="h-4 w-4" />
           На главную

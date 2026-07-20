@@ -45,7 +45,7 @@ export default function RadarChart({ scores }: RadarChartProps) {
 
   return (
     <div className="glass-card rounded-[28px] p-6 flex flex-col items-center justify-center relative overflow-hidden">
-      <h3 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-accent-text mb-4 font-sans text-center">
+      <h3 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-accent-text mb-4 font-sans text-center">
         Свечение способностей (RIASEC)
       </h3>
       <div className="relative w-[280px] h-[280px] flex items-center justify-center">

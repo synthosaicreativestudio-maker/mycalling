@@ -48,7 +48,7 @@ export function ExitIntentPopup() {
         >
           <button
             onClick={() => setIsVisible(false)}
-            className="absolute right-6 top-6 text-[#7A8A9E] hover:text-white transition-colors"
+            className="absolute right-6 top-6 text-[var(--text-muted)] hover:text-white transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
@@ -57,7 +57,7 @@ export function ExitIntentPopup() {
             <h2 className="text-2xl font-extrabold text-white font-sans">
               Уже уходите?
             </h2>
-            <p className="text-[#7A8A9E] text-[1.05rem] leading-relaxed font-sans pb-4">
+            <p className="text-[var(--text-muted)] text-[1.05rem] leading-relaxed font-sans pb-4">
               Пройдите бесплатную диагностику талантов сейчас — это займёт всего 25 минут, а план развития останется с вами навсегда.
             </p>
             
@@ -72,7 +72,7 @@ export function ExitIntentPopup() {
             
             <button
               onClick={() => setIsVisible(false)}
-              className="mt-4 text-sm font-semibold text-[#7A8A9E] hover:text-white transition-colors"
+              className="mt-4 text-sm font-semibold text-[var(--text-muted)] hover:text-white transition-colors"
             >
               Нет, спасибо, я просто смотрю
             </button>

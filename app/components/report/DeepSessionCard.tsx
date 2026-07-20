@@ -31,7 +31,7 @@ export default function DeepSessionCard({ deepSession }: DeepSessionCardProps) {
         <h2 className="text-lg font-bold text-white">Глубокая коуч сессия</h2>
       </div>
 
-      <p className="text-sm text-[#7A8A9E] leading-relaxed mb-6 theme-subcard-text">
+      <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-6 theme-subcard-text">
         {deepSession.synthesis}
       </p>
 
@@ -42,7 +42,7 @@ export default function DeepSessionCard({ deepSession }: DeepSessionCardProps) {
               <Target className="h-3.5 w-3.5 text-[#C4A484] theme-deep-session-icon" />
               <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#C4A484] theme-deep-session-title font-sans">Цель</h4>
             </div>
-            <p className="text-xs text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{deepSession.goal}</p>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed theme-subcard-text font-medium">{deepSession.goal}</p>
           </div>
         )}
         {deepSession.identity && (
@@ -51,7 +51,7 @@ export default function DeepSessionCard({ deepSession }: DeepSessionCardProps) {
               <Sparkles className="h-3.5 w-3.5 text-[#C4A484] theme-deep-session-icon" />
               <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#C4A484] theme-deep-session-title font-sans">Идентичность</h4>
             </div>
-            <p className="text-xs text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold italic">{deepSession.identity}</p>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed theme-subcard-text font-bold italic">{deepSession.identity}</p>
           </div>
         )}
         {deepSession.firstStep && (
@@ -60,7 +60,7 @@ export default function DeepSessionCard({ deepSession }: DeepSessionCardProps) {
               <Zap className="h-3.5 w-3.5 text-[#C4A484] theme-deep-session-icon" />
               <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#C4A484] theme-deep-session-title font-sans">Первый шаг</h4>
             </div>
-            <p className="text-xs text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold">{deepSession.firstStep}</p>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed theme-subcard-text font-bold">{deepSession.firstStep}</p>
           </div>
         )}
       </div>

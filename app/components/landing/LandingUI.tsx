@@ -74,7 +74,7 @@ export function UspCard({ icon, title, text }: { icon: ReactNode; title: string;
         {icon}
       </div>
       <h3 className="text-xl font-bold text-white font-sans mb-3">{title}</h3>
-      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans flex-grow">{text}</p>
+      <p className="text-sm text-[var(--text-muted)] leading-relaxed font-sans flex-grow">{text}</p>
     </div>
   );
 }
@@ -86,7 +86,7 @@ export function ForWhomCard({ icon, title, text }: { icon: ReactNode; title: str
         {icon}
       </div>
       <h3 className="text-lg font-bold text-white font-sans">{title}</h3>
-      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans flex-grow">{text}</p>
+      <p className="text-sm text-[var(--text-muted)] leading-relaxed font-sans flex-grow">{text}</p>
     </div>
   );
 }
@@ -94,9 +94,9 @@ export function ForWhomCard({ icon, title, text }: { icon: ReactNode; title: str
 export function TrustCard({ number, label, desc }: { number: string; label: string; desc: string }) {
   return (
     <div className="glass-card rounded-[22px] p-6 text-center flex flex-col h-full space-y-3">
-      <div className="text-4xl font-extrabold text-[#3B82F6] font-sans">{number}</div>
+      <div className="text-4xl font-extrabold text-[var(--accent-brown)] font-sans">{number}</div>
       <div className="text-sm font-bold uppercase tracking-wider text-[#60A5FA]">{label}</div>
-      <p className="text-sm text-[#7A8A9E] leading-relaxed font-sans flex-grow">{desc}</p>
+      <p className="text-sm text-[var(--text-muted)] leading-relaxed font-sans flex-grow">{desc}</p>
     </div>
   );
 }
@@ -112,13 +112,13 @@ export function FaqItem({ question, answer }: { question: string; answer: string
       >
         <span className="text-sm font-semibold text-white pr-4">{question}</span>
         <span
-          className={`text-[#3B82F6] text-xl font-light flex-shrink-0 transition-transform ${isOpen ? "rotate-45" : ""}`}
+          className={`text-[var(--accent-brown)] text-xl font-light flex-shrink-0 transition-transform ${isOpen ? "rotate-45" : ""}`}
         >
           +
         </span>
       </button>
       <div className={`overflow-hidden ${isOpen ? "block" : "hidden"}`}>
-        <p className="px-5 pb-5 text-sm text-[#7A8A9E] leading-relaxed">
+        <p className="px-5 pb-5 text-sm text-[var(--text-muted)] leading-relaxed">
           {answer}
         </p>
       </div>
@@ -136,7 +136,7 @@ export function ReviewCard({ author, text }: { author: string; text: string }) {
           </svg>
         ))}
       </div>
-      <p className="text-[#7A8A9E] text-sm leading-relaxed italic flex-grow">«{text}»</p>
+      <p className="text-[var(--text-muted)] text-sm leading-relaxed italic flex-grow">«{text}»</p>
       <div className="font-bold text-white text-sm pt-2 border-t border-white/10 shrink-0">{author}</div>
     </div>
   );

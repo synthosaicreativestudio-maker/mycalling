@@ -365,10 +365,10 @@ function ReportPageContent() {
       <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] glass-card p-12 text-center relative overflow-hidden">
           <div className="relative z-10 flex flex-col items-center space-y-8">
-            <Loader2 className="h-16 w-16 animate-spin text-[#3B82F6]" />
+            <Loader2 className="h-16 w-16 animate-spin text-[var(--accent-brown)]" />
             <div className="space-y-3">
               <h1 className="text-2xl font-bold font-sans text-white">Генерация карты призвания</h1>
-              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
+              <p className="max-w-md text-sm text-[var(--text-muted)] leading-relaxed">
                 Пожалуйста, подождите. ИИ-эксперт анализирует ваши ответы, сопоставляет интересы с базой профессий и формулирует персональные рекомендации. Это займет около 15 секунд...
               </p>
             </div>
@@ -386,7 +386,7 @@ function ReportPageContent() {
             <AlertCircle className="h-16 w-16 text-red-500" />
             <div className="space-y-3">
               <h1 className="text-xl font-bold text-white font-sans">Не удалось загрузить отчет</h1>
-              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
+              <p className="max-w-md text-sm text-[var(--text-muted)] leading-relaxed">
                 {error}
               </p>
             </div>
@@ -450,14 +450,14 @@ function ReportPageContent() {
           {/* Шапка отчета */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8 mb-8">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#3B82F6] font-sans">
-                <Award className="h-3.5 w-3.5 text-[#3B82F6]" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--accent-brown)] font-sans">
+                <Award className="h-3.5 w-3.5 text-[var(--accent-brown)]" />
                 Итоговый отчет
               </div>
               <h1 className="text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl leading-tight font-sans">
                 Карта талантов: {report.studentName}
               </h1>
-              <p className="text-xs text-[#7A8A9E]">
+              <p className="text-xs text-[var(--text-muted)]">
                 Диагностика успешно пройдена · Отчет подготовлен нейросетевыми алгоритмами
               </p>
             </div>
@@ -496,7 +496,7 @@ function ReportPageContent() {
             <button
               onClick={() => setActiveTab('talents')}
               className={`pb-4 text-sm md:text-base font-bold transition relative whitespace-nowrap ${
-                activeTab === 'talents' ? 'text-white border-b-2 border-[#3B82F6]' : 'text-[#7A8A9E] hover:text-white'
+                activeTab === 'talents' ? 'text-white border-b-2 border-[var(--accent-brown)]' : 'text-[var(--text-muted)] hover:text-white'
               }`}
             >
               Карта талантов
@@ -504,7 +504,7 @@ function ReportPageContent() {
             <button
               onClick={() => setActiveTab('career')}
               className={`pb-4 text-sm md:text-base font-bold transition relative whitespace-nowrap ${
-                activeTab === 'career' ? 'text-white border-b-2 border-[#3B82F6]' : 'text-[#7A8A9E] hover:text-white'
+                activeTab === 'career' ? 'text-white border-b-2 border-[var(--accent-brown)]' : 'text-[var(--text-muted)] hover:text-white'
               }`}
             >
               Карьерные рекомендации
@@ -528,7 +528,7 @@ function ReportPageContent() {
                   {/* Главное резюме потенциала */}
                   <div className="glass-card rounded-[28px] p-8">
                     <h2 className="text-lg font-bold text-white mb-4">Главное резюме потенциала</h2>
-                    <div className="space-y-3 text-[#7A8A9E] text-base leading-relaxed">
+                    <div className="space-y-3 text-[var(--text-muted)] text-base leading-relaxed">
                       {report.heroSummary.map((sentence, idx) => (
                         <p key={idx}>{sentence}</p>
                       ))}
@@ -539,7 +539,7 @@ function ReportPageContent() {
                   {report.coachSection && (
                     <div className="glass-card rounded-[28px] p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <Brain className="h-5 w-5 text-[#3B82F6] theme-accent-text" />
+                        <Brain className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />
                         <h2 className="text-lg font-bold text-white">
                           {report.coachSection.deepGoal ? 'Коучинговый Манифест целей и Идентичности' : 'Качественный анализ диалога (Нейрокоуч)'}
                         </h2>
@@ -548,58 +548,58 @@ function ReportPageContent() {
                         {/* Экспресс-коучинг */}
                         {report.coachSection?.dreams && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Мечты и устремления</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.dreams.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">Мечты и устремления</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text font-medium">{report.coachSection.dreams.trim()}</p>
                           </div>
                         )}
                         {report.coachSection?.idols && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Ролевые модели и кумиры</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.idols.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">Ролевые модели и кумиры</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text font-medium">{report.coachSection.idols.trim()}</p>
                           </div>
                         )}
                         {report.coachSection?.values && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">Ключевые ценности</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.values.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">Ключевые ценности</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text font-medium">{report.coachSection.values.trim()}</p>
                           </div>
                         )}
 
                         {/* Глубокий коучинг */}
                         {report.coachSection?.deepGoal && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🎯 Мой запрос / Цель</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepGoal.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">🎯 Мой запрос / Цель</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepGoal.trim()}</p>
                           </div>
                         )}
                         {report.coachSection?.deepOutcome && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🌟 Ожидаемый результат</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepOutcome.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">🌟 Ожидаемый результат</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepOutcome.trim()}</p>
                           </div>
                         )}
                         {report.coachSection?.deepEmotions && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🔥 Эмоциональный отклик</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepEmotions.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">🔥 Эмоциональный отклик</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text font-medium">{report.coachSection.deepEmotions.trim()}</p>
                           </div>
                         )}
                         {report.coachSection?.deepIdentity && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">👑 Моя идентичность</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold italic">{report.coachSection.deepIdentity.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">👑 Моя идентичность</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text font-bold italic">{report.coachSection.deepIdentity.trim()}</p>
                           </div>
                         )}
                         {report.coachSection?.deepActions && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">🚀 План действий и навыки</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text whitespace-pre-wrap font-medium">{report.coachSection.deepActions.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">🚀 План действий и навыки</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text whitespace-pre-wrap font-medium">{report.coachSection.deepActions.trim()}</p>
                           </div>
                         )}
                         {report.coachSection?.deepFirstStep && (
                           <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl theme-subcard">
-                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-1.5 font-sans">⚡ Первый шаг за 2 минуты</h4>
-                            <p className="text-sm text-[#7A8A9E] leading-relaxed theme-subcard-text font-bold">{report.coachSection.deepFirstStep.trim()}</p>
+                            <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-1.5 font-sans">⚡ Первый шаг за 2 минуты</h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed theme-subcard-text font-bold">{report.coachSection.deepFirstStep.trim()}</p>
                           </div>
                         )}
                       </div>
@@ -619,7 +619,7 @@ function ReportPageContent() {
                   {report.personalityTraits && report.personalityTraits.length > 0 && (
                     <div className="glass-card rounded-[28px] p-8">
                       <div className="flex items-center gap-3 mb-6">
-                        <Sparkles className="h-5 w-5 text-[#3B82F6]" />
+                        <Sparkles className="h-5 w-5 text-[var(--accent-brown)]" />
                         <h2 className="text-lg font-bold text-white">Личностные особенности (Big Five)</h2>
                       </div>
                       <div className="space-y-4">
@@ -627,12 +627,12 @@ function ReportPageContent() {
                           <div key={trait.name} className="space-y-2">
                             <div className="flex items-center justify-between text-xs font-bold text-white">
                               <span>{trait.name}</span>
-                              <span className="text-[#3B82F6]">{trait.score}%</span>
+                              <span className="text-[var(--accent-brown)]">{trait.score}%</span>
                             </div>
                             <div className="h-1.5 bg-black/20 rounded-full overflow-hidden">
-                              <div className="h-full bg-[#3B82F6] rounded-full" style={{ width: `${trait.score}%` }} />
+                              <div className="h-full bg-[var(--accent-brown)] rounded-full" style={{ width: `${trait.score}%` }} />
                             </div>
-                            <p className="text-[11px] text-[#7A8A9E] leading-relaxed">{trait.description}</p>
+                            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">{trait.description}</p>
                           </div>
                         ))}
                       </div>
@@ -643,7 +643,7 @@ function ReportPageContent() {
                   {report.signatureStrengths && report.signatureStrengths.length > 0 && (
                     <div className="glass-card rounded-[28px] p-8">
                       <h2 className="text-lg font-bold text-white mb-1">Артефакты силы</h2>
-                      <p className="text-xs text-[#7A8A9E] mb-4">Топ-5 сильных сторон характера по методике VIA Youth Survey</p>
+                      <p className="text-xs text-[var(--text-muted)] mb-4">Топ-5 сильных сторон характера по методике VIA Youth Survey</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {report.signatureStrengths.map((s, i) => (
                           <div key={s.code || i} className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -651,7 +651,7 @@ function ReportPageContent() {
                               <Award className="w-4 h-4 text-[#EAB308]" />
                               <span className="text-sm font-bold text-white">{s.nameRu}</span>
                             </div>
-                            <p className="text-[11px] text-[#7A8A9E] leading-relaxed">{s.description}</p>
+                            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">{s.description}</p>
                           </div>
                         ))}
                       </div>
@@ -694,7 +694,7 @@ function ReportPageContent() {
                         <AlertCircle className="w-4 h-4 text-amber-400" />
                         <h2 className="text-lg font-bold text-white">Внутренние противоречия — твои скрытые ресурсы</h2>
                       </div>
-                      <p className="text-xs text-[#7A8A9E] mb-4">Тесты и разговор с Романом показали разные грани — это не ошибка, а повод разобраться глубже.</p>
+                      <p className="text-xs text-[var(--text-muted)] mb-4">Тесты и разговор с Романом показали разные грани — это не ошибка, а повод разобраться глубже.</p>
                       <div className="space-y-3">
                         {report.innerConflicts.map((c, i) => (
                           <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -703,7 +703,7 @@ function ReportPageContent() {
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                                 {c.testFact && (
                                   <div className="rounded-xl border border-[#3B82F6]/20 bg-[#3B82F6]/5 p-2.5">
-                                    <span className="block text-[9px] uppercase tracking-wider font-extrabold text-[#3B82F6] mb-0.5">Тесты</span>
+                                    <span className="block text-[9px] uppercase tracking-wider font-extrabold text-[var(--accent-brown)] mb-0.5">Тесты</span>
                                     <span className="text-[11px] text-[#93A3B8] leading-snug">{c.testFact}</span>
                                   </div>
                                 )}
@@ -715,7 +715,7 @@ function ReportPageContent() {
                                 )}
                               </div>
                             )}
-                            <p className="text-[11px] text-[#7A8A9E] leading-relaxed">{c.text}</p>
+                            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">{c.text}</p>
                           </div>
                         ))}
                       </div>
@@ -724,7 +724,7 @@ function ReportPageContent() {
                     <div className="glass-card rounded-[28px] p-4 flex items-center gap-2 border border-emerald-500/20">
                       <ShieldCheck className="w-4 h-4 text-emerald-400" />
                       <span className="text-xs font-bold text-emerald-400">Высокая достоверность профиля</span>
-                      <span className="text-[11px] text-[#7A8A9E]">— данные тестов и разговора с Романом совпадают</span>
+                      <span className="text-[11px] text-[var(--text-muted)]">— данные тестов и разговора с Романом совпадают</span>
                     </div>
                   )}
 
@@ -738,18 +738,18 @@ function ReportPageContent() {
                           {report.strengths.map((s, i) => (
                             <div key={i} className="flex items-start gap-2 rounded-xl border border-emerald-500/15 bg-emerald-500/5 p-3">
                               <TrendingUp className="h-3.5 w-3.5 mt-0.5 shrink-0 text-emerald-400" />
-                              <span className="text-xs text-[#7A8A9E] leading-relaxed">{s}</span>
+                              <span className="text-xs text-[var(--text-muted)] leading-relaxed">{s}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                       <div>
-                        <h4 className="text-xs uppercase tracking-wider font-bold text-[#3B82F6] mb-3">Зоны развития</h4>
+                        <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-brown)] mb-3">Зоны развития</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           {report.growthAreas.map((g, i) => (
                             <div key={i} className="flex items-start gap-2 rounded-xl border border-[#3B82F6]/15 bg-[#3B82F6]/5 p-3">
-                              <Target className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[#3B82F6]" />
-                              <span className="text-xs text-[#7A8A9E] leading-relaxed">{g}</span>
+                              <Target className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[var(--accent-brown)]" />
+                              <span className="text-xs text-[var(--text-muted)] leading-relaxed">{g}</span>
                             </div>
                           ))}
                         </div>
@@ -762,7 +762,7 @@ function ReportPageContent() {
                     <ValueBars
                       title="Ведущие ценности"
                       subtitle="Топ-3 ценности по методике PVQ Шварца"
-                      icon={<Heart className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      icon={<Heart className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />}
                       items={report.topValueScores.map((v) => ({
                         label: v.nameRu,
                         value: v.score,
@@ -777,7 +777,7 @@ function ReportPageContent() {
                     <ValueBars
                       title="Логическое мышление (ICAR)"
                       subtitle="Готовность по субшкалам: вербальная, числовая, пространственная"
-                      icon={<Gauge className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      icon={<Gauge className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />}
                       items={Object.entries(report.icarSubscales).map(([key, value]) => ({
                         label: ICAR_SUBSCALE_LABELS[key] || key,
                         value,
@@ -792,7 +792,7 @@ function ReportPageContent() {
                     <ValueBars
                       title="Внутренний компас"
                       subtitle="Настойчивость, установка на рост и эмоциональный интеллект"
-                      icon={<Compass className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      icon={<Compass className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />}
                       items={Object.entries(report.innerCompass)
                         .filter(([, value]) => typeof value === 'number')
                         .map(([key, value]) => ({
@@ -810,7 +810,7 @@ function ReportPageContent() {
                     <ValueBars
                       title="Карта ресурсов"
                       subtitle="Опоры и ограничения вокруг тебя — не диагноз, а контекст для рекомендаций"
-                      icon={<Target className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      icon={<Target className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />}
                       items={Object.entries(report.resourceMap).map(([key, value]) => ({
                         label: RESOURCE_MAP_LABELS[key] || key,
                         value,
@@ -826,7 +826,7 @@ function ReportPageContent() {
                     <ValueBars
                       title="Карта заполненности профиля"
                       subtitle="Насколько подробно собран каждый слой цифрового профиля"
-                      icon={<Gauge className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      icon={<Gauge className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />}
                       items={Object.entries(report.profileCoverage)
                         .filter(([key]) => key !== 'overall' && PROFILE_COVERAGE_LABELS[key])
                         .map(([key, value]) => ({
@@ -845,7 +845,7 @@ function ReportPageContent() {
                     <ValueBars
                       title="Стиль мышления"
                       subtitle="Как ты удерживаешь внимание, учишься, планируешь и проверяешь себя"
-                      icon={<Brain className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      icon={<Brain className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />}
                       items={Object.entries(report.methodologyProfile.cognitiveStyle)
                         .filter(([, value]) => typeof value === 'number' && value > 0)
                         .map(([key, value]) => ({
@@ -864,7 +864,7 @@ function ReportPageContent() {
                     <ValueBars
                       title="Роль в команде (Белбин)"
                       subtitle="Как ты естественнее всего проявляешь себя в совместной работе"
-                      icon={<User className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      icon={<User className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />}
                       items={Object.entries(report.methodologyProfile.belbin)
                         .filter(([, value]) => typeof value === 'number' && value > 0)
                         .map(([key, value]) => ({
@@ -882,7 +882,7 @@ function ReportPageContent() {
                     <ValueBars
                       title="Карьерная адаптивность (Савикас)"
                       subtitle="Четыре ресурса, которые помогают уверенно строить свой путь"
-                      icon={<TrendingUp className="h-5 w-5 text-[#3B82F6] theme-accent-text" />}
+                      icon={<TrendingUp className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />}
                       items={Object.entries(report.methodologyProfile.savickas)
                         .filter(([, value]) => typeof value === 'number' && value > 0)
                         .map(([key, value]) => ({
@@ -899,13 +899,13 @@ function ReportPageContent() {
                   {typeof report.methodologyProfile?.procrastination === 'number' && (
                     <div className="glass-card rounded-[28px] p-8">
                       <div className="flex items-center gap-3 mb-3">
-                        <Clock className="h-5 w-5 text-[#3B82F6] theme-accent-text" />
+                        <Clock className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />
                         <h2 className="text-lg font-bold text-white">Склонность к прокрастинации</h2>
-                        <span className="ml-auto rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[#3B82F6]">
+                        <span className="ml-auto rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[var(--accent-brown)]">
                           {report.methodologyProfile.procrastination}/20
                         </span>
                       </div>
-                      <p className="text-[#7A8A9E] text-sm leading-relaxed">
+                      <p className="text-[var(--text-muted)] text-sm leading-relaxed">
                         {report.methodologyProfile.procrastination <= 8
                           ? 'Низкая: ты обычно берёшься за дело без долгих раскачек — это сильная опора для любых целей.'
                           : report.methodologyProfile.procrastination <= 14
@@ -921,15 +921,15 @@ function ReportPageContent() {
                     (report.methodologyProfile?.antiInterests?.length ?? 0) > 0) && (
                     <div className="glass-card rounded-[28px] p-8 space-y-5">
                       <div className="flex items-center gap-3">
-                        <Heart className="h-5 w-5 text-[#3B82F6] theme-accent-text" />
+                        <Heart className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />
                         <h2 className="text-lg font-bold text-white">Увлечения и анти-интересы</h2>
                       </div>
                       {(report.methodologyProfile?.hobbies?.length ?? 0) > 0 && (
                         <div className="space-y-2">
-                          <span className="text-xs uppercase tracking-widest font-extrabold text-[#7A8A9E]">Чем увлекаешься по своей воле</span>
+                          <span className="text-xs uppercase tracking-widest font-extrabold text-[var(--text-muted)]">Чем увлекаешься по своей воле</span>
                           <div className="flex flex-wrap gap-2">
                             {report.methodologyProfile!.hobbies!.map((h, i) => (
-                              <span key={i} className="rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/10 px-3 py-1 text-xs font-semibold text-[#3B82F6]">
+                              <span key={i} className="rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/10 px-3 py-1 text-xs font-semibold text-[var(--accent-brown)]">
                                 {h}
                               </span>
                             ))}
@@ -938,10 +938,10 @@ function ReportPageContent() {
                       )}
                       {(report.methodologyProfile?.antiInterests?.length ?? 0) > 0 && (
                         <div className="space-y-2">
-                          <span className="text-xs uppercase tracking-widest font-extrabold text-[#7A8A9E]">Что точно не откликается</span>
+                          <span className="text-xs uppercase tracking-widest font-extrabold text-[var(--text-muted)]">Что точно не откликается</span>
                           <div className="flex flex-wrap gap-2">
                             {report.methodologyProfile!.antiInterests!.map((a, i) => (
-                              <span key={i} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[#7A8A9E]">
+                              <span key={i} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-[var(--text-muted)]">
                                 {a}
                               </span>
                             ))}
@@ -961,15 +961,15 @@ function ReportPageContent() {
                 {report.riasecSummary && (
                   <div className="glass-card rounded-[28px] p-8">
                     <div className="flex items-center gap-3 mb-4">
-                      <Compass className="h-5 w-5 text-[#3B82F6]" />
+                      <Compass className="h-5 w-5 text-[var(--accent-brown)]" />
                       <h2 className="text-lg font-bold text-white">Профессиональные интересы (RIASEC)</h2>
                       {report.hollandCode && (
-                        <span className="ml-auto rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[#3B82F6]">
+                        <span className="ml-auto rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[var(--accent-brown)]">
                           Твой код призвания: {report.hollandCode}
                         </span>
                       )}
                     </div>
-                    <p className="text-[#7A8A9E] text-sm leading-relaxed">{report.riasecSummary}</p>
+                    <p className="text-[var(--text-muted)] text-sm leading-relaxed">{report.riasecSummary}</p>
                   </div>
                 )}
 
@@ -1006,7 +1006,7 @@ function ReportPageContent() {
                                   <h3 className="text-base font-bold text-white">
                                     <span className="mr-2">{section.emoji}</span>{section.title}
                                   </h3>
-                                  <p className="text-xs text-[#7A8A9E] mt-1 leading-relaxed">{section.note}</p>
+                                  <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">{section.note}</p>
                                 </div>
                                 <div className="grid gap-6 md:grid-cols-2">
                                   {items.map((prof, idx) => (
@@ -1126,7 +1126,7 @@ export default function ReportPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-[#3B82F6]" />
+        <Loader2 className="h-12 w-12 animate-spin text-[var(--accent-brown)]" />
       </div>
     }>
       <ReportPageContent />

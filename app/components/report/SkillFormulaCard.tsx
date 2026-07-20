@@ -27,7 +27,7 @@ export default function SkillFormulaCard({ skills, applications }: SkillFormulaC
   return (
     <div className="glass-card rounded-[28px] p-8">
       <div className="flex items-center gap-3 mb-6">
-        <Sparkles className="h-5 w-5 text-[#3B82F6] theme-accent-text" />
+        <Sparkles className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />
         <h2 className="text-lg font-bold text-white">Твоя формула успеха</h2>
       </div>
 
@@ -38,7 +38,7 @@ export default function SkillFormulaCard({ skills, applications }: SkillFormulaC
               {skill.nameRu}
             </span>
             {idx < skills.length - 1 && (
-              <span className="text-lg font-bold text-[#7A8A9E]">+</span>
+              <span className="text-lg font-bold text-[var(--text-muted)]">+</span>
             )}
           </div>
         ))}
@@ -46,7 +46,7 @@ export default function SkillFormulaCard({ skills, applications }: SkillFormulaC
 
       <div className="space-y-2 mb-6">
         {skills.map((skill) => (
-          <p key={skill.code} className="text-xs text-[#7A8A9E] leading-relaxed">
+          <p key={skill.code} className="text-xs text-[var(--text-muted)] leading-relaxed">
             <span className="font-semibold text-white">{skill.nameRu}.</span> {skill.evidence}
           </p>
         ))}
@@ -54,10 +54,10 @@ export default function SkillFormulaCard({ skills, applications }: SkillFormulaC
 
       {applications && applications.length > 0 && (
         <div>
-          <h4 className="text-xs uppercase tracking-wider font-extrabold text-[#3B82F6] theme-subcard-title mb-2 font-sans">
+          <h4 className="text-xs uppercase tracking-wider font-extrabold text-[var(--accent-brown)] theme-subcard-title mb-2 font-sans">
             Где эта комбинация пригодится
           </h4>
-          <ul className="list-disc list-inside space-y-1.5 text-xs text-[#7A8A9E]">
+          <ul className="list-disc list-inside space-y-1.5 text-xs text-[var(--text-muted)]">
             {applications.map((application, i) => (
               <li key={i}>{application}</li>
             ))}

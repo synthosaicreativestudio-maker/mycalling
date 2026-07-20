@@ -19,7 +19,7 @@ const themeStyles: Record<string, {
     title: 'Космическая Одиссея',
     subtitle: 'Исследование вашего потенциала',
     badgeColor: 'border-blue-500/20 bg-blue-500/5 text-[#60A5FA]',
-    cardActiveBorder: 'border-[#3B82F6] bg-[#3B82F6]/10 text-white shadow-sm',
+    cardActiveBorder: 'border-[var(--accent-brown)] bg-[#3B82F6]/10 text-white shadow-sm',
     accentColor: '#3B82F6'
   },
   CREATIVE: {
@@ -266,7 +266,7 @@ export default function AssessmentPage() {
             <span className="text-red-500 font-extrabold text-4xl">⚠️</span>
             <div className="space-y-3">
               <h1 className="text-2xl font-bold font-sans text-white">Пожалуйста, делай выбор осознанно</h1>
-              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
+              <p className="max-w-md text-sm text-[var(--text-muted)] leading-relaxed">
                 Мы заметили, что ты спешишь. Твои результаты могут оказаться неточными. Тест временно заблокирован.
               </p>
             </div>
@@ -288,7 +288,7 @@ export default function AssessmentPage() {
             <span className="text-4xl">🧭</span>
             <div className="space-y-3">
               <h1 className="text-2xl font-bold font-sans text-white">Тестирование завершено!</h1>
-              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
+              <p className="max-w-md text-sm text-[var(--text-muted)] leading-relaxed">
                 Ты уже собрал базовый профиль. Хочешь пройти <span className="text-[#C4A484] font-semibold">глубокую сессию</span> с наставником Романом — разобрать свою цель, эмоции и первый шаг детальнее? Это займёт ещё немного времени, но результат войдёт отдельным разделом в твой финальный отчёт.
               </p>
             </div>
@@ -318,10 +318,10 @@ export default function AssessmentPage() {
       <main className="mx-auto flex min-h-[calc(100vh-140px)] max-w-2xl flex-col justify-center px-6 pt-[120px] pb-12 relative z-10">
         <div className="rounded-[32px] glass-card p-8 text-center relative overflow-hidden">
           <div className="relative z-10 flex flex-col items-center space-y-8">
-            <Loader2 className="h-16 w-16 animate-spin text-[#3B82F6] opacity-80" />
+            <Loader2 className="h-16 w-16 animate-spin text-[var(--accent-brown)] opacity-80" />
             <div className="space-y-2">
               <h1 className="text-xl font-bold font-sans text-white">Загрузка вопросов диагностики...</h1>
-              <p className="max-w-md text-xs text-[#7A8A9E] leading-relaxed">
+              <p className="max-w-md text-xs text-[var(--text-muted)] leading-relaxed">
                 Пожалуйста, подождите, мы настраиваем сессию тестирования.
               </p>
             </div>
@@ -362,7 +362,7 @@ export default function AssessmentPage() {
                 Глава {to.chapterNumber || ''} · Новый этап
               </span>
               <h1 className="text-2xl font-bold font-sans text-white">{to.chapterTitle}</h1>
-              <p className="max-w-md text-sm text-[#7A8A9E] leading-relaxed">
+              <p className="max-w-md text-sm text-[var(--text-muted)] leading-relaxed">
                 {to.intro}
               </p>
             </div>
@@ -419,7 +419,7 @@ export default function AssessmentPage() {
             <h1 className="text-xl font-bold text-white mt-1.5 leading-tight font-sans">
               {currentStyle.subtitle}
             </h1>
-            <p className="mt-1 text-xs text-[#7A8A9E] leading-relaxed">
+            <p className="mt-1 text-xs text-[var(--text-muted)] leading-relaxed">
               Вы продвигаетесь по игровому сценарию. Отвечайте искренне для точного совпадения!
             </p>
           </div>
@@ -428,11 +428,11 @@ export default function AssessmentPage() {
           <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs font-semibold text-white font-sans">Общий прогресс</p>
-              <p className="text-xs font-bold text-[#3B82F6]">{currentQuestion.progress_percent}%</p>
+              <p className="text-xs font-bold text-[var(--accent-brown)]">{currentQuestion.progress_percent}%</p>
             </div>
             <div className="mt-2.5 h-1 rounded-full bg-black/10 overflow-hidden">
               <div
-                className="h-1 rounded-full bg-[#3B82F6] transition-all duration-300"
+                className="h-1 rounded-full bg-[var(--accent-brown)] transition-all duration-300"
                 style={{ width: `${currentQuestion.progress_percent}%` }}
               />
             </div>
@@ -461,10 +461,10 @@ export default function AssessmentPage() {
                     key={key} 
                     className={`rounded-xl border p-2.5 transition duration-200 ${
                       isCurrent 
-                        ? 'border-[#3B82F6] bg-[#3B82F6]/5 text-white' 
+                        ? 'border-[var(--accent-brown)] bg-[#3B82F6]/5 text-white' 
                         : isPassed 
                           ? 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400' 
-                          : 'border-white/5 bg-white/[0.01] text-[#7A8A9E]'
+                          : 'border-white/5 bg-white/[0.01] text-[var(--text-muted)]'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -473,7 +473,7 @@ export default function AssessmentPage() {
                         <span className="text-[10px] font-semibold">{name}</span>
                       </div>
                       {isPassed && <span className="text-[8px] uppercase font-bold text-emerald-400">Пройден</span>}
-                      {isCurrent && <span className="text-[8px] uppercase font-bold text-[#3B82F6] animate-pulse">Текущий</span>}
+                      {isCurrent && <span className="text-[8px] uppercase font-bold text-[var(--accent-brown)] animate-pulse">Текущий</span>}
                     </div>
                   </div>
                 );
@@ -487,7 +487,7 @@ export default function AssessmentPage() {
           
           {isWaitingForNext && (
             <div className="absolute inset-0 z-50 bg-[#040506]/85 backdrop-blur-sm flex flex-col items-center justify-center rounded-[24px]">
-              <Loader2 className="h-8 w-8 animate-spin text-[#3B82F6] mb-3" />
+              <Loader2 className="h-8 w-8 animate-spin text-[var(--accent-brown)] mb-3" />
               <p className="text-xs font-bold text-white">Синхронизация ответа...</p>
               {store.isOffline && <p className="text-[10px] text-muted mt-1">Ожидание подключения к сети</p>}
             </div>
@@ -507,7 +507,7 @@ export default function AssessmentPage() {
                   <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-white leading-snug font-sans">
                     {getAdaptiveQuestionText(currentQuestion.question_id, currentQuestion.question_text, narrativeTheme)}
                   </h2>
-                  <p className="text-[11px] text-[#7A8A9E] leading-relaxed">
+                  <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
                     {currentQuestion.test_type === 'riasec'
                       ? 'Определи свое отношение к этому занятию. Выбери одну из интерактивных карточек ниже.'
                       : currentQuestion.test_type === 'icar'
@@ -536,7 +536,7 @@ export default function AssessmentPage() {
                       </div>
                       <div className="space-y-1">
                         <h3 className="text-base font-bold text-white group-hover:text-emerald-300 transition">Да, это моё</h3>
-                        <p className="text-xs text-[#7A8A9E]">Мне нравится заниматься подобными делами, это меня заряжает</p>
+                        <p className="text-xs text-[var(--text-muted)]">Мне нравится заниматься подобными делами, это меня заряжает</p>
                       </div>
                     </div>
                   </button>
@@ -555,7 +555,7 @@ export default function AssessmentPage() {
                       </div>
                       <div className="space-y-1">
                         <h3 className="text-base font-bold text-white group-hover:text-rose-300 transition">Нет, не привлекает</h3>
-                        <p className="text-xs text-[#7A8A9E]">Я бы предпочел избежать подобных задач в работе</p>
+                        <p className="text-xs text-[var(--text-muted)]">Я бы предпочел избежать подобных задач в работе</p>
                       </div>
                     </div>
                   </button>
@@ -605,7 +605,7 @@ export default function AssessmentPage() {
                                 : 'border-white/5 bg-white/[0.01] hover:border-white/20 hover:bg-white/5 text-white/90'
                             }`}
                           >
-                            <span className="text-[9px] text-[#7A8A9E] uppercase tracking-wider font-bold">Вариант</span>
+                            <span className="text-[9px] text-[var(--text-muted)] uppercase tracking-wider font-bold">Вариант</span>
                             <span className="text-sm font-sans font-bold">{ans.label}</span>
                           </button>
                         );
@@ -644,7 +644,7 @@ export default function AssessmentPage() {
                         </div>
                         <div className="space-y-0.5">
                           <span className="text-xs md:text-sm font-bold block">{ans.label}</span>
-                          <span className="text-[10px] text-[#7A8A9E] block">
+                          <span className="text-[10px] text-[var(--text-muted)] block">
                             {ans.value === 5 ? 'Полностью согласен с этим утверждением' : 
                              ans.value === 4 ? 'Скорее согласен' : 
                              ans.value === 3 ? 'Отношусь нейтрально' : 

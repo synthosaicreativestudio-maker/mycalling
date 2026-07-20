@@ -95,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="relative min-h-screen bg-transparent text-[#E8ECF0]">
+      <body className="relative min-h-screen bg-transparent text-[var(--text-primary)]">
         <LazyMotion features={domAnimation}>
           <script
             type="application/ld+json"

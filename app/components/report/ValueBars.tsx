@@ -34,7 +34,7 @@ export default function ValueBars({ title, subtitle, items, icon }: ValueBarsPro
         {icon}
         <h2 className="text-lg font-bold text-white">{title}</h2>
       </div>
-      {subtitle && <p className="text-xs text-[#7A8A9E] mb-4">{subtitle}</p>}
+      {subtitle && <p className="text-xs text-[var(--text-muted)] mb-4">{subtitle}</p>}
       <div className={`space-y-4 ${subtitle ? '' : 'mt-4'}`}>
         {items.map((item, i) => {
           const percent = item.max > 0 ? Math.max(4, Math.min(100, Math.round((item.value / item.max) * 100))) : 0;
@@ -43,11 +43,11 @@ export default function ValueBars({ title, subtitle, items, icon }: ValueBarsPro
             <div key={`${item.label}-${i}`} className="space-y-1.5">
               <div className="flex items-center justify-between text-xs font-bold text-white">
                 <span>{item.label}</span>
-                <span className="text-[#3B82F6] theme-accent-text">{displayValue}</span>
+                <span className="text-[var(--accent-brown)] theme-accent-text">{displayValue}</span>
               </div>
               <div className="h-1.5 bg-black/20 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#3B82F6] rounded-full transition-all duration-500"
+                  className="h-full bg-[var(--accent-brown)] rounded-full transition-all duration-500"
                   style={{ width: `${percent}%` }}
                 />
               </div>

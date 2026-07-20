@@ -30,10 +30,10 @@ export function CookieBanner() {
           className="fixed bottom-4 left-4 right-4 z-[99999] mx-auto max-w-5xl md:bottom-8"
         >
           <div className="flex flex-col items-center justify-between gap-4 rounded-[20px] bg-[#080C14]/90 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.5)] backdrop-blur-md border border-[#3B82F6]/20 md:flex-row md:px-8 md:py-4">
-            <p className="text-sm text-[#7A8A9E] leading-relaxed max-w-3xl">
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-3xl">
               Мы используем файлы cookie и аналитические системы для улучшения работы сервиса. 
               Продолжая пользоваться сайтом, вы даете согласие на обработку данных согласно 
-              <a href="/privacy" className="text-[#60A5FA] hover:text-[#3B82F6] hover:underline ml-1">Политике конфиденциальности</a>.
+              <a href="/privacy" className="text-[#60A5FA] hover:text-[var(--accent-brown)] hover:underline ml-1">Политике конфиденциальности</a>.
             </p>
             <button
               onClick={acceptCookies}

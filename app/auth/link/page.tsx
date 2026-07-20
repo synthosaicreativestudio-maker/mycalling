@@ -95,7 +95,7 @@ function LinkCard() {
         <h1 className="text-xl font-bold font-sans text-white">
           Подключение через {isTelegram ? 'Telegram' : 'MAX ID'}
         </h1>
-        <p className="text-xs text-[#7A8A9E] mt-1.5 leading-relaxed">
+        <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
           Отсканируйте QR-код камерой телефона или нажмите кнопку ниже, чтобы запустить бот
         </p>
       </div>
@@ -125,7 +125,7 @@ function LinkCard() {
               Открыть чат-бот <ExternalLink className="h-4 w-4" />
             </a>
             {isTelegram && (
-              <p className="text-xs text-[#7A8A9E] leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                 Если приложение не открылось,{' '}
                 <a 
                   href={telegramWebLink} 
@@ -140,8 +140,8 @@ function LinkCard() {
           </div>
 
           {/* Поллинг индикатор */}
-          <div className="flex items-center justify-center gap-2 text-xs text-[#7A8A9E] pt-2 border-t border-white/5">
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
+          <div className="flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] pt-2 border-t border-white/5">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--accent-brown)]" />
             Ожидание подтверждения в мессенджере...
           </div>
         </>
@@ -158,11 +158,11 @@ function LinkCard() {
           </div>
           <div>
             <h3 className="text-base font-bold text-white">Канал связи успешно подключен!</h3>
-            <p className="text-xs text-[#7A8A9E] mt-1 leading-relaxed">
+            <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
               Вы успешно подключили мессенджер. Эта вкладка закроется, а на основном устройстве продолжится сессия.
             </p>
           </div>
-          <div className="flex items-center justify-center gap-2 text-[11px] text-[#7A8A9E]">
+          <div className="flex items-center justify-center gap-2 text-[11px] text-[var(--text-muted)]">
             <Loader2 className="h-3 w-3 animate-spin text-emerald-600" /> Выполняется перенаправление...
           </div>
         </motion.div>
@@ -175,7 +175,7 @@ function LinkCard() {
           </div>
           <div>
             <h3 className="text-base font-bold text-white">Срок действия кода истек</h3>
-            <p className="text-xs text-[#7A8A9E] mt-1 leading-relaxed">
+            <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
               Пожалуйста, вернитесь на предыдущую страницу и запросите QR-код повторно.
             </p>
           </div>
@@ -192,7 +192,7 @@ export default function LinkPage() {
 
       <Suspense fallback={
         <div className="w-full max-w-[420px] rounded-[32px] border border-white/5 bg-[#080C14]/90 p-8 backdrop-blur-xl flex flex-col items-center justify-center min-h-[300px]">
-          <Loader2 className="h-8 w-8 animate-spin text-[#3B82F6]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--accent-brown)]" />
         </div>
       }>
         <LinkCard />

@@ -335,7 +335,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       <div className="w-full flex items-center justify-between px-2 pt-1">
         <div className="text-left space-y-0.5">
           <h3 className="text-base font-extrabold font-sans text-gray-900 dark:text-white tracking-wide">Карта Талантов</h3>
-          <p className="text-[11px] text-[#7A8A9E] font-medium">Живой профиль ваших интересов</p>
+          <p className="text-[11px] text-[var(--text-muted)] font-medium">Живой профиль ваших интересов</p>
         </div>
       </div>
 
@@ -530,7 +530,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
               <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: sector.color }} />
               <div className="flex flex-col min-w-0">
                 <span className="text-gray-900 dark:text-white/90 font-bold tracking-wide font-sans truncate text-[10px] leading-tight">{sector.name}</span>
-                <span className="text-[8px] text-[#7A8A9E] truncate leading-tight">{sector.description}</span>
+                <span className="text-[8px] text-[var(--text-muted)] truncate leading-tight">{sector.description}</span>
               </div>
             </div>
             <span className="font-extrabold font-sans text-[10.5px] ml-1 shrink-0" style={{ color: sector.rawScore > 0 ? sector.color : '#7A6B5D' }}>
@@ -540,7 +540,7 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
         ))}
       </div>
 
-      <div className="text-[9px] text-[#7A8A9E] italic font-sans text-center">
+      <div className="text-[9px] text-[var(--text-muted)] italic font-sans text-center">
         * Оценки обновляются в реальном времени из диалога.
       </div>
     </div>

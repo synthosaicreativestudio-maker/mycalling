@@ -653,7 +653,7 @@ export default function CoachPage() {
       
       {process.env.NODE_ENV !== 'production' && (
         <div className="fixed top-4 left-4 z-50 bg-black/90 border border-white/10 rounded-xl p-3 text-[10px] text-slate-400 font-mono shadow-2xl space-y-1">
-          <div>[DEBUG] LinkCode: <span className="text-[#3B82F6]">{linkCode || 'null'}</span></div>
+          <div>[DEBUG] LinkCode: <span className="text-[var(--accent-brown)]">{linkCode || 'null'}</span></div>
           <div>[DEBUG] PhoneConfirmed: <span className={phoneConfirmed ? 'text-green-500' : 'text-red-500'}>{String(phoneConfirmed)}</span></div>
           <div>[DEBUG] SessionId: <span className="text-purple-400">{sessionId || 'null'}</span></div>
         </div>
@@ -662,7 +662,7 @@ export default function CoachPage() {
       {/* progress top panel */}
       <div className="w-full max-w-7xl mb-6 shrink-0 sticky top-4 z-20 glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/15 dark:bg-[#040506]/15 backdrop-blur-xl">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-10 w-10 shrink-0 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center text-[#3B82F6]">
+          <div className="h-10 w-10 shrink-0 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center text-[var(--accent-brown)]">
             <Brain className="h-5 w-5 animate-pulse" />
           </div>
           <div className="min-w-0">
@@ -673,10 +673,10 @@ export default function CoachPage() {
         </div>
         <div className="flex items-center gap-4 self-end sm:self-auto">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-[#3B82F6]">{progressPercent}%</span>
+            <span className="text-xs font-bold text-[var(--accent-brown)]">{progressPercent}%</span>
             <div className="w-24 h-2 bg-white/5 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-[#3B82F6] transition-all duration-500" 
+                className="h-full bg-[var(--accent-brown)] transition-all duration-500" 
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -776,7 +776,7 @@ export default function CoachPage() {
                   className={`flex gap-3 max-w-[72%] ${isCoach ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
                 >
                   <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${
-                    isCoach ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : 'bg-[#3B82F6] text-white'
+                    isCoach ? 'bg-[#3B82F6]/10 text-[var(--accent-brown)]' : 'bg-[var(--accent-brown)] text-white'
                   }`}>
                     {isCoach ? <Brain className="h-4 w-4" /> : <User className="h-4 w-4" />}
                   </div>
@@ -784,12 +784,12 @@ export default function CoachPage() {
                     isCoach 
                       ? (isFinalStep && idx === messages.length - 1
                           ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
-                          : 'bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm'
+                          : 'bg-[#080C14]/80 text-[var(--text-primary)] border border-white/5 rounded-tl-none shadow-sm'
                         )
-                      : 'bg-[#3B82F6]/25 text-[#E8ECF0] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
+                      : 'bg-[#3B82F6]/25 text-[var(--text-primary)] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
                   }`}>
                     {isCoach && isFinalStep && idx === messages.length - 1 && (
-                      <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#3B82F6] mb-2">
+                      <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[var(--accent-brown)] mb-2">
                         <span>✨</span> Резюме наставника Романа
                       </div>
                     )}
@@ -816,7 +816,7 @@ export default function CoachPage() {
 
                     {isCoach && step === 2 && !phoneConfirmed && idx === messages.length - 1 && (
                       <div className="mt-4 p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/15 space-y-3">
-                        <p className="text-xs font-bold text-[#3B82F6] flex items-center gap-1.5">
+                        <p className="text-xs font-bold text-[var(--accent-brown)] flex items-center gap-1.5">
                           <span>📲</span> Подключите удобный канал связи для получения отчета:
                         </p>
                         <div className="flex flex-wrap gap-3">
@@ -866,10 +866,10 @@ export default function CoachPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex gap-3 max-w-[90%] mr-auto"
               >
-                <div className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold bg-[#3B82F6]/10 text-[#3B82F6]">
+                <div className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold bg-[#3B82F6]/10 text-[var(--accent-brown)]">
                   <Brain className="h-4 w-4" />
                 </div>
-                <div className="p-5 rounded-2xl text-sm leading-relaxed bg-[#080C14]/80 text-[#E8ECF0] border border-white/5 rounded-tl-none shadow-sm space-y-4 max-w-xl">
+                <div className="p-5 rounded-2xl text-sm leading-relaxed bg-[#080C14]/80 text-[var(--text-primary)] border border-white/5 rounded-tl-none shadow-sm space-y-4 max-w-xl">
                   <div className="space-y-1">
                     <p className="font-bold text-[#EAD5C3] text-sm flex items-center gap-1.5">
                       <span>🎯</span> Выберите формат исследования талантов:
@@ -888,10 +888,10 @@ export default function CoachPage() {
                       className="p-3.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition text-left space-y-1.5 group relative"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-white group-hover:text-[#3B82F6] transition">Экспресс-формат</span>
-                        <span className="text-[9px] text-[#7A8A9E] px-1.5 py-0.5 rounded bg-white/5">10-15 мин</span>
+                        <span className="text-[11px] font-bold text-white group-hover:text-[var(--accent-brown)] transition">Экспресс-формат</span>
+                        <span className="text-[9px] text-[var(--text-muted)] px-1.5 py-0.5 rounded bg-white/5">10-15 мин</span>
                       </div>
-                      <p className="text-[10px] text-[#7A8A9E] leading-normal">
+                      <p className="text-[10px] text-[var(--text-muted)] leading-normal">
                         Быстрый опросник по увлечениям, интересам и целям для моментального получения рекомендаций.
                       </p>
                     </button>
@@ -921,13 +921,13 @@ export default function CoachPage() {
 
             {isTyping && (
               <div className="flex gap-3 max-w-[80%] mr-auto">
-                <div className="h-8 w-8 rounded-full bg-[#3B82F6]/10 text-[#3B82F6] flex items-center justify-center">
+                <div className="h-8 w-8 rounded-full bg-[#3B82F6]/10 text-[var(--accent-brown)] flex items-center justify-center">
                   <Brain className="h-4 w-4" />
                 </div>
                 <div className="p-4 rounded-2xl bg-[#080C14]/80 border border-white/5 rounded-tl-none shadow-sm flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce [animation-delay:-0.3s]" />
-                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce [animation-delay:-0.15s]" />
-                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-bounce" />
+                  <span className="w-2 h-2 rounded-full bg-[var(--accent-brown)] animate-bounce [animation-delay:-0.3s]" />
+                  <span className="w-2 h-2 rounded-full bg-[var(--accent-brown)] animate-bounce [animation-delay:-0.15s]" />
+                  <span className="w-2 h-2 rounded-full bg-[var(--accent-brown)] animate-bounce" />
                 </div>
               </div>
             )}
@@ -944,7 +944,7 @@ export default function CoachPage() {
                 className="text-center p-4 space-y-4"
               >
                 <h3 className="text-lg font-bold text-white">Коуч-сессия успешно завершена!</h3>
-                <p className="text-xs text-[#7A8A9E] max-w-md mx-auto">
+                <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
                   Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
@@ -979,7 +979,7 @@ export default function CoachPage() {
                     onChange={e => setInput(e.target.value)}
                     disabled={loading || isTyping}
                     placeholder="Напишите ответ..."
-                    className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#C4A484]/30 text-white placeholder:text-[#7A8A9E] chat-input"
+                    className="flex-1 h-12 px-4 rounded-xl border border-white/10 bg-[#080C14]/70 outline-none focus:border-[#C4A484]/30 text-white placeholder:text-[var(--text-muted)] chat-input"
                   />
                   <button
                     type="submit"
@@ -1006,8 +1006,8 @@ export default function CoachPage() {
               onClick={() => setActiveTab('wheel')}
               className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
                 activeTab === 'wheel'
-                  ? 'bg-[#3B82F6] text-white shadow-lg shadow-[#3B82F6]/30 border border-white/10'
-                  : 'text-[#7A8A9E] hover:text-white hover:bg-white/5'
+                  ? 'bg-[var(--accent-brown)] text-white shadow-lg shadow-[#3B82F6]/30 border border-white/10'
+                  : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
               }`}
             >
               <Compass className="h-4 w-4" />
@@ -1018,7 +1018,7 @@ export default function CoachPage() {
               className={`flex-1 py-2 px-3 text-xs font-sans font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 ${
                 activeTab === 'pyramid'
                   ? 'bg-[#EAB308] text-white shadow-lg shadow-[#EAB308]/30 border border-white/10'
-                  : 'text-[#7A8A9E] hover:text-white hover:bg-white/5'
+                  : 'text-[var(--text-muted)] hover:text-white hover:bg-white/5'
               }`}
             >
               <Activity className="h-4 w-4" />
@@ -1027,7 +1027,7 @@ export default function CoachPage() {
             <button
               onClick={() => setIsWheelHovered(true)}
               title="Развернуть на весь экран"
-              className="h-9 w-9 shrink-0 flex items-center justify-center text-[#7A8A9E] hover:text-white hover:bg-white/5 rounded-xl border border-white/5 ml-1 transition"
+              className="h-9 w-9 shrink-0 flex items-center justify-center text-[var(--text-muted)] hover:text-white hover:bg-white/5 rounded-xl border border-white/5 ml-1 transition"
             >
               <Maximize2 className="h-4 w-4" />
             </button>
@@ -1065,7 +1065,7 @@ export default function CoachPage() {
       <div className="lg:hidden fixed bottom-24 right-6 z-40">
         <button
           onClick={() => setShowVocationModal(true)}
-          className="h-12 w-12 rounded-full bg-[#3B82F6] text-white flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)] border border-[#3B82F6]/30 hover:bg-[#2563EB] transition active:scale-95 duration-200"
+          className="h-12 w-12 rounded-full bg-[var(--accent-brown)] text-white flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)] border border-[#3B82F6]/30 hover:bg-[#2563EB] transition active:scale-95 duration-200"
         >
           <Compass className="h-6 w-6 animate-[spin_10s_linear_infinite]" />
         </button>
@@ -1099,8 +1099,8 @@ export default function CoachPage() {
                       onClick={() => setActiveTab('wheel')}
                       className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
                         activeTab === 'wheel'
-                          ? 'bg-[#3B82F6] text-white shadow-sm'
-                          : 'text-[#7A8A9E] hover:text-white'
+                          ? 'bg-[var(--accent-brown)] text-white shadow-sm'
+                          : 'text-[var(--text-muted)] hover:text-white'
                       }`}
                     >
                       Колесо талантов
@@ -1110,7 +1110,7 @@ export default function CoachPage() {
                       className={`flex-1 py-2 px-3 text-[11px] font-sans font-bold rounded-xl transition-all duration-300 ${
                         activeTab === 'pyramid'
                           ? 'bg-[#EAB308] text-white shadow-sm'
-                          : 'text-[#7A8A9E] hover:text-white'
+                          : 'text-[var(--text-muted)] hover:text-white'
                       }`}
                     >
                       Пирамида целей

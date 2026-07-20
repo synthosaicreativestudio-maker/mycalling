@@ -68,7 +68,7 @@ export default function FormattedContent({ content }: FormattedContentProps) {
                 </div>
                 {/* Правая колонка: карточка шага */}
                 <div className="flex-1 p-3.5 rounded-2xl bg-gradient-to-r from-white/[0.03] to-transparent border border-white/5 shadow-inner transition hover:from-white/[0.05]">
-                  <div className="text-sm text-[#E8ECF0] leading-relaxed">
+                  <div className="text-sm text-[var(--text-primary)] leading-relaxed">
                     {parseInlineElements(rest)}
                   </div>
                 </div>
@@ -78,7 +78,7 @@ export default function FormattedContent({ content }: FormattedContentProps) {
 
           // Рендерим обычные вводные или итоговые строки внутри плана
           return (
-            <p key={i} className="text-sm text-[#E8ECF0] leading-relaxed pl-1">
+            <p key={i} className="text-sm text-[var(--text-primary)] leading-relaxed pl-1">
               {parseInlineElements(line)}
             </p>
           );
@@ -97,17 +97,17 @@ export default function FormattedContent({ content }: FormattedContentProps) {
           const rest = listMatch[2];
           return (
             <div key={i} className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 shadow-inner my-1 transition hover:bg-white/[0.04]">
-              <div className="h-6 w-6 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5">
+              <div className="h-6 w-6 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[var(--accent-brown)] flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5">
                  {num}
               </div>
-              <div className="text-sm text-[#E8ECF0] leading-relaxed flex-1">
+              <div className="text-sm text-[var(--text-primary)] leading-relaxed flex-1">
                 {parseInlineElements(rest)}
               </div>
             </div>
           );
         }
         return (
-          <p key={i} className="text-sm text-[#E8ECF0] leading-relaxed">
+          <p key={i} className="text-sm text-[var(--text-primary)] leading-relaxed">
             {parseInlineElements(line)}
           </p>
         );

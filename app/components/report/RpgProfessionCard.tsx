@@ -42,20 +42,20 @@ export default function RpgProfessionCard({ name, score, why, variants }: RpgPro
       <div className="absolute top-0 right-0 w-24 h-24 bg-[#3B82F6]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none" />
       
       <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] group-hover:scale-105 group-hover:bg-[#3B82F6] group-hover:text-white transition duration-300 shadow-inner">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[var(--accent-brown)] group-hover:scale-105 group-hover:bg-[var(--accent-brown)] group-hover:text-white transition duration-300 shadow-inner">
           <Compass className="h-5.5 w-5.5" />
         </div>
 
         <div className="space-y-1 flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="font-extrabold text-white text-xs md:text-sm truncate leading-snug font-sans group-hover:text-[#3B82F6] transition">
+            <h3 className="font-extrabold text-white text-xs md:text-sm truncate leading-snug font-sans group-hover:text-[var(--accent-brown)] transition">
               {name}
             </h3>
-            <span className="shrink-0 text-[9px] font-black px-2 py-0.5 bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 rounded-full font-sans tracking-wide">
+            <span className="shrink-0 text-[9px] font-black px-2 py-0.5 bg-[#3B82F6]/10 text-[var(--accent-brown)] border border-[#3B82F6]/20 rounded-full font-sans tracking-wide">
               {score}%
             </span>
           </div>
-          <p className="text-[10px] text-[#7A8A9E] leading-relaxed line-clamp-3">
+          <p className="text-[10px] text-[var(--text-muted)] leading-relaxed line-clamp-3">
             {why}
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function RpgProfessionCard({ name, score, why, variants }: RpgPro
 
       {stats && (
         <div className="border-t border-white/5 pt-3.5 space-y-2">
-          <span className="text-[8px] uppercase tracking-widest font-extrabold text-[#7A8A9E] block mb-1 font-sans">Профиль по RIASEC</span>
+          <span className="text-[8px] uppercase tracking-widest font-extrabold text-[var(--text-muted)] block mb-1 font-sans">Профиль по RIASEC</span>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between text-[9px] font-bold text-white/70">
@@ -99,14 +99,14 @@ export default function RpgProfessionCard({ name, score, why, variants }: RpgPro
 
       {fan.length > 0 && (
         <div className="border-t border-white/5 pt-3">
-          <span className="text-[8px] uppercase tracking-widest font-extrabold text-[#7A8A9E] block mb-1.5 font-sans">
+          <span className="text-[8px] uppercase tracking-widest font-extrabold text-[var(--text-muted)] block mb-1.5 font-sans">
             Близкие специализации
           </span>
           <div className="flex flex-wrap gap-1.5">
             {fan.map((v, i) => (
               <span
                 key={i}
-                className="text-[9px] font-semibold text-[#7A8A9E] bg-white/5 border border-white/5 rounded-full px-2 py-0.5"
+                className="text-[9px] font-semibold text-[var(--text-muted)] bg-white/5 border border-white/5 rounded-full px-2 py-0.5"
               >
                 {v}
               </span>

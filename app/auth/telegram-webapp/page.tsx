@@ -74,7 +74,7 @@ export default function TelegramWebAppPage() {
         }}
       />
       
-      <main className="min-h-screen bg-[#040508] text-[#E8ECF0] flex flex-col items-center justify-center px-6 relative overflow-hidden font-sans">
+      <main className="min-h-screen bg-[#040508] text-[var(--text-primary)] flex flex-col items-center justify-center px-6 relative overflow-hidden font-sans">
         
         {/* Декоративное космическое свечение */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#3B82F6]/10 rounded-full blur-[100px] pointer-events-none z-0" />
@@ -84,14 +84,14 @@ export default function TelegramWebAppPage() {
           {/* Логотип */}
           <div className="relative">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-b from-white/10 to-transparent border border-white/10 shadow-inner flex items-center justify-center">
-              <Smartphone className="h-10 w-10 text-[#3B82F6]" />
+              <Smartphone className="h-10 w-10 text-[var(--accent-brown)]" />
             </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#3B82F6] rounded-full animate-ping opacity-75" />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent-brown)] rounded-full animate-ping opacity-75" />
           </div>
 
           <div className="space-y-2">
             <h1 className="text-xl font-bold text-white tracking-tight">Подключение профиля</h1>
-            <p className="text-sm text-[#7A8A9E] leading-relaxed px-4">
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed px-4">
               Поделитесь контактом, чтобы бот платформы «МоёПризвание» привязал результаты диагностики к вашей сессии.
             </p>
           </div>
@@ -106,7 +106,7 @@ export default function TelegramWebAppPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   onClick={handleShareContact}
-                  className="w-full h-14 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold text-base shadow-[0_0_25px_rgba(59,130,246,0.3)] transition duration-200 flex items-center justify-center gap-2 border border-white/10"
+                  className="w-full h-14 rounded-2xl bg-[var(--accent-brown)] hover:bg-[#2563EB] text-white font-semibold text-base shadow-[0_0_25px_rgba(59,130,246,0.3)] transition duration-200 flex items-center justify-center gap-2 border border-white/10"
                 >
                   <Smartphone className="h-5 w-5" />
                   <span>Поделиться контактом</span>
@@ -121,7 +121,7 @@ export default function TelegramWebAppPage() {
                   exit={{ opacity: 0 }}
                   className="flex flex-col items-center gap-3"
                 >
-                  <Loader className="h-8 w-8 text-[#3B82F6] animate-spin" />
+                  <Loader className="h-8 w-8 text-[var(--accent-brown)] animate-spin" />
                   <span className="text-sm text-white/70">Ожидание подтверждения...</span>
                 </motion.div>
               )}
@@ -136,7 +136,7 @@ export default function TelegramWebAppPage() {
                 >
                   <CheckCircle className="h-12 w-12" />
                   <span className="text-base font-bold text-white">Профиль успешно подключен!</span>
-                  <span className="text-xs text-[#7A8A9E]">Это окно автоматически закроется</span>
+                  <span className="text-xs text-[var(--text-muted)]">Это окно автоматически закроется</span>
                 </motion.div>
               )}
 

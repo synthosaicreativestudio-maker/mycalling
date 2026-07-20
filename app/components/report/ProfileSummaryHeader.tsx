@@ -37,9 +37,9 @@ export default function ProfileSummaryHeader({ hollandCode, topSignatureStrength
           key={i}
           className="inline-flex items-center gap-2.5 rounded-2xl border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-4 py-2.5"
         >
-          <span className="text-[#3B82F6] theme-accent-text">{badge.icon}</span>
+          <span className="text-[var(--accent-brown)] theme-accent-text">{badge.icon}</span>
           <div className="flex flex-col leading-tight">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-[#7A8A9E]">{badge.label}</span>
+            <span className="text-[10px] uppercase tracking-wider font-bold text-[var(--text-muted)]">{badge.label}</span>
             <span className="text-sm font-bold text-white">{badge.value}</span>
           </div>
         </div>

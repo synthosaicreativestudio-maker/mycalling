@@ -61,18 +61,18 @@ export default function CabinetProgress({ progress, session, handleLogout, total
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white font-sans flex items-center justify-center gap-2">
-            <User className="h-7 w-7 text-[#3B82F6]" />
+            <User className="h-7 w-7 text-[var(--accent-brown)]" />
             Личный кабинет
           </h1>
-          <p className="text-sm text-[#7A8A9E]">Управляйте вашим профилем и прогрессом диагностики</p>
+          <p className="text-sm text-[var(--text-muted)]">Управляйте вашим профилем и прогрессом диагностики</p>
         </div>
 
         {/* Profile info */}
         <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
-            <div className="text-xs text-[#7A8A9E] font-medium font-sans">Вы вошли как:</div>
+            <div className="text-xs text-[var(--text-muted)] font-medium font-sans">Вы вошли как:</div>
             <div className="text-sm font-bold text-white font-sans">{userName}</div>
-            <div className="text-xs text-[#7A8A9E] flex items-center gap-1">
+            <div className="text-xs text-[var(--text-muted)] flex items-center gap-1">
               <Phone className="h-3 w-3 shrink-0" /> {userPhone}
             </div>
           </div>
@@ -89,8 +89,8 @@ export default function CabinetProgress({ progress, session, handleLogout, total
         {/* Progress bar */}
         <div className="space-y-3">
           <div className="flex justify-between items-center text-xs font-bold font-sans">
-            <span className="text-[#7A8A9E]">Ваш прогресс диагностики</span>
-            <span className="text-[#3B82F6]">{totalProgress}%</span>
+            <span className="text-[var(--text-muted)]">Ваш прогресс диагностики</span>
+            <span className="text-[var(--accent-brown)]">{totalProgress}%</span>
           </div>
           <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden">
             <div 
@@ -142,7 +142,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                 {progress.coachCompleted && <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />}
               </div>
               <h3 className="text-sm font-bold text-white font-sans">Диалог с наставником Романом</h3>
-              <p className="text-xs text-[#7A8A9E] leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                 Персональный интерактивный чат по методологиям CLEAR и WOOP для выявления ваших целей, сильных качеств и эмоций.
               </p>
             </div>
@@ -220,7 +220,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                   progress.testCompleted 
                     ? 'bg-green-500/15 text-green-400' 
                     : (progress.coachCompleted 
-                        ? 'bg-[#3B82F6]/15 text-[#3B82F6] animate-pulse' 
+                        ? 'bg-[#3B82F6]/15 text-[var(--accent-brown)] animate-pulse' 
                         : 'bg-white/5 text-slate-500'
                       )
                 }`}>
@@ -229,7 +229,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                 {progress.testCompleted && <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />}
               </div>
               <h3 className="text-sm font-bold text-white font-sans">Интерактивные опросники способностей</h3>
-              <p className="text-xs text-[#7A8A9E] leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                 Определение вашего типа мышления (RIASEC), командных ролей, ценностей и ведущих интересов по интерактивной шкале.
               </p>
               {/* Главы игрового квеста тестирования (Д-8) */}
@@ -241,7 +241,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                     className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-semibold ${
                       progress.testCompleted
                         ? 'border-green-500/20 bg-green-500/10 text-green-400'
-                        : 'border-white/10 bg-white/[0.03] text-[#7A8A9E]'
+                        : 'border-white/10 bg-white/[0.03] text-[var(--text-muted)]'
                     }`}
                   >
                     <span>{chapter.emoji}</span>
@@ -283,7 +283,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                 >
                   <Link
                     href="/assessment"
-                    className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold font-sans transition duration-300 w-full"
+                    className="flex items-center justify-center gap-1.5 px-5 py-3 bg-[var(--accent-brown)] hover:bg-[#2563EB] text-white text-xs font-bold font-sans transition duration-300 w-full"
                   >
                     <span>Начать тесты</span>
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -329,7 +329,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                 </span>
               </div>
               <h3 className="text-sm font-bold text-white font-sans">Итоговый ИИ-отчёт и Карта Призвания</h3>
-              <p className="text-xs text-[#7A8A9E] leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                 Полная расшифровка вашего психологического портрета, 3 рекомендуемые ИИ профессии и советы по развитию сильных сторон.
               </p>
             </div>
