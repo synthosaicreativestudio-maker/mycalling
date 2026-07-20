@@ -111,11 +111,59 @@ export function matchProfessions(
   return scored.map(({ profession, matchScore }) => ({ profession, matchScore }));
 }
 
-/** Топ-N максимально подходящих профессий (по умолчанию 20). */
+/**
+ * Топ-N максимально подходящих профессий (по умолчанию 20), СВЁРНУТЫХ по
+ * архетипу (docs/22 §5, «подача архетипами»): если у одного архетипа совпало
+ * несколько специализаций, в топ попадает только лучшая — чтобы список не
+ * засорялся однотипными ролями (5 вариантов юриста → один «Юрист»). Профессии
+ * без archetype группируются по собственному id, т.е. остаются как есть —
+ * поведение обратно совместимо, пока поле не заполнено.
+ */
 export function topProfessions(
   riasec: Record<string, number>,
   bigFive: Record<string, number | boolean>,
   n = 20,
 ): ProfessionMatch[] {
-  return matchProfessions(riasec, bigFive).slice(0, Math.max(0, n));
+  const ranked = matchProfessions(riasec, bigFive);
+  const seen = new Set<string>();
+  const collapsed: ProfessionMatch[] = [];
+  for (const match of ranked) {
+    const key = match.profession.archetype || `id:${match.profession.id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    collapsed.push(match);
+    if (collapsed.length >= Math.max(0, n)) break;
+  }
+  return collapsed;
+}
+
+/**
+ * То же ранжирование, но с «веером» специализаций внутри каждого архетипа:
+ * лучшая специализация — `profession`, остальные совпавшие того же архетипа —
+ * в `variants` (по убыванию совпадения). Для карточки архетипа в отчёте, где
+ * под основной ролью показывается свёрнутый список родственных специализаций.
+ */
+export interface ArchetypeGroup extends ProfessionMatch {
+  variants: ProfessionMatch[];
+}
+
+export function topArchetypes(
+  riasec: Record<string, number>,
+  bigFive: Record<string, number | boolean>,
+  n = 20,
+): ArchetypeGroup[] {
+  const ranked = matchProfessions(riasec, bigFive);
+  const byKey = new Map<string, ArchetypeGroup>();
+  const order: string[] = [];
+  for (const match of ranked) {
+    const key = match.profession.archetype || `id:${match.profession.id}`;
+    const group = byKey.get(key);
+    if (group) {
+      group.variants.push(match);
+    } else {
+      byKey.set(key, { ...match, variants: [] });
+      order.push(key);
+    }
+  }
+  return order.slice(0, Math.max(0, n)).map((key) => byKey.get(key)!);
 }
