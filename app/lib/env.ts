@@ -51,4 +51,7 @@ export const env = {
   REDIS_URL: getEnvOptional('REDIS_URL'),
   /** Окружение (development / production) */
   NODE_ENV: getEnvOptional('NODE_ENV', 'development'),
+  /** Т-Банк (Тинькофф) Интернет-эквайринг / Биллинг */
+  TINKOFF_TERMINAL_KEY: getEnvOptional('TINKOFF_TERMINAL_KEY'),
+  TINKOFF_SECRET_KEY: getEnvOptional('TINKOFF_SECRET_KEY'),
 } as const;
