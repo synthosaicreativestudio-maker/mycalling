@@ -52,6 +52,21 @@
 
   /* Переменная для "пустого"/неактивного состояния SVG-заливок (Пирамида идентичности и т.п.) */
   --pyramid-idle-fill: rgba(255, 255, 255, 0.02);
+
+  /* Семантическая палитра (тесты/диагностика, стат-бары) — тёмная тема.
+     Значения совпадают с исходными утилитами Tailwind, чтобы тёмная тема не
+     изменилась; в светлой теме те же токены переопределяются на приглушённые
+     под капучино (см. блок оверрайдов ниже). */
+  --success: #10b981;         /* emerald/green-500 — «да/пройдено/успех» */
+  --success-strong: #34d399;  /* emerald-400 (текст/иконки) */
+  --danger: #f43f5e;          /* rose/red-500 — «нет/ошибка» */
+  --danger-strong: #fb7185;   /* rose-400 */
+  --warning: #eab308;         /* amber — «заблокировано/ввод кода» */
+  --category-pink: #ec4899;   /* pink — акцент категории теста */
+  /* Стат-бары карточки профессии (RIASEC-профиль) */
+  --stat-analytic: #3b82f6;
+  --stat-creative: #ec4899;
+  --stat-practical: #10b981;
 }
 
 html {
@@ -441,6 +456,18 @@ a:focus-visible {
   --riasec-startup: #A85128; /* насыщенный терракотовый */
   --riasec-outcome: #A67C52; /* карамельный золотой */
   --riasec-goal: #8D5B4C; /* капучино-коричневый */
+
+  /* Семантическая палитра — светлая тема капучино (приглушённые, читаемые на
+     бежевом фоне вместо кричащих неоновых emerald/rose/amber). */
+  --success: #386B52;         /* глубокий шалфейно-зелёный */
+  --success-strong: #2F5A45;
+  --danger: #8C2D19;          /* глубокий терракотово-красный */
+  --danger-strong: #A5382A;
+  --warning: #9E7437;         /* тёплый медово-ореховый */
+  --category-pink: #B85042;   /* терракотово-коралловый */
+  --stat-analytic: #8D5B4C;   /* капучино-коричневый */
+  --stat-creative: #B85042;   /* терракотово-коралловый */
+  --stat-practical: #386B52;  /* шалфейно-зелёный */
 }
 
 /* Оверрайды для контрастности второстепенных красных кнопок и ошибок в светлой теме */
@@ -459,6 +486,81 @@ a:focus-visible {
 [data-theme="light"] .hover\:bg-red-500\/20:hover {
   background-color: rgba(140, 45, 25, 0.15) !important;
 }
+
+/* ── Семантическая палитра тестов/диагностики в светлой теме ──
+   Кричащие неоновые emerald/rose/pink/amber в капучино-теме заменяются
+   приглушёнными токенами (--success / --danger / --category-pink / --warning).
+   Тёмная тема не затрагивается (оверрайды только под [data-theme="light"]). */
+
+/* success (emerald / green) */
+[data-theme="light"] .text-emerald-400,
+[data-theme="light"] .text-emerald-500,
+[data-theme="light"] .text-emerald-600,
+[data-theme="light"] .text-green-400,
+[data-theme="light"] .text-green-500 { color: var(--success) !important; }
+[data-theme="light"] .group:hover .group-hover\:text-emerald-300 { color: var(--success-strong) !important; }
+[data-theme="light"] .bg-emerald-500,
+[data-theme="light"] .bg-green-500,
+[data-theme="light"] .group:hover .group-hover\:bg-emerald-500 { background-color: var(--success) !important; }
+[data-theme="light"] .bg-emerald-500\/5,
+[data-theme="light"] .bg-green-500\/5,
+[data-theme="light"] .hover\:bg-emerald-500\/\[0\.02\]:hover { background-color: rgba(56, 107, 82, 0.06) !important; }
+[data-theme="light"] .bg-emerald-500\/10,
+[data-theme="light"] .bg-green-500\/10 { background-color: rgba(56, 107, 82, 0.10) !important; }
+[data-theme="light"] .bg-green-500\/15 { background-color: rgba(56, 107, 82, 0.15) !important; }
+[data-theme="light"] .border-emerald-500\/15,
+[data-theme="light"] .border-emerald-500\/20,
+[data-theme="light"] .border-green-500,
+[data-theme="light"] .border-green-500\/20 { border-color: rgba(56, 107, 82, 0.30) !important; }
+[data-theme="light"] .hover\:border-emerald-500\/40:hover { border-color: rgba(56, 107, 82, 0.45) !important; }
+
+/* danger (rose / red-500/600) */
+[data-theme="light"] .text-rose-400,
+[data-theme="light"] .text-red-500,
+[data-theme="light"] .text-red-600 { color: var(--danger) !important; }
+[data-theme="light"] .text-red-200,
+[data-theme="light"] .text-red-300\/90,
+[data-theme="light"] .group:hover .group-hover\:text-rose-300 { color: var(--danger-strong) !important; }
+[data-theme="light"] .bg-rose-500,
+[data-theme="light"] .group:hover .group-hover\:bg-rose-500 { background-color: var(--danger) !important; }
+[data-theme="light"] .bg-rose-500\/5,
+[data-theme="light"] .bg-red-500\/5,
+[data-theme="light"] .hover\:bg-rose-500\/\[0\.02\]:hover { background-color: rgba(140, 45, 25, 0.06) !important; }
+[data-theme="light"] .bg-rose-500\/10 { background-color: rgba(140, 45, 25, 0.10) !important; }
+[data-theme="light"] .hover\:bg-red-500\/30:hover,
+[data-theme="light"] .hover\:bg-red-500\/35:hover { background-color: rgba(140, 45, 25, 0.25) !important; }
+[data-theme="light"] .border-rose-500\/20,
+[data-theme="light"] .border-red-500\/30 { border-color: rgba(140, 45, 25, 0.28) !important; }
+[data-theme="light"] .hover\:border-rose-500\/40:hover { border-color: rgba(140, 45, 25, 0.45) !important; }
+
+/* category accent (pink) */
+[data-theme="light"] .text-pink-400 { color: var(--category-pink) !important; }
+[data-theme="light"] .bg-pink-500 { background-color: var(--category-pink) !important; }
+[data-theme="light"] .bg-pink-500\/5 { background-color: rgba(184, 80, 66, 0.06) !important; }
+[data-theme="light"] .bg-pink-500\/10 { background-color: rgba(184, 80, 66, 0.10) !important; }
+[data-theme="light"] .border-pink-500,
+[data-theme="light"] .border-pink-500\/20 { border-color: rgba(184, 80, 66, 0.30) !important; }
+
+/* warning (amber / #EAB308) */
+[data-theme="light"] .text-amber-400,
+[data-theme="light"] .text-amber-700,
+[data-theme="light"] .text-amber-900,
+[data-theme="light"] .text-\[\#EAB308\] { color: var(--warning) !important; }
+[data-theme="light"] .bg-amber-500\/5,
+[data-theme="light"] .bg-\[\#EAB308\]\/15 { background-color: rgba(158, 116, 55, 0.12) !important; }
+[data-theme="light"] .hover\:bg-amber-500\/20:hover { background-color: rgba(158, 116, 55, 0.20) !important; }
+[data-theme="light"] .border-amber-500\/20,
+[data-theme="light"] .border-\[\#EAB308\] { border-color: rgba(158, 116, 55, 0.35) !important; }
+
+/* stat-бары карточки профессии (blue/pink/green solid) */
+[data-theme="light"] .bg-blue-500 { background-color: var(--stat-analytic) !important; }
+[data-theme="light"] .bg-blue-500\/5 { background-color: rgba(141, 91, 76, 0.06) !important; }
+[data-theme="light"] .border-blue-500\/20 { border-color: rgba(141, 91, 76, 0.28) !important; }
+
+/* slate (второстепенный текст) */
+[data-theme="light"] .text-slate-300 { color: var(--text-primary) !important; }
+[data-theme="light"] .text-slate-400,
+[data-theme="light"] .text-slate-500 { color: var(--text-muted) !important; }
 
 /* Оверрайды для жестко захардкоженных утилит Tailwind в светлой теме */
 [data-theme="light"] .text-\[\#7A8A9E\] {
