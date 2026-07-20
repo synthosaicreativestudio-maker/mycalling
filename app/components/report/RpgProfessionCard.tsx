@@ -53,7 +53,12 @@ export default function RpgProfessionCard({ name, score, why, variants, breakdow
   const tier = profession?.tier ? TIER_BADGE[profession.tier] : null;
 
   return (
-    <div className="relative group overflow-hidden rounded-[24px] border border-white/5 bg-[#080C14]/40 hover:border-[var(--accent-wash-30)] hover:bg-[var(--accent-wash-5)] hover:shadow-[0_8px_30px_rgba(59,130,246,0.03)] transition-all duration-300 text-left">
+    <div className={`relative group overflow-hidden rounded-[24px] border bg-[#080C14]/40 hover:bg-[var(--accent-wash-5)] hover:shadow-[0_8px_30px_rgba(59,130,246,0.03)] transition-all duration-300 text-left ${open ? 'border-[var(--accent-wash-30)]' : 'border-white/5 hover:border-[var(--accent-wash-30)]'}`}>
+      {/* Полоса силы совпадения сверху (тема-осознанный акцент). */}
+      <div className="h-1 w-full bg-white/5">
+        <div className="h-full bg-[var(--accent-brown)] opacity-80 rounded-r-full transition-all duration-700" style={{ width: `${score}%` }} />
+      </div>
+
       {/* Шапка-кнопка: клик раскрывает карточку (docs/25 Трек B). */}
       <button
         type="button"
@@ -89,6 +94,20 @@ export default function RpgProfessionCard({ name, score, why, variants, breakdow
 
       {open && (
         <div className="px-5 pb-5 space-y-4 motion-safe:animate-[fadeIn_.3s_ease]">
+          {/* Контекст: индустрия + слой каталога */}
+          <div className="flex flex-wrap items-center gap-1.5 -mt-1">
+            {profession?.industry && (
+              <span className="text-[9px] font-semibold text-[var(--accent-brown)] bg-[var(--accent-wash-10)] border border-[var(--accent-wash-20)] rounded-full px-2 py-0.5">
+                {profession.industry}
+              </span>
+            )}
+            {tier && (
+              <span className="text-[9px] font-semibold text-[var(--text-muted)] bg-white/5 border border-white/5 rounded-full px-2 py-0.5">
+                {tier.icon} {tier.label}
+              </span>
+            )}
+          </div>
+
           {/* Удивительный факт */}
           {profession?.fact && (
             <div className="rounded-2xl bg-[var(--accent-wash-5)] border border-[var(--accent-wash-10)] p-3.5">
