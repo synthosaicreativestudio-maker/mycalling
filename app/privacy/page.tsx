@@ -1,6 +1,6 @@
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-24 z-10 relative bg-[#080C14]/90 backdrop-blur-md rounded-[32px] my-12 border border-[#3B82F6]/20 shadow-2xl">
+    <main className="mx-auto max-w-4xl px-6 py-24 z-10 relative bg-[#080C14]/90 backdrop-blur-md rounded-[32px] my-12 border border-[var(--accent-wash-20)] shadow-2xl">
       <h1 className="text-3xl font-extrabold text-white font-sans mb-8">Политика конфиденциальности и обработки персональных данных</h1>
       <div className="prose prose-invert text-[var(--text-muted)] max-w-none">
         <p>Мы серьезно относимся к защите данных пользователей, особенно несовершеннолетних.</p>

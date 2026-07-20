@@ -662,7 +662,7 @@ export default function CoachPage() {
       {/* progress top panel */}
       <div className="w-full max-w-7xl mb-6 shrink-0 sticky top-4 z-20 glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/15 dark:bg-[#040506]/15 backdrop-blur-xl">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-10 w-10 shrink-0 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center text-[var(--accent-brown)]">
+          <div className="h-10 w-10 shrink-0 bg-[var(--accent-wash-10)] rounded-xl flex items-center justify-center text-[var(--accent-brown)]">
             <Brain className="h-5 w-5 animate-pulse" />
           </div>
           <div className="min-w-0">
@@ -776,17 +776,17 @@ export default function CoachPage() {
                   className={`flex gap-3 max-w-[72%] ${isCoach ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
                 >
                   <div className={`h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold ${
-                    isCoach ? 'bg-[#3B82F6]/10 text-[var(--accent-brown)]' : 'bg-[var(--accent-brown)] text-white'
+                    isCoach ? 'bg-[var(--accent-wash-10)] text-[var(--accent-brown)]' : 'bg-[var(--accent-brown)] text-white'
                   }`}>
                     {isCoach ? <Brain className="h-4 w-4" /> : <User className="h-4 w-4" />}
                   </div>
                   <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
                     isCoach 
                       ? (isFinalStep && idx === messages.length - 1
-                          ? 'bg-[#0B1220]/95 text-white border-2 border-[#3B82F6]/30 rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
+                          ? 'bg-[#0B1220]/95 text-white border-2 border-[var(--accent-wash-30)] rounded-tl-none shadow-[0_8px_30px_rgba(0,0,0,0.5)] ring-1 ring-[#3B82F6]/10 relative overflow-hidden'
                           : 'bg-[#080C14]/80 text-[var(--text-primary)] border border-white/5 rounded-tl-none shadow-sm'
                         )
-                      : 'bg-[#3B82F6]/25 text-[var(--text-primary)] border border-[#3B82F6]/30 rounded-tr-none shadow-md'
+                      : 'bg-[var(--accent-wash-25)] text-[var(--text-primary)] border border-[var(--accent-wash-30)] rounded-tr-none shadow-md'
                   }`}>
                     {isCoach && isFinalStep && idx === messages.length - 1 && (
                       <div className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[var(--accent-brown)] mb-2">
@@ -798,7 +798,7 @@ export default function CoachPage() {
                     {/* Вывод ИИ-аватара на шаге 16 */}
                     {isCoach && isFinalStep && idx === messages.length - 1 && extractedData.avatarUrl && (
                       <div className="mt-4 mb-4 flex flex-col items-center gap-3">
-                        <div className="relative w-64 h-64 rounded-2xl overflow-hidden border border-[#3B82F6]/30 shadow-2xl bg-black/40">
+                        <div className="relative w-64 h-64 rounded-2xl overflow-hidden border border-[var(--accent-wash-30)] shadow-2xl bg-black/40">
                           {/* Внешний динамический URL (Pollinations AI) с неизвестными
                               размерами — next/image здесь неуместен (требует remotePatterns
                               и фикс. размеров). Обычный img оправдан. */}
@@ -815,7 +815,7 @@ export default function CoachPage() {
                     )}
 
                     {isCoach && step === 2 && !phoneConfirmed && idx === messages.length - 1 && (
-                      <div className="mt-4 p-4 rounded-xl bg-[#3B82F6]/5 border border-[#3B82F6]/15 space-y-3">
+                      <div className="mt-4 p-4 rounded-xl bg-[var(--accent-wash-5)] border border-[var(--accent-wash-15)] space-y-3">
                         <p className="text-xs font-bold text-[var(--accent-brown)] flex items-center gap-1.5">
                           <span>📲</span> Подключите удобный канал связи для получения отчета:
                         </p>
@@ -866,7 +866,7 @@ export default function CoachPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex gap-3 max-w-[90%] mr-auto"
               >
-                <div className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold bg-[#3B82F6]/10 text-[var(--accent-brown)]">
+                <div className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold bg-[var(--accent-wash-10)] text-[var(--accent-brown)]">
                   <Brain className="h-4 w-4" />
                 </div>
                 <div className="p-5 rounded-2xl text-sm leading-relaxed bg-[#080C14]/80 text-[var(--text-primary)] border border-white/5 rounded-tl-none shadow-sm space-y-4 max-w-xl">
@@ -921,7 +921,7 @@ export default function CoachPage() {
 
             {isTyping && (
               <div className="flex gap-3 max-w-[80%] mr-auto">
-                <div className="h-8 w-8 rounded-full bg-[#3B82F6]/10 text-[var(--accent-brown)] flex items-center justify-center">
+                <div className="h-8 w-8 rounded-full bg-[var(--accent-wash-10)] text-[var(--accent-brown)] flex items-center justify-center">
                   <Brain className="h-4 w-4" />
                 </div>
                 <div className="p-4 rounded-2xl bg-[#080C14]/80 border border-white/5 rounded-tl-none shadow-sm flex items-center gap-1.5">
@@ -1065,7 +1065,7 @@ export default function CoachPage() {
       <div className="lg:hidden fixed bottom-24 right-6 z-40">
         <button
           onClick={() => setShowVocationModal(true)}
-          className="h-12 w-12 rounded-full bg-[var(--accent-brown)] text-white flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)] border border-[#3B82F6]/30 hover:bg-[#2563EB] transition active:scale-95 duration-200"
+          className="h-12 w-12 rounded-full bg-[var(--accent-brown)] text-white flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)] border border-[var(--accent-wash-30)] hover:bg-[#2563EB] transition active:scale-95 duration-200"
         >
           <Compass className="h-6 w-6 animate-[spin_10s_linear_infinite]" />
         </button>

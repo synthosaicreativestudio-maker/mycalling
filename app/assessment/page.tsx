@@ -15,11 +15,11 @@ const themeStyles: Record<string, {
 }> = {
   SPACE: {
     bgClass: 'from-[#02050c] via-[#081121] to-[#02050c]',
-    glowClass: 'shadow-[0_0_50px_rgba(59,130,246,0.12)] border-[#3B82F6]/20',
+    glowClass: 'shadow-[0_0_50px_rgba(59,130,246,0.12)] border-[var(--accent-wash-20)]',
     title: 'Космическая Одиссея',
     subtitle: 'Исследование вашего потенциала',
-    badgeColor: 'border-blue-500/20 bg-blue-500/5 text-[#60A5FA]',
-    cardActiveBorder: 'border-[var(--accent-brown)] bg-[#3B82F6]/10 text-white shadow-sm',
+    badgeColor: 'border-blue-500/20 bg-blue-500/5 text-[var(--accent-sky)]',
+    cardActiveBorder: 'border-[var(--accent-brown)] bg-[var(--accent-wash-10)] text-white shadow-sm',
     accentColor: '#3B82F6'
   },
   CREATIVE: {
@@ -461,7 +461,7 @@ export default function AssessmentPage() {
                     key={key} 
                     className={`rounded-xl border p-2.5 transition duration-200 ${
                       isCurrent 
-                        ? 'border-[var(--accent-brown)] bg-[#3B82F6]/5 text-white' 
+                        ? 'border-[var(--accent-brown)] bg-[var(--accent-wash-5)] text-white' 
                         : isPassed 
                           ? 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400' 
                           : 'border-white/5 bg-white/[0.01] text-[var(--text-muted)]'

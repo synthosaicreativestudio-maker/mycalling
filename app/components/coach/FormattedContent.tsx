@@ -14,7 +14,7 @@ export const parseInlineElements = (text: string) => {
           return (
             <span 
               key={idx} 
-              className="inline-block px-2 py-0.5 mx-0.5 rounded bg-[#3B82F6]/10 text-[#60A5FA] font-sans text-xs border border-[#3B82F6]/25 font-bold shadow-[0_0_10px_rgba(59,130,246,0.1)]"
+              className="inline-block px-2 py-0.5 mx-0.5 rounded bg-[var(--accent-wash-10)] text-[var(--accent-sky)] font-sans text-xs border border-[var(--accent-wash-25)] font-bold shadow-[0_0_10px_rgba(59,130,246,0.1)]"
             >
               {clean}
             </span>
@@ -97,7 +97,7 @@ export default function FormattedContent({ content }: FormattedContentProps) {
           const rest = listMatch[2];
           return (
             <div key={i} className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 shadow-inner my-1 transition hover:bg-white/[0.04]">
-              <div className="h-6 w-6 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[var(--accent-brown)] flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5">
+              <div className="h-6 w-6 rounded-full bg-[var(--accent-wash-10)] border border-[var(--accent-wash-20)] text-[var(--accent-brown)] flex items-center justify-center text-xs font-extrabold shrink-0 mt-0.5">
                  {num}
               </div>
               <div className="text-sm text-[var(--text-primary)] leading-relaxed flex-1">

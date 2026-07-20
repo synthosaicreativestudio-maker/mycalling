@@ -38,11 +38,11 @@ export default function RpgProfessionCard({ name, score, why, variants }: RpgPro
   const fan = (variants ?? []).filter((v) => v && v !== name);
 
   return (
-    <div className="relative group overflow-hidden rounded-[24px] border border-white/5 bg-[#080C14]/40 p-5 space-y-4 hover:border-[#3B82F6]/30 hover:bg-[#3B82F6]/5 hover:shadow-[0_8px_30px_rgba(59,130,246,0.03)] transition-all duration-300 text-left">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-[#3B82F6]/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none" />
+    <div className="relative group overflow-hidden rounded-[24px] border border-white/5 bg-[#080C14]/40 p-5 space-y-4 hover:border-[var(--accent-wash-30)] hover:bg-[var(--accent-wash-5)] hover:shadow-[0_8px_30px_rgba(59,130,246,0.03)] transition-all duration-300 text-left">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--accent-wash-5)] rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition duration-500 pointer-events-none" />
       
       <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[var(--accent-brown)] group-hover:scale-105 group-hover:bg-[var(--accent-brown)] group-hover:text-white transition duration-300 shadow-inner">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent-wash-10)] border border-[var(--accent-wash-20)] text-[var(--accent-brown)] group-hover:scale-105 group-hover:bg-[var(--accent-brown)] group-hover:text-white transition duration-300 shadow-inner">
           <Compass className="h-5.5 w-5.5" />
         </div>
 
@@ -51,7 +51,7 @@ export default function RpgProfessionCard({ name, score, why, variants }: RpgPro
             <h3 className="font-extrabold text-white text-xs md:text-sm truncate leading-snug font-sans group-hover:text-[var(--accent-brown)] transition">
               {name}
             </h3>
-            <span className="shrink-0 text-[9px] font-black px-2 py-0.5 bg-[#3B82F6]/10 text-[var(--accent-brown)] border border-[#3B82F6]/20 rounded-full font-sans tracking-wide">
+            <span className="shrink-0 text-[9px] font-black px-2 py-0.5 bg-[var(--accent-wash-10)] text-[var(--accent-brown)] border border-[var(--accent-wash-20)] rounded-full font-sans tracking-wide">
               {score}%
             </span>
           </div>

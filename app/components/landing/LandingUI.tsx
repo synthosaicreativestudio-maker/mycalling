@@ -82,7 +82,7 @@ export function UspCard({ icon, title, text }: { icon: ReactNode; title: string;
 export function ForWhomCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
     <div className="glass-card rounded-[22px] p-6 flex flex-col h-full space-y-4">
-      <div className="w-12 h-12 rounded-2xl bg-[#1E3A5F]/20 border border-[#3B82F6]/20 flex items-center justify-center shadow-sm shrink-0">
+      <div className="w-12 h-12 rounded-2xl bg-[#1E3A5F]/20 border border-[var(--accent-wash-20)] flex items-center justify-center shadow-sm shrink-0">
         {icon}
       </div>
       <h3 className="text-lg font-bold text-white font-sans">{title}</h3>
@@ -95,7 +95,7 @@ export function TrustCard({ number, label, desc }: { number: string; label: stri
   return (
     <div className="glass-card rounded-[22px] p-6 text-center flex flex-col h-full space-y-3">
       <div className="text-4xl font-extrabold text-[var(--accent-brown)] font-sans">{number}</div>
-      <div className="text-sm font-bold uppercase tracking-wider text-[#60A5FA]">{label}</div>
+      <div className="text-sm font-bold uppercase tracking-wider text-[var(--accent-sky)]">{label}</div>
       <p className="text-sm text-[var(--text-muted)] leading-relaxed font-sans flex-grow">{desc}</p>
     </div>
   );
@@ -129,7 +129,7 @@ export function FaqItem({ question, answer }: { question: string; answer: string
 export function ReviewCard({ author, text }: { author: string; text: string }) {
   return (
     <div className="glass-card rounded-[22px] p-6 flex flex-col h-full space-y-4">
-      <div className="flex text-[#60A5FA] shrink-0">
+      <div className="flex text-[var(--accent-sky)] shrink-0">
         {Array.from({ length: 5 }).map((_, i) => (
           <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />

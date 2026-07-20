@@ -18,7 +18,7 @@ export default function NotFound() {
 
       <Link
         href="/"
-        className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[var(--accent-brown)] hover:bg-[#2563EB] text-white transition font-medium shadow-lg shadow-[#3B82F6]/20 border border-[#3B82F6]/30 hover:scale-[1.02] active:scale-[0.98]"
+        className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-[var(--accent-brown)] hover:bg-[#2563EB] text-white transition font-medium shadow-lg shadow-[#3B82F6]/20 border border-[var(--accent-wash-30)] hover:scale-[1.02] active:scale-[0.98]"
       >
         <Home className="h-4 w-4" />
         Вернуться на главную

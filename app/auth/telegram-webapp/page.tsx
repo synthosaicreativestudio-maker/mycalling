@@ -77,7 +77,7 @@ export default function TelegramWebAppPage() {
       <main className="min-h-screen bg-[#040508] text-[var(--text-primary)] flex flex-col items-center justify-center px-6 relative overflow-hidden font-sans">
         
         {/* Декоративное космическое свечение */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#3B82F6]/10 rounded-full blur-[100px] pointer-events-none z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[var(--accent-wash-10)] rounded-full blur-[100px] pointer-events-none z-0" />
         
         <div className="w-full max-w-sm flex flex-col items-center text-center relative z-10 space-y-8">
           

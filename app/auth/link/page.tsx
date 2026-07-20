@@ -103,7 +103,7 @@ function LinkCard() {
       {status === 'PENDING' && (
         <>
           {/* QR-код */}
-          <div className="mx-auto w-[240px] h-[240px] bg-white rounded-3xl p-2.5 flex items-center justify-center shadow-md border border-[#3B82F6]/20">
+          <div className="mx-auto w-[240px] h-[240px] bg-white rounded-3xl p-2.5 flex items-center justify-center shadow-md border border-[var(--accent-wash-20)]">
             <QRCodeSVG
               value={qrLink}
               size={220}

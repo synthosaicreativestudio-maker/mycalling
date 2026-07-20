@@ -34,7 +34,7 @@ export default function SkillFormulaCard({ skills, applications }: SkillFormulaC
       <div className="flex flex-wrap items-center gap-3 mb-6">
         {skills.map((skill, idx) => (
           <div key={skill.code} className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-4 py-2 text-sm font-bold text-white">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-wash-20)] bg-[var(--accent-wash-5)] px-4 py-2 text-sm font-bold text-white">
               {skill.nameRu}
             </span>
             {idx < skills.length - 1 && (

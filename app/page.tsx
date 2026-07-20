@@ -201,9 +201,9 @@ export default function HomePage() {
                 variants={fadeUpVariants}
                 className="glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden"
               >
-                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">01</div>
+                <div className="absolute top-4 right-4 text-xs font-extrabold text-[var(--accent-wash-20)]">01</div>
                 <div className="space-y-4">
-                  <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 flex items-center justify-center text-[var(--accent-brown)]">
+                  <div className="h-12 w-12 rounded-2xl bg-[var(--accent-wash-10)] flex items-center justify-center text-[var(--accent-brown)]">
                     <Brain className="h-6 w-6" />
                   </div>
                   <h3 className="text-xl font-bold text-white">Нейрокоуч-сессия</h3>
@@ -225,9 +225,9 @@ export default function HomePage() {
                 className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden ${coachCompleted ? '' : 'opacity-60 pointer-events-none'
                   }`}
               >
-                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">02</div>
+                <div className="absolute top-4 right-4 text-xs font-extrabold text-[var(--accent-wash-20)]">02</div>
                 <div className="space-y-4">
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted ? 'bg-[#3B82F6]/10 text-[var(--accent-brown)]' : 'bg-white/5 text-[var(--text-muted)]'
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted ? 'bg-[var(--accent-wash-10)] text-[var(--accent-brown)]' : 'bg-white/5 text-[var(--text-muted)]'
                     }`}>
                     {coachCompleted ? <Compass className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[var(--text-muted)]" />}
                   </div>
@@ -256,9 +256,9 @@ export default function HomePage() {
                 className={`glass-card rounded-[24px] p-8 flex flex-col justify-between min-h-[250px] relative overflow-hidden ${coachCompleted && testCompleted ? '' : 'opacity-60 pointer-events-none'
                   }`}
               >
-                <div className="absolute top-4 right-4 text-xs font-extrabold text-[#3B82F6]/20">03</div>
+                <div className="absolute top-4 right-4 text-xs font-extrabold text-[var(--accent-wash-20)]">03</div>
                 <div className="space-y-4">
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted && testCompleted ? 'bg-[#3B82F6]/10 text-[var(--accent-brown)]' : 'bg-white/5 text-[var(--text-muted)]'
+                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${coachCompleted && testCompleted ? 'bg-[var(--accent-wash-10)] text-[var(--accent-brown)]' : 'bg-white/5 text-[var(--text-muted)]'
                     }`}>
                     {coachCompleted && testCompleted ? <FileCheck className="h-6 w-6" /> : <Lock className="h-5 w-5 text-[var(--text-muted)]" />}
                   </div>
@@ -314,7 +314,7 @@ export default function HomePage() {
               </m.div>
               <m.div variants={fadeUpVariants} className="h-full">
                 <ForWhomCard
-                  icon={<Shield className="h-6 w-6 text-[#60A5FA]" />}
+                  icon={<Shield className="h-6 w-6 text-[var(--accent-sky)]" />}
                   title="Родителям"
                   text="Понятный отчёт с конкретными рекомендациями — без сложной психологической терминологии"
                 />
@@ -466,7 +466,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="border-t border-[#3B82F6]/10 bg-[#040506]/85 relative z-10 backdrop-blur-md">
+      <footer className="border-t border-[var(--accent-wash-10)] bg-[#040506]/85 relative z-10 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-6 lg:px-10 py-12">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-6">

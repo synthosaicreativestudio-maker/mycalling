@@ -6,7 +6,7 @@ export default function Loading() {
       <div className="flex flex-col items-center gap-5">
         {/* Премиальный спиннер */}
         <div className="relative flex h-16 w-16 items-center justify-center">
-          <div className="absolute h-full w-full rounded-full border-2 border-[#3B82F6]/10"></div>
+          <div className="absolute h-full w-full rounded-full border-2 border-[var(--accent-wash-10)]"></div>
           <div className="absolute h-full w-full rounded-full border-t-2 border-[var(--accent-brown)] animate-spin"></div>
           <div className="h-8 w-8 rounded-full bg-white/5 animate-pulse"></div>
         </div>

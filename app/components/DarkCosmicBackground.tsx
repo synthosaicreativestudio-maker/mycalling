@@ -57,7 +57,7 @@ export function DarkCosmicBackground() {
       ) : (
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-[#040506] via-[#0A0F1C] to-[#0D1420]">
           {/* Размытые синие пятна — статичный аналог видео-фона для мобильных/reduced-motion */}
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#3B82F6]/10 blur-[100px]" />
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[var(--accent-wash-10)] blur-[100px]" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[#8D5B4C]/10 blur-[120px]" />
         </div>
       )}

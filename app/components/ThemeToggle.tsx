@@ -29,7 +29,7 @@ export function ThemeToggle() {
       aria-label="Переключить тему"
     >
       {theme === 'dark' ? (
-        <Sun className="h-4 w-4 text-[#60A5FA] hover:scale-110 transition duration-300" />
+        <Sun className="h-4 w-4 text-[var(--accent-sky)] hover:scale-110 transition duration-300" />
       ) : (
         <Moon className="h-4 w-4 text-[#8D5B4C] hover:scale-110 transition duration-300" />
       )}

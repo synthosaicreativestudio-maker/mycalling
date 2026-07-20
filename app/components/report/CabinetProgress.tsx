@@ -41,7 +41,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute top-0 right-0 w-72 h-72 bg-[#3B82F6]/10 rounded-full blur-[100px] pointer-events-none" 
+          className="absolute top-0 right-0 w-72 h-72 bg-[var(--accent-wash-10)] rounded-full blur-[100px] pointer-events-none" 
         />
         <motion.div 
           animate={{
@@ -198,7 +198,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
               progress.testCompleted 
                 ? 'bg-green-500/5 border-green-500/20' 
                 : (progress.coachCompleted 
-                    ? 'bg-[#3B82F6]/5 border-[#3B82F6]/20 shadow-[0_0_15px_rgba(59,130,246,0.03)]' 
+                    ? 'bg-[var(--accent-wash-5)] border-[var(--accent-wash-20)] shadow-[0_0_15px_rgba(59,130,246,0.03)]' 
                     : 'bg-white/[0.01] border-white/5 opacity-50'
                   )
             }`}
@@ -211,7 +211,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                   scale: [0.9, 1.1, 0.9]
                 }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-[#3B82F6]/10 blur-3xl pointer-events-none"
+                className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-[var(--accent-wash-10)] blur-3xl pointer-events-none"
               />
             )}
             <div className="space-y-1.5 flex-1 relative z-10">
@@ -220,7 +220,7 @@ export default function CabinetProgress({ progress, session, handleLogout, total
                   progress.testCompleted 
                     ? 'bg-green-500/15 text-green-400' 
                     : (progress.coachCompleted 
-                        ? 'bg-[#3B82F6]/15 text-[var(--accent-brown)] animate-pulse' 
+                        ? 'bg-[var(--accent-wash-15)] text-[var(--accent-brown)] animate-pulse' 
                         : 'bg-white/5 text-slate-500'
                       )
                 }`}>

@@ -44,7 +44,7 @@ export function ExitIntentPopup() {
           animate={{ scale: 1, y: 0, opacity: 1 }}
           exit={{ scale: 0.95, y: 20, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-lg rounded-[28px] bg-[#080C14]/95 p-8 shadow-[0_24px_64px_rgba(0,0,0,0.6)] border border-[#3B82F6]/20 backdrop-blur-md"
+          className="relative w-full max-w-lg rounded-[28px] bg-[#080C14]/95 p-8 shadow-[0_24px_64px_rgba(0,0,0,0.6)] border border-[var(--accent-wash-20)] backdrop-blur-md"
         >
           <button
             onClick={() => setIsVisible(false)}

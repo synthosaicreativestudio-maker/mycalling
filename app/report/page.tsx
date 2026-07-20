@@ -450,7 +450,7 @@ function ReportPageContent() {
           {/* Шапка отчета */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8 mb-8">
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--accent-brown)] font-sans">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-wash-20)] bg-[var(--accent-wash-5)] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--accent-brown)] font-sans">
                 <Award className="h-3.5 w-3.5 text-[var(--accent-brown)]" />
                 Итоговый отчет
               </div>
@@ -702,7 +702,7 @@ function ReportPageContent() {
                             {(c.testFact || c.coachFact) && (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                                 {c.testFact && (
-                                  <div className="rounded-xl border border-[#3B82F6]/20 bg-[#3B82F6]/5 p-2.5">
+                                  <div className="rounded-xl border border-[var(--accent-wash-20)] bg-[var(--accent-wash-5)] p-2.5">
                                     <span className="block text-[9px] uppercase tracking-wider font-extrabold text-[var(--accent-brown)] mb-0.5">Тесты</span>
                                     <span className="text-[11px] text-[#93A3B8] leading-snug">{c.testFact}</span>
                                   </div>
@@ -747,7 +747,7 @@ function ReportPageContent() {
                         <h4 className="text-xs uppercase tracking-wider font-bold text-[var(--accent-brown)] mb-3">Зоны развития</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           {report.growthAreas.map((g, i) => (
-                            <div key={i} className="flex items-start gap-2 rounded-xl border border-[#3B82F6]/15 bg-[#3B82F6]/5 p-3">
+                            <div key={i} className="flex items-start gap-2 rounded-xl border border-[var(--accent-wash-15)] bg-[var(--accent-wash-5)] p-3">
                               <Target className="h-3.5 w-3.5 mt-0.5 shrink-0 text-[var(--accent-brown)]" />
                               <span className="text-xs text-[var(--text-muted)] leading-relaxed">{g}</span>
                             </div>
@@ -901,7 +901,7 @@ function ReportPageContent() {
                       <div className="flex items-center gap-3 mb-3">
                         <Clock className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />
                         <h2 className="text-lg font-bold text-white">Склонность к прокрастинации</h2>
-                        <span className="ml-auto rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[var(--accent-brown)]">
+                        <span className="ml-auto rounded-full border border-[var(--accent-wash-30)] bg-[var(--accent-wash-10)] px-3 py-1 text-xs font-bold text-[var(--accent-brown)]">
                           {report.methodologyProfile.procrastination}/20
                         </span>
                       </div>
@@ -929,7 +929,7 @@ function ReportPageContent() {
                           <span className="text-xs uppercase tracking-widest font-extrabold text-[var(--text-muted)]">Чем увлекаешься по своей воле</span>
                           <div className="flex flex-wrap gap-2">
                             {report.methodologyProfile!.hobbies!.map((h, i) => (
-                              <span key={i} className="rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/10 px-3 py-1 text-xs font-semibold text-[var(--accent-brown)]">
+                              <span key={i} className="rounded-full border border-[var(--accent-wash-20)] bg-[var(--accent-wash-10)] px-3 py-1 text-xs font-semibold text-[var(--accent-brown)]">
                                 {h}
                               </span>
                             ))}
@@ -964,7 +964,7 @@ function ReportPageContent() {
                       <Compass className="h-5 w-5 text-[var(--accent-brown)]" />
                       <h2 className="text-lg font-bold text-white">Профессиональные интересы (RIASEC)</h2>
                       {report.hollandCode && (
-                        <span className="ml-auto rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[var(--accent-brown)]">
+                        <span className="ml-auto rounded-full border border-[var(--accent-wash-30)] bg-[var(--accent-wash-10)] px-3 py-1 text-xs font-bold text-[var(--accent-brown)]">
                           Твой код призвания: {report.hollandCode}
                         </span>
                       )}
