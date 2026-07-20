@@ -11,10 +11,14 @@ describe('professionExtras (docs/26 Этап 8, docs/25 Трек B)', () => {
   });
 
   it('fact не нарушает правило текста (без «ИИ»/«искусственный интеллект»)', () => {
+    // Блокируем аббревиатуру «ИИ» как отдельное слово и слово «искусственный»
+    // (маркер фразы «искусственный интеллект»). «Интеллектуальная собственность»
+    // и «нейросети» — легитимны и не флагаются.
+    const standaloneAI = /(^|[^А-Яа-яЁё])ИИ([^А-Яа-яЁё]|$)/;
     for (const [id, extra] of Object.entries(professionExtras)) {
       const text = `${extra.fact ?? ''} ${extra.salary ?? ''}`;
-      expect(/ИИ/.test(text), `${id}: содержит «ИИ»`).toBe(false);
-      expect(/искусственн|интеллект/i.test(text), `${id}: содержит «искусственный интеллект»`).toBe(false);
+      expect(standaloneAI.test(text), `${id}: содержит «ИИ»`).toBe(false);
+      expect(/искусственн/i.test(text), `${id}: содержит «искусственный интеллект»`).toBe(false);
     }
   });
 
