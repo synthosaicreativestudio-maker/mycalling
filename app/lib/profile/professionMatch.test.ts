@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { matchProfessions, topProfessions } from './professionMatch';
+import { matchProfessions, topProfessions, topArchetypes } from './professionMatch';
 import { professionsDb } from '../../data/professions_db';
 
 // Профиль сильного «исследователя-систематизатора» (I/C высокие, добросовестность
@@ -69,5 +69,38 @@ describe('topProfessions', () => {
 
   it('уважает параметр n', () => {
     expect(topProfessions(analyticalRiasec, analyticalBigFive, 5)).toHaveLength(5);
+  });
+
+  it('сворачивает по архетипу: без повторяющихся archetype в выдаче', () => {
+    const top = topProfessions(analyticalRiasec, analyticalBigFive, 20);
+    const keys = top.map((m) => m.profession.archetype ?? `id:${m.profession.id}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+});
+
+describe('topArchetypes (подача архетипами, docs/22 §5)', () => {
+  it('возвращает ровно n групп с уникальными архетипами', () => {
+    const groups = topArchetypes(analyticalRiasec, analyticalBigFive, 20);
+    expect(groups).toHaveLength(20);
+    const keys = groups.map((g) => g.profession.archetype ?? `id:${g.profession.id}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('внутри группы лучшая специализация — представитель (variants не выше по score)', () => {
+    topArchetypes(analyticalRiasec, analyticalBigFive, 20).forEach((g) => {
+      g.variants.forEach((v) => expect(g.matchScore).toBeGreaterThanOrEqual(v.matchScore));
+    });
+  });
+
+  it('покрывает всю базу: сумма представитель+веер = число профессий', () => {
+    const groups = topArchetypes(analyticalRiasec, analyticalBigFive, professionsDb.length);
+    const total = groups.reduce((s, g) => s + 1 + g.variants.length, 0);
+    expect(total).toBe(professionsDb.length);
+  });
+
+  it('детерминирован', () => {
+    const a = topArchetypes(socialRiasec, socialBigFive, 10).map((g) => g.profession.name);
+    const b = topArchetypes(socialRiasec, socialBigFive, 10).map((g) => g.profession.name);
+    expect(a).toEqual(b);
   });
 });
