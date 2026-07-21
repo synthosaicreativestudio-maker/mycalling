@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Ассеты и Иконки Сфер — МоёПризвание</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 40px; margin: 0; }
+        h1 { text-align: center; margin-bottom: 8px; font-size: 28px; color: #ffffff; }
+        p.subtitle { text-align: center; color: #94a3b8; margin-bottom: 40px; font-size: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; max-width: 1400px; margin: 0 auto; }
+        .card { background: #1e293b; border: 1px solid #334155; padding: 20px; border-radius: 16px; text-align: center; transition: transform 0.2s, border-color 0.2s; }
+        .card:hover { transform: translateY(-4px); border-color: #38bdf8; }
+        .card-img-wrap { 
+            background-color: #0f172a;
+            background-image: 
+                linear-gradient(45deg, #1e293b 25%, transparent 25%), 
+                linear-gradient(-45deg, #1e293b 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #1e293b 75%), 
+                linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 160px;
+        }
+        .card img { max-width: 100%; max-height: 140px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
+        .card h3 { margin: 0 0 6px 0; font-size: 16px; color: #f1f5f9; }
+        .card p { margin: 0; font-size: 12px; color: #38bdf8; font-weight: 600; }
+        .file-path { font-size: 11px; color: #64748b; margin-top: 6px; font-family: monospace; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <h1>3D-Ассеты Сфер Талантов и Профессий</h1>
+    <p class="subtitle">Каталог готовых 3D-значков проекта: <code>/public/assets/tree/webp/</code></p>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_creativity.webp" alt="Креатив"></div>
+            <h3>🎨 Творчество & Креатив</h3>
+            <p>Дизайн, искусство, медиа</p>
+            <div class="file-path">webp/icon_creativity.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_it.webp" alt="IT"></div>
+            <h3>💻 IT, Код & Программирование</h3>
+            <p>Разработка, сайты, приложения</p>
+            <div class="file-path">webp/icon_it.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_technology.webp" alt="Технологии"></div>
+            <h3>🤖 Технологии & ИИ</h3>
+            <p>Робототехника, AI, системы</p>
+            <div class="file-path">webp/icon_technology.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_science.webp" alt="Наука"></div>
+            <h3>🔬 Наука & Исследования</h3>
+            <p>Эксперименты, естественные науки</p>
+            <div class="file-path">webp/icon_science.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_business.webp" alt="Бизнес"></div>
+            <h3>🚀 Бизнес, Лидерство & Продажи</h3>
+            <p>Стартапы, менеджмент, рост</p>
+            <div class="file-path">webp/icon_business.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_engineering.webp" alt="Инженерия"></div>
+            <h3>⚙️ Инженерия & Проектирование</h3>
+            <p>Конструирование, механика</p>
+            <div class="file-path">webp/icon_engineering.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_law.webp" alt="Право"></div>
+            <h3>⚖️ Управление, Право & Порядок</h3>
+            <p>Юриспруденция, структура</p>
+            <div class="file-path">webp/icon_law.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_medicine.webp" alt="Медицина"></div>
+            <h3>🩺 Забота, Общество & Здоровье</h3>
+            <p>Медицина, помощь людям</p>
+            <div class="file-path">webp/icon_medicine.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_education.webp" alt="Образование"></div>
+            <h3>📚 Образование & Педагогика</h3>
+            <p>Наставничество, обучение</p>
+            <div class="file-path">webp/icon_education.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_ecology.webp" alt="Экология"></div>
+            <h3>🌿 Экология & Природа</h3>
+            <p>Окружающая среда, биосфера</p>
+            <div class="file-path">webp/icon_ecology.webp</div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrap"><img src="webp/icon_urban.webp" alt="Урбанистика"></div>
+            <h3>🏢 Урбанистика & Среда</h3>
+            <p>Архитектура, городская среда</p>
+            <div class="file-path">webp/icon_urban.webp</div>
+        </div>
+    </div>
+</body>
+</html>
