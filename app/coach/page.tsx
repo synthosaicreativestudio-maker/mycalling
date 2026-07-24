@@ -950,17 +950,30 @@ export default function CoachPage() {
               >
                 <h3 className="text-lg font-bold text-white">Коуч-сессия успешно завершена!</h3>
                 <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
-                  Вы отлично поработали с нейрокоучем. Теперь ваш цифровой профиль подготовлен для прохождения интерактивных тестов.
+                  Вы отлично поработали с нейрокоучем. Что дальше? Можно пройти интерактивные тесты
+                  или углубиться в глубокую сессию с наставником — <span className="text-[#C4A484]">и то, и другое дополняет ваш профиль</span>.
                 </p>
+                {/* Развилка после экспресса: тесты ИЛИ глубокая сессия (обе дособирают
+                    данные в Пирамиду, Колесо и отчёт). Глубокая доступна, только если
+                    ещё не пройдена (иначе не предлагаем повторно). */}
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
-                  <button 
+                  <button
                     type="button"
                     onClick={downloadPreliminaryReport}
                     className="bg-[#080C14]/80 hover:bg-[#121824] border border-[#C4A484]/30 text-[#C4A484] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
                   >
                     📥 Скачать резюме (PDF)
                   </button>
-                  <button 
+                  {extractedData.sessionMode !== 'DEEP' && !extractedData.deepSessionCompletedAt && (
+                    <button
+                      type="button"
+                      onClick={() => router.push('/coach?forceDeep=1')}
+                      className="bg-[#C4A484]/10 hover:bg-[#C4A484]/20 border border-[#C4A484]/40 text-[#EAD5C3] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                    >
+                      🧭 Глубокая сессия с наставником
+                    </button>
+                  )}
+                  <button
                     type="button"
                     onClick={handleNextStep}
                     className="cta-glass h-12 px-8 text-sm inline-flex items-center justify-center gap-2 w-full sm:w-auto"
