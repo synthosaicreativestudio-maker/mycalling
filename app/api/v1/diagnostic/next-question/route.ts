@@ -264,8 +264,20 @@ export async function GET(request: Request) {
             goal: deepReportSummary.goal || '',
             identity: deepReportSummary.identity || '',
             barriers: deepReportSummary.barriers || '',
-            firstStep: deepReportSummary.firstStep || ''
+            firstStep: deepReportSummary.firstStep || '',
+            // docs/31 Блок C1: outcome/emotions/actions раньше обрезались здесь —
+            // без них PyramidOfAlignment не может отрисовать все 7 ярусов на /report.
+            outcome: deepReportSummary.outcome || '',
+            emotions: deepReportSummary.emotions || '',
+            actions: deepReportSummary.actions || ''
           }
+        : null;
+
+      // docs/31 Блок C1: 7 шкал Колеса талантов из экспресс-коучинга — раньше
+      // никогда не попадали в JSON отчёта, поэтому WheelOfVocation невозможно
+      // было отрисовать на /report (компонент существовал только на /coach).
+      const talentScoresForReport = coachExtracted.expressExtracted?.talentScores && typeof coachExtracted.expressExtracted.talentScores === 'object'
+        ? coachExtracted.expressExtracted.talentScores
         : null;
 
       // Сначала очищаем старые результаты диагностик для этого пользователя
@@ -751,6 +763,7 @@ ${professionCandidatesForLlm}
           // Переопределяем детерминированно: не полагаемся на то, что модель дословно
           // скопирует уже готовый синтез без искажений/добавления цитат.
           deepSession: deepSessionForReport,
+          talentScores: talentScoresForReport,
           innerConflicts: innerConflictsForReport,
           archetype: archetype ? { nameRu: archetype.nameRu, superpower: archetype.superpower, evidence: archetype.evidence } : null,
           // P0.2 (аудит характеристик): раньше digitalProfile.summary считался и
@@ -891,6 +904,7 @@ ${professionCandidatesForLlm}
           // Простой структурный passthrough без дополнительного вызова ИИ — синтез уже
           // готов из deepReportSummary (см. app/api/v1/coach/chat/route.ts).
           deepSession: deepSessionForReport,
+          talentScores: talentScoresForReport,
           isFallback: true
         };
         htmlReportContent = JSON.stringify({

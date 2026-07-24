@@ -13,6 +13,10 @@ import SkillFormulaCard from '../components/report/SkillFormulaCard';
 import ProfileSummaryHeader from '../components/report/ProfileSummaryHeader';
 import ValueBars from '../components/report/ValueBars';
 import DeepSessionCard, { type DeepSessionData } from '../components/report/DeepSessionCard';
+// docs/31 Блок C2/C3: раньше эти компоненты существовали только на /coach —
+// финальный отчёт показывал только текстовый нарратив, без визуализации.
+import WheelOfVocation from '../coach/WheelOfVocation';
+import PyramidOfAlignment from '../coach/PyramidOfAlignment';
 
 type Trait = {
   name: string;
@@ -66,6 +70,8 @@ type ReportData = {
   icarSubscales?: Record<string, number>;
   /** Раздел "Глубинная сессия" — присутствует только если пройдена DEEP-сессия коучинга. */
   deepSession?: DeepSessionData | null;
+  /** 7 шкал Колеса талантов из экспресс-коучинга (docs/31, Блок C1) — для WheelOfVocation на /report. */
+  talentScores?: Record<string, number>;
   /** Заполненность 8-слойного цифрового профиля (0-1 по каждому слою) — из DigitalProfile.summary. */
   profileCoverage?: Record<string, number>;
   /** Grit / Growth Mindset / TEIQue-SF (1-5) — короткие валидные шкалы теста "Внутренний компас". */
@@ -368,6 +374,7 @@ function ReportPageContent() {
           topValueScores: Array.isArray(rawData.topValueScores) ? rawData.topValueScores : undefined,
           icarSubscales: rawData.icarSubscales && typeof rawData.icarSubscales === 'object' ? rawData.icarSubscales : undefined,
           deepSession: rawData.deepSession && typeof rawData.deepSession === 'object' ? rawData.deepSession : null,
+          talentScores: rawData.talentScores && typeof rawData.talentScores === 'object' ? rawData.talentScores : undefined,
           profileCoverage: rawData.profileCoverage && typeof rawData.profileCoverage === 'object' ? rawData.profileCoverage : undefined,
           innerCompass: rawData.innerCompass && typeof rawData.innerCompass === 'object' ? rawData.innerCompass : undefined,
           resourceMap: rawData.resourceMap && typeof rawData.resourceMap === 'object' ? rawData.resourceMap : undefined,
@@ -671,10 +678,37 @@ function ReportPageContent() {
 
                   {/* Глубинная сессия (только если пройдена DEEP-сессия коучинга) */}
                   <DeepSessionCard deepSession={report.deepSession} />
+
+                  {/* Пирамида идентичности (docs/31, Блок C3) — только если пройдена
+                      глубокая сессия коучинга (тот же 7-ярусный компонент, что на /coach). */}
+                  {report.deepSession && report.deepSession.synthesis && (
+                    <div className="glass-card rounded-[28px] p-8">
+                      <h2 className="text-lg font-bold text-white mb-4">Пирамида идентичности</h2>
+                      <PyramidOfAlignment
+                        extractedData={{
+                          deepExtracted: {
+                            deepGoal: report.deepSession.goal,
+                            deepOutcome: report.deepSession.outcome,
+                            deepEmotions: report.deepSession.emotions,
+                            deepIdentity: report.deepSession.identity,
+                            deepBarriers: report.deepSession.barriers,
+                            deepActions: report.deepSession.actions,
+                            deepFirstStep: report.deepSession.firstStep,
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Правая колонка */}
                 <div className="space-y-8">
+                  {/* Колесо талантов (docs/31, Блок C2) — тот же компонент, что на
+                      /coach, наполняется теми же 7 шкалами из экспресс-коучинга. */}
+                  {report.talentScores && (
+                    <WheelOfVocation extractedData={{ talentScores: report.talentScores }} standalone />
+                  )}
+
                   {/* Радар талантов */}
                   <RadarChart scores={report.riasecScores} />
 

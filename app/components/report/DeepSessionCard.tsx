@@ -8,6 +8,11 @@ export interface DeepSessionData {
   identity: string;
   barriers?: string;
   firstStep: string;
+  // docs/31 Блок C1: нужны PyramidOfAlignment на /report (7 ярусов пирамиды),
+  // но не используются самой DeepSessionCard.
+  outcome?: string;
+  emotions?: string;
+  actions?: string;
 }
 
 interface DeepSessionCardProps {
