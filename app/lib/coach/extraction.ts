@@ -69,7 +69,16 @@ export function fallbackExtract(
         }
       }
     }
+  } else if (currentStep >= 3 && currentStep <= 15) {
+    // 5. Резервная экстракция для психологических шагов (3–15):
+    // Если ИИ-экстрактор сбоил (exception/пустой ответ), записываем сырой текст
+    // пользователя в первое незаполненное психологическое поле, чтобы шаг не зависал
+    // и вопрос не повторялся (баг задвоения на шаге 3). Восстановлено из 51c9548.
+    if (cleanMsg.length > 10) {
+      result._rawPsychologyFallback = cleanMsg;
+      result.shouldAdvanceStep = true;
+    }
   }
-  
+
   return result;
 }

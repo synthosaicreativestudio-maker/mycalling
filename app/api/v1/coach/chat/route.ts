@@ -980,6 +980,44 @@ ${dialogHistory}
       updateExpressField('values', parsedData.values);
       updateExpressField('decisionStyle', parsedData.decisionStyle);
 
+      // Safety net (восстановлено из 51c9548): если ИИ-экстрактор сбоил и ни одно
+      // психо-поле не заполнено, но fallbackExtract сохранил сырой текст пользователя —
+      // записываем его в первое пустое психологическое поле, чтобы шаг не завис и вопрос
+      // не повторялся (задвоение на шаге 3).
+      const psychoFieldsOrder = [
+        'hobbies', 'schoolSubjects', 'dreams', 'idols', 'parents', 'fears',
+        'experience', 'workFormat', 'thinkingType', 'successMeasure',
+        'energySources', 'teamRole', 'autonomyStyle', 'values', 'decisionStyle'
+      ];
+      if (currentStepBefore >= 3 && currentStepBefore <= 15 && parsedData._rawPsychologyFallback) {
+        const anyFieldFilled = psychoFieldsOrder.some(
+          k => parsedData[k] && String(parsedData[k]).trim().length > 6
+        );
+        if (!anyFieldFilled) {
+          const firstEmpty = psychoFieldsOrder.find(
+            k => getStrLen(extractedData.expressExtracted[k]) <= 6
+          );
+          if (firstEmpty) {
+            extractedData.expressExtracted[firstEmpty] = parsedData._rawPsychologyFallback;
+            console.log(`[coach/chat] Fallback: saved raw user text into field "${firstEmpty}"`);
+          }
+        }
+      }
+
+      // Гарантия продвижения шага: на шагах 3–15 при содержательном ответе (>15 симв.)
+      // и заполнении хотя бы одного нового поля — принудительно считаем шаг выполненным.
+      if (currentStepBefore >= 3 && currentStepBefore <= 15 && message.trim().length > 15) {
+        const prevPsychoCount = psychoFieldsOrder.filter(
+          k => getStrLen(rawExtractedData.expressExtracted?.[k]) > 6
+        ).length;
+        const newPsychoCount = psychoFieldsOrder.filter(
+          k => getStrLen(extractedData.expressExtracted?.[k]) > 6
+        ).length;
+        if (newPsychoCount > prevPsychoCount) {
+          parsedData.shouldAdvanceStep = true;
+        }
+      }
+
       // Д-7: анти-интересы и добровольные хобби — накопительное объединение массивов без дублей
       const updateExpressArrayField = (key: string, val: any) => {
         if (Array.isArray(val) && val.length > 0) {
