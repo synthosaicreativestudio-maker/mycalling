@@ -81,6 +81,8 @@ function buildStepPrompt(
   allPsychologyCollected: boolean,
   isRefusalOrEmpty: boolean
 ): string {
+  // Параметр hasPhone здесь = channelConnected (durable-признак подключённого канала).
+  // Канал обязателен для финала, как и работало до правок 20 июля.
   const isFinalStateNow = isDeepMode
     ? (extractedData.fullName && extractedData.fullName !== 'Гость' && hasPhone && !!extractedData.age && !!extractedData.grade && !!extractedData.city && getStrLen(extractedData.deepExtracted?.deepGoal) > 1 && getStrLen(extractedData.deepExtracted?.deepOutcome) > 1 && getStrLen(extractedData.deepExtracted?.deepEmotions) > 1 && getStrLen(extractedData.deepExtracted?.deepIdentity) > 1 && getStrLen(extractedData.deepExtracted?.deepBarriers) > 1 && getStrLen(extractedData.deepExtracted?.deepActions) > 1 && getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1)
     : (extractedData.fullName && extractedData.fullName !== 'Гость' && hasPhone && !!extractedData.age && !!extractedData.grade && !!extractedData.city && allPsychologyCollected);

@@ -19,6 +19,7 @@ import {
   sendMaxIdSync
 } from '../../../../lib/coach/notifications';
 import { fallbackExtract } from '../../../../lib/coach/extraction';
+import { deriveStep } from '../../../../lib/coach/stepMachine';
 
 // ============================
 // ГЛАВНЫЙ ОБРАБОТЧИК ДИАЛОГА
@@ -192,10 +193,14 @@ export async function POST(req: Request) {
               maxStepReachedByMode: { EXPRESS: userName ? 2 : 1, DEEP: 0 },
               fullName: userName || 'Гость',
               phone: userPhone,
+              channelConnected: !!userPhone,
               age: null,
               grade: null,
               city: null,
-              sessionMode: null,
+              // По умолчанию плавная цепочка EXPRESS без ранней блокирующей развилки
+              // (выбор «тесты / глубокая» перенесён на финиш экспресса). Восстановлено
+              // из e222135.
+              sessionMode: 'EXPRESS',
               expressExtracted: {
                 hobbies: "",
                 schoolSubjects: "",
@@ -269,7 +274,7 @@ export async function POST(req: Request) {
         data: {
           userId: user.id,
           transcript: [],
-          extractedData: { currentStep: 0, sessionMode: sessionMode || null },
+          extractedData: { currentStep: 0, sessionMode: sessionMode || 'EXPRESS' },
           status: 'IN_PROGRESS'
         },
         include: { user: true }
@@ -378,6 +383,13 @@ export async function POST(req: Request) {
     // Вычисляем, какие блоки информации уже собраны
     let hasName = getStrLen(extractedData.fullName) > 1 && extractedData.fullName !== 'Гость';
     let hasPhone = !!coachSession.user.phone || !!extractedData.phone;
+    // channelConnected — DURABLE/МОНОТОННЫЙ признак «канал подключён». Один раз true —
+    // остаётся true до конца сессии. Раньше гейт держался на нестабильном hasPhone,
+    // который у гостя мигал в false → шаг 2 повторял приглашение подключить канал
+    // (задвоение вопросов, баг 24.07). Канал остаётся ОБЯЗАТЕЛЬНЫМ шагом, но,
+    // единожды пройденный, назад не откатывается.
+    let channelConnected = !!extractedData.channelConnected || hasPhone;
+    if (channelConnected) extractedData.channelConnected = true;
     let hasAge = !!extractedData.age;
     let hasGrade = !!extractedData.grade;
     let hasCity = getStrLen(extractedData.city) > 1;
@@ -434,7 +446,8 @@ export async function POST(req: Request) {
       if (!hasName) {
         currentStepBefore = 1;
         nextStep = 1;
-      } else if (!hasPhone) {
+      } else if (!channelConnected) {
+        // Обязательное подключение канала связи.
         currentStepBefore = 2;
         nextStep = 2;
       } else if (!hasPersonalInfo) {
@@ -498,7 +511,8 @@ export async function POST(req: Request) {
       if (!hasName) {
         currentStepBefore = 1;
         nextStep = 1;
-      } else if (!hasPhone) {
+      } else if (!channelConnected) {
+        // Обязательное подключение канала связи.
         currentStepBefore = 2;
         nextStep = 2;
       } else if (!hasPersonalInfo) {
@@ -530,7 +544,7 @@ export async function POST(req: Request) {
       }
 
       const isFinalStep = allPsychologyCollected;
-      nextStep = !hasName ? 1 : (!hasPhone ? 2 : (!hasPersonalInfo ? 2 : (isFinalStep ? 16 : Math.min(15, 3 + psychoBlocksCount))));
+      nextStep = !hasName ? 1 : (!channelConnected ? 2 : (!hasPersonalInfo ? 2 : (isFinalStep ? 16 : Math.min(15, 3 + psychoBlocksCount))));
     }
 
     // Защита от зависания шагов (когда ИИ-экстрактор не может надежно извлечь данные)
@@ -638,7 +652,7 @@ export async function POST(req: Request) {
       const hasStep2Message = expressTranscript.some(m => m.role === 'assistant' && (m.content.includes('канал связи') || m.content.includes('Telegram или MAX ID')));
       const hasAgeMessage = expressTranscript.some(m => m.role === 'assistant' && (m.content.includes('сколько тебе лет') || m.content.includes('Сколько тебе лет')));
 
-      if (hasPhone && hasStep2Message && !hasAgeMessage) {
+      if (channelConnected && hasStep2Message && !hasAgeMessage) {
         console.log('[coach/chat] Auto-transitioning to Age question after phone confirmation on init');
         
         const name = extractedData.fullName || 'друг';
@@ -669,7 +683,7 @@ export async function POST(req: Request) {
         sessionId: coachSession.id,
         userId: coachSession.userId,
         currentStep: nextStep,
-        phoneConfirmed: hasPhone,
+        phoneConfirmed: channelConnected,
         sessionStatus: coachSession.status,
         extracted: extractedData
       });
@@ -680,7 +694,7 @@ export async function POST(req: Request) {
       let greeting = FALLBACK_REPLIES[0];
       if (fromLoginError) {
         greeting = 'Привет! Рад встрече. Меня зовут Роман, я твой коуч и наставник. Я вижу, ты хотел зайти в Личный кабинет, но для этого нужно сначала пройти нашу короткую сессию. Не переживай — это не скучный тест, а увлекательное исследование твоих талантов. Давай сначала познакомимся. Как мне к тебе обращаться? Напиши свое имя. 😊';
-      } else if (isDeepMode && hasPersonalInfo && hasPhone) {
+      } else if (isDeepMode && hasPersonalInfo && channelConnected) {
         greeting = 'Отличный выбор! Мы начинаем Глубокий самокоучинг по методологии «Что хочу → Действие». Наш путь состоит из 7 важных шагов: мы найдем твое истинное желание, оцифруем образ результата, подключим эмоции, поймём, каким героем этой истории ты становишься, честно назовём внутренние барьеры, составим план с KPI и зафиксируем первый шаг. \n\nДавай начнем: Что именно ты хочешь изменить, достичь или в чем реализоваться в плане будущей профессии?';
       }
       
@@ -690,7 +704,7 @@ export async function POST(req: Request) {
       
       sessionVersion = await saveCoachSession(coachSession.id, sessionVersion, {
         transcript: { EXPRESS: expressTranscript, DEEP: deepTranscript },
-        extractedData: { ...extractedData, currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 16 : 0 },
+        extractedData: { ...extractedData, currentStep: (isDeepMode && hasPersonalInfo && channelConnected) ? 16 : 0 },
         status: 'IN_PROGRESS'
       });
 
@@ -698,8 +712,8 @@ export async function POST(req: Request) {
         reply: greeting,
         sessionId: coachSession.id,
         userId: coachSession.userId,
-        currentStep: (isDeepMode && hasPersonalInfo && hasPhone) ? 16 : 0,
-        phoneConfirmed: hasPhone,
+        currentStep: (isDeepMode && hasPersonalInfo && channelConnected) ? 16 : 0,
+        phoneConfirmed: channelConnected,
         sessionStatus: 'IN_PROGRESS',
         extracted: extractedData,
         history: isDeepMode ? deepTranscript : expressTranscript
@@ -1049,7 +1063,10 @@ ${dialogHistory}
     }
 
     hasPhone = hasPhone || !!parsedData.phone;
-    
+    // Обновляем durable-флаг: если канал подключили в этом запросе — фиксируем навсегда.
+    channelConnected = channelConnected || hasPhone;
+    if (channelConnected) extractedData.channelConnected = true;
+
     // Проверяем заполненность отдельных полей личных данных в реальном времени
     hasName = getStrLen(extractedData.fullName) > 1 && extractedData.fullName !== 'Гость';
     hasAge = !!extractedData.age;
@@ -1092,74 +1109,30 @@ ${dialogHistory}
     if (updatedValues) psychoBlocks++;
     if (updatedDecisionStyle) psychoBlocks++;
 
-    // Расчет шага строго поэтапно
-    let currentVirtualStep = 1;
-    let isFinalStateNow = false;
-
-    if (isDeepMode) {
-      const hasDeepGoal = getStrLen(extractedData.deepExtracted?.deepGoal) > 1;
-      const hasDeepOutcome = getStrLen(extractedData.deepExtracted?.deepOutcome) > 1;
-      const hasDeepEmotions = getStrLen(extractedData.deepExtracted?.deepEmotions) > 1;
-      const hasDeepIdentity = getStrLen(extractedData.deepExtracted?.deepIdentity) > 1;
-      const hasDeepBarriers = getStrLen(extractedData.deepExtracted?.deepBarriers) > 1;
-      const hasDeepActions = getStrLen(extractedData.deepExtracted?.deepActions) > 1;
-      const hasDeepFirstStep = getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1;
-
-      if (!hasName) {
-        currentVirtualStep = 1;
-      } else if (!hasPhone) {
-        currentVirtualStep = 2;
-      } else if (!hasPersonalInfo) {
-        currentVirtualStep = 2;
-      } else if (psychoBlocks < 12) {
-        // docs/27 Трек 1 (решение B): глубокая сессия сначала собирает
-        // ЭКСПРЕСС-ПОРТРЕТ (хобби, предметы, мечты, страхи, опыт… — шаги 3-15),
-        // и только потом переходит к Пирамиде. Раньше этого этапа здесь не было:
-        // сразу после личных данных прыгали на цель (16), из-за чего «Карта
-        // талантов» оставалась пустой (интересы никто не спрашивал).
-        currentVirtualStep = Math.min(15, 3 + psychoBlocks);
-      } else if (!hasDeepGoal) {
-        // Шкала DEEP-шагов едина с фронтендом (STEP_NAMES/степпер пирамиды):
-        // 16 = Запрос, 17 = Результат, 18 = Эмоции, 19 = Идентичность,
-        // 20 = Барьеры, 21 = План, 22 = Микро-шаг, 23 = Финал.
-        currentVirtualStep = 16;
-      } else if (!hasDeepOutcome) {
-        currentVirtualStep = 17;
-      } else if (!hasDeepEmotions) {
-        currentVirtualStep = 18;
-      } else if (!hasDeepIdentity) {
-        currentVirtualStep = 19;
-      } else if (!hasDeepBarriers) {
-        currentVirtualStep = 20;
-      } else if (!hasDeepActions) {
-        currentVirtualStep = 21;
-      } else if (!hasDeepFirstStep) {
-        currentVirtualStep = 22;
-      } else {
-        currentVirtualStep = 23;
-      }
-      isFinalStateNow = hasPersonalInfo && hasPhone && hasDeepGoal && hasDeepOutcome && hasDeepEmotions && hasDeepIdentity && hasDeepBarriers && hasDeepActions && hasDeepFirstStep;
-    } else {
-      if (!hasName) {
-        currentVirtualStep = 1; // Шаг знакомства (Имя)
-      } else if (!hasPhone) {
-        currentVirtualStep = 2; // Шаг подключения Telegram
-      } else if (!hasPersonalInfo) {
-        currentVirtualStep = 2; // Шаг сбора возраста, класса, города
-      } else {
-        // Свободный диалог длится до Шага 15 (когда собрано 13 психологических полей)
-        if (psychoBlocks < 13) {
-          currentVirtualStep = Math.min(15, 3 + psychoBlocks);
-        } else {
-          currentVirtualStep = 16; // Шаг подведения итогов (Финал)
-        }
-      }
-
-      isFinalStateNow = hasPersonalInfo && hasPhone && (psychoBlocks >= 12);
-      if (isFinalStateNow) {
-        currentVirtualStep = 16;
-      }
-    }
+    // Расчёт шага — единая ЧИСТАЯ машина состояний (app/lib/coach/stepMachine.ts).
+    // Подключение канала — ОБЯЗАТЕЛЬНЫЙ шаг (channelConnected), но флаг durable/монотонный:
+    // единожды подключив, к приглашению не возвращаемся. Именно нестабильность hasPhone
+    // раньше давала задвоение (шаг 2 повторял приглашение подключить канал, баг 24.07).
+    // Поток: Имя → Канал → Возраст/Класс/Город → психоблоки → финал (в DEEP далее Пирамида).
+    // Ратчет (Math.max с достигнутым максимумом) применяется ниже.
+    const stepResult = deriveStep({
+      isDeepMode,
+      hasName,
+      channelConnected,
+      hasPersonalInfo,
+      psychoBlocks,
+      deep: {
+        goal: getStrLen(extractedData.deepExtracted?.deepGoal) > 1,
+        outcome: getStrLen(extractedData.deepExtracted?.deepOutcome) > 1,
+        emotions: getStrLen(extractedData.deepExtracted?.deepEmotions) > 1,
+        identity: getStrLen(extractedData.deepExtracted?.deepIdentity) > 1,
+        barriers: getStrLen(extractedData.deepExtracted?.deepBarriers) > 1,
+        actions: getStrLen(extractedData.deepExtracted?.deepActions) > 1,
+        firstStep: getStrLen(extractedData.deepExtracted?.deepFirstStep) > 1,
+      },
+    });
+    let currentVirtualStep = stepResult.candidate;
+    const isFinalStateNow = stepResult.isFinal;
 
     // Ratchet: шаг никогда не откатывается назад. currentVirtualStep выше пересчитывается
     // с нуля из наличия полей в extractedData на каждый запрос — раньше это приводило
@@ -1256,9 +1229,10 @@ ${dialogHistory}
     // Заполняем недостающие поля СТРОГО на основе текущего шага
     if (currentVirtualStep === 1) {
       missingFields.push("- Имя собеседника. Спроси, как его зовут (как к нему обращаться). Сделай это вежливо и дружелюбно.");
-    } else if (currentVirtualStep === 2 && !hasPhone) {
+    } else if (currentVirtualStep === 2 && !channelConnected) {
       missingFields.push("- Подключение канала связи (Telegram или MAX ID). Предложи подростку выбрать удобный канал связи ниже (подключить Telegram или указать свой MAX ID), чтобы результаты не потерялись, и мы могли продолжить.");
-    } else if (currentVirtualStep === 2 && hasPhone) {
+    } else if (currentVirtualStep === 2) {
+      // Канал уже подключён — по одному собираем возраст → класс → город.
       if (!hasAge) {
         missingFields.push("- Возраст. Спроси: «сколько тебе лет?» (мягко и прямо).");
       } else if (!hasGrade) {
@@ -1317,32 +1291,11 @@ ${dialogHistory}
 
     const isRefusalOrEmpty = !parsedData.shouldAdvanceStep;
 
-    // ============================================================
-    // ПЕРЕХВАТ: Если регистрация завершена, но sessionMode ещё не выбран,
-    // НЕ генерируем AI-ответ — даём фронтенду показать окно выбора формата.
-    // ============================================================
-    if (!extractedData.sessionMode && hasPersonalInfo && hasPhone && currentVirtualStep > 2) {
-      // Сохраняем текущее состояние в БД
-      const finalDbTranscript = {
-        EXPRESS: expressTranscript,
-        DEEP: deepTranscript
-      };
-      sessionVersion = await saveCoachSession(coachSession.id, sessionVersion, {
-        transcript: finalDbTranscript,
-        extractedData,
-        status: 'IN_PROGRESS'
-      });
-
-      return NextResponse.json({
-        sessionId: coachSession.id,
-        userId: coachSession.userId,
-        currentStep: currentVirtualStep,
-        phoneConfirmed: hasPhone,
-        sessionStatus: 'IN_PROGRESS',
-        extracted: extractedData,
-        history: expressTranscript,
-        awaitSessionModeSelection: true
-      });
+    // Ранней блокирующей развилки формата на шаге 3 больше нет: по умолчанию идёт
+    // плавный EXPRESS, а выбор «перейти к тестам / продолжить в глубокую сессию»
+    // показывается на финише экспресса и в отчёте. Восстановлено из e222135.
+    if (!extractedData.sessionMode) {
+      extractedData.sessionMode = 'EXPRESS';
     }
 
     // Формируем системный промпт
@@ -1350,7 +1303,7 @@ ${dialogHistory}
       currentVirtualStep,
       isDeepMode,
       extractedData,
-      hasPhone,
+      channelConnected,
       missingFields,
       collectedFields,
       allPsychologyCollected,
@@ -1359,8 +1312,10 @@ ${dialogHistory}
 
     let replyContent = '';
     
-    // Использовать ли ИИ-генерацию на текущем шаге
-    const useAI = (currentVirtualStep >= 2 && currentVirtualStep <= 22 && hasPhone) || (currentVirtualStep >= 3 && currentVirtualStep <= 22) || currentVirtualStep === 23 || currentVirtualStep === 16;
+    // Инвариант (.agents/AGENTS.md): шаги 0-2 (Имя → Канал → Возраст → Класс → Город) —
+    // строго детерминированные шаблоны БЕЗ ИИ (иначе модель копирует примеры из
+    // системного промпта и дублирует вежливости). ИИ включается с шага 3.
+    const useAI = currentVirtualStep >= 3 && currentVirtualStep <= 23;
 
     if (!useAI) {
       if (currentVirtualStep === 0) {
@@ -1368,8 +1323,15 @@ ${dialogHistory}
       } else if (currentVirtualStep === 1) {
         replyContent = FALLBACK_REPLIES[1];
       } else if (currentVirtualStep === 2) {
-        if (!hasPhone) {
+        if (!channelConnected) {
+          // Обязательное подключение канала. Приглашение (с приветствием) — ровно один раз.
           replyContent = FALLBACK_REPLIES[2];
+        } else if (!hasAge) {
+          replyContent = `Отлично, спасибо! 😊 Сколько тебе лет?`;
+        } else if (!hasGrade) {
+          replyContent = `Принято! А в каком классе ты учишься?`;
+        } else if (!hasCity) {
+          replyContent = `Здорово! И из какого ты города?`;
         }
       }
     } else {
@@ -1508,7 +1470,7 @@ ${dialogHistory}
       reply: replyContent,
       sessionId: coachSession.id,
       currentStep: currentVirtualStep,
-      phoneConfirmed: hasPhone,
+      phoneConfirmed: channelConnected,
       sessionStatus: status,
       extracted: extractedData,
       history: isDeepMode ? deepTranscript : expressTranscript

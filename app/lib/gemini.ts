@@ -161,10 +161,14 @@ function cleanJsonString(str: string): string {
  * Генерирует строго типизированный JSON.
  */
 export async function generateJson(systemPrompt: string, prompt: string, schema: any, temperature = 0.1): Promise<any> {
+  // Инъекция самой JSON-схемы в системный промпт: без неё модель не видит ожидаемую
+  // структуру полей и склонна возвращать пусто/копировать примеры (из-за чего колесо
+  // талантов и экстракция шага «молчали»). Восстановлено из фикса 10f454b.
+  const schemaStr = schema ? `\n\nОжидаемая JSON-схема:\n${JSON.stringify(schema)}` : "";
   const messages = [
     {
       role: 'system',
-      content: systemPrompt + "\nВы должны ответить СТРОГО в формате JSON. Не пишите никаких других текстов, кроме валидного JSON-объекта."
+      content: systemPrompt + "\nВы должны ответить СТРОГО в формате JSON. Не пишите никаких других текстов, кроме валидного JSON-объекта." + schemaStr
     },
     {
       role: 'user',
