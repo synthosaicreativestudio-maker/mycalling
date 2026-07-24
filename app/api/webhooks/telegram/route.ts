@@ -6,6 +6,20 @@ import { migrateGuestToUser } from '../../../lib/auth/migrate-guest';
 
 const TG_API_BASE = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
 
+/**
+ * A4: ссылка входа с ОДНОРАЗОВЫМ короткоживущим exchange-токеном вместо сырого
+ * 7-дневного session token в URL (тот утекал в историю/логи/Referer). Callback
+ * обменивает его на свежую сессию и гасит (см. auth/telegram/callback).
+ */
+async function buildTelegramLoginUrl(userId: string): Promise<string> {
+  const exchangeToken = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 минут
+  await prisma.authExchangeToken.create({
+    data: { token: exchangeToken, userId, expiresAt },
+  });
+  return `https://synthosai.ru/api/auth/telegram/callback?exchange_token=${exchangeToken}`;
+}
+
 export async function GET(request: Request) {
   if (!modulesConfig.enableTelegram) {
     return NextResponse.json({ error: 'Telegram module is disabled' }, { status: 503 });
@@ -31,14 +45,21 @@ export async function GET(request: Request) {
 
 export async function POST(req: Request) {
   try {
-    // Верификация подлинности запроса от Telegram
+    // A4 (OWASP A02:2025 Security Misconfiguration): fail-closed.
+    // Если секрет вебхука не сконфигурирован — НЕ обрабатываем запрос (иначе
+    // webhook принимал бы любой неаутентифицированный ввод). Токен сверяется
+    // всегда, сравнение — constant-time.
     const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
-    if (webhookSecret) {
-      const receivedToken = req.headers.get('X-Telegram-Bot-Api-Secret-Token');
-      if (receivedToken !== webhookSecret) {
-        console.warn('[telegram] Webhook rejected: invalid secret_token');
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!webhookSecret) {
+      console.error('[telegram] Webhook rejected: TELEGRAM_WEBHOOK_SECRET is not configured');
+      return NextResponse.json({ error: 'Webhook secret is not configured' }, { status: 503 });
+    }
+    const receivedToken = req.headers.get('X-Telegram-Bot-Api-Secret-Token') || '';
+    const a = Buffer.from(receivedToken);
+    const b = Buffer.from(webhookSecret);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      console.warn('[telegram] Webhook rejected: invalid secret_token');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     if (!modulesConfig.enableTelegram) {
@@ -119,9 +140,9 @@ export async function POST(req: Request) {
               }
             });
 
-            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+            const loginUrl = await buildTelegramLoginUrl(existingUser.id);
 
-            await sendTelegramMessage(botToken, chat_id, 
+            await sendTelegramMessage(botToken, chat_id,
               `👋 С возвращением, ${existingUser.name || existingUser.fullName || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Ваш профиль привязан — можете вернуться к браузеру, всё готово!\n\nИли нажмите кнопку ниже, чтобы войти прямо с телефона:`,
               {
                 inline_keyboard: [
@@ -144,7 +165,7 @@ export async function POST(req: Request) {
               }
             });
 
-            const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+            const loginUrl = await buildTelegramLoginUrl(existingUser.id);
 
             await sendTelegramMessage(botToken, chat_id,
               `👋 С возвращением, ${existingUser.name || existingUser.fullName || 'друг'}!\n\nВы уже подключены к платформе «МоёПризвание». Нажмите кнопку ниже, чтобы перейти в Личный кабинет:`,
@@ -299,7 +320,7 @@ export async function POST(req: Request) {
           }
         });
 
-        const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+        const loginUrl = await buildTelegramLoginUrl(user.id);
 
         // Убираем ReplyKeyboard и отправляем подтверждение с inline-кнопкой
         // Шаг 1: Убираем клавиатуру
@@ -516,7 +537,7 @@ export async function POST(req: Request) {
             }
           });
 
-          const loginUrl = `https://synthosai.ru/api/auth/telegram/callback?token=${sessionToken}`;
+          const loginUrl = await buildTelegramLoginUrl(user.id);
 
           await sendTelegramMessage(botToken, chat_id,
             `✅ Контакт получен! Подключаю ваш профиль...`,

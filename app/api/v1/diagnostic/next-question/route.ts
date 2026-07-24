@@ -32,22 +32,18 @@ export async function GET(request: Request) {
     let sessionData;
 
     if (!sessionDataRaw) {
-      // Сессии нет в кэше. Пытаемся восстановить ее из базы данных.
-      const userId = searchParams.get('user_id');
-      let user = null;
-
-      if (userId) {
-        user = await prisma.user.findUnique({ where: { id: userId } });
-      } else {
-        user = await prisma.user.findFirst({
-          where: {
-            diagnosticAnswers: {
-              path: ['sessionId'],
-              equals: sessionId
-            }
+      // Сессии нет в кэше. Восстанавливаем ТОЛЬКО по совпадению sessionId
+      // (A1/S-2, OWASP A01:2025): клиентский user_id больше не принимается как
+      // доказательство владения — иначе чужой user_id позволял бы поднять чужую
+      // диагностическую сессию. Доступ = владение случайным UUID сессии.
+      const user = await prisma.user.findFirst({
+        where: {
+          diagnosticAnswers: {
+            path: ['sessionId'],
+            equals: sessionId
           }
-        });
-      }
+        }
+      });
 
       if (user && user.diagnosticAnswers) {
         const dbData = user.diagnosticAnswers as any;
@@ -939,8 +935,9 @@ ${professionCandidatesForLlm}
         }
       });
 
-      // Кэшируем отчет в Redis
-      await redisClient.set(`report:${sessionId}`, htmlReportContent, 'EX', 86400);
+      // Кэшируем отчёт в Redis по владельцу (A1: ключ report:<userId>, единый с
+      // чтением в diagnostic/results — клиентский session_id не участвует в доступе).
+      await redisClient.set(`report:${userId}`, htmlReportContent, 'EX', 86400);
 
       // Уведомление о готовом отчёте в Telegram/MAX (fire-and-forget, не блокирует ответ).
       prisma.user.findUnique({ where: { id: userId } })

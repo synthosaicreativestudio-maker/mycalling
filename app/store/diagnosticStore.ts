@@ -114,7 +114,9 @@ export const useDiagnosticStore = create<DiagnosticState>()(
 
           set({ isLoading: true });
           try {
-            const res = await fetch(`/api/v1/diagnostic/next-question?session_id=${sessionId}&user_id=${userId || ''}`);
+            // user_id больше не передаём: сервер восстанавливает сессию по session_id
+            // (A1/S-2 — клиентский user_id не доказывает владение и не нужен в URL).
+            const res = await fetch(`/api/v1/diagnostic/next-question?session_id=${sessionId}`);
             
             if (res.status === 404) {
               // Сессия истекла на сервере. Сбрасываем локальное состояние и запускаем новую сессию.

@@ -11,15 +11,19 @@ export default function LeadPage() {
   const [grade, setGrade] = useState('');
   const [contact, setContact] = useState('');
   const [goal, setGoal] = useState('');
+  const [consent, setConsent] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    // A5: без родительского согласия старт невозможен (152-ФЗ ст.9 — за
+    // несовершеннолетнего согласие даёт законный представитель).
+    if (!consent) return;
     setIsSubmitting(true);
 
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(
         'moe-prizvanie-lead',
-        JSON.stringify({ studentName, grade, contact, goal, createdAt: new Date().toISOString() })
+        JSON.stringify({ studentName, grade, contact, goal, parentalConsent: true, consentAt: new Date().toISOString(), createdAt: new Date().toISOString() })
       );
     }
 
@@ -120,11 +124,25 @@ export default function LeadPage() {
               чтобы не терять стартовый контекст.
             </div>
 
+            <label className="flex items-start gap-3 rounded-2xl border border-sky/15 bg-white/5 p-4 text-sm leading-6 text-muted cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(event) => setConsent(event.target.checked)}
+                required
+                className="mt-1 h-4 w-4 shrink-0 accent-sky"
+              />
+              <span>
+                Я являюсь родителем или законным представителем ребёнка (либо получил(а) его согласие) и соглашаюсь с обработкой персональных данных согласно{' '}
+                <Link href="/privacy" className="underline text-text hover:opacity-80">политике конфиденциальности</Link>.
+              </span>
+            </label>
+
             <div className="flex flex-wrap gap-3 pt-2">
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="cta-glass h-[52px] px-6 text-sm font-semibold"
+                disabled={isSubmitting || !consent}
+                className="cta-glass h-[52px] px-6 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {isSubmitting ? 'Запускаем диагностику...' : 'Начать диагностику'}

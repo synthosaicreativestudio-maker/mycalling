@@ -2,34 +2,23 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
 import redisClient from '../../../../lib/redis';
 
-import { headers } from 'next/headers';
-import { auth } from '../../../../lib/auth';
+import { getPrincipalUserId } from '../../../../lib/authz/requireOwnedResource';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    let sessionId = searchParams.get('session_id');
-
-    // Проверяем сессию Better Auth
-    const session = await auth.api.getSession({
-      headers: await headers()
-    });
-
-    const userId = session?.user?.id;
-
-    // Если session_id не передан, но пользователь авторизован — используем его userId
-    if (!sessionId && userId) {
-      sessionId = userId;
+    // A1 (OWASP A01:2025): владелец определяется ТОЛЬКО из серверной сессии.
+    // Клиентский session_id больше не даёт доступа к чужим данным — все выборки
+    // ниже ограничены userId вошедшего пользователя. Страница /report за логином
+    // (middleware), поэтому анонимных вызовов здесь нет.
+    const userId = await getPrincipalUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Требуется авторизация' }, { status: 401 });
     }
 
-    if (!sessionId) {
-      return NextResponse.json({ error: 'Не указан session_id и пользователь не авторизован' }, { status: 400 });
-    }
-
-    // 1. Попытка загрузить кэшированный отчет из Redis
-    const cachedReport = await redisClient.get(`report:${sessionId}`);
+    // 1. Кэш отчёта — ключ привязан к владельцу, а не к произвольному session_id.
+    const cachedReport = await redisClient.get(`report:${userId}`);
     if (cachedReport) {
       return NextResponse.json({
         status: 'success',
@@ -37,45 +26,22 @@ export async function GET(request: Request) {
       });
     }
 
-    // 2. Если в Redis нет, возможно сессия была закрыта, но у нас есть User и Report в БД.
-    // Мы можем найти Report по пользователю.
-    // Чтобы связать sessionId и userId, мы можем проверить, не является ли sessionId
-    // идентификатором сессии коуча в БД (так как мы могли использовать его в качестве основы).
-    const coachSession = await prisma.coachSession.findUnique({
-      where: { id: sessionId },
-      include: { user: { include: { report: true } } }
-    });
-
-    if (coachSession && coachSession.user && coachSession.user.report) {
-      const reportJson = JSON.parse(coachSession.user.report.htmlContent);
-      
-      // Записываем обратно в Redis для быстрого доступа
-      await redisClient.set(`report:${sessionId}`, coachSession.user.report.htmlContent, 'EX', 86400);
-
-      return NextResponse.json({
-        status: 'success',
-        data: reportJson
-      });
-    }
-
-    // Попробуем поискать по сессиям better-auth (если sessionId совпадает с userId)
+    // 2. Итоговый отчёт из БД — строго по владельцу.
     const userReport = await prisma.report.findUnique({
-      where: { userId: sessionId }
+      where: { userId }
     });
 
     if (userReport) {
-      const reportJson = JSON.parse(userReport.htmlContent);
+      await redisClient.set(`report:${userId}`, userReport.htmlContent, 'EX', 86400);
       return NextResponse.json({
         status: 'success',
-        data: reportJson
+        data: JSON.parse(userReport.htmlContent)
       });
     }
 
-    // 3. ПРОМЕЖУТОЧНЫЙ ОТЧЁТ (в процессе прохождения):
-    // Если итоговый репорт еще не создан, но у пользователя есть активная сессия коучинга —
-    // возвращаем промежуточные накопленные данные талантов и ответы коуча.
-    const activeCoachSession = coachSession || await prisma.coachSession.findFirst({
-      where: { OR: [{ id: sessionId }, { userId: sessionId }, { userId: userId || undefined }] },
+    // 3. ПРОМЕЖУТОЧНЫЙ ОТЧЁТ: активная коуч-сессия владельца (строго по userId).
+    const activeCoachSession = await prisma.coachSession.findUnique({
+      where: { userId },
       include: { user: true }
     });
 

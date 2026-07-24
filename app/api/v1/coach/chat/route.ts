@@ -1,10 +1,16 @@
 // API Route — Server Side Only (НЕ ставить "use client" — это ломает серверные модули!)
 
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
 import { z } from 'zod';
 import prisma from '../../../../lib/prisma';
 import { auth } from '../../../../lib/auth';
+import {
+  GUEST_COACH_CAP_COOKIE,
+  signGuestCapability,
+  verifyGuestCapability,
+} from '../../../../lib/authz/guestCapability';
+import { detectDistress, CRISIS_REPLY } from '../../../../lib/coach/safety';
 import { generateText, generateJson } from '../../../../lib/gemini';
 import { modulesConfig } from '../../../../config/modules';
 import {
@@ -84,6 +90,24 @@ export async function POST(req: Request) {
 
     const { message, sessionId, fromLoginError, linkCode, sessionMode, reset } = parseResult.data;
 
+    // A3 — кризисный протокол (ISO/IEC 25010:2023 Safety). Проверяем сообщение
+    // подростка на сигналы distress ДО любой обработки/записи. При срабатывании
+    // мягко останавливаем сценарий и даём контакты помощи; НЕ продвигаем шаг
+    // (currentStep не возвращаем) и НЕ сохраняем эпизод как профориентационный
+    // «факт». Системные сообщения инициализации пропускаем.
+    const SYSTEM_MESSAGES = ['Начать сессию с коучем', 'Начать глубокий коучинг', 'Телефон подтвержден через бот'];
+    if (!SYSTEM_MESSAGES.includes(message)) {
+      const distress = detectDistress(message);
+      if (distress.isDistress) {
+        console.warn(`[coach/chat] distress-сигнал (${distress.category}) — активирован кризисный ответ`);
+        return NextResponse.json({
+          reply: CRISIS_REPLY,
+          sessionId: sessionId ?? null,
+          crisis: true,
+        });
+      }
+    }
+
     const getStrLen = (val: any): number => {
       return typeof val === 'string' ? val.trim().length : 0;
     };
@@ -132,48 +156,47 @@ export async function POST(req: Request) {
         });
       }
 
-      // Если гостевая сессия найдена и она принадлежит временному гостю,
-      // перепривязываем ее к вошедшему пользователю (удаляя его старые сессии коуча)
-      if (guestSession && guestSession.userId !== userId) {
-        try {
-          // Удаляем старые сессии коуча вошедшего пользователя, чтобы избежать дубликатов
-          await prisma.coachSession.deleteMany({
-            where: { userId }
-          });
-        } catch (e) {
-          console.error('Failed to delete old coach session during merge:', e);
-        }
+      // A2 (OWASP A01:2025): слияние гостевой сессии разрешено ТОЛЬКО при
+      // валидной capability-куке на этот sessionId — доказательстве, что гостевая
+      // сессия была создана в этом же браузере. Без него чужой (полученный)
+      // sessionId позволял бы присвоить чужие данные и затереть свои.
+      const capCookie = (await cookies()).get(GUEST_COACH_CAP_COOKIE)?.value;
+      const capabilityValid = !!sessionId && verifyGuestCapability(capCookie, sessionId);
 
-        // Обновляем текущую сессию коуча, связывая ее с авторизованным пользователем
-        coachSession = await prisma.coachSession.update({
-          where: { id: sessionId },
-          data: { userId: userId },
-          include: { user: true }
-        });
-
-        // Переносим имя из гостевого профиля, если оно было введено
-        if (guestSession.user.name && guestSession.user.name !== 'Гость') {
-          await prisma.user.update({
+      if (guestSession && guestSession.userId !== userId && capabilityValid) {
+        // Атомарно: удалить старые сессии вошедшего, перепривязать гостевую,
+        // перенести имя, пометить гостя merged — чтобы гонка не потеряла данные.
+        const [, merged] = await prisma.$transaction([
+          prisma.coachSession.deleteMany({ where: { userId } }),
+          prisma.coachSession.update({
+            where: { id: sessionId! },
+            data: { userId },
+            include: { user: true },
+          }),
+          prisma.user.update({
             where: { id: userId },
-            data: {
-              name: guestSession.user.name,
-              fullName: guestSession.user.fullName || guestSession.user.name
-            }
-          });
-        }
-
-        // Помечаем гостевого пользователя как объединенного (soft merge)
-        try {
-          await prisma.user.update({
+            data:
+              guestSession.user.name && guestSession.user.name !== 'Гость'
+                ? { name: guestSession.user.name, fullName: guestSession.user.fullName || guestSession.user.name }
+                : {},
+          }),
+          prisma.user.update({
             where: { id: guestSession.userId },
-            data: { mergedInto: userId }
-          });
-        } catch (e) {
-          console.error('Failed to update guest user status during merge:', e);
-        }
+            data: { mergedInto: userId },
+          }),
+        ]);
+        coachSession = merged;
+        // capability отработала — гасим её (one-time).
+        (await cookies()).delete(GUEST_COACH_CAP_COOKIE);
       } else {
-        // Если гостевая сессия не нуждается в слиянии, просто берем её (если она есть) или ищем по userId
-        coachSession = guestSession || await prisma.coachSession.findUnique({
+        if (guestSession && guestSession.userId !== userId && !capabilityValid) {
+          console.warn('[coach/chat] merge отклонён: нет валидной guest capability для переданного sessionId');
+        }
+        // Берём гостевую сессию ТОЛЬКО если она уже принадлежит этому пользователю
+        // (свой sessionId); чужую (отклонённый merge) не трогаем — берём свою по userId.
+        coachSession = (guestSession && guestSession.userId === userId)
+          ? guestSession
+          : await prisma.coachSession.findUnique({
           where: { userId },
           include: { user: true }
         });
@@ -279,6 +302,16 @@ export async function POST(req: Request) {
           status: 'IN_PROGRESS'
         },
         include: { user: true }
+      });
+
+      // A2: ставим одноразовую HttpOnly-capability на эту гостевую сессию, чтобы
+      // позже подтвердить, что merge инициирован из этого же браузера.
+      (await cookies()).set(GUEST_COACH_CAP_COOKIE, signGuestCapability(coachSession.id), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
       });
     } else {
       userId = coachSession.userId;
