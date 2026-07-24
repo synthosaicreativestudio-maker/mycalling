@@ -51,6 +51,13 @@ export const env = {
   REDIS_URL: getEnvOptional('REDIS_URL'),
   /** Окружение (development / production) */
   NODE_ENV: getEnvOptional('NODE_ENV', 'development'),
+  /**
+   * Быстрая модель для МЕХАНИЧЕСКОЙ экстракции реплик коуча в JSON (шаги 3–15).
+   * Пусто = использовать основную модель (без изменений). Задайте лёгкую модель
+   * из вашего тарифа ProxyAPI (напр. gpt-5-mini), чтобы ускорить ответы коуча и
+   * снизить сбои экстракции. На качество разбора почти не влияет.
+   */
+  EXTRACTION_MODEL: getEnvOptional('EXTRACTION_MODEL'),
   /** Т-Банк (Тинькофф) Интернет-эквайринг / Биллинг */
   TINKOFF_TERMINAL_KEY: getEnvOptional('TINKOFF_TERMINAL_KEY'),
   TINKOFF_SECRET_KEY: getEnvOptional('TINKOFF_SECRET_KEY'),

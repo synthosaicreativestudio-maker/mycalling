@@ -929,7 +929,9 @@ ${dialogHistory}
       };
 
       try {
-        parsedData = await generateJson('Ты — система анализа диалогов.', extractionPrompt, extractionSchema, 0.1);
+        // Экстракция — механическая задача; можно гнать на быстрой модели (env
+        // EXTRACTION_MODEL), чтобы ускорить ответ коуча. Пусто → основная модель.
+        parsedData = await generateJson('Ты — система анализа диалогов.', extractionPrompt, extractionSchema, 0.1, process.env.EXTRACTION_MODEL || undefined);
       } catch (err) {
         console.warn('Extraction failed, using fallback:', err);
       }
