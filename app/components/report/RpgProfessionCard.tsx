@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Compass, ChevronDown, Sparkles, Wallet, GraduationCap, TrendingUp } from 'lucide-react';
 import { professionsDb } from '../../data/professions_db';
+import { matchBand } from '../../lib/profile/matchBand';
+import { deriveEducationPath, deriveOutlook } from '../../lib/profile/professionGuidance';
 
 interface MatchAxisView {
   axis: string;
@@ -79,8 +81,9 @@ export default function RpgProfessionCard({ name, score, why, variants, breakdow
               {tier && (
                 <span className="text-[9px] text-[var(--text-muted)] font-semibold hidden md:inline">{tier.icon}</span>
               )}
-              <span className="text-[9px] font-black px-2 py-0.5 bg-[var(--accent-wash-10)] text-[var(--accent-brown)] border border-[var(--accent-wash-20)] rounded-full font-sans tracking-wide">
-                {score}%
+              {/* B2: качественная полоса совпадения вместо псевдо-процента. */}
+              <span className="text-[9px] font-black px-2 py-0.5 bg-[var(--accent-wash-10)] text-[var(--accent-brown)] border border-[var(--accent-wash-20)] rounded-full font-sans tracking-wide whitespace-nowrap">
+                {matchBand(score).label}
               </span>
               <ChevronDown className={`h-4 w-4 text-[var(--text-muted)] transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
             </span>
@@ -133,27 +136,25 @@ export default function RpgProfessionCard({ name, score, why, variants, breakdow
             )}
           </div>
 
-          {/* Зарплата / образование / перспективы (docs/26 Этап 8) */}
-          {(profession?.salary || profession?.educationPath || profession?.outlook) && (
+          {/* Зарплата / образование / перспективы (docs/26 Этап 8, Трек H).
+              educationPath/outlook выводятся из полей профессии, если не заданы явно
+              (B1b) — чтобы «Путь» и «Перспективы» были у каждой профессии. */}
+          {profession && (
             <div className="grid grid-cols-1 gap-2">
-              {profession?.salary && (
+              {profession.salary && (
                 <div className="flex items-start gap-2 text-[10px] text-white/70">
                   <Wallet className="h-3.5 w-3.5 shrink-0 text-[var(--accent-brown)] mt-0.5" />
                   <span><span className="text-[var(--text-muted)]">Доход (ориентировочно): </span>{profession.salary}</span>
                 </div>
               )}
-              {profession?.educationPath && (
-                <div className="flex items-start gap-2 text-[10px] text-white/70">
-                  <GraduationCap className="h-3.5 w-3.5 shrink-0 text-[var(--accent-brown)] mt-0.5" />
-                  <span><span className="text-[var(--text-muted)]">Путь: </span>{profession.educationPath}</span>
-                </div>
-              )}
-              {profession?.outlook && (
-                <div className="flex items-start gap-2 text-[10px] text-white/70">
-                  <TrendingUp className="h-3.5 w-3.5 shrink-0 text-[var(--accent-brown)] mt-0.5" />
-                  <span><span className="text-[var(--text-muted)]">Перспективы: </span>{profession.outlook}</span>
-                </div>
-              )}
+              <div className="flex items-start gap-2 text-[10px] text-white/70">
+                <GraduationCap className="h-3.5 w-3.5 shrink-0 text-[var(--accent-brown)] mt-0.5" />
+                <span><span className="text-[var(--text-muted)]">Путь: </span>{deriveEducationPath(profession)}</span>
+              </div>
+              <div className="flex items-start gap-2 text-[10px] text-white/70">
+                <TrendingUp className="h-3.5 w-3.5 shrink-0 text-[var(--accent-brown)] mt-0.5" />
+                <span><span className="text-[var(--text-muted)]">Перспективы: </span>{deriveOutlook(profession)}</span>
+              </div>
             </div>
           )}
 

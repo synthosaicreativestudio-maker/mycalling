@@ -7,6 +7,7 @@ import { Brain, Compass, Sparkles, Award, RefreshCw, AlertCircle, ArrowLeft, Dow
 import { authClient } from '../lib/auth-client';
 import { motion } from 'framer-motion';
 import RpgProfessionCard from '../components/report/RpgProfessionCard';
+import { matchBand } from '../lib/profile/matchBand';
 import RadarChart from '../components/report/RadarChart';
 import CabinetProgress from '../components/report/CabinetProgress';
 import SkillFormulaCard from '../components/report/SkillFormulaCard';
@@ -1105,7 +1106,11 @@ function ReportPageContent() {
                   const hasTiers = report.professions.some((p) => p.tier);
                   return (
                     <div className="glass-card rounded-[28px] p-8">
-                      <h2 className="text-lg font-bold text-white mb-6">Подходящие профессии для развития</h2>
+                      <h2 className="text-lg font-bold text-white mb-2">Подходящие профессии для развития</h2>
+                      {/* B2: анти-детерминизм — это направления для исследования, не приговор. */}
+                      <p className="text-xs text-[var(--text-muted)] mb-6 leading-relaxed">
+                        Это не приговор и не «твоя единственная профессия», а направления, где твои сильные стороны совпадают сильнее всего. Их стоит исследовать — а решение всегда за тобой, и его можно менять.
+                      </p>
                       {hasTiers ? (
                         <div className="space-y-8">
                           {TIER_SECTIONS.map((section) => {
@@ -1292,7 +1297,7 @@ function ReportPageContent() {
           <h2>Рекомендуемые профессии</h2>
           {report.professions.map((p, idx) => (
             <div key={idx} style={{ marginBottom: '1rem' }}>
-              <strong>{p.name} (Совпадение {p.score}%)</strong>
+              <strong>{p.name} — {matchBand(p.score).label}</strong>
               <p>{p.why}</p>
             </div>
           ))}

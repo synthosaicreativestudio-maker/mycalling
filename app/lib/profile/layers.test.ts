@@ -102,3 +102,48 @@ describe('buildSummaryProfile', () => {
     expect(profile.coverage.overall).toBe(1);
   });
 });
+
+// B1 — инвариант сквозной связности (docs/audit C-4): ответ из ЛЮБОГО источника
+// (коуч ИЛИ тест) дополняет единый профиль, из которого питаются все поверхности
+// (Колесо, Пирамида, матчинг, отчёт). Гарантия «не разрозненного сбора».
+describe('связность профиля (B1): любой источник дополняет единый профиль', () => {
+  it('ответ КОУЧА (motivation.dreams/deepActions) влияет на покрытие', () => {
+    const full = computeCoverage(fullProfile());
+    const noCoach = fullProfile();
+    noCoach.motivation.dreams = '';
+    noCoach.motivation.coachValues = '';
+    noCoach.behavior.deepActions = '';
+    noCoach.behavior.deepFirstStep = '';
+    const dropped = computeCoverage(noCoach);
+    expect(dropped.motivation).toBeLessThan(full.motivation);
+    expect(dropped.behavior).toBeLessThan(full.behavior);
+    expect(dropped.overall).toBeLessThan(full.overall);
+  });
+
+  it('ответ ТЕСТА (cognitive.icar) влияет на покрытие', () => {
+    const full = computeCoverage(fullProfile());
+    const noTest = fullProfile();
+    noTest.cognitive.icar.bySubscale = { verbal: undefined as any, numeric: undefined as any, spatial: undefined as any };
+    noTest.cognitive.execInhibition = undefined as any;
+    noTest.cognitive.execFlexibility = undefined as any;
+    const dropped = computeCoverage(noTest);
+    expect(dropped.cognitive).toBeLessThan(full.cognitive);
+    expect(dropped.overall).toBeLessThan(full.overall);
+  });
+
+  it('единый профиль содержит входы всех 4 поверхностей', () => {
+    const p = fullProfile();
+    // Колесо талантов ← RIASEC
+    expect(Object.keys(p.interests.riasec).length).toBeGreaterThan(0);
+    // Пирамида Дилтса ← глубинные поля коуча
+    expect(p.behavior.deepActions).toBeTruthy();
+    expect(p.behavior.deepFirstStep).toBeTruthy();
+    // Матчинг ← оси профиля (интересы/личность/ценности/сильные стороны/когнитив)
+    expect(Object.keys(p.personality.bigFive).length).toBeGreaterThan(0);
+    expect(p.motivation.topValues.length).toBeGreaterThan(0);
+    expect(p.strengths.signatureStrengths.length).toBeGreaterThan(0);
+    expect(p.cognitive.icar.band).toBeTruthy();
+    // Отчёт ← сводное покрытие из одного источника
+    expect(buildSummaryProfile(p).coverage.overall).toBeGreaterThan(0);
+  });
+});
