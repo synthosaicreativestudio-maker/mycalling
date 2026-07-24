@@ -160,7 +160,7 @@ function cleanJsonString(str: string): string {
 /**
  * Генерирует строго типизированный JSON.
  */
-export async function generateJson(systemPrompt: string, prompt: string, schema: any, temperature = 0.1, model: string = DEFAULT_MODEL): Promise<any> {
+export async function generateJson(systemPrompt: string, prompt: string, schema: any, temperature = 0.1, model: string = DEFAULT_MODEL, timeoutMs = 25000, retriesPerKey = 1): Promise<any> {
   // Инъекция самой JSON-схемы в системный промпт: без неё модель не видит ожидаемую
   // структуру полей и склонна возвращать пусто/копировать примеры (из-за чего колесо
   // талантов и экстракция шага «молчали»). Восстановлено из фикса 10f454b.
@@ -184,7 +184,7 @@ export async function generateJson(systemPrompt: string, prompt: string, schema:
     max_tokens: 2048
   };
 
-  const responseData = await callFreemodelWithRetry(requestBody, 25000); // 25 секунд лимит для полной генерации отчета
+  const responseData = await callFreemodelWithRetry(requestBody, timeoutMs, retriesPerKey);
   const text = responseData.choices?.[0]?.message?.content;
   
   if (!text) {

@@ -123,6 +123,20 @@ export async function GET(request: Request) {
         values: getField('values') || 'Не указано',
         barriers: getField('fears') || getField('barriers') || 'Не указано',
 
+        // docs/31 Блок A1: раньше эти 10 полей экспресс-коучинга собирались в
+        // extractedData, но НИКУДА не читались отсюда — ни в промпт нарратива,
+        // ни в матчинг профессий. Полжизни диалога с подростком терялось.
+        hobbies: getField('hobbies') || 'Не указано',
+        schoolSubjects: getField('schoolSubjects') || 'Не указано',
+        experience: getField('experience') || 'Не указано',
+        workFormat: getField('workFormat') || 'Не указано',
+        thinkingType: getField('thinkingType') || 'Не указано',
+        successMeasure: getField('successMeasure') || 'Не указано',
+        energySources: getField('energySources') || 'Не указано',
+        teamRole: getField('teamRole') || 'Не указано',
+        autonomyStyle: getField('autonomyStyle') || 'Не указано',
+        decisionStyle: getField('decisionStyle') || 'Не указано',
+
         deepGoal: getField('deepGoal') || '',
         deepOutcome: getField('deepOutcome') || '',
         deepEmotions: getField('deepEmotions') || '',
@@ -498,6 +512,23 @@ export async function GET(request: Request) {
       if (coachData.dreams !== 'Не указано' || coachData.idols !== 'Не указано') {
         coachDataPrompt += `Экспресс-коучинг: Мечты - ${coachData.dreams}, Кумиры - ${coachData.idols}, Ценности - ${coachData.values}, – Барьеры/Страхи: ${coachData.barriers}. `;
       }
+      // docs/31 Блок A1: остальные 10 полей экспресс-коучинга (раньше терялись).
+      const extraFields: [string, string][] = [
+        ['Увлечения/хобби', coachData.hobbies],
+        ['Школьные предметы', coachData.schoolSubjects],
+        ['Практический опыт', coachData.experience],
+        ['Желаемый формат работы', coachData.workFormat],
+        ['Тип мышления', coachData.thinkingType],
+        ['Мерило успеха', coachData.successMeasure],
+        ['Источники энергии', coachData.energySources],
+        ['Командная роль', coachData.teamRole],
+        ['Отношение к автономии', coachData.autonomyStyle],
+        ['Способ принятия решений', coachData.decisionStyle],
+      ];
+      const filledExtra = extraFields.filter(([, v]) => v !== 'Не указано');
+      if (filledExtra.length > 0) {
+        coachDataPrompt += `Дополнительно из коучинга: ${filledExtra.map(([label, v]) => `${label} - ${v}`).join(', ')}. `;
+      }
       if (coachData.deepGoal) {
         coachDataPrompt += `Глубокий коучинг: Цель - ${coachData.deepGoal}, Ожидаемый результат - ${coachData.deepOutcome}, Эмоции - ${coachData.deepEmotions}, Идентичность - ${coachData.deepIdentity}, Шаги - ${coachData.deepActions}, Первый двухминутный шаг - ${coachData.deepFirstStep}.`;
       }
@@ -688,11 +719,17 @@ ${professionCandidatesForLlm}
 
       let htmlReportContent = '{}';
       try {
+        // docs/31 Блок A3: разовая операция при завершении теста (не блокирует
+        // живой чат) — можно позволить больше времени/попыток, чтобы реже
+        // проваливаться в generic-фолбэк из-за нестабильного провайдера.
         const resultJson = await generateJson(
           systemPrompt,
           'Составь отчет по этим данным и верни строго JSON.',
           nextQuestionReportSchema,
-          0.7
+          0.7,
+          undefined,
+          35000,
+          2
         );
         htmlReportContent = JSON.stringify({
           ...resultJson,
@@ -729,12 +766,25 @@ ${professionCandidatesForLlm}
       } catch (err) {
         console.error('Gemini report generation failed in next-question, creating fallback report:', err);
         // Резервный отчет на основе реальных баллов, чтобы личный кабинет не оставался пустым
+        // docs/31 Блок A2: даже при сбое Gemini фолбэк должен быть персонализирован
+        // реальными данными коуча (детерминированно, без ИИ), а не одним generic
+        // абзацем на всех — так пользователь видит, что система его "услышала".
+        const fallbackHero = [
+          'Успешно пройден экспресс-анализ интересов и психологических качеств.',
+        ];
+        if (coachData.hobbies !== 'Не указано') {
+          fallbackHero.push(`Судя по твоим ответам, тебя увлекает: ${coachData.hobbies}.`);
+        }
+        if (coachData.dreams !== 'Не указано') {
+          fallbackHero.push(`Ты рассказал о своей мечте: ${coachData.dreams} — это уже отражено в подборе профессий ниже.`);
+        }
+        if (fallbackHero.length === 1) {
+          fallbackHero.push('На основе ваших ответов сформирована интерактивная карта способностей.');
+        }
+
         const fallbackReport = {
           studentName: sessionData.username || 'Ученик',
-          heroSummary: [
-            'Успешно пройден экспресс-анализ интересов и психологических качеств.',
-            'На основе ваших ответов сформирована интерактивная карта способностей.'
-          ],
+          heroSummary: fallbackHero,
           personalityTraits: Object.entries(finalBigFive)
             .filter(([key]) => key !== 'honestyFlag' && key !== 'LOC' && key !== 'AMB')
             .map(([key, val]) => {
@@ -797,6 +847,8 @@ ${professionCandidatesForLlm}
               .join(' и ')
           }.`,
           strengths: [
+            ...(coachData.schoolSubjects !== 'Не указано' ? [`Хорошо даются предметы: ${coachData.schoolSubjects}.`] : []),
+            ...(coachData.experience !== 'Не указано' ? [`Есть практический опыт: ${coachData.experience}.`] : []),
             'Способность к гибкой адаптации в учебных задачах.',
             'Выявленный баланс между аналитическим и практическим подходами.'
           ],
@@ -816,6 +868,8 @@ ${professionCandidatesForLlm}
             dreams: coachData.dreams !== 'Не указано' ? coachData.dreams : '',
             idols: coachData.idols !== 'Не указано' ? coachData.idols : '',
             values: coachData.values !== 'Не указано' ? coachData.values : '',
+            hobbies: coachData.hobbies !== 'Не указано' ? coachData.hobbies : '',
+            schoolSubjects: coachData.schoolSubjects !== 'Не указано' ? coachData.schoolSubjects : '',
             deepGoal: coachData.deepGoal || '',
             deepOutcome: coachData.deepOutcome || '',
             deepEmotions: coachData.deepEmotions || '',
