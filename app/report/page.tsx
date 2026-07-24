@@ -153,9 +153,11 @@ const PROFILE_COVERAGE_LABELS: Record<string, string> = {
 
 // docs/25 Трек D: «главы» разбивают длинный стек секций отчёта на понятные
 // смысловые части, чтобы он читался как история о себе, а не как портянка.
-function ReportChapter({ emoji, title, subtitle }: { emoji: string; title: string; subtitle: string }) {
+function ReportChapter({ emoji, title, subtitle, className = '' }: { emoji: string; title: string; subtitle: string; className?: string }) {
+  // docs/31 Блок D: заголовок-разделитель главы всегда во всю ширину Bento-сетки
+  // (col-span по умолчанию), чтобы не становиться узкой плиткой среди карточек.
   return (
-    <div className="flex items-center gap-3 pt-2">
+    <div className={`flex items-center gap-3 pt-2 md:col-span-2 xl:col-span-3 ${className}`}>
       <span className="text-2xl shrink-0" aria-hidden>{emoji}</span>
       <div className="min-w-0">
         <h2 className="text-xl font-extrabold text-white leading-tight font-sans">{title}</h2>
@@ -584,19 +586,32 @@ function ReportPageContent() {
           {/* Контент вкладок */}
           <div className="mt-8">
             {activeTab === 'talents' && (
-              <div className="grid gap-8 lg:grid-cols-[1.25fr_0.75fr]">
-                
-                {/* Левая колонка */}
-                <div className="space-y-8">
-                  {/* Шапка-визитка профиля: код Холланда, ключевая сила, ведущая ценность */}
+              // docs/31 Блок D: Bento-сетка вместо двух параллельных вертикальных
+              // колонок ("портянка") — карточки разного размера в общем потоке,
+              // auto-flow сам подбирает следующую плитку в свободное место.
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 auto-rows-max">
+
+                {/* Шапка-визитка профиля: код Холланда, ключевая сила, ведущая ценность — во всю ширину */}
+                <div className="md:col-span-2 xl:col-span-3">
                   <ProfileSummaryHeader
                     hollandCode={report.hollandCode}
                     topSignatureStrength={report.signatureStrengths?.[0]}
                     topValue={report.topValues?.[0]}
                   />
+                </div>
 
-                  {/* Главное резюме потенциала */}
-                  <div className="glass-card rounded-[28px] p-8">
+                {/* Колесо талантов (docs/31, Блок C2) — крупная плитка. */}
+                {report.talentScores && (
+                  <div className="md:col-span-2">
+                    <WheelOfVocation extractedData={{ talentScores: report.talentScores }} standalone />
+                  </div>
+                )}
+
+                {/* Радар талантов — узкая плитка рядом с Колесом. */}
+                <RadarChart scores={report.riasecScores} />
+
+                {/* Главное резюме потенциала */}
+                <div className="glass-card rounded-[28px] p-8 md:col-span-2">
                     <h2 className="text-lg font-bold text-white mb-4">Главное резюме потенциала</h2>
                     <div className="space-y-3 text-[var(--text-muted)] text-base leading-relaxed">
                       {report.heroSummary.map((sentence, idx) => (
@@ -607,7 +622,7 @@ function ReportPageContent() {
 
                   {/* Блок Нейрокоуча (Качественные данные) */}
                   {report.coachSection && (
-                    <div className="glass-card rounded-[28px] p-8">
+                    <div className="glass-card rounded-[28px] p-8 md:col-span-2">
                       <div className="flex items-center gap-3 mb-6">
                         <Brain className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />
                         <h2 className="text-lg font-bold text-white">
@@ -682,7 +697,7 @@ function ReportPageContent() {
                   {/* Пирамида идентичности (docs/31, Блок C3) — только если пройдена
                       глубокая сессия коучинга (тот же 7-ярусный компонент, что на /coach). */}
                   {report.deepSession && report.deepSession.synthesis && (
-                    <div className="glass-card rounded-[28px] p-8">
+                    <div className="glass-card rounded-[28px] p-8 md:col-span-2">
                       <h2 className="text-lg font-bold text-white mb-4">Пирамида идентичности</h2>
                       <PyramidOfAlignment
                         extractedData={{
@@ -699,18 +714,6 @@ function ReportPageContent() {
                       />
                     </div>
                   )}
-                </div>
-
-                {/* Правая колонка */}
-                <div className="space-y-8">
-                  {/* Колесо талантов (docs/31, Блок C2) — тот же компонент, что на
-                      /coach, наполняется теми же 7 шкалами из экспресс-коучинга. */}
-                  {report.talentScores && (
-                    <WheelOfVocation extractedData={{ talentScores: report.talentScores }} standalone />
-                  )}
-
-                  {/* Радар талантов */}
-                  <RadarChart scores={report.riasecScores} />
 
                   {/* Big Five */}
                   {report.personalityTraits && report.personalityTraits.length > 0 && (
@@ -786,7 +789,7 @@ function ReportPageContent() {
 
                   {/* Индекс согласованности: внутренние противоречия или бейдж достоверности */}
                   {report.innerConflicts && report.innerConflicts.length > 0 ? (
-                    <div className="glass-card rounded-[28px] p-8 border border-amber-500/20">
+                    <div className="glass-card rounded-[28px] p-8 border border-amber-500/20 md:col-span-2">
                       <div className="flex items-center gap-2 mb-1">
                         <AlertCircle className="w-4 h-4 text-amber-400" />
                         <h2 className="text-lg font-bold text-white">Внутренние противоречия — твои скрытые ресурсы</h2>
@@ -828,7 +831,7 @@ function ReportPageContent() {
                   {/* Силы и Зоны развития */}
                   <ReportChapter emoji="💪" title="Твои сильные стороны" subtitle="Что у тебя получается лучше всего — и что стоит подтянуть" />
 
-                  <div className="glass-card rounded-[28px] p-8">
+                  <div className="glass-card rounded-[28px] p-8 md:col-span-2">
                     <h2 className="text-lg font-bold text-white mb-4">Сильные стороны и зоны развития</h2>
                     <div className="space-y-5">
                       <div>
@@ -1028,7 +1031,7 @@ function ReportPageContent() {
                       сигналы интересов, собранные коучем. */}
                   {((report.methodologyProfile?.hobbies?.length ?? 0) > 0 ||
                     (report.methodologyProfile?.antiInterests?.length ?? 0) > 0) && (
-                    <div className="glass-card rounded-[28px] p-8 space-y-5">
+                    <div className="glass-card rounded-[28px] p-8 space-y-5 md:col-span-2">
                       <div className="flex items-center gap-3">
                         <Heart className="h-5 w-5 text-[var(--accent-brown)] theme-accent-text" />
                         <h2 className="text-lg font-bold text-white">Увлечения и анти-интересы</h2>
@@ -1059,7 +1062,6 @@ function ReportPageContent() {
                       )}
                     </div>
                   )}
-                </div>
 
               </div>
             )}
