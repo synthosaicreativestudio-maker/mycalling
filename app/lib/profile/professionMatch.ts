@@ -25,7 +25,7 @@ export interface ProfessionMatch {
 
 export interface MatchAxis {
   /** Машинный ключ оси. */
-  axis: 'interests' | 'personality' | 'values' | 'strengths' | 'cognitive';
+  axis: 'interests' | 'personality' | 'values' | 'strengths' | 'cognitive' | 'subjects' | 'gardner';
   /** Человекочитаемая подпись для отчёта. */
   label: string;
   /** Балл по оси, 0–100. */
@@ -50,6 +50,13 @@ export interface MatchProfile {
   signatureStrengths?: string[];
   /** Диапазон ICAR ученика: 'developing' | 'solid' | 'strong' (см. icarBand). */
   icarBand?: string;
+  /**
+   * Текстовые сигналы ученика (docs/31, Блок B) — сырой текст из коуч-сессии
+   * (хобби, предметы, опыт), которого раньше НЕ было в матчинге вовсе: профессии
+   * ранжировались только по числовым тестам, не по тому, что подросток реально
+   * рассказал. Сверяется с `profession.subjects` по вхождению подстрок.
+   */
+  textSignals?: string;
 }
 
 // RIASEC-скорер отдаёт короткие ключи R/I/A/S/E/C, а база — полные названия.
@@ -158,6 +165,58 @@ function cognitiveFit(profession: Profession, icarBand: string | undefined): num
   return Math.max(0.5, 1 - gap * 0.5); // gap 0.5 → 0.75; gap 1 → 0.5
 }
 
+// docs/31 Блок B2: интеллекты Гарднера напрямую не тестируются (нет отдельной
+// батареи), поэтому выводятся из уже собранного RIASEC-профиля по устоявшейся в
+// профориентации связке типов интересов с интеллектами (Holland↔Gardner). Не
+// выдумка — стандартная эвристика, используется только когда точных данных нет.
+const RIASEC_TO_GARDNER: Record<string, Profession['gardner']> = {
+  Realistic: ['Bodily-Kinesthetic', 'Spatial-Visual'],
+  Investigative: ['Logical-Mathematical', 'Naturalist'],
+  Artistic: ['Musical', 'Spatial-Visual', 'Linguistic'],
+  Social: ['Interpersonal', 'Linguistic'],
+  Enterprising: ['Interpersonal', 'Intrapersonal'],
+  Conventional: ['Logical-Mathematical', 'Intrapersonal'],
+};
+
+function deriveGardnerFromRiasec(riasec: Record<string, number>): string[] {
+  const entries = Object.entries(RIASEC_LETTER_TO_FULL)
+    .map(([letter, full]) => ({ full, score: riasec[letter] ?? 0 }))
+    .filter((e) => e.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 2);
+  const set = new Set<string>();
+  entries.forEach((e) => (RIASEC_TO_GARDNER[e.full] || []).forEach((g) => set.add(g)));
+  return Array.from(set);
+}
+
+function gardnerFit(profession: Profession, riasec: Record<string, number>): number | null {
+  if (!profession.gardner || profession.gardner.length === 0) return null;
+  const studentGardner = deriveGardnerFromRiasec(riasec);
+  return overlapFit(profession.gardner, studentGardner);
+}
+
+// docs/31 Блок B1: верификация профессии по тому, что подросток РЕАЛЬНО написал
+// коучу (хобби, предметы, опыт) — не только по числовым баллам тестов. Подстрочное
+// сопоставление ключевых слов паспорта (`profession.subjects`) с сырым текстом
+// ученика, регистронезависимо. Та же идея, что `talentSignals.ts` для коуча.
+// Русские слова склоняются («математика» → «математику», «информатика» →
+// «информатике») — точное совпадение подстрокой пропускает почти все реальные
+// формы. Берём основу слова (первые ~80% символов, минимум 4) вместо точной
+// формы — грубый, но рабочий стемминг без словаря.
+function wordStem(word: string): string {
+  const w = word.trim().toLowerCase();
+  const len = Math.max(4, Math.floor(w.length * 0.8));
+  return w.slice(0, Math.min(len, w.length));
+}
+
+function subjectsFit(profession: Profession, textSignals: string | undefined): number | null {
+  if (!profession.subjects || profession.subjects.length === 0) return null;
+  if (!textSignals || textSignals.trim().length === 0) return null;
+  const lower = textSignals.toLowerCase();
+  const hits = profession.subjects.filter((s) => lower.includes(wordStem(s))).length;
+  return hits > 0 ? Math.min(1, hits / Math.min(3, profession.subjects.length)) : 0;
+}
+
 // Базовые веса осей (docs/25, Трек A). Активные оси ре-нормируются к сумме 1,
 // поэтому отсутствие части осей (экспресс-путь) не ломает шкалу.
 const AXIS_WEIGHTS = {
@@ -166,6 +225,11 @@ const AXIS_WEIGHTS = {
   values: 0.15,
   strengths: 0.15,
   cognitive: 0.10,
+  // docs/31 Блок B3: две новые оси добирают вес до 1.00 (было 0.85) — прямая
+  // верификация по тому, что подросток написал (subjects), и по интеллектам
+  // Гарднера (более мягкая эвристика, поэтому вес ниже subjects).
+  subjects: 0.10,
+  gardner: 0.05,
 } as const;
 
 const AXIS_LABELS: Record<MatchAxis['axis'], string> = {
@@ -174,6 +238,8 @@ const AXIS_LABELS: Record<MatchAxis['axis'], string> = {
   values: 'Ценности',
   strengths: 'Сильные стороны',
   cognitive: 'Мышление',
+  subjects: 'Предметы и склонности',
+  gardner: 'Тип интеллекта',
 };
 
 interface FitResult {
@@ -190,6 +256,8 @@ function computeFit(profession: Profession, profile: MatchProfile): FitResult {
     { axis: 'values', value: overlapFit(profession.values, profile.topValues) },
     { axis: 'strengths', value: overlapFit(profession.viaFit, profile.signatureStrengths) },
     { axis: 'cognitive', value: cognitiveFit(profession, profile.icarBand) },
+    { axis: 'subjects', value: subjectsFit(profession, profile.textSignals) },
+    { axis: 'gardner', value: gardnerFit(profession, profile.riasec) },
   ];
   const active = raw.filter((a): a is { axis: MatchAxis['axis']; value: number } => a.value !== null);
   const weightSum = active.reduce((s, a) => s + AXIS_WEIGHTS[a.axis], 0);

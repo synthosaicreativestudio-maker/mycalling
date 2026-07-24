@@ -172,12 +172,17 @@ export async function GET(request: Request) {
       // специализации свёрнуты в один архетип — лучшая наверх, остальные в
       // variants («веер»). Так отчёт группируется по слоям tier 🟢/🔵/🟣 и не
       // засоряется однотипными ролями.
+      // docs/31 Блок B4: сырой текст коуча (хобби/предметы/опыт) для subjectsFit —
+      // раньше матчинг вообще не видел, что подросток реально рассказал.
+      const textSignalsParts = [coachData.hobbies, coachData.schoolSubjects, coachData.experience]
+        .filter((v) => v !== 'Не указано');
       const matchProfile = {
         riasec: finalRiasec,
         bigFive: finalBigFive,
         topValues: (results.PVQ?.scores as { topValues?: string[] } | undefined)?.topValues,
         signatureStrengths: (results.VIA?.scores as { signatureStrengths?: string[] } | undefined)?.signatureStrengths,
         icarBand: (results.ICAR?.scores as { band?: string } | undefined)?.band,
+        textSignals: textSignalsParts.length > 0 ? textSignalsParts.join('. ') : undefined,
       };
       const rankedProfessions: ArchetypeGroup[] = topArchetypes(matchProfile, 20);
       // Топ-8 названий передаём модели как кандидатов для персонального why.
