@@ -752,6 +752,15 @@ export async function POST(req: Request) {
     // ЭТАП ЭКСТРАКЦИИ
     // ==========================================
     const isPhoneConfirmedMsg = message === 'Телефон подтвержден через бот';
+    // docs/32: фронтенд шлёт этот текст как ОБЫЧНОЕ сообщение (не через init-путь
+    // с полной перезагрузкой), когда пользователь переключается в глубокую сессию,
+    // уже находясь на /coach (кнопка на финише экспресса, без window.location.href).
+    // Раньше это сообщение прогонялось через обычную экстракцию/генерацию ответа,
+    // как если бы это была реплика подростка — из-за чего коуч иногда отвечал
+    // старым текстом завершения экспресса вместо вопроса «Что хочу?» (баг: «не
+    // запускается глубокая сессия с нужного места»). Теперь это триггер, как
+    // isPhoneConfirmedMsg: экстракция пропускается, приветствие — фиксированный текст.
+    const isDeepKickoffMsg = message === 'Начать глубокий коучинг' && sessionMode === 'DEEP';
 
     if (!isInitMessage && isPhoneConfirmedMsg) {
       parsedData = { shouldAdvanceStep: true };
@@ -760,7 +769,7 @@ export async function POST(req: Request) {
         extractedData.fullName = dbUser.name;
         extractedData.phone = dbUser.phone;
       }
-    } else if (!isInitMessage) {
+    } else if (!isInitMessage && !isDeepKickoffMsg) {
       // Для работы fallbackExtract
       const prevHasName = getStrLen(extractedData.fullName) > 1 && extractedData.fullName !== 'Гость';
       const prevHasAge = !!extractedData.age;
@@ -1406,6 +1415,13 @@ ${dialogHistory}
 
     if (isPhoneConfirmedMsg) {
       replyContent = "Отлично! Telegram-канал связи успешно подключен. " + replyContent;
+    }
+
+    // docs/32: фиксированное приветствие Пирамиды вместо результата generateText —
+    // не зависим от того, что модель нафантазирует по (короткому/пустому)
+    // deepTranscript в момент самого перехода в глубокую сессию.
+    if (isDeepKickoffMsg) {
+      replyContent = 'Отличный выбор! Мы начинаем Глубокий самокоучинг по методологии «Что хочу → Действие». Наш путь состоит из 7 важных шагов: мы найдем твое истинное желание, оцифруем образ результата, подключим эмоции, поймём, каким героем этой истории ты становишься, честно назовём внутренние барьеры, составим план с KPI и зафиксируем первый шаг. \n\nДавай начнем: Что именно ты хочешь изменить, достичь или в чем реализоваться в плане будущей профессии?';
     }
 
     // Сохраняем предварительное резюме в БД на шаге 16 и генерируем аватар
