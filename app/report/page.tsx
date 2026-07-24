@@ -302,11 +302,6 @@ function ReportPageContent() {
             deepSessionCompleted: progressData.deepSessionCompleted
           });
 
-          if (!progressData.coachCompleted || !progressData.testCompleted) {
-            setIsLoading(false);
-            return;
-          }
-
           targetSessionId = progressData.sessionId;
         }
 
@@ -478,18 +473,44 @@ function ReportPageContent() {
       <main className="mx-auto min-h-screen max-w-7xl px-6 py-10 lg:px-10 relative overflow-hidden print:hidden pt-28">
         
         <div className="relative z-10">
+          {((report as any).isIntermediate || !progress?.testCompleted || !progress?.coachCompleted) && (
+            <div className="mb-6 p-4 rounded-2xl bg-[#C4A484]/10 border border-[#C4A484]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Sparkles className="h-5 w-5 text-[#C4A484] shrink-0" />
+                <div>
+                  <h4 className="text-sm font-bold text-[#EAD5C3]">⚡ Промежуточный профиль (в процессе диагностики)</h4>
+                  <p className="text-xs text-[#C4A484]/80">Ваше Колесо Талантов и инсайты коучинга обновляются в реальном времени.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {!progress?.coachCompleted && (
+                  <Link href="/coach" className="px-4 py-2 text-xs font-bold bg-[#C4A484] text-[#121824] rounded-xl hover:bg-[#d5b595] transition">
+                    Продолжить коучинг ➔
+                  </Link>
+                )}
+                {!progress?.testCompleted && progress?.coachCompleted && (
+                  <Link href="/assessment" className="px-4 py-2 text-xs font-bold bg-[#C4A484] text-[#121824] rounded-xl hover:bg-[#d5b595] transition">
+                    Пройти тесты ➔
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Шапка отчета */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8 mb-8">
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-wash-20)] bg-[var(--accent-wash-5)] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--accent-brown)] font-sans">
                 <Award className="h-3.5 w-3.5 text-[var(--accent-brown)]" />
-                Итоговый отчет
+                {((report as any).isIntermediate || !progress?.testCompleted) ? 'Промежуточный отчёт' : 'Итоговый отчёт'}
               </div>
               <h1 className="text-3xl font-extrabold text-white sm:text-4xl lg:text-5xl leading-tight font-sans">
                 Карта талантов: {report.studentName}
               </h1>
               <p className="text-xs text-[var(--text-muted)]">
-                Диагностика успешно пройдена · Отчет подготовлен нейросетевыми алгоритмами
+                {((report as any).isIntermediate || !progress?.testCompleted)
+                  ? 'Диагностика в процессе · Промежуточные результаты обновляются в реальном времени'
+                  : 'Диагностика успешно пройдена · Отчет подготовлен нейросетевыми алгоритмами'}
               </p>
             </div>
 
