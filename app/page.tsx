@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Users, HelpCircle, Shield, Brain, FileCheck, Lock, Unlock, MessageSquare, Compass, Sparkles } from 'lucide-react';
+import { ArrowRight, Users, HelpCircle, Shield, Brain, FileCheck, Lock, Unlock, MessageSquare, Compass, Sparkles, Mail, Send } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AnimatedLogo } from './components/AnimatedLogo';
 import { IconTimer, IconScience, IconReport, UspCard, ForWhomCard, TrustCard, FaqItem, ReviewCard } from './components/landing/LandingUI';
@@ -467,7 +467,7 @@ export default function HomePage() {
 
       {/* ─── FOOTER ─── */}
       <footer className="border-t border-[var(--accent-wash-10)] bg-[#040506]/85 relative z-10 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10 py-12">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10 py-12 space-y-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-6">
               <AnimatedLogo
@@ -486,10 +486,27 @@ export default function HomePage() {
               <Link href="/terms" className="inline-flex items-center min-h-[32px] py-1.5">
                 <span className="hover:text-white transition cursor-pointer">Пользовательское соглашение</span>
               </Link>
-              <a href="mailto:hello@synthosai.ru" className="inline-flex items-center min-h-[32px] py-1.5 hover:text-white transition">
-                Контакты
-              </a>
             </nav>
+          </div>
+
+          {/* Контакты владельца проекта */}
+          <div className="pt-6 border-t border-[var(--accent-wash-10)] flex flex-col sm:flex-row flex-wrap items-center justify-center sm:justify-start gap-x-8 gap-y-3 text-xs text-[var(--text-muted)] font-sans">
+            <a href="mailto:romanomarche@gmail.ru" className="inline-flex items-center gap-2 min-h-[32px] py-1.5 hover:text-white transition">
+              <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              romanomarche@gmail.ru
+            </a>
+            <a href="mailto:romanomarche@yandex.ru" className="inline-flex items-center gap-2 min-h-[32px] py-1.5 hover:text-white transition">
+              <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              romanomarche@yandex.ru
+            </a>
+            <a href="https://t.me/romanomarche" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 min-h-[32px] py-1.5 hover:text-white transition">
+              <Send className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              Telegram: +7 (982) 910-39-43 (@romanomarche)
+            </a>
+            <span className="inline-flex items-center gap-2 min-h-[32px] py-1.5">
+              <MessageSquare className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              MAX: +7 (982) 910-39-43
+            </span>
           </div>
         </div>
       </footer>

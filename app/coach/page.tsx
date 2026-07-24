@@ -264,6 +264,14 @@ export default function CoachPage() {
           setStep(data.currentStep || 0);
           setPhoneConfirmed(data.phoneConfirmed || false);
           setExtractedData(data.extracted || {});
+          // Эта ветка (возврат в чат с уже существующей историей — напр. после
+          // логина через Telegram/MAX, где sessionId приходит с сервера) раньше
+          // НЕ сохраняла coachSessionId в localStorage. /assessment читает именно
+          // localStorage и при пустом значении редиректит на главную — снаружи это
+          // выглядело как «тестирование не открывается».
+          if (typeof window !== 'undefined' && data.sessionId) {
+            localStorage.setItem('coachSessionId', data.sessionId);
+          }
         } else if (data.reply) {
           setMessages([{ role: 'assistant', content: data.reply }]);
           setSessionId(data.sessionId);
@@ -967,7 +975,11 @@ export default function CoachPage() {
                   {extractedData.sessionMode !== 'DEEP' && !extractedData.deepSessionCompletedAt && (
                     <button
                       type="button"
-                      onClick={() => router.push('/coach?forceDeep=1')}
+                      // Полная навигация (не router.push): кнопка уже находится на /coach,
+                      // а логика forceDeep выполняется в initSession() при МОНТИРОВАНИИ
+                      // страницы (гард isInitializing.current). router.push на тот же роут
+                      // не перемонтирует компонент — кнопка визуально не срабатывала (баг).
+                      onClick={() => { window.location.href = '/coach?forceDeep=1'; }}
                       className="bg-[#C4A484]/10 hover:bg-[#C4A484]/20 border border-[#C4A484]/40 text-[#EAD5C3] h-12 px-6 rounded-xl text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
                     >
                       🧭 Глубокая сессия с наставником

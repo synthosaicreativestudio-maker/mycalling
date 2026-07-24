@@ -14,6 +14,7 @@ import { deriveSkillFormula } from '../../../../lib/profile/skillFormula';
 import { buildSummaryProfile } from '../../../../lib/profile/layers';
 import { pvqValueByCode } from '../../../../data/pvqValues';
 import { skillByCode } from '../../../../data/skills';
+import { sendFinalReportNotification } from '../../../../lib/coach/notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -867,6 +868,11 @@ ${professionCandidatesForLlm}
 
       // Кэшируем отчет в Redis
       await redisClient.set(`report:${sessionId}`, htmlReportContent, 'EX', 86400);
+
+      // Уведомление о готовом отчёте в Telegram/MAX (fire-and-forget, не блокирует ответ).
+      prisma.user.findUnique({ where: { id: userId } })
+        .then(reportUser => { if (reportUser) sendFinalReportNotification(reportUser); })
+        .catch(err => console.error('Failed to send final report notification:', err));
 
       // Очищаем сессию из Redis и БД
       await redisClient.del(`session:${sessionId}`);

@@ -127,6 +127,59 @@ export async function sendTelegramReportToUser(user: any, data: any) {
   }
 }
 
+/**
+ * Отправить уведомление о готовом ИТОГОВОМ отчёте (после завершения тестов) в
+ * Telegram/MAX со ссылкой на /report. Вызывается из next-question/route.ts сразу
+ * после upsert отчёта в БД — на случай, если этот путь уведомления отсутствовал
+ * или не срабатывал (жалоба: «нет отчёта нигде, в т.ч. в тг»).
+ */
+export async function sendFinalReportNotification(user: any) {
+  const text = 'Твой полный отчёт по результатам диагностики готов! 🎉\n\nПосмотреть его можно в личном кабинете на сайте.';
+
+  const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN;
+  if (telegramBotToken && user?.telegramId) {
+    const tgApiBase = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/$/, '');
+    try {
+      await fetch(`${tgApiBase}/bot${telegramBotToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: user.telegramId,
+          text: formatToTelegramHtml(text),
+          parse_mode: 'HTML',
+          reply_markup: {
+            inline_keyboard: [[{ text: 'Открыть отчёт', url: 'https://synthosai.ru/report' }]]
+          }
+        })
+      });
+      console.log(`Final report notification sent to Telegram user ${user.telegramId}`);
+    } catch (err) {
+      console.error('Final report Telegram notification error:', err);
+    }
+  }
+
+  const maxBotToken = process.env.MAXID_BOT_TOKEN;
+  if (maxBotToken && user?.maxUserId) {
+    try {
+      await fetch(`https://platform-api2.max.ru/messages?user_id=${user.maxUserId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': maxBotToken },
+        body: JSON.stringify({
+          text: `${text} https://synthosai.ru/report`,
+          format: 'html',
+          attachments: [{
+            type: 'inline_keyboard',
+            payload: { buttons: [[{ type: 'link', text: 'Открыть отчёт', url: 'https://synthosai.ru/report' }]] }
+          }]
+        })
+      });
+      console.log(`Final report notification sent to MAX user ${user.maxUserId}`);
+    } catch (err) {
+      console.error('Final report MAX notification error:', err);
+    }
+  }
+}
+
 /** Отправить резюме пользователю лично в бот МАКС */
 export async function sendMaxReportToUser(user: any, data: any) {
   const botToken = process.env.MAXID_BOT_TOKEN;

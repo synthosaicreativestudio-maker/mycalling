@@ -40,9 +40,13 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Творчество, дизайн, тексты',
       value: sectorValue(getScore('creative')),
       rawScore: getScore('creative'),
-      color: '#E07A5F', // Rose Copper Gold
-      glowColor: 'rgba(224, 122, 95, 0.65)',
-      gradStops: ['#FFF5E4', '#E07A5F', '#9E4733'],
+      // Палитра по цветовой психологии UX (владелец, docs/30): 7 различимых цветов,
+      // расположенных в хроматическом порядке по кругу, чтобы соседние лепестки
+      // никогда не сливались (было: Технологии/Данные — один синий, Коммуникация
+      // сливалась с бежевым фоном, Стартап/Креатив — близкие оттенки).
+      color: '#EC4899', // Маджента — вдохновение, самовыражение
+      glowColor: 'rgba(236, 72, 153, 0.65)',
+      gradStops: ['#FDE8F3', '#EC4899', '#9D174D'],
     },
     {
       id: 'tech',
@@ -52,9 +56,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Программирование, инженерия',
       value: sectorValue(getScore('tech')),
       rawScore: getScore('tech'),
-      color: '#4A90E2', // Platinum Sapphire Gold
-      glowColor: 'rgba(74, 144, 226, 0.65)',
-      gradStops: ['#EBF3FF', '#4A90E2', '#1C4A86'],
+      color: '#2563EB', // Индиго — надёжность, архитектура систем
+      glowColor: 'rgba(37, 99, 235, 0.65)',
+      gradStops: ['#EAF1FE', '#2563EB', '#1E3A8A'],
     },
     {
       id: 'science',
@@ -64,9 +68,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Естественные науки, эксперименты',
       value: sectorValue(getScore('science')),
       rawScore: getScore('science'),
-      color: '#9B5DE5', // Royal Amethyst Gold
-      glowColor: 'rgba(155, 93, 229, 0.65)',
-      gradStops: ['#F7EEFF', '#9B5DE5', '#5E2893'],
+      color: '#8B5CF6', // Аметистовый — глубокие знания, гипотезы
+      glowColor: 'rgba(139, 92, 246, 0.65)',
+      gradStops: ['#F3EEFE', '#8B5CF6', '#5B21B6'],
     },
     {
       id: 'data',
@@ -76,9 +80,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Математика, статистика, метрики',
       value: sectorValue(getScore('data')),
       rawScore: getScore('data'),
-      color: '#5D8BE5', // Deep Indigo Gold — родственный науке, но холоднее
-      glowColor: 'rgba(93, 139, 229, 0.65)',
-      gradStops: ['#EEF3FF', '#5D8BE5', '#28417D'],
+      color: '#06B6D4', // Бирюза/Cyan — чистота данных, чётко отличается от IT-синего
+      glowColor: 'rgba(6, 182, 212, 0.65)',
+      gradStops: ['#E3F8FB', '#06B6D4', '#0E7490'],
     },
     {
       id: 'social',
@@ -88,9 +92,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Общение, продажи, обучение',
       value: sectorValue(getScore('social')),
       rawScore: getScore('social'),
-      color: '#E5BA73', // Honey Amber Gold
-      glowColor: 'rgba(229, 186, 115, 0.65)',
-      gradStops: ['#FFF8EB', '#E5BA73', '#A4742B'],
+      color: '#F97316', // Тёплый янтарный/оранжевый — эмпатия, тепло (не сливается с бежевым)
+      glowColor: 'rgba(249, 115, 22, 0.65)',
+      gradStops: ['#FFEDD9', '#F97316', '#9A3412'],
     },
     {
       id: 'organizational',
@@ -100,9 +104,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Менеджмент, процессы, порядок',
       value: sectorValue(getScore('organizational')),
       rawScore: getScore('organizational'),
-      color: '#2A9D8F', // Emerald Bronze
-      glowColor: 'rgba(42, 157, 143, 0.65)',
-      gradStops: ['#E6F8F6', '#2A9D8F', '#175951'],
+      color: '#10B981', // Изумрудный — порядок, устойчивость процессов
+      glowColor: 'rgba(16, 185, 129, 0.65)',
+      gradStops: ['#DFFAF0', '#10B981', '#065F46'],
     },
     {
       id: 'startup',
@@ -112,9 +116,9 @@ export default function WheelOfVocation({ extractedData, standalone = false }: W
       description: 'Предпринимательство, проекты',
       value: sectorValue(getScore('startup')),
       rawScore: getScore('startup'),
-      color: '#F4A261', // Fiery Warm Copper
-      glowColor: 'rgba(244, 162, 97, 0.65)',
-      gradStops: ['#FFF3EA', '#F4A261', '#B35315'],
+      color: '#E11D48', // Алый/рубиновый — энергия, драйв, амбиции
+      glowColor: 'rgba(225, 29, 72, 0.65)',
+      gradStops: ['#FDE4E9', '#E11D48', '#881337'],
     },
   ];
 
