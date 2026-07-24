@@ -20,7 +20,7 @@ import {
 } from '../../../../lib/coach/notifications';
 import { fallbackExtract } from '../../../../lib/coach/extraction';
 import { deriveStep } from '../../../../lib/coach/stepMachine';
-import { detectTalentSignals, SIGNAL_FLOOR } from '../../../../lib/coach/talentSignals';
+import { scoreTalentSignals } from '../../../../lib/coach/talentSignals';
 
 // ============================
 // ГЛАВНЫЙ ОБРАБОТЧИК ДИАЛОГА
@@ -1072,16 +1072,17 @@ ${dialogHistory}
       // шкалу минимум на SIGNAL_FLOOR (по ratchet-принципу Math.max, колесо только
       // растёт). Так «хочу свою IT-компанию» гарантированно даёт tech>0 и startup>0.
       {
-        const signals = detectTalentSignals(message);
-        if (signals.length > 0) {
+        const signalScores = scoreTalentSignals(message);
+        const signalScales = Object.keys(signalScores);
+        if (signalScales.length > 0) {
           if (!extractedData.expressExtracted.talentScores) {
             extractedData.expressExtracted.talentScores = {
               creative: 0, tech: 0, science: 0, data: 0, social: 0, organizational: 0, startup: 0
             };
           }
           const scores = extractedData.expressExtracted.talentScores;
-          for (const scale of signals) {
-            scores[scale] = Math.max(scores[scale] || 0, SIGNAL_FLOOR);
+          for (const scale of signalScales) {
+            scores[scale] = Math.max(scores[scale] || 0, (signalScores as Record<string, number>)[scale]);
           }
         }
       }

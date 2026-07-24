@@ -19,18 +19,36 @@ const SIGNALS: Record<TalentScale, string[]> = {
   startup: ['бизнес', 'стартап', 'предприним', 'компани', 'лидер', 'влияни', 'масштаб', 'слава', 'деньги', 'амбиц', 'основа'],
 };
 
-/** Минимальный балл, который выставляется шкале при явном сигнале. */
+/** Минимальный балл, который выставляется шкале при ОДНОМ явном сигнале. */
 export const SIGNAL_FLOOR = 45;
+/** Прибавка за каждый дополнительный (уникальный) сигнал той же шкалы. */
+export const SIGNAL_STEP = 14;
+/** Потолок детерминированной оценки (выше — только ИИ-скорер). */
+export const SIGNAL_CAP = 88;
 
 /**
- * Возвращает список шкал, для которых в сообщении найден явный сигнал.
+ * Возвращает список шкал, для которых в сообщении найден хотя бы один сигнал.
  * Регистронезависимо; сопоставление по подстрокам-корням.
  */
 export function detectTalentSignals(message: string): TalentScale[] {
+  return Object.keys(scoreTalentSignals(message)) as TalentScale[];
+}
+
+/**
+ * ГРАДУИРОВАННАЯ детекция: для каждой шкалы считает число совпавших уникальных
+ * ключевых слов и переводит в балл (SIGNAL_FLOOR + (n-1)*SIGNAL_STEP, но не выше
+ * SIGNAL_CAP). Так насыщенный ответ («программирование, чат-боты, it-продукт»)
+ * даёт tech заметно выше, чем вскользь упомянутая шкала — колесо перестаёт быть
+ * «подозрительно ровным». Возвращает только шкалы с сигналом.
+ */
+export function scoreTalentSignals(message: string): Partial<Record<TalentScale, number>> {
   const lower = ` ${(message || '').toLowerCase()} `;
-  const matched: TalentScale[] = [];
+  const out: Partial<Record<TalentScale, number>> = {};
   for (const scale of Object.keys(SIGNALS) as TalentScale[]) {
-    if (SIGNALS[scale].some(w => lower.includes(w))) matched.push(scale);
+    const hits = SIGNALS[scale].filter(w => lower.includes(w)).length;
+    if (hits > 0) {
+      out[scale] = Math.min(SIGNAL_CAP, SIGNAL_FLOOR + (hits - 1) * SIGNAL_STEP);
+    }
   }
-  return matched;
+  return out;
 }
